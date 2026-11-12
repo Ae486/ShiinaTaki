@@ -1,12 +1,11 @@
 /**
  * INPUT:  one socket-local canonical Approval request plus a response callback
- * OUTPUT: <ApprovalDialog> — bounded redacted modal with explicit once/session/always/deny choices
- * POS:    ui/components/approval — ephemeral operator prompt; never writes navigation, events, stores, or localStorage.
- *         Batch-2: the modal shell/keyboard contract (trap, initial focus, restore) rides the shared ui/ Dialog with
- *         escapePolicy="none" — fail-closed, so there is NO close affordance and Escape dismisses nothing (A1).
+ * OUTPUT: <ApprovalDialog> — literal complete command or ordinary sealed fields, choices and background-use consent.
+ * POS:    ui/components/approval — ephemeral operator prompt; disclosure revisions stay in the controller binding.
+ *         The shared Dialog traps/restores focus and keeps escapePolicy="none" for fail-closed approval.
  */
 import { useId } from "react";
-import type { ApprovalChoice, CanonicalApprovalRequest } from "@taki/shared";
+import { reconstructApprovalCommand, type ApprovalChoice, type CanonicalApprovalRequest } from "@taki/shared";
 import { Dialog } from "@/components/ui/dialog.js";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { ActionButton } from "@/windows/home/action-button.js";
@@ -43,7 +42,6 @@ export function ApprovalDialog({
   const disclosureRevision = request.allowedChoices.includes("allow_always") ? request.disclosureRevision : undefined;
   const disclosure = disclosureRevision !== undefined
     ? <DisclosureAck
-        revision={disclosureRevision}
         accepted={disclosureAcknowledged}
         disabled={status.kind === "responding"}
         onChange={onDisclosureAcknowledged}
@@ -79,13 +77,22 @@ export function ApprovalDialog({
 }
 
 function ApprovalSections({ request }: { request: CanonicalApprovalRequest }) {
+  const command = reconstructApprovalCommand(request.presentation);
+  if (command !== undefined) return (
+    <pre
+      role="region"
+      aria-label="完整命令（已隐藏识别到的凭证，控制字符以转义显示）"
+      tabIndex={0}
+      className="mt-4 max-h-72 select-text overflow-auto whitespace-pre-wrap break-words rounded-xl bg-surface-muted p-3 font-mono text-sm text-text-body focus-visible:outline-2 focus-visible:outline-offset-2"
+    ><code>{command}</code></pre>
+  );
   return (
     <div className="mt-4 space-y-3">
       {request.presentation.sections.map((section) => (
         <section key={section.title} className="rounded-xl bg-surface-muted p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{section.title}</h3>
           {section.fields.map((field) => (
-            <p key={field.label} className="mt-1 text-sm text-text-body"><span className="font-medium">{field.label}：</span>{field.value}</p>
+            <p key={field.label} className="mt-1 break-words text-sm text-text-body"><span className="font-medium">{field.label}：</span>{field.value}</p>
           ))}
         </section>
       ))}
@@ -94,12 +101,10 @@ function ApprovalSections({ request }: { request: CanonicalApprovalRequest }) {
 }
 
 function DisclosureAck({
-  revision,
   accepted,
   disabled,
   onChange,
 }: {
-  revision: number;
   accepted: boolean;
   disabled: boolean;
   onChange(accepted: boolean): void;
@@ -113,7 +118,7 @@ function DisclosureAck({
         onChange={(event) => onChange(event.currentTarget.checked)}
         className="mt-0.5 h-4 w-4"
       />
-      <span>我明确同意此长期允许也适用于未来后台运行（披露版本 {revision}）。</span>
+      <span>我明确同意此长期允许也适用于未来后台运行。</span>
     </label>
   );
 }

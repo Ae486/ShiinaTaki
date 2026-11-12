@@ -1,12 +1,13 @@
 /**
  * INPUT:  a compaction retirement range and the active Memory Provider flush contract
- * OUTPUT: typed pre-retirement outcomes plus receipt-guarded Legacy/Local adapters and the unavailable Hindsight port
+ * OUTPUT: typed pre-retirement outcomes plus receipt-guarded Legacy/Local adapters and a switchable binding
  * POS:    core/memory — provider boundary used by Core-owned Compaction; never owns summary or Timeline state
  */
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { FlushWriter } from "./flush-writer.ts";
 import type { MemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
+import type { IngestionCoverageGap } from "./canonical-ingestion-source.ts";
 
 export interface MemoryFlushRequest {
   characterId: string;
@@ -39,6 +40,7 @@ export function createLegacyMemoryFlushPort(input: {
 export interface CanonicalMemoryIngestionRunner {
   run(input: { characterId: string; throughSeq: number }): Promise<{
     writes: number; throughSeq: number; eligibilityStartSeq?: number; hasApplicableSource?: boolean;
+    coverageGap?: IngestionCoverageGap;
   }>;
 }
 
@@ -52,6 +54,8 @@ export function canonicalLocalMemoryFlushPort(ingestion?: CanonicalMemoryIngesti
           || !Number.isSafeInteger(result.writes) || result.writes < 0) {
           return { status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" };
         }
+        // A baseline excludes old history, but cannot release an unsettled trusted custody group.
+        if (result.coverageGap) return { status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" };
         if (result.eligibilityStartSeq !== undefined && request.throughSeq < result.eligibilityStartSeq && !result.hasApplicableSource) {
           return { status: "not_required", reason: "before_canonical_ingestion_eligibility" };
         }

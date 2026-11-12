@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { HINDSIGHT_SECRET_REFS } from "@taki/shared/hindsight-custody";
 import type { InjectionCheckpointV1, InjectionCheckpointResult } from "@taki/shared/hindsight-deployment";
@@ -13,12 +13,14 @@ afterEach(async () => {
   for (const entry of owned.splice(0)) {
     for (const helper of entry.helpers) await helper.stop();
     await entry.engine.close();
+    if (dirname(resolve(entry.fixture.root)) !== resolve(process.env.TAKI_C2A_TEMP ?? tmpdir())
+      || !basename(entry.fixture.root).startsWith("taki-c2a-host-")) throw new Error("unsafe Host deployment fixture cleanup");
     rmSync(entry.fixture.root, { recursive: true, force: true });
   }
 });
 async function harness(options: Parameters<typeof deploymentFixture>[2] = {}) {
   const root = mkdtempSync(join(process.env.TAKI_C2A_TEMP ?? tmpdir(), "taki-c2a-host-"));
-  const fixture = await deploymentFixture(root, process.env.TAKI_C2A_KEY_ADAPTER ?? "G:/Temp/taki-c2a-source-20261014-impl/fake-key-adapter.exe", options);
+  const fixture = await deploymentFixture(root, process.env.TAKI_C2A_KEY_ADAPTER, options);
   const engine = new FakeDeploymentEngine(fixture);
   const entry = { fixture, engine, helpers: [] as DeploymentHelperProcess[] }; owned.push(entry);
   const helper = () => { const child = new DeploymentHelperProcess(fixture, engine); entry.helpers.push(child); return child; };

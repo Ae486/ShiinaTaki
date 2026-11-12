@@ -1,5 +1,8 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
 {"file": "docs/UIUX-OPTIMIZATION.md", "reason": "Master item list with file:line evidence, priorities, batches — the task executes its frontend-only subset"}
 {"file": ".trellis/spec/frontend/home-window.md", "reason": "Window topology, page registry, presentation contract, palette rules, streaming timeline spec"}
 {"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Component conventions the new ui primitives must follow"}
 {"file": ".trellis/spec/frontend/state-management.md", "reason": "Store/controller/generation-guard rules pages must keep honoring"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md", "reason": "G4 removes meaningless internal metadata from all user-facing details; verified reference patterns, field inventory, retained contracts and old assertions."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md", "reason": "Owner-approved G1-G5 behavior, sequence and child-task scope; no Monitor visual acceptance from the scaffold."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve gaps from named sources and current installed contracts; do not invent behavior."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Source size/headers/indexes and focused component/controller quality gates."}

@@ -1,40 +1,61 @@
 /**
- * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
- *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory/onUsage/primaryPersistence hooks
- * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
- *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost;
- *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes);
- *         a primary turn's rows are custody members of one group, finalized once when the turn ends
- * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
- *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
- *         a classified context-overflow retries ONCE against the same captured Run extension context
+ * INPUT:  chat/attachment input, SDK models, ConversationStore, Memory hooks, live User Timezone and Run bindings
+ * OUTPUT: ordered live activity, text streaming, and atomic primary-source retention/retraction after either ending
+ * POS:    core/agents — the existing ToolLoopAgent boundary; owns abort/retract and one context-overflow retry,
+ *         preserving day-stable instructions, volatile message-tail context, and detached memory writes
  */
-import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
-import type { ChatSendParams, ImageAttachment, RunMemoryReference, TimelineEntry } from "@taki/shared";
+import type { LanguageModel, ModelMessage, StopCondition, ToolSet } from "ai";
+import { captureToolDisplayNames, type ChatSendParams, type ImageAttachment, type InitiativeSelectedContext, type RunMemoryReference, type TimelineEntry, type EffectLifecycle } from "@taki/shared";
+import type { HeartbeatDecisionCollector } from "./heartbeat-respond-tool.ts";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { Connection } from "../server/connection-registry.ts";
-import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
-import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
-import type { ConversationWriter } from "./conversation-writer.ts";
 import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
 import type { PrimaryPersistence } from "./primary-persistence.ts";
-import { mergeToolSets } from "./tool-set-assembly.ts";
-import { fireUsageReport, type TurnUsageReport } from "./turn-usage-report.ts";
+import type { TurnUsageReport } from "./turn-usage-report.ts";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import type { RequestMeasurement } from "./request-measurement.ts";
-import { measurePostTurnRequest, prepareOutgoingRequest, type RequestPreparationDeps } from "./request-preparation.ts";
-import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
+import type { RequestPreparationDeps } from "./request-preparation.ts";
+import type { UserImageInput } from "./turn-mapping.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
-import { createRunObservabilityModel, type ToolEffectObserver } from "./run-observability-telemetry.ts";
+import type { ToolEffectObserver } from "./run-observability-telemetry.ts";
+import type { ChatActivityAttempt, ChatTurnActivity } from "./chat-activity.ts";
+import { createTurnRecording, type TurnRecording } from "./turn-recording.ts";
 import type { AutomaticMemoryRecall } from "../memory/automatic-memory-recall.ts";
 import type { PrimaryConversationCommit } from "../memory/canonical-ingestion-source.ts";
+import type { ToolDisclosureSnapshot } from "../extensions/tool-disclosure-snapshot.ts";
+import type { SkillToolBundle } from "./tool-disclosure.ts";
+import type { WorkContext } from "./work-context.ts";
+import { createToolMaterialSink, type ToolMaterialSink } from "../harness/subagent-tool-materials.ts";
+import type { ForegroundInboxContext, ForegroundInboxInput } from "./foreground-inbox.ts";
+import { runAttempt } from "./agent-attempt.ts";
+import type { NativeImageContext } from "./native-image-context.ts";
+import type { ImageReplayReader } from "./native-image-replay.ts";
+import type { ContextWindowSnapshot } from "@taki/shared";
+import type { AttributedText } from "./context-attribution.ts";
 
 /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
+  /** Trusted initiative evidence, leased only for the current model Attempt. */
+  nativeImageContext?: NativeImageContext;
+  /** Trusted synchronous fence and opportunity charge inside each model Effect intent transaction. */
+  onCommitModelIntent?: (effect: EffectLifecycle) => void;
+  /** Trusted shared-work execution. Never populated from a public request or source label. */
+  workContext?: WorkContext;
+  /** Actual final SDK lookup, captured for delegation when an admitted parent invokes its tools. */
+  executableTools?: ToolSet;
+  /** Set only after independently owned work commits; cancellation must preserve its real primary input. */
+  independentWorkAccepted?: boolean;
+  /** Exact current-execution completed tool results available for explicit material selection. */
+  materials?: ToolMaterialSink;
+  /** Final SDK step text after authoritative settlement; unattended delivery must not publish intermediate deltas. */
+  onSettledText?: (text: string) => void;
+  /** Trusted caller's optional tool subset for this execution; narrows existing governed tools without granting any. */
+  allowedToolNames?: readonly string[];
+  decisionCollector?: HeartbeatDecisionCollector;
   /** Exact physical operator socket that initiated this turn; Approval session authority is object-identity bound. */
   connection?: Connection;
   notify?: (method: string, params: unknown) => void;
@@ -54,6 +75,8 @@ export interface TurnContext {
   /** Records a new durable Attempt immediately before the one supported overflow retry. */
   onRetry?: (reason: string) => boolean;
   toolObserver?: ToolEffectObserver;
+  /** Disposable foreground presentation; the accepted send identity and terminal notification are server-owned. */
+  activity?: ChatTurnActivity;
 }
 
 export interface ChatAgent {
@@ -72,7 +95,12 @@ export type { TurnUsageReport } from "./turn-usage-report.ts";
 
 /** Immutable-by-contract resources captured once before a Run's first model attempt and shared by every retry. */
 export interface AgentRunContext {
+  readonly runtime?: import("./agent-runtime-binding.ts").AgentRuntimeBinding;
+  readonly toolDisclosure?: ToolDisclosureSnapshot;
+  readonly selectedContext?: InitiativeSelectedContext;
   readonly tools?: ToolSet;
+  /** Presentation only; copied before the first attempt so injected mutable tables cannot rename a finished turn. */
+  readonly toolDisplayNames?: Readonly<Record<string, string>>;
   /** Memory authority tool closures captured at Admission so a queued Run cannot switch epochs before execution. */
   readonly memoryTools?: ToolSet;
   readonly memorySnapshot?: RunMemoryReference;
@@ -80,28 +108,28 @@ export interface AgentRunContext {
   readonly memoryPrompt?: string;
   readonly assembleMemory?: (currentMessage: string) => string;
   readonly instructions?: string;
+  readonly instructionsAttribution?: AttributedText;
   dispose?(): void;
 }
 
 /** model + store + memory are injected so tests supply a MockLanguageModelV4 and a tmp-workspace engine (no network/disk deps). */
 export interface ChatAgentDeps {
-  model: LanguageModel;
+  model?: LanguageModel;
+  historyBudget?: () => number;
   store: ConversationStore;
   memory: MemoryEngine;
   /** Authority-selected memory procedure prompt; canonical Local must not advertise retired Markdown tool names. */
   memoryPrompt?: string | (() => string);
   /** Optional auto-write orchestrator; when present, fired detached after each turn (existing tests omit it). */
   autoMemory?: AutoMemory;
-  /** Exact committed primary rows, never a queried seq range. The composition root persists source witnesses. */
+  /** Compatibility witness callback only when the ConversationStore has no durable primary-source writer. */
   onPrimaryCommitted?: (input: PrimaryConversationCommit) => void;
-  /** Durable per-turn primary custody: one group per primary turn, shared by its overflow retry, finalized once. */
+  /** Durable trusted custody is bound into the atomic primary-source writer for this whole turn. */
   primaryPersistence?: PrimaryPersistence;
-  /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
-  visionModel?: LanguageModel;
   /** Content-addressed attachment writer — a NARROW structural type (zero coupling to the media module). */
-  attachments?: { save(dataBase64: string, mediaType: ImageAttachment["mediaType"]): { ref: string; bytes: number } };
-  /** Detached post-turn image-description hook (mirrors autoMemory); fired void, only when the turn carried images (D28). */
-  imageMemory?: { onImageTurn(input: { characterId: string; refs: string[]; caption: string }): void };
+  attachments?: { save(dataBase64: string, mediaType: ImageAttachment["mediaType"]): { ref: string; bytes: number }; read?: ImageReplayReader["read"] };
+  /** Optional live foreground observation; acquired once per Attempt, validated at every actual dispatch. */
+  acquireNativeImageContext?: () => NativeImageContext | undefined;
   /** Adapter-governed tools merged after Core governance (Skill/MCP/Host); stable across turns. */
   extraTools?: ToolSet;
   /** Connection-bound adapter tools built per turn (MCP); preferred over static extraTools for interactive authority. */
@@ -110,12 +138,20 @@ export interface ChatAgentDeps {
   runContext?: (turn?: TurnContext) => AgentRunContext;
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
   coreTools?: ToolSet | ((primary: boolean, characterId: string) => ToolSet);
+  /** Primary-only domain tools bind the exact committed input, never a later query for the newest user row. */
+  primaryTools?: (input: { characterId: string; userEntry: TimelineEntry; turn?: TurnContext }) => ToolSet;
+  /** One real primary inbox consumer per Attempt; accepted events remain private until actual model intent. */
+  foregroundInbox?: (input: ForegroundInboxInput) => ForegroundInboxContext | undefined;
+  /** Trusted integration registration; only a successful current-generation Skill load discloses its tools. */
+  skillTools?: (input: { characterId: string; userEntry?: TimelineEntry; turn?: TurnContext }) => readonly SkillToolBundle[];
   /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
   coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver }): ToolSet };
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
   instructionsExtra?: (characterId: string) => string;
+  /** Live User Timezone authority; captured once per attempt for its day/time lines. Omitted = legacy local time. */
+  userTimezone?: () => string;
   /** Volatile per-turn context (perception activity/screen, fenced upstream) carried INSIDE the <turn-context> tail
    *  on the outgoing user message — in-flight only, never persisted (Q4/ADR 0008). Absent/blank = a time-only tail. */
   volatileContext?: (now: number) => string;
@@ -130,10 +166,12 @@ export interface ChatAgentDeps {
   /** Extra stop conditions OR-composed into stopWhen after the step cap (e.g. the avatar presentation tail-stop, 1c). */
   stopConditions?: StopCondition<ToolSet>[];
   /** Usage-capture seam (batch 6, R1 tier 2): fired DETACHED on committed turns only, alongside the auto-memory
-   *  fire (same never-adds-latency contract); a retract or a thrown ending fires nothing. Absent = today's behavior. */
+   *  fire (same never-adds-latency contract); a retract, cancellation or thrown ending fires nothing. */
   onUsage?: (report: TurnUsageReport) => void;
   /** The configured non-history share of the calibrated context window; actual stable costs consume it first. */
   requestEnvelopeReserve?: () => number;
+  /** Effective complete input window for child context preparation; main request policy stays unchanged. */
+  contextWindowTokens?: () => number;
   /** Production enables provider usage as the complete-envelope calibration anchor. */
   useProviderUsage?: boolean;
   /** Captures primary relationship pressure before detached maintenance; ephemeral controls never replace it. */
@@ -146,32 +184,28 @@ export interface ChatAgentDeps {
   onOverflow?: (observedInput: number) => void;
   /** Optional Core-owned effect boundary; omitted by focused legacy callers. */
   effectLifecycle?: EffectLifecycleService;
+  /** Captured at actual native dispatch; real provider tokens never divide by estimator units. */
+  requestWindowSnapshot?: () => ContextWindowSnapshot;
 }
 
-// Fallback step cap when no caller injects one (tests). Production injects AgentConfig.maxSteps (env TAKI_MAX_STEPS, D11);
-// a turn hitting the cap ends cleanly instead of looping forever.
-const DEFAULT_MAX_STEPS = 10;
+
 
 export function createChatAgent(deps: ChatAgentDeps): ChatAgent {
   return { stream: (params, turn) => runTurn(deps, params, turn) };
 }
 
-// Narrowed vision pair (decision 5): model + attachment store, present iff the turn carries images.
-type VisionDeps = { model: LanguageModel; store: NonNullable<ChatAgentDeps["attachments"]> };
-
 /** The per-turn stable inputs each attempt replays; `state` is re-created per attempt (the R2 retry reads it). */
-interface TurnAttempt {
+export interface TurnAttempt {
   characterId: string;
   message: string;
   attachments: ImageAttachment[];
   images: UserImageInput[];
-  vision: VisionDeps | null;
   userSeq?: number;
   userEntry?: TimelineEntry;
+  primarySourceId?: string;
   primary: boolean;
-  /** The turn's Timeline writer: the custody-bound writer for primary turns with persistence, else the store. */
-  writer: ConversationWriter;
   runContext?: AgentRunContext;
+  toolDisplayNames?: Readonly<Record<string, string>>;
   recall: { result?: Promise<string> };
   state: AttemptState;
 }
@@ -181,177 +215,115 @@ interface AttemptState {
   instructions: string;
   outgoing: ModelMessage[];
   stepEnded: boolean;
+  recording: TurnRecording;
+  activity?: ChatActivityAttempt;
+  afterCommit?: () => void;
+  inbox?: ForegroundInboxContext;
 }
 
 async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: TurnContext): AsyncIterable<string> {
-  const { store, approval } = deps;
+  const capturedContext = turn?.runContext ?? deps.runContext?.(turn);
+  if (capturedContext?.runtime) deps = { ...deps, ...capturedContext.runtime };
+  if (!deps.model) throw new Error("MODEL_UNAVAILABLE");
+  const { approval } = deps;
+  let store = deps.store;
   const { characterId, message } = params;
   const attachments = params.attachments ?? [];
-  // Image turns route to the vision slot (decision 5). A turn carrying images with no slot/store configured is rejected
-  // BEFORE any persistence — the text model must never be handed an image (chat-send maps this throw to a structured
-  // chat.error; the UI also disables attach). `vision` is null for a text turn, else the narrowed {model, store}.
-  const vision = attachments.length > 0 ? requireVisionDeps(deps) : null;
+  const imageStore = attachments.length > 0 ? requireAttachmentStore(deps) : undefined;
   // Save the in-flight bytes to the content-addressed store; only the refs (mediaType + ref) persist on the timeline row.
   const primary = (turn?.turnKind ?? "primary") === "primary";
-  const images = primary && vision
-    ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
+  const images = primary && imageStore
+    ? attachments.map((a) => ({ mediaType: a.mediaType, ref: imageStore.save(a.dataBase64, a.mediaType).ref }))
     : [];
-  // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam in the
-  // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one. The custody group is
-  // opened before that first append and shared by the retry; it is finalized exactly once when the turn ends.
   const persistence = primary ? deps.primaryPersistence?.begin({ characterId, runId: turn?.runId }) : undefined;
-  const writer = persistence?.writer ?? store;
-  const userEntry = primary ? writer.appendUser(characterId, message, images) : undefined;
-  if (approval && turn) wireApprovalDenial(approval, turn);
-  const runContext = turn?.runContext ?? deps.runContext?.(turn);
+  if (persistence) {
+    store = store.withPrimaryWriter(persistence);
+    deps = { ...deps, store };
+  }
+  const runContext = capturedContext;
   const ownsRunContext = turn?.runContext === undefined;
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry, primary, writer, runContext, recall: {} };
-  // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
-  // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
-  // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
-  // spec's never-blind-retry rule). Unrecognized errors and second failures propagate as today (fail-open), and an
-  // absent onOverflow seam disables the retry entirely (nothing would have recalibrated the window). NEVER any
-  // compaction/summarization here — batch 7 owns that (R2).
   try {
-    for (let attempt = 0; ; attempt += 1) {
-      const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false };
-      let yielded = false;
-      try {
-        for await (const delta of runAttempt(deps, { ...base, state }, turn)) {
-          yielded = true;
-          yield delta;
-        }
-        return;
-      } catch (error) {
-        const onOverflow = deps.onOverflow;
-        const clean = !yielded && !state.stepEnded;
-        if (attempt > 0 || !clean || onOverflow === undefined || !isContextOverflowError(error)) throw error;
-        if (turn?.onRetry?.("context_overflow") === false) throw error;
-        // Observed = the provider-reported request size when the body names one, else our own estimate of the SAME
-        // request (computed only here, off every hot path). The calibrator persists the shrunken window, so the
-        // retry's fresh history() pull re-windows through the store's budget closure.
-        onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
-      }
-    }
+    // Admission identity is captured before the atomic initial write and remains unchanged across retries.
+    const opened = primary ? store.beginPrimary({ characterId, text: message, images,
+      runId: turn?.runId, memory: runContext?.memorySnapshot }) : undefined;
+    const userEntry = opened?.userEntry;
+    if (turn?.runId) turn.materials ??= createToolMaterialSink();
+    if (approval && turn) wireApprovalDenial(approval, turn);
+    const base = { characterId, message, attachments, images, userSeq: userEntry?.seq, userEntry,
+      primarySourceId: opened?.sourceId, primary, runContext, recall: {},
+      toolDisplayNames: captureToolDisplayNames(runContext?.toolDisplayNames) };
+    yield* executeAttempts(deps, base, turn);
   } finally {
     persistence?.finalize();
     if (ownsRunContext) runContext?.dispose?.();
   }
 }
 
-// ONE model attempt — request composition, streaming, persistence, retract, detached fires — extracted so the R2
-// retry can re-run it under the recalibrated window (batch-6 design §3.1's named-fn relief; the machinery below is
-// the pre-batch-6 runTurn body, moved verbatim). The fresh per-attempt history() pull is the point: the retry's
-// window is computed under the budget the calibrator just shrank.
-// eslint-disable-next-line max-lines-per-function
-async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
-  const { store, approval } = deps;
-  const { characterId, message, attachments, images, vision, userSeq, primary, writer, state } = attempt;
-  const controlMessage = turn?.controlInput ?? message; const replay = store.project(characterId); const history = replay.messages;
-  // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
-  const now = Date.now();
-  const memoryContext = attempt.runContext?.assembleMemory?.(controlMessage) ?? deps.memory.assemble({ characterId, currentMessage: controlMessage });
-  const instructions = composeInstructions(deps, { characterId, memoryContext, memoryPrompt: attempt.runContext?.memoryPrompt, runInstructions: attempt.runContext?.instructions }, now);
-  const selectedModel = vision ? vision.model : deps.model; const { model, observability } = createRunObservabilityModel({ model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId });
-  if (turn && observability) turn.toolObserver = observability.tools;
-  const tools = assembleTurnTools(deps, attempt, turn); const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
-  let preparedTools: ReadonlyArray<Record<string, unknown>> | undefined;
-  const requestTelemetry: Telemetry = { onLanguageModelCallStart: (event) => { preparedTools = event.tools ?? []; } };
-  const agent = new ToolLoopAgent({
-    model,
-    instructions,
-    tools,
-    toolOrder,
-    telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
-      integrations: observability ? [observability.telemetry, requestTelemetry] : [requestTelemetry] },
-    stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
-    // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
-    // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
-    toolApproval: approval ? ({ toolCall }) => approval.decide(toolCall, turn?.notify) : undefined,
-    // A completed step disqualifies the R2 retry (see runTurn's seam comment); construction-level on purpose so the
-    // frozen stream loop body below stays byte-identical (`onStepFinish` is this callback's deprecated alias).
-    onStepEnd: () => {
-      state.stepEnded = true;
-    },
-  });
-  // THREE additive seams ride ONLY this turn's outgoing copy of the last user row (the D1-frozen turn is otherwise
-  // untouched): the in-flight image bytes as a FilePart tail swap (decision 6), a one-shot costume note prefixed onto
-  // the user TEXT (1f), and the <turn-context> tail suffixed onto it (Q4 — time line + volatile perception ride the
-  // REQUEST, never the store). `history` (the persisted projection) is NEVER mutated; the tail always exists, so every
-  // turn rebuilds its last user row (the old text-turn "history unchanged" fast path is superseded).
-  // consumeCostumeChanged fires here even if the turn is later cancelled/retracted or R2-retried (baseline advances
-  // anyway, and a retry attempt carries no second notice → a rare skipped notice, backstopped by the 1e enum;
-  // accepted narrow edge).
-  attempt.recall.result ??= recallMemory(attempt, { query: message, visibleContext: memoryContext, now, signal: turn?.signal });
-  const recalled = await attempt.recall.result;
-  const initialOutgoing = buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: buildTurnTail(now, deps.volatileContext, recalled), primary });
-  // Provider maintenance may still be pending when an autonomous Run starts. Its ephemeral control envelope must
-  // not replace the last primary pressure snapshot used to decide whether the relationship Timeline needs compaction.
-  const preparationDeps = primary ? deps : { ...deps, onRequestMeasured: undefined };
-  const prepared = await prepareOutgoingRequest(preparationDeps, { characterId, instructions, outgoing: initialOutgoing, replay: replay.measurement, tools, toolOrder });
-  const outgoing = prepared.messages;
-  // Exposed for the R2 estimate fallback — read only on the retry path, never on the hot path.
-  state.instructions = instructions;
-  state.outgoing = outgoing;
-  // abortSignal is per-call by SDK design (not a constructor setting). A cancel ends the stream by EITHER a graceful
-  // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
-  const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
-
-  // finish-step clears in-flight text once that step is present in responseMessages, avoiding duplicate persistence.
-  let pendingStepText = ""; let streamEnded = false;
-  const committed = attempt.userEntry ? [attempt.userEntry] : [];
-  try {
+async function* executeAttempts(deps: ChatAgentDeps, base: Omit<TurnAttempt, "state">, turn?: TurnContext): AsyncIterable<string> {
+  for (let ordinal = 0; ; ordinal += 1) {
+    const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false, recording: createTurnRecording() };
+    let yielded = false;
+    let failure: { error: unknown } | undefined;
+    let retrying = false;
+    let retracted = false;
     try {
-      // Iterate result.stream (not textStream) so a provider failure surfaces as an error part rather than being
-      // swallowed. Tool/approval/abort parts flow by here — the assembled turn is persisted from responseMessages.
-      for await (const part of result.stream) {
-        observability?.observeStreamPart(part);
-        if (part.type === "text-delta") {
-          pendingStepText += part.text;
-          yield part.text;
-        } else if (part.type === "finish-step") {
-          pendingStepText = "";
-        } else if (part.type === "error") {
-          throw part.error;
+      try {
+        for await (const delta of runAttempt(deps, { ...base, state }, turn)) { yielded = true; yield delta; }
+      } catch (error) {
+        const clean = !yielded && !state.stepEnded && !state.inbox?.hasIntent();
+        if (ordinal === 0 && clean && !turn?.nativeImageContext && deps.onOverflow && isContextOverflowError(error)
+          && turn?.onRetry?.("context_overflow") !== false) {
+          deps.onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
+          retrying = true;
+          continue;
         }
+        failure = { error };
       }
-      observability?.assertHealthy(); streamEnded = true;
     } finally {
-      // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-      if (primary) await persistTurn(writer, characterId, { result, pendingStepText, streamEnded, onCommitted: (entry) => committed.push(entry) });
+      state.activity?.close(turn?.signal?.aborted ?? false);
+      // Includes iterator.return(): delivered partial text survives even when a direct consumer stops reading.
+      // A failed transaction is outside the stream catch and therefore cannot retry or append a second batch.
+      try {
+        if (!retrying) retracted = finishRecordedTurn(deps, { ...base, state }, turn);
+      } finally {
+        state.inbox?.dispose();
+      }
     }
-  } catch (error) {
-    // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
-    // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
-    if (primary && userSeq !== undefined && await retractIfCancelledSilent(writer, { characterId, userSeq, result, pendingStepText, turn })) return;
-    if (primary && committed.length > 1) deps.onPrimaryCommitted?.({ characterId, entries: committed, runId: turn?.runId });
-    throw error;
+    if (retracted) return;
+    if (failure) throw failure.error;
+    // A cancelled turn keeps its committed source witness but starts no post-turn maintenance.
+    if (!turn?.signal?.aborted) state.afterCommit?.();
+    return;
   }
-  // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
-  if (primary && userSeq !== undefined && await retractIfCancelledSilent(writer, { characterId, userSeq, result, pendingStepText, turn })) return;
-  if (primary) deps.onPrimaryCommitted?.({ characterId, entries: committed, runId: turn?.runId });
-  if (primary) measurePostTurnRequest(deps, { characterId, instructions, tools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
-  if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
-  if (primary) fireUsageReport(deps, { characterId, usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
 }
 
-function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {
-  const coreTools = mergeToolSets(
-    attempt.runContext?.memoryTools ?? deps.memory.createTools(attempt.characterId),
-    typeof deps.coreTools === "function" ? deps.coreTools(attempt.primary, attempt.characterId) : deps.coreTools ?? {},
-    deps.characterTools?.(attempt.characterId) ?? {},
-  );
-  const interactive = turn && (turn.connection || (turn.runId && turn.attemptId && deps.effectLifecycle))
-    ? { connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId, effects: deps.effectLifecycle, toolObserver: turn.toolObserver }
-    : undefined;
-  const extra = turn?.connection && deps.turnTools
-    ? deps.turnTools({ ...turn, connection: turn.connection })
-    : deps.extraTools ?? {};
-  return mergeToolSets(
-    deps.coreToolGovernance?.wrap(coreTools, interactive) ?? coreTools,
-    extra,
-    attempt.runContext?.tools ?? {},
-  );
+function finishRecordedTurn(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): boolean {
+  const { store } = deps;
+  if (!attempt.primary) {
+    const partial = attempt.state.recording.partial();
+    if (partial && turn?.attemptId) turn.workContext?.recordPartial({ attemptId: turn.attemptId, ...partial });
+    return false;
+  }
+  const { recording, activity } = attempt.state;
+  const retract = (turn?.signal?.aborted ?? false) && !recording.hasProduced()
+    && !attempt.state.inbox?.hasIntent() && turn?.independentWorkAccepted !== true && attempt.userSeq !== undefined;
+  if (retract && attempt.userSeq !== undefined) {
+    if (attempt.primarySourceId) store.retractPrimary(attempt.primarySourceId);
+    else store.removeEntry(attempt.characterId, attempt.userSeq);
+    turn?.onRetract?.();
+    return true;
+  }
+  const entries = recording.commit({ store, characterId: attempt.characterId, toolDisplayNames: attempt.toolDisplayNames,
+    primarySourceId: attempt.primarySourceId,
+    activity: turn?.activity, attempt: activity,
+    partialSourceContext: attempt.state.inbox?.hasIntent() ? attempt.state.inbox.sourceContext : undefined });
+  attempt.state.inbox?.onPublicCommitted?.(entries);
+  // The atomic writer returns the exact committed rows, including presentation metadata. Witness only
+  // this primary source, after commit and on exceptional/iterator-close endings as well as normal completion.
+  // A clean overflow retry never reaches this guard; a retracted user row must never become ingestion input.
+  if (!attempt.primarySourceId && attempt.userEntry) deps.onPrimaryCommitted?.({ characterId: attempt.characterId,
+    entries: [attempt.userEntry, ...entries], runId: turn?.runId });
+  return retract;
 }
 
 // A disconnect mid-turn denies every pending approval immediately (fail-closed, ruling 3); so does an abort —
@@ -363,142 +335,16 @@ function wireApprovalDenial(approval: ApprovalGate, turn: TurnContext): void {
   turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
 }
 
-// The detached post-turn writes: the auto-memory pass + the image-description hook. Fired void so they never add
+// The detached post-turn auto-memory pass. Fired void so it never adds
 // latency to the user-facing turn (prd §3), and ONLY on the committed path — a retracted turn skips them (it never
 // entered model memory), and a throw ending never reaches here (it rethrew or already retracted).
-function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string; imageRefs: string[]; message: string }): void {
+export function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string }): void {
   void deps.autoMemory?.onTurnCompleted(ctx.characterId);
-  // An image turn's authoritative cross-turn record is the vision model's TEXT description (decision 6).
-  if (ctx.imageRefs.length > 0) {
-    void deps.imageMemory?.onImageTurn({ characterId: ctx.characterId, refs: ctx.imageRefs, caption: ctx.message });
-  }
 }
 
-interface RetractInput {
-  characterId: string;
-  userSeq: number;
-  result: { responseMessages: PromiseLike<TurnMessage[]> };
-  pendingStepText: string;
-  turn?: TurnContext;
-}
 
-// The cancel-before-reply retract, ENDING-AGNOSTIC. A cancel reaches runTurn's post-loop code by either SDK ending:
-// (a) GRACEFUL — the model read resolves (or rejects with an AbortError-shaped error) and the SDK emits an `abort`
-// stream part then closes; (b) THROW — the transport rejects the read with our PLAIN-STRING abort reason, which
-// fails provider-utils `isAbortError` (an Error/DOMException named AbortError/ResponseAborted/TimeoutError), so the
-// SDK errors the stream and the for-await throws the reason. In BOTH, "produced nothing" == aborted with no completed
-// step (responseMessages settles to [] / rejects — verified it does NOT hang after the error ending) and no partial
-// text. On retract: delete exactly the appended user row (DB + timeline.removed) and signal the pump to restore the
-// draft; the message never enters memory. Attachments are NOT restored client-side (bytes stay until TTL GC).
-async function retractIfCancelledSilent(store: ConversationWriter, input: RetractInput): Promise<boolean> {
-  if (!(input.turn?.signal?.aborted ?? false) || input.pendingStepText.length > 0) return false;
-  if ((await Promise.resolve(input.result.responseMessages).then((m) => m.length, () => 0)) !== 0) return false;
-  store.removeEntry(input.characterId, input.userSeq);
-  input.turn?.onRetract?.();
-  return true;
-}
-
-// Image turns need BOTH the vision slot and the attachment store; a turn with images but either missing is rejected
-// (the guard). Returns the narrowed non-optional pair so the save + model-pick sites carry no `undefined` (decision 5).
-function requireVisionDeps(deps: ChatAgentDeps): VisionDeps {
-  if (!deps.visionModel || !deps.attachments) {
-    throw new Error("Image attachments require a configured vision model (TAKI_VLM_*)");
-  }
-  return { model: deps.visionModel, store: deps.attachments };
-}
-
-// This turn's model-facing messages: history with its last user row REBUILT as the outgoing copy — costume notice
-// prefix (1f), the current message, then the turn-context tail suffix (Q4); an image turn carries that text as the
-// text part before its FileParts (bytes in-flight only, decision 6). All in-flight: `history` (the persisted
-// projection) is never mutated, so replay never accumulates notices or tails.
-function buildOutgoing(args: {
-  history: ModelMessage[];
-  isImageTurn: boolean;
-  message: string;
-  attachments: ImageAttachment[];
-  changed: boolean;
-  tail: string;
-  primary: boolean;
-}): ModelMessage[] {
-  const modelText = [args.changed ? COSTUME_CHANGE_NOTICE : "", args.message, args.tail]
-    .filter((part) => part.length > 0)
-    .join("\n\n");
-  const prefix = args.primary && args.history.at(-1)?.role === "user" ? args.history.slice(0, -1) : args.history;
-  if (args.isImageTurn) return [...prefix, buildMultimodalUser(modelText, args.attachments)];
-  return [...prefix, { role: "user", content: modelText }];
-}
-
-// The volatile tail (Q4/ADR 0008): every minute-granular item — the wall-clock line first, unconditionally, then
-// whatever volatile context the composition root wires (perception activity/screen, fenced upstream) — inside ONE
-// <turn-context> block appended to the outgoing user message. The wrapper conveys "app-appended, not user-typed";
-// an <untrusted-observation> fence inside it keeps conveying "data, never instructions" — two orthogonal contracts,
-// two tags. The tag NAME is a LOCAL choice (grep-verified unused in-tree); the PATTERN is Claude Code's
-// <system-reminder> / Codex's <environment_context> (rb §P1 verdict).
-function buildTurnTail(now: number, volatileContext?: (now: number) => string, recalled = ""): string {
-  const volatile = volatileContext?.(now) ?? "";
-  const body = [renderCurrentTime(now), volatile, recalled].filter((part) => part.length > 0).join("\n\n");
-  return `<turn-context>\n${body}\n</turn-context>`;
-}
-
-async function recallMemory(attempt: TurnAttempt, input: Parameters<AutomaticMemoryRecall>[0]): Promise<string> {
-  if (!attempt.primary) return "";
-  try { return await attempt.runContext?.automaticMemoryRecall?.(input) ?? ""; }
-  catch { return ""; } // A failed optional read must not prevent the foreground response.
-}
-
-// The canonical v7 multimodal user message: a FilePart per attachment (ImagePart is @deprecated in v7), `data` = RAW
-// base64 (a tagged data-URL throws InvalidDataContentError — research r1). This message rides one turn and is never persisted.
-function buildMultimodalUser(text: string, attachments: ImageAttachment[]): ModelMessage {
-  const fileParts = attachments.map((a) => ({ type: "file" as const, mediaType: a.mediaType, data: a.dataBase64 }));
-  return { role: "user", content: text.length > 0 ? [{ type: "text" as const, text }, ...fileParts] : fileParts };
-}
-
-interface TurnOutcome {
-  result: { responseMessages: PromiseLike<TurnMessage[]> };
-  pendingStepText: string;
-  streamEnded: boolean;
-  onCommitted?: (entry: TimelineEntry) => void;
-}
-
-// On a clean end (including a graceful abort) the stream was fully consumed, so responseMessages settles: it
-// resolves with every COMPLETED step's messages, or rejects when none completed (abort during step 0). After a
-// THROWN error the loop exited early — the pipeline may never flush its promises, so they are not awaited.
-async function persistTurn(store: ConversationWriter, characterId: string, outcome: TurnOutcome): Promise<void> {
-  if (outcome.streamEnded) {
-    const completed = await Promise.resolve(outcome.result.responseMessages).then(
-      (messages) => messages,
-      () => [] as TurnMessage[],
-    );
-    if (completed.length > 0) store.appendTurn(characterId, completed, outcome.onCommitted);
-  }
-  // The interrupted step's partial text exists only in our accumulator (the SDK never finalizes that step); the
-  // transcript must never lose what the user already saw — on abort AND on a thrown mid-stream error (D1 #5).
-  // A clean completion cleared it at the final finish-step, so this only fires for interrupted turns.
-  if (outcome.pendingStepText.length > 0) store.appendAssistant(characterId, outcome.pendingStepText, outcome.onCommitted);
-}
-
-// Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor, D1 #2),
-// the day-date line (byte-stable for a calendar day), the assembled memory context, then any extra section (skills
-// list + avatar vocabulary — boot/costume-stable). DAY-STABLE by construction (Q4, rb §A5): nothing minute-granular
-// remains here — the time line and perception moved to the turn-context tail — so on a breakpoint-less prefix cache
-// the byte-stable instructions AND the whole replayed history stay cached across same-day turns. Blank sections
-// dropped; the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
-function composeInstructions(
-  deps: ChatAgentDeps,
-  turn: { characterId: string; memoryContext: string; memoryPrompt?: string; runInstructions?: string },
-  now: number,
-): string {
-  return [
-    turn.memoryPrompt ?? resolveMemoryPrompt(deps.memoryPrompt),
-    renderDayDate(now),
-    turn.memoryContext,
-    deps.instructionsExtra?.(turn.characterId) ?? "",
-    turn.runInstructions ?? "",
-  ]
-    .filter((section) => section.length > 0)
-    .join("\n\n");
-}
-
-function resolveMemoryPrompt(prompt: ChatAgentDeps["memoryPrompt"]): string {
-  return typeof prompt === "function" ? prompt() : prompt ?? BASE_SYSTEM_PROMPT;
+// Storage admission precedes persistence; the configured primary model receives both text and image input.
+function requireAttachmentStore(deps: ChatAgentDeps): NonNullable<ChatAgentDeps["attachments"]> {
+  if (!deps.attachments) throw new Error("Image attachments require configured attachment storage.");
+  return deps.attachments;
 }

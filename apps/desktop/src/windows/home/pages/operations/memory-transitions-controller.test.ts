@@ -27,6 +27,8 @@ function fake() {
   const order: string[] = [];
   const client = { memoryAuthorityStatus: async () => hindsightStatus(), memoryActivationStatus: async () => activationStatus(),
     memoryOperationSubmit: vi.fn(async () => operation()), memoryOperationCancel: vi.fn(async () => operation()),
+    memoryOperationList: vi.fn(async () => { throw new Error("Unexpected Tidy operation list read"); }),
+    memoryOperationStatus: vi.fn(async () => { throw new Error("Unexpected Tidy operation status read"); }),
     subscribeMemoryOperations: vi.fn(async () => { order.push("subscribe"); }), onMemoryOperationChanged: vi.fn(() => () => undefined),
     onMemoryReplicaChanged: vi.fn(() => () => undefined),
     memoryReplicaConfigure: vi.fn(async () => { throw new Error("transition fixture does not configure replicas"); }),

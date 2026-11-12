@@ -1,0 +1,32 @@
+{
+  "files": [
+    "packages/shared/src/context-source-schema.ts",
+    "packages/shared/src/subagent-schema.ts",
+    "packages/shared/src/subagent-result-schema.ts",
+    "packages/shared/src/run-message-schema.ts",
+    "packages/shared/src/timeline-schema.ts",
+    "packages/shared/src/index.ts",
+    "packages/core/src/db/subagent-repo.ts",
+    "packages/core/src/db/subagent-input-repo.ts",
+    "packages/core/src/db/subagent-execution-repo.ts",
+    "packages/core/src/db/subagent-terminal.ts",
+    "packages/core/src/db/subagent-readers.ts",
+    "packages/core/src/db/run-message-repo.ts",
+    "packages/core/src/db/run-linked-state.ts",
+    "packages/core/src/db/run-repo.ts",
+    "packages/core/src/db/effect-repo.ts",
+    "packages/core/src/db/sqlite.ts",
+    "packages/core/src/db/sqlite.test.ts",
+    "packages/core/src/db/migrations/056-subagent-conversations.ts",
+    "packages/core/src/db/migrations/index-list.ts",
+    "packages/core/src/harness/run-service.ts",
+    "packages/core/src/boot/core-bootstrap.ts",
+    "packages/core/src/boot/core-bootstrap.test.ts",
+    "packages/core/src/db/run-terminal-transition.ts",
+    "packages/core/src/testing/run-service-stub.ts",
+    "packages/shared/src/subagent-schema.test.ts",
+    "packages/core/src/db/subagent-repo.test.ts",
+    "packages/core/src/db/migrations/056-subagent-conversations.test.ts"
+  ],
+  "exitCode": 0
+}

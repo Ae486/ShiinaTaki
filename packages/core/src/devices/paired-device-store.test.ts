@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -54,5 +54,18 @@ describe("createPairedDeviceStore", () => {
     const path = tempStorePath();
     writeFileSync(path, JSON.stringify({ devices: [{ deviceId: "x" }] }));
     expect(() => createPairedDeviceStore(path)).toThrow(/malformed/);
+  });
+
+  it("failed durable enrollment never becomes trusted only in process memory", () => {
+    const path = tempStorePath();
+    const store = createPairedDeviceStore(path);
+    mkdirSync(`${path}.tmp`);
+    expect(() => store.save(sample)).toThrow();
+    expect(store.find(sample.deviceId)).toBeUndefined();
+    rmSync(`${path}.tmp`, { recursive: true });
+    store.save(sample);
+    mkdirSync(`${path}.tmp`);
+    expect(() => store.save({ ...sample, tokenHash: "rejected" })).toThrow();
+    expect(store.find(sample.deviceId)?.tokenHash).toBe(sample.tokenHash);
   });
 });

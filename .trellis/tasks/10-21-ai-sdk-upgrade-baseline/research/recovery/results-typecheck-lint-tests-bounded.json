@@ -1,0 +1,32 @@
+[
+  {
+    "name": "typecheck",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 67.93
+  },
+  {
+    "name": "lint",
+    "command": [
+      "pnpm.cmd",
+      "lint"
+    ],
+    "exitCode": 0,
+    "seconds": 42.62
+  },
+  {
+    "name": "tests-bounded",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "test",
+      "--maxWorkers=4"
+    ],
+    "exitCode": 0,
+    "seconds": 258.7
+  }
+]

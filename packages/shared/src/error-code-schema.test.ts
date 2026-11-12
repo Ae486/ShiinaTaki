@@ -24,6 +24,7 @@ describe("ErrorCodeSchema", () => {
     "MEMORY_OPERATION_REFUSED",
     "GOVERNANCE_DENIED",
     "APPROVAL_REQUIRED",
+    "AVATAR_REJECTED",
   ])("accepts the %s code", (code) => {
     expect(ErrorCodeSchema.safeParse(code).success).toBe(true);
   });

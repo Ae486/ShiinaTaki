@@ -1,0 +1,19 @@
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Home field selection, window/streaming ownership, meaningful content and preserved generation boundaries."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve gaps from named sources and current installed contracts; do not invent behavior."}
+{"file": ".trellis/spec/backend/index.md", "reason": "Core/Shared execution and protocol authority; follow its relevant package checklists."}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Client generation, disposable views and state authority."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Map producer/protocol/consumer boundaries and compatibility before implementation."}
+{"file": ".trellis/tasks/09-05-uiux-readable-operations/research/d64-disclosure-policy-proposal-2026-09-05.md", "reason": "Delegated D64 policy A: complete permitted command disclosure, deterministic credential masking, explicit limits and unchanged execution authority."}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Canonical registry, authority/label separation, permission and Approval behavior, raw-input privacy."}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Core/Shared/Rust engineering and meaningful quality gates."}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Presentational components, existing primitives and accessible controls."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Frontend source boundaries and validation."}
+{"file": ".trellis/spec/backend/operation-presentation.md", "reason": "Chinese labels, exact approval names, captured tool metadata, optional validation and canonical replay invariants."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md", "reason": "Latest owner delegation, selected D64 policy A, commit authority and truthful verification boundaries."}
+{"file": ".trellis/tasks/09-05-uiux-readable-operations/research/d64-executable-contract-2026-09-06.md", "reason": "Reviewed executable D64 source contract: full masking/escaping and bounds, exact command reconstruction, operator echo, Host-v3 ACK compatibility, once-only settlement and test ownership."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "D64 preserves Host request/control identity, generation boundaries, pending raw-input lifetime and bounded terminal reuse."}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Physical operator ownership, offer/echo on every connect path, authentication versus capability support."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Missing display-support echo must close incompatibility without credential clearing or stale-generation restoration."}
+{"file": ".trellis/spec/backend/e2e-harness.md", "reason": "Use isolated real Core/Host L1 approval paths, deterministic teardown and no raw diagnostic output."}
+{"file": ".trellis/tasks/09-05-uiux-readable-operations/research/d64-disclosure-validation-2026-09-06.md", "reason": "D64 companion sections 6-11: exact recognition families, escaping and dual-unit bounds, failure cleanup, full tests and explicit production ownership."}
+{"file": ".trellis/spec/backend/command-approval-disclosure.md", "reason": "Executable D64 Shared/Rust/Core/operator contracts, complete disclosure and credential limits, ACK/legacy refusal, canonical parity and required real-process/window assertions."}

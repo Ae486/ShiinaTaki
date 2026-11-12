@@ -3,8 +3,11 @@ import {
   PERCEPTION_METHODS,
   PerceptionActivityEntrySchema,
   PerceptionCardSchema,
+  PerceptionChangedSchema,
   PerceptionPauseSetParamsSchema,
   PerceptionPauseStateSchema,
+  PerceptionSubscribeParamsSchema,
+  PerceptionSubscribeResultSchema,
 } from "./perception-schema.ts";
 
 const ENTRY = {
@@ -17,12 +20,44 @@ const ENTRY = {
 };
 
 describe("PERCEPTION_METHODS", () => {
-  it("names the three perception methods", () => {
+  it("keeps the reads and writer while adding the opt-in invalidation channel", () => {
     expect(PERCEPTION_METHODS).toEqual({
       pauseGet: "perception.pauseGet",
       pauseSet: "perception.pauseSet",
       card: "perception.card",
+      subscribe: "perception.subscribe",
+      changed: "perception.changed",
     });
+  });
+});
+
+describe("perception invalidation schemas", () => {
+  it("round-trips only the empty subscription and acknowledgement", () => {
+    expect(PerceptionSubscribeParamsSchema.parse({})).toEqual({});
+    expect(PerceptionSubscribeResultSchema.parse({ status: "ok" })).toEqual({ status: "ok" });
+    expect(PerceptionSubscribeParamsSchema.safeParse({ hostId: "host" }).success).toBe(false);
+    expect(PerceptionSubscribeResultSchema.safeParse({ status: "ok", revision: 1 }).success).toBe(false);
+    expect(PerceptionSubscribeResultSchema.safeParse({ status: "unknown" }).success).toBe(false);
+  });
+
+  it("accepts only a content-free nonnegative safe integer revision", () => {
+    for (const revision of [0, 1, Number.MAX_SAFE_INTEGER]) {
+      expect(PerceptionChangedSchema.parse({ revision })).toEqual({ revision });
+    }
+    for (const revision of [-1, 0.5, Number.MAX_SAFE_INTEGER + 1, Infinity, NaN, "1"]) {
+      expect(PerceptionChangedSchema.safeParse({ revision }).success).toBe(false);
+    }
+    for (const privateField of ["windowTitle", "processName", "screenshot", "description", "reason"]) {
+      expect(PerceptionChangedSchema.safeParse({ revision: 1, [privateField]: "private" }).success).toBe(false);
+    }
+  });
+
+  it("does not widen the existing strict card or pause results", () => {
+    const pauseState = { paused: false, until: null };
+    expect(PerceptionPauseStateSchema.safeParse({ ...pauseState, revision: 1 }).success).toBe(false);
+    expect(PerceptionCardSchema.safeParse({
+      current: null, recent: [], samplingStatus: { foreground: false, ambientScreen: false }, pauseState, revision: 1,
+    }).success).toBe(false);
   });
 });
 

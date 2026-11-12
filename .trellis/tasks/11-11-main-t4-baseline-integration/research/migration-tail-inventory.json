@@ -1,0 +1,575 @@
+{
+  "main": [
+    {
+      "file": "049-local-onboarding.ts",
+      "created": [
+        "memory_migration_candidates",
+        "memory_migration_block_plans",
+        "memory_migration_block_plan_scope",
+        "memory_migration_source_proofs",
+        "primary_memory_groups",
+        "primary_memory_members",
+        "primary_memory_groups_epoch"
+      ],
+      "changes": []
+    },
+    {
+      "file": "050-hindsight-reviewed-deployment-mode.ts",
+      "created": [],
+      "changes": [
+        "ALTER TABLE hindsight_connection_state ADD COLUMN reviewed_deployment_mode TEXT\n CHECK(reviewed_deployment_mode IS NULL OR reviewed_deployment_mode IN ('existing-instance','managed-helper'));"
+      ]
+    },
+    {
+      "file": "051-hindsight-replica-requests.ts",
+      "created": [
+        "hindsight_replica_manual_requests",
+        "hindsight_replica_manual_requests_queued",
+        "hindsight_replica_manual_requests_terminal",
+        "hindsight_replica_manual_requests_no_delete"
+      ],
+      "changes": []
+    },
+    {
+      "file": "052-memory-transitions.ts",
+      "created": [
+        "memory_transition_intents",
+        "memory_transition_attempts",
+        "memory_transition_evidence",
+        "memory_transition_receipts",
+        "memory_transition_results",
+        "memory_transition_queue",
+        "memory_transition_queue_executions",
+        "memory_transition_queue_results",
+        "memory_transition_queue_observations",
+        "memory_transition_recoveries",
+        "memory_transition_resolutions",
+        "memory_transition_",
+        "memory_transition_",
+        "memory_transition_attempt_terminal",
+        "memory_transition_attempt_delete",
+        "memory_transition_operation_admission",
+        "memory_transition_manual_admission"
+      ],
+      "changes": []
+    },
+    {
+      "file": "053-memory-transition-candidates.ts",
+      "created": [
+        "memory_transition_",
+        "memory_transition_",
+        "memory_transition_",
+        "memory_transition_",
+        "memory_transition_scope_ids",
+        "memory_transition_candidate_reservations",
+        "memory_transition_",
+        "memory_transition_",
+        "memory_transition_",
+        "canonical_memory_record_provenance",
+        "canonical_memory_historical_identities",
+        "canonical_memory_historical_references",
+        "canonical_memory_source_aliases",
+        "canonical_memory_source_sets",
+        "canonical_memory_source_references"
+      ],
+      "changes": []
+    },
+    {
+      "file": "054-memory-transition-publication.ts",
+      "created": [
+        "memory_authority_selection",
+        "memory_transition_publications",
+        "memory_transition_publications_no_update",
+        "memory_transition_publications_no_delete",
+        "memory_transition_publications_no_replace",
+        "memory_transition_effect_receipts",
+        "memory_transition_effect_receipts_no_update",
+        "memory_transition_effect_receipts_no_delete",
+        "memory_transition_effect_receipts_no_replace",
+        "memory_transition_target_refusals",
+        "memory_transition_target_refusals_no_update",
+        "memory_transition_target_refusals_no_delete",
+        "memory_transition_target_refusals_no_replace",
+        "memory_transition_native_outcomes",
+        "memory_transition_native_outcomes_no_update",
+        "memory_transition_native_outcomes_no_delete",
+        "memory_transition_native_outcomes_no_replace"
+      ],
+      "changes": [
+        "ALTER TABLE memory_authority_selection RENAME TO memory_authority_selection_pre_054;",
+        "DROP TABLE memory_authority_selection_pre_054;"
+      ]
+    },
+    {
+      "file": "055-memory-transition-drivers.ts",
+      "created": [
+        "memory_transition_previews",
+        "memory_transition_driver_banks",
+        "memory_transition_native_commands",
+        "memory_transition_native_dispatches",
+        "memory_transition_native_observations",
+        "memory_transition_undispatched",
+        "memory_transition_driver_failures",
+        "memory_transition_dispatch_after_release",
+        "memory_transition_release_after_dispatch",
+        "memory_transition_",
+        "memory_transition_",
+        "memory_transition_"
+      ],
+      "changes": []
+    },
+    {
+      "file": "056-memory-transition-verification-dispatch.ts",
+      "created": [
+        "memory_transition_native_verifications",
+        "memory_transition_verifications_no_update",
+        "memory_transition_verifications_no_delete",
+        "memory_transition_verifications_no_replace",
+        "memory_transition_verification_after_release"
+      ],
+      "changes": []
+    },
+    {
+      "file": "057-memory-transition-emergency.ts",
+      "created": [
+        "memory_transition_emergency_captures",
+        "memory_transition_emergency_captures_no_update",
+        "memory_transition_emergency_captures_no_delete",
+        "memory_transition_emergency_captures_no_replace",
+        "memory_transition_incidents",
+        "memory_transition_incidents_no_update",
+        "memory_transition_incidents_no_delete",
+        "memory_transition_incidents_no_replace",
+        "memory_transition_surviving_evidence",
+        "memory_transition_surviving_evidence_no_update",
+        "memory_transition_surviving_evidence_no_delete",
+        "memory_transition_surviving_evidence_no_replace",
+        "memory_transition_foreign_branches",
+        "memory_transition_foreign_branches_no_update",
+        "memory_transition_foreign_branches_no_delete",
+        "memory_transition_foreign_branches_no_replace",
+        "memory_transition_emergency_quarantine",
+        "memory_transition_emergency_quarantine_no_update",
+        "memory_transition_emergency_quarantine_no_delete",
+        "memory_transition_emergency_quarantine_no_replace",
+        "memory_transition_emergency_manual_quarantine",
+        "memory_transition_emergency_manual_quarantine_no_update",
+        "memory_transition_emergency_manual_quarantine_no_delete",
+        "memory_transition_emergency_manual_quarantine_no_replace",
+        "memory_transition_quarantined_attempt",
+        "memory_transition_quarantined_manual",
+        "memory_transition_operation_admission",
+        "memory_transition_manual_admission"
+      ],
+      "changes": [
+        "DROP TRIGGER memory_transition_operation_admission;",
+        "DROP TRIGGER memory_transition_manual_admission;"
+      ]
+    },
+    {
+      "file": "058-hindsight-template-overlays.ts",
+      "created": [
+        "hindsight_template_enrollments",
+        "hindsight_template_enrollments_immutable_replace",
+        "hindsight_template_catalog",
+        "hindsight_template_catalog_immutable_replace",
+        "hindsight_template_bases",
+        "hindsight_template_users",
+        "hindsight_template_selections",
+        "hindsight_template_applied",
+        "hindsight_template_applied_step",
+        "hindsight_template_applied_no_delete",
+        "hindsight_template_applied_no_replace",
+        "hindsight_template_default_history",
+        "hindsight_template_defaults",
+        "hindsight_template_defaults_step",
+        "hindsight_template_defaults_no_delete",
+        "hindsight_template_defaults_no_replace",
+        "hindsight_template_selections_request_replace",
+        "hindsight_template_default_history_immutable_replace"
+      ],
+      "changes": []
+    },
+    {
+      "file": "059-hindsight-template-execution.ts",
+      "created": [
+        "hindsight_template_config_clock",
+        "hindsight_template_config_insert",
+        "hindsight_template_config_update",
+        "hindsight_template_config_delete",
+        "hindsight_template_plans",
+        "hindsight_template_bank_reservations",
+        "hindsight_template_reservation_bank_unique",
+        "hindsight_template_admissions",
+        "hindsight_template_executors",
+        "hindsight_template_executor_step",
+        "hindsight_template_executor_no_delete",
+        "hindsight_template_executor_no_replace",
+        "hindsight_template_executor_quarantined",
+        "hindsight_template_dispatches",
+        "hindsight_template_dispatch_bank",
+        "hindsight_template_bank_receipts",
+        "hindsight_template_observations",
+        "hindsight_template_observation_bank",
+        "hindsight_template_publications",
+        "hindsight_template_holds",
+        "hindsight_template_active_hold",
+        "hindsight_template_hold_step",
+        "hindsight_template_hold_no_delete",
+        "hindsight_template_hold_no_replace",
+        "hindsight_template_plan_operation_unique",
+        "hindsight_template_admission_operation_unique",
+        "hindsight_template_receipt_bank_unique",
+        "hindsight_template_publication_plan_unique"
+      ],
+      "changes": []
+    },
+    {
+      "file": "060-hindsight-candidates.ts",
+      "created": [],
+      "changes": []
+    },
+    {
+      "file": "061-hindsight-runtime-identity.ts",
+      "created": [
+        "hindsight_runtime_identity_clock"
+      ],
+      "changes": []
+    },
+    {
+      "file": "062-hindsight-policy-review-schedule.ts",
+      "created": [
+        "hindsight_policy_review_schedule"
+      ],
+      "changes": []
+    },
+    {
+      "file": "063-hindsight-replica-waiting.ts",
+      "created": [
+        "hindsight_replica_manual_requests_before_063",
+        "memory_transition_emergency_manual_quarantine_before_063",
+        "hindsight_replica_manual_requests",
+        "memory_transition_emergency_manual_quarantine",
+        "hindsight_replica_manual_requests_queued",
+        "hindsight_replica_manual_requests_terminal",
+        "hindsight_replica_manual_requests_no_delete",
+        "memory_transition_emergency_manual_quarantine_no_update",
+        "memory_transition_emergency_manual_quarantine_no_delete",
+        "memory_transition_emergency_manual_quarantine_no_replace",
+        "memory_transition_quarantined_manual",
+        "memory_transition_manual_admission"
+      ],
+      "changes": [
+        "DROP TABLE memory_transition_emergency_manual_quarantine;",
+        "DROP TABLE hindsight_replica_manual_requests;",
+        "DROP TABLE memory_transition_emergency_manual_quarantine_before_063;",
+        "DROP TABLE hindsight_replica_manual_requests_before_063;"
+      ]
+    }
+  ],
+  "t4": [
+    {
+      "file": "049-initiative-delivery.ts",
+      "created": [
+        "run_deliveries",
+        "run_deliveries_budget",
+        "run_deliveries_one_held",
+        "initiative_policy_facts",
+        "initiative_policy_recent"
+      ],
+      "changes": [
+        "ALTER TABLE user_timezone ADD COLUMN mode TEXT NOT NULL DEFAULT 'fixed' CHECK(mode IN ('fixed','follow-primary-device'));",
+        "ALTER TABLE user_timezone ADD COLUMN authority_device_id TEXT;",
+        "ALTER TABLE user_timezone ADD COLUMN confirmed_at TEXT;",
+        "ALTER TABLE user_timezone ADD COLUMN source TEXT NOT NULL DEFAULT 'bootstrap' CHECK(source IN ('bootstrap','operator','device'));",
+        "ALTER TABLE user_timezone ADD COLUMN source_device_id TEXT;"
+      ]
+    },
+    {
+      "file": "050-initiative-model-opportunities.ts",
+      "created": [
+        "initiative_model_opportunities",
+        "initiative_model_charges",
+        "initiative_model_reservations"
+      ],
+      "changes": []
+    },
+    {
+      "file": "051-initiative-feedback.ts",
+      "created": [
+        "delivery_presentations",
+        "initiative_feedback",
+        "initiative_feedback_pending",
+        "initiative_feedback_character",
+        "run_deliveries_feedback"
+      ],
+      "changes": []
+    },
+    {
+      "file": "052-interaction-patterns.ts",
+      "created": [
+        "interaction_patterns",
+        "interaction_pattern_revisions",
+        "interaction_pattern_reviews",
+        "interaction_pattern_commands",
+        "interaction_pattern_primary_sources",
+        "interaction_patterns_character",
+        "interaction_patterns_active",
+        "interaction_pattern_revisions_history",
+        "interaction_pattern_commands_character",
+        "interaction_pattern_primary_sources_character",
+        "interaction_pattern_revision_immutable_update",
+        "interaction_pattern_revision_immutable_delete",
+        "interaction_pattern_review_immutable_update",
+        "interaction_pattern_review_immutable_delete",
+        "interaction_pattern_source_immutable_update",
+        "interaction_pattern_source_immutable_delete",
+        "interaction_pattern_command_immutable_update",
+        "interaction_pattern_command_immutable_delete",
+        "interaction_pattern_identity_immutable",
+        "interaction_pattern_revision_scope",
+        "interaction_pattern_effective_review"
+      ],
+      "changes": []
+    },
+    {
+      "file": "053-initiative-wake-policy.ts",
+      "created": [
+        "initiative_wake_claims",
+        "initiative_wake_claims_patterns",
+        "initiative_wake_evaluations",
+        "initiative_wake_evaluations_character",
+        "initiative_wake_counters"
+      ],
+      "changes": []
+    },
+    {
+      "file": "054-initiative-intentions.ts",
+      "created": [
+        "initiative_intentions",
+        "initiative_intentions_due",
+        "initiative_intentions_expiry",
+        "initiative_intentions_claim",
+        "initiative_intention_identity_immutable",
+        "initiative_intention_terminal_immutable",
+        "initiative_intention_source_scope",
+        "initiative_intention_insert_run_scope",
+        "initiative_intention_run_scope"
+      ],
+      "changes": []
+    },
+    {
+      "file": "055-initiative-backoff.ts",
+      "created": [
+        "initiative_backoff_resets",
+        "initiative_backoff_admissions",
+        "initiative_backoff_qualified"
+      ],
+      "changes": []
+    },
+    {
+      "file": "056-subagent-conversations.ts",
+      "created": [
+        "subagent_conversations",
+        "subagent_conversations_character",
+        "subagent_inputs",
+        "subagent_executions",
+        "subagent_one_active_execution",
+        "subagent_completion_queue",
+        "subagent_work_executions",
+        "run_messages",
+        "run_message_output_identity",
+        "run_message_input_receipt",
+        "run_message_order",
+        "subagent_context_immutable",
+        "subagent_input_immutable",
+        "subagent_first_receipt_immutable",
+        "subagent_reply_binding_immutable",
+        "subagent_execution_identity_immutable",
+        "subagent_parent_link_immutable",
+        "subagent_child_result_immutable",
+        "subagent_parent_result_immutable",
+        "run_messages_immutable"
+      ],
+      "changes": []
+    },
+    {
+      "file": "057-source-context.ts",
+      "created": [
+        "timeline_source_context_immutable",
+        "delivery_source_context_immutable"
+      ],
+      "changes": []
+    },
+    {
+      "file": "058-agent-inbox.ts",
+      "created": [
+        "subagent_validity_immutable",
+        "subagent_work_routes",
+        "subagent_route_immutable",
+        "subagent_events",
+        "subagent_event_fifo",
+        "subagent_event_immutable",
+        "subagent_input_waits",
+        "subagent_one_open_wait",
+        "subagent_answer_immutable",
+        "subagent_inbox_consumers",
+        "subagent_inbox_members",
+        "subagent_inbox_deliveries",
+        "subagent_event_actions",
+        "subagent_consumer_identity_immutable",
+        "subagent_member_immutable",
+        "subagent_delivery_immutable",
+        "subagent_action_immutable",
+        "subagent_speech_publications",
+        "subagent_context_summaries",
+        "subagent_context_summary_intents",
+        "subagent_context_summary_failures",
+        "subagent_summary_immutable",
+        "subagent_summary_intent_immutable",
+        "subagent_summary_failure_immutable",
+        "subagent_tool_results",
+        "subagent_tool_result_immutable"
+      ],
+      "changes": [
+        "DROP TABLE run_messages;",
+        "DROP TABLE subagent_executions;",
+        "DROP TABLE subagent_inputs;",
+        "DROP TABLE inbox_old_messages;",
+        "DROP TABLE inbox_old_executions;",
+        "DROP TABLE inbox_old_inputs;",
+        "DROP TABLE inbox_old_sequence;",
+        "ALTER TABLE subagent_inputs ADD COLUMN validity_json TEXT CHECK(validity_json IS NULL OR json_valid(validity_json));",
+        "ALTER TABLE subagent_inputs ADD COLUMN reply_to_event_id TEXT;"
+      ]
+    },
+    {
+      "file": "060-agent-conversation-order.ts",
+      "created": [
+        "subagent_controls",
+        "subagent_conversation_order",
+        "subagent_conversation_page",
+        "subagent_order_input",
+        "subagent_order_message",
+        "subagent_order_event",
+        "subagent_order_control",
+        "subagent_order_immutable",
+        "subagent_control_immutable",
+        "subagent_primary_speech",
+        "subagent_primary_speech_immutable",
+        "subagent_event_frontiers",
+        "subagent_event_frontier_immutable"
+      ],
+      "changes": []
+    },
+    {
+      "file": "061-subagent-presentation.ts",
+      "created": [
+        "subagent_message_presentation",
+        "subagent_presentation_immutable"
+      ],
+      "changes": []
+    },
+    {
+      "file": "062-subagent-inbox-resume.ts",
+      "created": [
+        "subagent_inbox_resumes",
+        "subagent_inbox_resume_immutable"
+      ],
+      "changes": []
+    },
+    {
+      "file": "063-subagent-progress.ts",
+      "created": [
+        "subagent_work_progress",
+        "subagent_task_steps",
+        "subagent_completed_step_identity",
+        "subagent_checkins",
+        "subagent_checkin_immutable",
+        "subagent_user_attention",
+        "subagent_inbox_retry_failures"
+      ],
+      "changes": []
+    },
+    {
+      "file": "064-primary-conversation-sources.ts",
+      "created": [
+        "primary_conversation_sources",
+        "timeline_primary_source_members",
+        "primary_conversation_source_ready",
+        "primary_conversation_source_immutable",
+        "primary_conversation_source_no_delete",
+        "timeline_primary_source_link",
+        "timeline_primary_source_insert",
+        "timeline_primary_source_identity",
+        "timeline_primary_source_delete"
+      ],
+      "changes": [
+        "ALTER TABLE timeline_messages ADD COLUMN primary_source_id TEXT REFERENCES primary_conversation_sources(source_id);"
+      ]
+    },
+    {
+      "file": "065-auxiliary-model-usage.ts",
+      "created": [
+        "auxiliary_model_calls",
+        "auxiliary_model_calls_started",
+        "auxiliary_model_calls_status"
+      ],
+      "changes": []
+    },
+    {
+      "file": "066-cache-usage-window.ts",
+      "created": [
+        "cache_usage_baselines"
+      ],
+      "changes": [
+        "ALTER TABLE run_usage ADD COLUMN cache_read_observed INTEGER CHECK(cache_read_observed IN (0,1));"
+      ]
+    },
+    {
+      "file": "067-memory-tidy-reviews.ts",
+      "created": [
+        "memory_tidy_reviews",
+        "memory_tidy_block_reviews",
+        "memory_tidy_retry"
+      ],
+      "changes": []
+    },
+    {
+      "file": "068-maintenance-monitor.ts",
+      "created": [
+        "auxiliary_model_calls_operation"
+      ],
+      "changes": [
+        "ALTER TABLE auxiliary_model_calls ADD COLUMN operation_json TEXT;",
+        "ALTER TABLE cache_usage_baselines ADD COLUMN population TEXT;"
+      ]
+    },
+    {
+      "file": "069-delegation-schema-convergence.ts",
+      "created": [],
+      "changes": []
+    },
+    {
+      "file": "070-model-profiles.ts",
+      "created": [
+        "model_profiles"
+      ],
+      "changes": []
+    },
+    {
+      "file": "071-model-profile-secrets.ts",
+      "created": [
+        "model_profile_secrets"
+      ],
+      "changes": []
+    },
+    {
+      "file": "072-search-projection-policy.ts",
+      "created": [
+        "search_projection_policy"
+      ],
+      "changes": []
+    }
+  ]
+}

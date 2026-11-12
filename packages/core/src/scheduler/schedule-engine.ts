@@ -11,7 +11,7 @@ import type { ScheduledRunAdapter } from "./scheduled-run-adapter.ts";
 
 interface TimerHandle { unref?(): void }
 export interface ScheduleEngine { start(): Promise<void>; rearm(): void; stop(): Promise<void>; runDue(): Promise<void>; }
-export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns: SchedulePatternAdapter; runs: ScheduledRunAdapter; userTimezone: () => string; logger: Logger; now?: () => Date; setTimer?: (callback: () => void, delay: number) => TimerHandle; clearTimer?: (timer: TimerHandle) => void }): ScheduleEngine {
+export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns: SchedulePatternAdapter; runs: ScheduledRunAdapter; userTimezone: () => string; logger: Logger; available?: () => boolean; now?: () => Date; setTimer?: (callback: () => void, delay: number) => TimerHandle; clearTimer?: (timer: TimerHandle) => void }): ScheduleEngine {
   const now = input.now ?? (() => new Date()); const setTimer = input.setTimer ?? ((callback, delay) => setTimeout(callback, delay)); const clearTimer = input.clearTimer ?? ((timer) => clearTimeout(timer as NodeJS.Timeout));
   let timer: TimerHandle | undefined; let stopped = true; let activeRun: Promise<void> | undefined;
   const zone = (task: ScheduledTask) => task.timezone.kind === "fixed" ? task.timezone.timezone : input.userTimezone();
@@ -22,10 +22,12 @@ export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns:
     const unsettled = input.repo.unsettled();
     const retryPending = unsettled.some((occurrence) => occurrence.state === "pending");
     const reconcileAdmitted = unsettled.some((occurrence) => occurrence.state === "admitted");
+    const available = input.available?.() !== false;
+    if (!available && !reconcileAdmitted) return;
     const next = input.repo.list().filter((task) => task.state === "active" && task.enabled && task.nextRunAt)
       .sort((a, b) => a.nextRunAt!.localeCompare(b.nextRunAt!))[0];
     if (!retryPending && !reconcileAdmitted && !next?.nextRunAt) return;
-    const delay = retryPending ? 1_000 : !next?.nextRunAt ? 5_000 : Math.min(2_147_000_000, Math.max(0, Date.parse(next.nextRunAt) - now().getTime()));
+    const delay = !available ? 5_000 : retryPending ? 1_000 : !next?.nextRunAt ? 5_000 : Math.min(2_147_000_000, Math.max(0, Date.parse(next.nextRunAt) - now().getTime()));
     timer = setTimer(() => { void runDue(); }, delay);
     timer.unref?.();
   };
@@ -43,7 +45,7 @@ export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns:
     if (missed) { input.repo.settleOccurrence({ taskId: task.taskId, scheduledFor, state: "missed" }); return; }
     await input.runs.dispatch(task.taskId, occurrence);
   };
-  const executeDue = async () => { try { input.runs.reconcile(); const fired = now(); for (const occurrence of input.repo.unsettled()) await input.runs.dispatch(occurrence.taskId, occurrence); for (const task of input.repo.due(fired.toISOString())) await processTask(task, fired); } catch (error) { input.logger.error({ errorCode: error instanceof Error ? error.name : "unknown" }, "schedule timer callback failed"); } };
+  const executeDue = () => dispatchDueTasks({ ...input, now, processTask });
   const runDue = () => {
     if (stopped) return Promise.resolve();
     if (activeRun) return activeRun;
@@ -52,4 +54,26 @@ export function createScheduleEngine(input: { repo: ScheduledTaskRepo; patterns:
     return execution;
   };
   return { async start() { stopped = false; await runDue(); }, rearm: arm, async stop() { stopped = true; if (timer) clearTimer(timer); timer = undefined; await activeRun; }, runDue };
+}
+
+async function dispatchDueTasks(input: {
+  repo: ScheduledTaskRepo; runs: ScheduledRunAdapter; logger: Logger; available?: () => boolean; now: () => Date;
+  processTask: (task: ScheduledTask, fired: Date) => Promise<void>;
+}): Promise<void> {
+  try {
+    input.runs.reconcile();
+    if (input.available?.() === false) return;
+    const fired = input.now();
+    for (const occurrence of input.repo.unsettled()) {
+      if (input.available?.() === false) return;
+      await input.runs.dispatch(occurrence.taskId, occurrence);
+    }
+    for (const candidate of input.repo.due(fired.toISOString())) {
+      if (input.available?.() === false) return;
+      // Dispatch can await a busy Run. A timezone/settings change in that gap invalidates the captured due row.
+      const task = input.repo.get(candidate.taskId);
+      if (!task || !task.enabled || task.state !== "active" || !task.nextRunAt || Date.parse(task.nextRunAt) > fired.getTime()) continue;
+      await input.processTask(task, fired);
+    }
+  } catch (error) { input.logger.error({ errorCode: error instanceof Error ? error.name : "unknown" }, "schedule timer callback failed"); }
 }

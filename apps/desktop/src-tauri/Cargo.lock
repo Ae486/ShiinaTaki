@@ -3416,6 +3416,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
 
 [[package]]
+name = "qqmm-management-native"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "quick-error"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4255,8 +4263,10 @@ version = "0.0.0"
 dependencies = [
  "arboard",
  "futures-util",
+ "hmac",
  "keyring",
  "keyring-core",
+ "qqmm-management-native",
  "serde",
  "serde_json",
  "sha2",

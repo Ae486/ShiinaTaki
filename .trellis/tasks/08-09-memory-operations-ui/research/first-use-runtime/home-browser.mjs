@@ -3,7 +3,7 @@
  * OUTPUT: real Settings/Operations pages over the production WS client, plus Playwright evidence
  * POS: first-use verification only; reuses the existing browser-test Vite/Chromium approach
  */
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -16,6 +16,39 @@ const { createServer } = await import(pathToFileURL(require.resolve("vite")).hre
 const { default: tailwindcss } = await import(pathToFileURL(require.resolve("@tailwindcss/vite")).href);
 const python = "G:/anaconda3/python.exe";
 const chromium = "G:/AppDataMove/ms-playwright/chromium_headless_shell-1181/chrome-win/headless_shell.exe";
+const browserPackages = "G:/Roaming/Python/Python312/site-packages";
+
+function browserEnvironment() {
+  // Reuse installed browser dependencies without restoring the real OS profile or enabling its user-site hooks.
+  return { ...process.env, PYTHONPATH: browserPackages, PYTHONNOUSERSITE: "1",
+    PYTHONDONTWRITEBYTECODE: "1", PYTHONIOENCODING: "utf-8" };
+}
+
+export function preflightHomeBrowser() {
+  const script = `import json, os, site, sys
+from importlib.metadata import version
+import playwright
+from playwright.sync_api import sync_playwright, expect
+with sync_playwright() as p:
+    browser = p.chromium.launch(executable_path=${JSON.stringify(chromium)}, headless=True)
+    try:
+        page = browser.new_page()
+        page.set_content("<title>Home browser preflight</title>")
+        expect(page).to_have_title("Home browser preflight")
+        print(json.dumps({"status": "passed", "python": sys.executable, "pythonVersion": sys.version,
+            "playwrightVersion": version("playwright"), "playwrightModule": playwright.__file__,
+            "chromium": ${JSON.stringify(chromium)}, "chromiumVersion": browser.version,
+            "profile": os.environ.get("USERPROFILE"), "temp": os.environ.get("TEMP"),
+            "userSiteEnabled": site.ENABLE_USER_SITE, "bytecodeDisabled": sys.dont_write_bytecode}))
+    finally:
+        browser.close()
+`;
+  const result = spawnSync(python, ["-B", "-s", "-c", script], { windowsHide: true, encoding: "utf8",
+    env: browserEnvironment(), timeout: 60_000 });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`Home browser preflight failed (${result.status}): ${result.stderr || result.stdout}`);
+  return JSON.parse(result.stdout);
+}
 
 export async function startHome(corePort, artifactsRoot) {
   const entry = join(root, "owned-first-use-entry.tsx").replaceAll("\\", "/");
@@ -63,8 +96,8 @@ export async function homeStep(ctx, action, observation, beforeInteraction) {
   const artifacts = mkdtempSync(join(ctx.root, `home-${action}-`));
   const script = fileURLToPath(new URL("./home-check.py", import.meta.url));
   return new Promise((resolve, reject) => {
-    const child = spawn(python, [script], { windowsHide: true, stdio: ["pipe", "pipe", "pipe"],
-      env: { ...process.env, PYTHONIOENCODING: "utf-8" } });
+    const child = spawn(python, ["-B", "-s", script], { windowsHide: true, stdio: ["pipe", "pipe", "pipe"],
+      env: browserEnvironment() });
     let output = "";
     let preparing = false;
     child.stdout.on("data", (data) => {
@@ -92,4 +125,8 @@ export async function homeStep(ctx, action, observation, beforeInteraction) {
       endpoint: `http://127.0.0.1:${ctx.nativePort}` }) + "\n";
     if (beforeInteraction) child.stdin.write(input); else child.stdin.end(input);
   });
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href && process.argv.includes("--preflight")) {
+  console.log(JSON.stringify(preflightHomeBrowser()));
 }

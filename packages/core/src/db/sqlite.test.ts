@@ -87,6 +87,16 @@ describe("openDatabase", () => {
     const bad = [{ version: 1, sql: "CREATE TABLE ok (id INTEGER); THIS IS NOT SQL;" }];
     expect(() => openDatabase({ path: ":memory:", migrations: bad })).toThrowError(/migration 1 failed/);
   });
+
+  it("releases a failed file boot and reopens without partial migration state", () => {
+    const path = tempFile();
+    const bad = [{ version: 1, sql: "CREATE TABLE partial (id INTEGER); THIS IS NOT SQL;" }];
+    expect(() => openDatabase({ path, migrations: bad })).toThrowError(/migration 1 failed/);
+    const reopened = openDatabase({ path, migrations: [] }); dbs.push(reopened);
+    expect(reopened.prepare("SELECT name FROM sqlite_schema WHERE name='partial'").get()).toBeUndefined();
+    expect(reopened.prepare("SELECT version FROM migrations").all()).toEqual([]);
+    reopened.exec("CREATE TABLE retry_usable (id INTEGER)");
+  });
 });
 
 describe("toSafeInteger", () => {
@@ -248,5 +258,88 @@ describe("backupTo", () => {
     db.transaction(() => { inside = db.backupTo(join(dir, "inside.sqlite")); });
     await expect(inside).rejects.toThrow(/inside a transaction/);
     await expect(db.backupTo(join(dir, "missing", "copy.sqlite"))).rejects.toThrow();
+  });
+});
+
+describe("outermost afterCommit", () => {
+  function database(onAfterCommitError?: (error: unknown) => void) {
+    const db = openDatabase({ path: ":memory:", migrations: [], onAfterCommitError }); dbs.push(db);
+    db.exec("CREATE TABLE records (id INTEGER PRIMARY KEY)");
+    return db;
+  }
+
+  it("runs only after the outer commit and preserves registration order across savepoints", () => {
+    const db = database(); const seen: string[] = [];
+    db.transaction(() => {
+      db.afterCommit(() => { expect(db.prepare("SELECT id FROM records").all()).toHaveLength(1); seen.push("outer-first"); });
+      db.transaction(() => { db.exec("INSERT INTO records VALUES (1)"); db.afterCommit(() => { seen.push("inner"); }); });
+      db.afterCommit(() => { seen.push("outer-last"); });
+      expect(seen).toEqual([]);
+    });
+    expect(seen).toEqual(["outer-first", "inner", "outer-last"]);
+  });
+
+  it("discards failed children and their merged grandchildren while a caught outer transaction can commit", () => {
+    const db = database(); const seen: string[] = [];
+    db.transaction(() => {
+      db.afterCommit(() => { seen.push("kept"); });
+      expect(() => db.transaction(() => {
+        db.transaction(() => { db.afterCommit(() => { seen.push("lost-grandchild"); }); });
+        db.afterCommit(() => { seen.push("lost-child"); });
+        db.exec("INSERT INTO records VALUES (1)"); throw new Error("inner");
+      })).toThrow("inner");
+      db.exec("INSERT INTO records VALUES (2)");
+    });
+    expect(seen).toEqual(["kept"]);
+    expect(db.prepare("SELECT id FROM records").all()).toEqual([{ id: 2 }]);
+  });
+
+  it("discards callbacks on outer rollback and actual deferred-FK COMMIT failure", () => {
+    const db = database(); let calls = 0;
+    expect(() => db.transaction(() => {
+      db.transaction(() => { db.afterCommit(() => { calls += 1; }); });
+      throw new Error("outer");
+    })).toThrow("outer");
+    db.exec("CREATE TABLE child (parent INTEGER REFERENCES records(id) DEFERRABLE INITIALLY DEFERRED)");
+    expect(() => db.transaction(() => { db.exec("INSERT INTO child VALUES (99)"); db.afterCommit(() => { calls += 1; }); })).toThrow();
+    expect(calls).toBe(0);
+    expect(db.prepare("SELECT * FROM child").all()).toEqual([]);
+    db.transaction(() => { db.afterCommit(() => { calls += 1; }); });
+    expect(calls).toBe(1);
+  });
+
+  it("refuses callback registration after implicit rollback and never leaks frames to another transaction", () => {
+    const db = database(); let calls = 0;
+    expect(() => db.transaction(() => {
+      db.afterCommit(() => { calls += 1; }); db.exec("INSERT INTO records VALUES (1)");
+      expect(() => db.transaction(() => { db.exec("INSERT OR ROLLBACK INTO records VALUES (1)"); })).toThrow();
+      expect(() => db.afterCommit(() => { calls += 100; })).toThrow("rolled back");
+    })).toThrow("rolled back");
+    db.transaction(() => { db.afterCommit(() => { calls += 10; }); });
+    expect(calls).toBe(10);
+  });
+
+  it("isolates callback and diagnostic errors while allowing FIFO reentrant commits", () => {
+    const errors: unknown[] = []; const db = database((error) => { errors.push(error); throw new Error("reporter"); });
+    const seen: string[] = [];
+    expect(() => db.transaction(() => {
+      db.exec("INSERT INTO records VALUES (1)");
+      db.afterCommit(() => { throw new Error("callback"); });
+      db.afterCommit(() => {
+        seen.push("first");
+        db.transaction(() => { db.exec("INSERT INTO records VALUES (2)"); db.afterCommit(() => { seen.push("reentrant"); }); });
+        db.afterCommit(() => { seen.push("outside"); });
+      });
+      db.afterCommit(() => { seen.push("second"); });
+    })).not.toThrow();
+    expect(errors).toHaveLength(1);
+    expect(seen).toEqual(["first", "second", "reentrant", "outside"]);
+    expect(db.prepare("SELECT id FROM records ORDER BY id").all()).toEqual([{ id: 1 }, { id: 2 }]);
+  });
+
+  it("refuses unmanaged raw transactions rather than prematurely notifying", () => {
+    const db = database(); let calls = 0; db.exec("BEGIN");
+    expect(() => db.afterCommit(() => { calls += 1; })).toThrow("wrapper-managed");
+    db.exec("ROLLBACK"); db.afterCommit(() => { calls += 1; }); expect(calls).toBe(1);
   });
 });

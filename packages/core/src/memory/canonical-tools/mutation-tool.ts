@@ -11,4 +11,4 @@ export const MemoryIdSchema = z.string().min(1).max(256)
   .describe("Stable memory identity returned by recall.");
 export const ExpectedRevisionSchema = z.int().min(1)
   .describe("Current revision returned by recall; stale revisions are rejected without mutation.");
-export const MUTATION_DESCRIPTION = "Conditionally mutate one identified memory using its current revision. Refresh memory before retrying a stale revision. Lifecycle changes remain reversible.";
+export const MUTATION_DESCRIPTION = "Conditionally mutate one identified memory using its current revision. Pending is unconfirmed, not applied completion; do not blindly repeat it. Applied, unchanged, superseded and not_found are distinct outcomes. Refresh memory after a conflict or superseded result before deciding another mutation. Lifecycle changes remain reversible.";

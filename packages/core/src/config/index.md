@@ -1,18 +1,34 @@
 # core/config/
+- memory-runtime-policy.ts — cached accepted Local/Legacy assembly/search/ranking/retention/Tidy policies with independent availability
+- config-application.ts — actual consumer boundary, desired/active state and revision-fenced completion observations
+- model-profile-service.ts — durable Main/Utility drafts, explicit activation/testing and revision-checked changes
+- model-profile-resolution.ts — coherent legacy fallback, no-auth/disable/inheritance and private prepared bindings
+- model-profile-secrets.ts — staged profile-secret ownership and bounded orphan recovery without touching unrelated secrets
+- model-profile-application.ts — grouped active-model identity projected into scalar application observations
+- agent-runtime-config.ts — cached Main policy, immutable admitted bindings and per-revision calibration
+- model-capabilities.ts — settings-demand models.dev names, explicit canonical identity, provider logos and capability/limit declarations for exact MAIN identities; one bounded TTL cache and separate adapter evidence; no native-input gate or model probes
+- initiative-wake-config.ts — validated finite periodic/event evaluation controls, explicit targets, global model cadence/jitter and User Timezone quiet hours
+- initiative-wake-knobs.ts — declarative live-registry controls for the shared finite wake-source cadence policy
 - provider-config.ts — TAKI_PROVIDER_* env → { baseUrl, apiKey, model }; fatal-fast, names missing var
-- provider-factory.ts — createModels({provider, vision, includeUsage?}) → { model, visionModel }; provider/model construction lifted out of main.ts (batch-6 line-cap relief); includeUsage=true (Q14) adds stream_options:{include_usage:true} to main-slot streams
-- vision-config.ts — TAKI_VLM_* env → { baseUrl, apiKey, model } | null (feature off); the optional vision slot, partial = fatal
+- provider-factory.ts — constructs the single primary text/image model with the existing streaming-usage opt-in
 - utility-config.ts — TAKI_UTILITY_* env → { baseUrl, apiKey, model } | null (no separate slot); the optional BACKGROUND model slot (T5-R11), partial = fatal; absent means background work rides the main model
 - attachment-config.ts — TAKI_ATTACHMENT_TTL_DAYS env → { ttlDays, ttlMs }; image-retention TTL (default 14; fail-closed parse)
-- context-config.ts — TAKI_*_CONTEXT_TOKENS / TAKI_CONTEXT_HISTORY_RATIO / TAKI_PROVIDER_INCLUDE_USAGE / TAKI_COMPACT_TRIGGER_RATIO / TAKI_COMPACT_KEEP_MESSAGES env → { contextTokens: {main, vision, utility}, historyRatio, includeUsage, compact: {triggerRatio, keepMessages} }; the per-slot declared windows (T5-R1 tier 1, default 131072 — batch-7 optimistic rider), the history slice (default 0.7), the Q14 streaming-usage opt-in (default OFF), and compaction's 0.8 trigger plus DSH-grounded 0.16 token-priced tail; keepMessages is only a minimum-tail/emergency guard. Garbage = fatal
-- memory-config.ts — TAKI_MEMORY_PINNED_BUDGET / _BM25_WEIGHTS / _STOPLIST / _INTENTIONS_DEFAULT_DAYS / _TIDY_* env → { pinnedBudget, bm25Weights, stoplist, intentionsDefaultDays, tidyWriteThreshold, tidyMaxSteps, tidyStaleDays, reportClassCap }; the pinned-row safety valve (default 800), the 4-column bm25 weights (default 2/1/2, disclosure+search_terms above content), the segmenter stoplist toggle (default on), retention's fallback window for an intention with no explicit expiry (default 30) and the tidy pass's four numbers (threshold 40 / steps 12 / stale 45 / report cap 10). Garbage = fatal. Per-block budgets and per-layer retention are registry rows, not env vars
+- context-config.ts — primary/utility windows, history ratio, streaming usage and compaction settings; images share the primary window
+- memory-config.ts — validated pinned/search/retention settings and Tidy defaults, applied by independent runtime policy consumers
 - server-config.ts — TAKI_WS_* / TAKI_LOG_LEVEL / TAKI_DATA_DIR / TAKI_PROMPT_DIR / TAKI_TRUST_LOOPBACK_OPERATOR env → { host, port, logLevel, dataDir, promptDir, trustLoopbackOperator } with defaults
 - agent-config.ts — TAKI_MAX_STEPS env → { maxSteps } per-turn tool-loop cap (default 10; D11 config-ization)
-- ambient-screenshot-config.ts — TAKI_AMBIENT_SCREENSHOT / _RETENTION env → { enabled, retention }; ambient screen sampling is OFF by default and its raw frames drop right after describe (keep / N days are the opt-ins; garbage = fatal)
-- knob-registry.ts — CONFIG_KNOBS: one declarative row per operator-visible env knob (key/value schema/default/apply class/secret/input hint/description) + findKnob; the SINGLE source config.list renders from (#26 batch 1); D108: validated config.list/set knobs, including live Hindsight review mode/time/interval/threshold
-- config-source.ts — createConfigSource({env, repo}) → { env(), resolve(key), effectiveAll() }; the ONE place precedence lives: env (explicitly set) > stored > built-in default; secrets masked to presence only
-- config-writer.ts — createConfigWriter({env, repo, onChanged}) → { set }; the store's only write path, with five distinct fail-closed refusals (unknown key / invalid value / env-locked / secret / env-only)
+- ambient-screenshot-config.ts — opt-in native ambient sampling and drop-after-consumption/keep/days retention; feature readiness isolates invalid desired inputs without failing the recoverable basic plane
+- knob-registry.ts — the declarative CONFIG_KNOBS schema/default/boundary/secret/hint/description registry rendered by config.list, including live Hindsight review mode/time/interval/threshold settings
+- config-source.ts — the single application > environment fallback > built-in default resolver; sparse stored values, env-only bootstrap fields and secret-presence masking
+- config-writer.ts — validated sparse writes/reset to actual fallback; committed storage stays distinct from consumer application outcomes; unknown/invalid/secret/env-only inputs refuse
 - timing-config-validation.ts — validates a proposed timing-row set/reset against the shared full-policy relationships before config-writer mutates the sparse store
-- config-subscriptions.ts — createConfigSubscriptions() → { subscribe, unsubscribe, publish, count, revision }; global config.changed fan-out and successful-write generation for observation ABA rejection; D108: connection fan-out and disposable in-process config observers with a write generation
-- hindsight-config.ts — sparse non-secret TAKI_HINDSIGHT_* projection; disabled/unconfigured/ready states using Shared's fixed Hindsight connection Secret Catalog reference
-- hindsight-policy-config.ts — validated whole-pass timeout and optional additional policy instructions; D108: curator timeout/instructions and configurable daily/interval/threshold review settings
+- config-subscriptions.ts — global config.changed fan-out plus disposable in-process observers and successful-write generation/revision for ABA rejection
+- hindsight-config.ts — sparse non-secret TAKI_HINDSIGHT_* projection with disabled/unconfigured/ready states and the fixed Secret Catalog reference
+- hindsight-policy-config.ts — validated whole-pass timeout/instructions and configurable daily/interval/threshold review settings
+- avatar-config.ts — TAKI_AVATAR_OUTCOME_DEADLINE_MS live reader over ConfigSource → () => number (default 1000, 100..10000; garbage falls back to the default); consumed per open by the avatar outcomes registry (D80)
+- initiative-policy-config.ts — validated independent Class B model/utterance budgets, output lifetimes and busy-hold limits; set/reset validation uses the effective whole policy
+- viewing-invitation-config.ts — live registered effective-viewing, remaining-time and invitation-lifetime settings
+- initiative-intention-config.ts — live maximum active duration for new finite follow-up plans; existing deadlines never slide
+- Browser playback opt-in is registered in knob-registry.ts and read live by the Perception source receiver; default false and subordinate to Privacy Pause.
+
+- subagent-config.ts — registered live next-interval check-in N/K policy with defaults 50/3

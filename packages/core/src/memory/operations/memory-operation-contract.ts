@@ -10,6 +10,7 @@
 import type {
   HindsightConnectionProjection, MemoryHindsightLifecycleOrigin, MemoryOperation, MemoryOperationErrorCode, MemoryOperationProducerRef,
   MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, PendingMemorySummary,
+  MemoryTidyOutcome, MemoryTidyProgress,
 } from "@taki/shared";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { MemoryReplicaRequest } from "@taki/shared";
@@ -46,6 +47,8 @@ export interface MemoryOperationsRuntime {
 
 export interface MemoryOperationContext {
   live(): MemoryOperationsRuntime | null;
+  tidy?: () => MemoryTidyRuntime | null;
+  searchIndex?: () => MemorySearchIndexRuntime | null;
   setup: HindsightSetupService;
   /** Absent when Core composes without a Local onboarding producer; the local kinds then refuse at admission. */
   local?: LocalOnboardingService;
@@ -88,6 +91,18 @@ export interface MemoryOperationSettlement {
   result: MemoryOperationResult | null;
   producer?: MemoryOperationProducerRef;
 }
+
+export interface MemorySearchIndexRuntime {
+  authorityEpochId: string | null;
+  desiredStoplist(): boolean;
+  rebuild(stoplist: boolean): Promise<{ indexed: number }>;
+}
+
+/** The selected runtime owns candidate/model work; the operation owner persists only its actual progress/outcome. */
+export interface MemoryTidyRuntime {
+  authorityEpochId: string | null;
+  runNow(characterId: string, options?: { onProgress?: (progress: MemoryTidyProgress) => void }): Promise<MemoryTidyOutcome>;
+}
 /** What a producer re-read says about a non-terminal row: it became claimed, it settled, or nothing changed. */
 export type MemoryOperationObservation = { kind: "running" } | { kind: "settled"; settlement: MemoryOperationSettlement } | null;
 
@@ -102,6 +117,8 @@ export interface MemoryOperationExecution<R extends MemoryOperationRequest> {
   tryClaim(): boolean;
   /** Persists a producer checkpoint on the running row and publishes it; a lost race is not an error. */
   checkpoint(producer: MemoryOperationProducerRef): void;
+  /** Tidy/index producers publish updated checkpoints through the same durable row CAS. */
+  updateProducer(producer: MemoryOperationProducerRef): void;
 }
 
 /** Who asked: WS submissions are always the operator; only Core's automatic lifecycle triggers pass "automatic". */

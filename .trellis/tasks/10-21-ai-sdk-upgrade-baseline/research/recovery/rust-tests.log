@@ -1,0 +1,242 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.52s
+     Running unittests src\lib.rs (apps\desktop\src-tauri\target\debug\deps\taki_desktop_lib-d0df5a7d2a8d0f66.exe)
+
+running 204 tests
+test audit::tests::iso_timestamp_formats_the_unix_epoch ... ok
+test browser_attachment::tests::expiry_and_source_replacement_create_new_attachment_identity ... ok
+test browser_attachment::tests::dedicated_token_and_actual_core_generation_control_both_gate_collection ... ok
+test browser_attachment::tests::chromium_document_tokens_remain_opaque_and_do_not_relax_player_identity ... ok
+test browser_attachment::tests::local_reports_do_not_supply_core_authority_and_unknown_numbers_stay_required ... ok
+test capabilities_impl::clipboard::tests::write_requires_a_string_text ... ok
+test capabilities_impl::exec::parser::tests::a_bare_single_command_tokenizes_and_normalizes_argv0 ... ok
+test capabilities_impl::exec::parser::tests::a_batch_target_reports_its_extension_for_the_policy_to_refuse ... ok
+test capabilities_impl::exec::parser::tests::a_newline_forces_complex ... ok
+test capabilities_impl::exec::parser::tests::a_path_qualified_exe_normalizes_to_basename_without_extension ... ok
+test capabilities_impl::exec::parser::tests::an_empty_or_whitespace_command_is_complex ... ok
+test capabilities_impl::exec::parser::tests::an_unbalanced_quote_forces_complex ... ok
+test capabilities_impl::exec::parser::tests::every_operator_and_metachar_forces_complex ... ok
+test capabilities_impl::exec::parser::tests::glob_metacharacters_force_complex ... ok
+test capabilities_impl::exec::parser::tests::quoted_args_keep_metachars_literal_and_stay_simple ... ok
+test browser_attachment::tests::shared_local_wire_fixtures_match_shell_validation ... ok
+test audit::tests::only_exec_records_the_command_field ... ok
+test audit::tests::file_auditor_writes_one_jsonl_line_per_decision ... ok
+test capabilities_impl::clipboard::tests::set_then_get_round_trips ... ok
+test capabilities_impl::exec::policy::tests::a_shell_in_argv0_always_escalates_even_if_allowlisted ... ok
+test capabilities_impl::exec::policy::tests::a_missing_config_yields_the_fail_closed_default ... ok
+test capabilities_impl::exec::policy::tests::allowlist_mode_escalates_a_chained_or_redirected_command ... ok
+test capabilities_impl::exec::policy::tests::a_batch_or_cmd_target_never_auto_runs_even_if_the_stem_is_allowlisted ... ok
+test capabilities_impl::exec::policy::tests::blocklist_wins_over_an_allowlisted_command_inside_a_chain ... ok
+test capabilities_impl::exec::policy::tests::a_malformed_config_warns_and_uses_the_default ... ok
+test capabilities_impl::exec::policy::tests::blocklist_fires_in_every_mode_before_mode_logic ... ok
+test capabilities_impl::exec::policy::tests::allowlist_mode_escalates_a_non_allowlisted_command ... ok
+test capabilities_impl::exec::policy::tests::deny_mode_rejects_everything_without_a_dialog ... ok
+test capabilities_impl::exec::policy::tests::each_seed_family_is_caught ... ok
+test capabilities_impl::exec::policy::tests::the_operator_blocklist_adds_to_the_seed ... ok
+test capabilities_impl::exec::resolve::tests::path_qualification_detects_both_separators ... ok
+test capabilities_impl::exec::resolve::tests::pathext_parsing_trims_and_drops_empties ... ok
+test capabilities_impl::exec::sandbox::tests::a_compound_command_fails_structurally_without_a_shell ... ok
+test capabilities_impl::exec::tests::command_of_extracts_the_string_for_audit_and_dialog ... ok
+test capabilities_impl::foreground_window::tests::normalize_title_collapses_whitespace_and_trims ... ok
+test capabilities_impl::exec::tests::a_missing_command_classifies_as_disabled_and_fails_to_run ... ok
+test capabilities_impl::foreground_window::tests::a_null_window_field_stays_on_the_wire_as_null ... ok
+test capabilities_impl::foreground_window::tests::detail_discloses_that_titles_are_sampled ... ok
+test capabilities_impl::foreground_window::tests::normalize_title_truncates_multibyte_on_a_char_boundary ... ok
+test capabilities_impl::foreground_window::tests::output_round_trips_through_serde_both_arms ... ok
+test capabilities_impl::foreground_window::tests::normalize_title_truncates_to_the_char_cap ... ok
+test capabilities_impl::screenshot::tests::ambient_capture_is_a_distinct_capability_name ... ok
+test capabilities_impl::screenshot::tests::base64_matches_known_vectors ... ok
+test capabilities_impl::screenshot::tests::the_ambient_dialog_detail_discloses_repeated_background_capture ... ok
+test capabilities_impl::shell_open::target::tests::ambiguous_targets_fail_closed_to_local_exec ... ok
+test capabilities_impl::shell_open::target::tests::allowlisted_url_schemes_are_url_safe ... ok
+test capabilities_impl::shell_open::target::tests::control_characters_block_the_target_regardless_of_extension ... ok
+test capabilities_impl::shell_open::target::tests::executable_and_script_extensions_are_local_exec ... ok
+test capabilities_impl::exec::policy::tests::a_config_cwd_overrides_the_default ... ok
+test capabilities_impl::shell_open::target::tests::extension_tricks_still_classify_as_local_exec ... ok
+test capabilities_impl::shell_open::target::tests::malformed_requests_are_blocked ... ok
+test capabilities_impl::shell_open::target::tests::non_allowlisted_or_malformed_urls_are_blocked ... ok
+test capabilities_impl::shell_open::target::tests::renderable_documents_are_local_file ... ok
+test capabilities_impl::exec::policy::tests::full_mode_always_escalates_and_never_auto_runs ... ok
+test capabilities_impl::shell_open::tests::a_path_plan_accepts_files_and_executables_alike ... ok
+test capabilities_impl::shell_open::tests::allows_http_https_mailto_urls ... ok
+test capabilities_impl::shell_open::tests::an_empty_path_target_is_refused ... ok
+test capabilities_impl::shell_open::tests::detail_shows_the_target_for_the_dialog ... ok
+test capabilities_impl::shell_open::tests::rejects_dangerous_and_unknown_schemes_without_launching ... ok
+test capabilities_impl::tests::a_fake_exec_shapes_a_success_respond_frame ... ok
+test capabilities_impl::tests::an_unknown_capability_is_unsupported ... ok
+test capabilities_impl::tests::detail_is_none_for_a_capability_without_one ... ok
+test capabilities_impl::tests::early_dynamic_failure_evidence_uses_the_projected_blocked_cell ... ok
+test capabilities_impl::foreground_window::tests::run_never_errors_and_shapes_a_valid_output ... ok
+test exec_command_disclosure::tests::ambiguous_recognized_boundaries_refuse_but_unknown_syntax_stays_visible ... ok
+test exec_command_disclosure::tests::masks_complete_credential_values_and_keeps_source_delimiters ... ok
+test exec_command_disclosure::tests::recognized_tokens_and_uri_credentials_include_adjacent_quote_fragments ... ok
+test capabilities_impl::exec::resolve::tests::a_missing_bare_name_fails_closed_to_none ... ok
+test exec_command_disclosure::tests::header_and_curl_aliases_mask_whole_values_only_in_defined_contexts ... ok
+test exec_command_disclosure::tests::escape_table_is_unambiguous_and_keeps_printable_unicode_unchanged ... ok
+test exec_command_disclosure::tests::unicode_before_a_uri_preserves_scalar_boundaries_and_the_complete_tail ... ok
+test exec_command_disclosure::tests::finite_key_families_and_path_exclusions_are_not_substring_rules ... ok
+test gate::approver::tests::a_bare_directive_is_the_default_for_every_capability ... ok
+test gate::approver::tests::an_unknown_directive_is_a_parse_error ... ok
+test gate::approver::tests::every_directive_maps_to_its_outcome ... ok
+test capabilities_impl::exec::resolve::tests::a_bare_name_present_only_in_the_cwd_does_not_resolve ... ok
+test exec_command_disclosure::tests::url_offsets_preserve_host_paths_other_queries_and_fragment ... ok
+test gate::approver::tests::overrides_without_a_default_deny_everything_else ... ok
+test gate::approver::tests::per_capability_overrides_beat_the_default ... ok
+test gate::approver::tests::whitespace_and_empty_entries_are_tolerated ... ok
+test capabilities_impl::exec::resolve::tests::an_absolute_path_qualified_target_resolves_to_itself_when_it_exists ... ok
+test capabilities_impl::exec::policy::tests::allowlist_mode_auto_runs_only_a_simple_allowlisted_exe ... ok
+test capabilities_impl::exec::resolve::tests::a_relative_argv0_is_never_resolved_by_bare_name ... ok
+test gate::fs_write_class::tests::a_file_outside_every_root_is_outside_root ... ok
+test gate::fs_write_class::tests::a_file_under_an_authorized_root_carries_that_root_in_its_key ... ok
+test gate::fs_write_class::tests::a_sensitive_sub_target_beats_an_authorized_root ... ok
+test gate::fs_write_class::tests::an_ambiguous_target_never_classifies_in_workspace ... ok
+test gate::fs_write_class::tests::distinct_roots_produce_distinct_full_keys ... ok
+test gate::fs_write_class::tests::in_workspace_plain_data_classifies_in_workspace ... ok
+test capabilities_impl::exec::resolve::tests::an_extensionless_bare_name_is_completed_via_pathext ... ok
+test gate::fs_write_class::tests::sensitive_detection_is_case_insensitive ... ok
+test capabilities_impl::exec::policy::tests::a_cwd_local_binary_never_satisfies_the_allowlist_d3 ... ok
+test capabilities_impl::exec::resolve::tests::a_bare_name_resolves_on_the_path_never_the_cwd_copy ... ok
+test gate::fs_write_class::tests::skill_hook_dirs_are_checked_before_the_workspace ... ok
+test gate::fs_write_class::tests::the_class_keys_match_the_governance_registry ... ok
+test gate::fs_write_class::tests::the_permission_surface_is_the_self_escalation_floor ... ok
+test gate::fs_write_class::tests::traversal_back_into_the_workspace_is_in_workspace ... ok
+test gate::decisions::tests::once_is_not_remembered ... ok
+test gate::governance::tests::a_dir_root_key_with_a_drive_colon_resolves_to_the_family_cell_not_the_capability ... ok
+test gate::decisions::tests::session_is_memory_only_and_not_persisted ... ok
+test gate::governance::tests::a_dir_root_per_target_key_projects_on_its_family_cell ... ok
+test gate::governance::tests::an_unknown_key_has_no_cell ... ok
+test gate::governance::tests::family_key_splits_on_the_second_colon_never_a_windows_drive_colon ... ok
+test gate::governance::tests::floor_membership_is_set_membership ... ok
+test gate::governance::tests::only_url_safe_is_rememberable ... ok
+test gate::decisions::tests::corrupt_file_fails_closed ... ok
+test gate::governance::tests::project_level_folds_over_the_whole_registry_and_pins_the_floor_to_deny ... ok
+test gate::governance::tests::the_exec_projection_matches_the_prd_factory_table ... ok
+test gate::governance::tests::the_fixed_risk_projection_matches_the_factory_default ... ok
+test gate::governance::tests::the_fs_write_projection_matches_the_prd_factory_table ... ok
+test gate::governance::tests::the_projection_matches_the_prd_factory_table ... ok
+test exec_command_disclosure::tests::unicode_chunks_respect_both_limits_and_reconstruct_every_tail ... ok
+test gate::level::tests::a_missing_file_is_standard ... ok
+test gate::decisions::tests::deny_plus_always_persists_as_never ... ok
+test gate::decisions::tests::always_is_durable_across_a_reload ... ok
+test gate::level::tests::unreadable_source_fails_closed ... ok
+test gate::tests::an_exec_ask_allow_writes_no_decision_memory ... ok
+test gate::level::tests::a_valid_file_selects_its_level ... ok
+test gate::tests::an_unregistered_class_key_fail_closed_denies ... ok
+test gate::tests::evaluate_exec_ask_passes_the_command_to_the_approver ... ok
+test gate::level::tests::corrupt_or_unknown_degrades_to_standard_not_relaxed ... ok
+test gate::level::tests::legacy_constraints_are_deny_only ... ok
+test gate::tests::a_stored_never_beats_an_auto_projection ... ok
+test gate::tests::an_always_on_one_dir_root_never_authorizes_another ... ok
+test gate::tests::a_dir_root_always_persists_under_its_own_full_key ... ok
+test gate::tests::decision_memory_has_exactly_one_production_writer ... ok
+test gate::tests::fixed_risk_asks_at_strict ... ok
+test gate::tests::a_conversational_grant_is_inert_without_an_approver_allow ... ok
+test capabilities_impl::process_list::tests::snapshot_has_processes_with_expected_fields_and_no_cmd ... ok
+test gate::tests::fixed_risk_threads_the_detail_string_to_the_approver_on_ask ... ok
+test gate::tests::blocked_is_the_exec_floor_in_every_tier ... ok
+test gate::tests::fs_write_outside_root_never_persists_even_on_allow_always ... ok
+test gate::tests::evaluate_exec_records_the_command_on_every_tier ... ok
+test gate::tests::shell_open_blocked_auto_denies_without_asking ... ok
+test gate::tests::fixed_risk_remembered_never_auto_denies_and_allow_once_persists_nothing ... ok
+test gate::tests::fs_write_in_workspace_is_auto_in_every_tier ... ok
+test gate::tests::fixed_risk_ask_then_remember_survives_at_standard ... ok
+test gate::tests::shell_open_url_safe_always_is_remembered_under_its_class_key_only ... ok
+test gate::tests::blocked_is_floor_denied_in_every_level ... ok
+test gate::tests::shell_open_local_classes_never_persist_even_on_allow_always ... ok
+test host_session::tests::cancel_requires_the_exact_request_and_control_tuple ... ok
+test gate::tests::simple_allowlisted_asks_once_only_at_strict ... ok
+test host_session::tests::accepted_unrelated_and_old_challenge_ack_cannot_consume_authority ... ok
+test host_session::tests::cancel_retires_a_pending_challenge_and_settles_it_cancelled ... ok
+test host_session::tests::duplicate_in_flight_delivery_never_starts_a_second_execution ... ok
+test host_session::tests::duplicate_terminal_delivery_reuses_the_cached_response ... ok
+test host_session::tests::cancellation_cannot_remove_another_pending_control_with_the_same_request_id ... ok
+test gate::tests::shell_open_disabled_capability_auto_denies_every_class ... ok
+test host_session::tests::exact_cancellation_retires_old_policy_work_without_reopening_execution ... ok
+test host_session::tests::exact_completion_cancel_and_reconnect_leave_no_raw_ack_target ... ok
+test host_session::tests::policy_lineage_rejects_stale_and_same_generation_tampering ... ok
+test host_session::tests::old_ack_cannot_retire_a_new_challenge_reusing_the_request_id ... ok
+test gate::tests::fixed_risk_auto_runs_at_relaxed ... ok
+test host_session::tests::pending_challenge_is_consumed_exactly_once ... ok
+test host_session::tests::projection_digest_matches_the_shared_canonical_fixture ... ok
+test host_session::tests::policy_lineage_tracks_projection_digest_per_capability ... ok
+test host_session::tests::projection_rejects_noncanonical_order_and_incomplete_cells ... ok
+test host_session::tests::reconnect_discards_the_previous_generation_cache ... ok
+test node::tests::device_identity_store_errors_fail_closed ... ok
+test host_session::tests::reconnect_discards_pending_challenges_with_the_session ... ok
+test node::tests::existing_device_identity_wins_without_a_write ... ok
+test node::tests::losing_device_identity_creator_adopts_and_validates_the_persisted_winner ... ok
+test gate::tests::shell_open_url_safe_always_never_authorizes_a_local_class ... ok
+test node::tests::missing_device_identity_persists_the_create_only_winner ... ok
+test node::tests::stable_device_identity_rejects_invalid_existing_state ... ok
+test node::tests::the_ambient_capture_is_advertised_under_the_execs_own_name_beside_the_on_demand_one ... ok
+test protocol::host_approval_protocol::tests::decision_scope_digests_match_the_shared_canonicalizer ... ok
+test protocol::host_approval_protocol::tests::canonical_digests_match_the_shared_fixture ... ok
+test host_session::tests::exact_negative_ack_retires_raw_and_active_once_with_original_evidence ... ok
+test gate::tests::fs_write_outside_and_dir_root_are_yolo_at_relaxed_but_the_floors_hold ... ok
+test protocol::host_approval_protocol::tests::resume_validation_rejects_missing_authorization_and_expired_windows ... ok
+test exec_command_disclosure::tests::full_capacity_and_post_escape_overflow_never_return_partial_disclosure ... ok
+test gate::tests::shell_open_local_classes_ignore_a_seeded_remembered_always ... ok
+test protocol::ws_challenge::tests::ordinary_host_prompts_have_bounded_chinese_copy_without_changing_legacy_shape ... ok
+test protocol::host_approval_protocol::tests::command_fixture_pins_marker_order_and_legacy_omission ... ok
+test qqmm::tests::management_acl_is_home_only_and_keeps_existing_event_permissions ... ok
+test qqmm::tests::only_the_actual_home_window_can_access_management ... ok
+test protocol::ws_challenge::tests::resume_authorization_is_validated_exactly_against_the_pending_challenge ... ok
+test protocol::ws_challenge::tests::built_challenge_validates_and_carries_no_raw_input ... ok
+test secrets::tests::credential_mutex_names_are_global_user_and_account_scoped ... ok
+test secrets::tests::in_memory_create_only_keeps_the_first_value ... ok
+test secrets::tests::in_memory_fake_round_trips_and_maps_missing_to_none ... ok
+test protocol::ws_challenge::tests::same_masked_command_never_shares_raw_input_or_authorization_identity ... ok
+test gate::tests::the_escalate_family_auto_runs_at_relaxed ... ok
+test gate::tests::fs_write_self_escalation_is_denied_in_every_tier ... ok
+test gate::tests::url_safe_projects_ask_auto_auto_across_levels ... ok
+test qqmm::tests::compiled_authority_preserves_local_legacy_commands_and_scopes_qqmm ... ok
+test gate::tests::local_classes_ask_below_relaxed_and_auto_at_relaxed ... ok
+test ws_client::tests::approved_resume_emits_one_allowed_once_audit_row ... ok
+test ws_client::tests::resume_refuses_when_the_host_floor_tightens_after_challenge ... ok
+test gate::tests::fixed_risk_standard_tier_matches_today_exactly ... ok
+test ws_client::tests::approved_exec_audits_the_original_command_once_not_the_masked_projection ... ok
+test gate::tests::evaluate_exec_standard_tier_matches_today_exactly ... ok
+test ws_client::tests::preflight_returns_classification_without_executor_access ... ok
+test protocol::tests::golden_fixtures_parse_reject_and_round_trip ... ok
+test host_session::tests::terminal_cache_evicts_in_insertion_order_after_256_attempts ... ok
+test protocol::ws_challenge::tests::only_effective_ask_exec_uses_the_disclosure_capacity_gate ... ok
+test capabilities_impl::exec::sandbox::tests::a_fast_program_runs_and_reports_exit_zero ... ok
+test capabilities_impl::exec::sandbox::tests::an_over_producing_command_truncates_and_is_killed ... ok
+test ws_client::tests::actual_socket_disclosure_failures_settle_once_without_execution_audit_or_token_loss ... ok
+test capabilities_impl::exec::sandbox::tests::a_sleeper_hits_the_timeout_and_is_killed ... ok
+test ws_client::tests::actual_socket_resume_mismatch_only_retires_its_exact_pending_binding ... ok
+test browser_attachment::tests::real_loopback_rejects_web_origins_and_drains_the_exact_authenticated_client ... ok
+test exec_command_disclosure::tests::vendor_jwt_and_private_keys_hide_unbounded_tails ... ok
+
+test result: ok. 204 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.23s
+
+     Running unittests src\main.rs (apps\desktop\src-tauri\target\debug\deps\taki_desktop-73e800e88916ed70.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\taki-node.rs (apps\desktop\src-tauri\target\debug\deps\taki_node-62fd130b1a0e273b.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\taki-secret-key.rs (apps\desktop\src-tauri\target\debug\deps\taki_secret_key-5a3b3b986643d07c.exe)
+
+running 7 tests
+test tests::create_rejects_unframed_and_wrong_length_stdin ... ok
+test tests::create_is_create_only_and_never_overwrites ... ok
+test tests::get_returns_the_framed_key_and_missing_fails_closed ... ok
+test tests::hex_roundtrips_and_rejects_odd_or_non_hex ... ok
+test tests::usage_complaints_are_bounded_and_value_free ... ok
+test tests::concurrent_first_creators_converge_without_overwrite ... ok
+test tests::credential_reads_credentials_directory_and_fails_closed ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests taki_desktop_lib
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

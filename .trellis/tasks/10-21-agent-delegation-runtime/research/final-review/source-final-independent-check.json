@@ -1,0 +1,44 @@
+{
+  "finalA1A2": [
+    {
+      "case": "a1-external",
+      "initialRequest": 1,
+      "compactionRequest": 2,
+      "followupRequest": 3,
+      "summaryExact": true,
+      "onlyRecentPairAndQuestionOutsideSummary": true,
+      "finalCompactionRulePresent": true,
+      "semanticDisposition": "external narrator events retained"
+    },
+    {
+      "case": "a2-self-report",
+      "initialRequest": 4,
+      "compactionRequest": 5,
+      "followupRequest": 6,
+      "summaryExact": true,
+      "onlyRecentPairAndQuestionOutsideSummary": true,
+      "finalCompactionRulePresent": true,
+      "semanticDisposition": "explicit user self-report events retained"
+    }
+  ],
+  "sourceManifestPaths": 53,
+  "unchangedSourceManifestPaths": 50,
+  "expectedSubsequentReviewerIndexUpdates": [
+    {
+      "path": "packages/core/src/agents/index.md",
+      "sourceOwnerSha256": "ccbb05e60aa68367fcbfe8d5a6debd4009e6d45fac9d8e44270506498e0c2c6d",
+      "currentSha256": "6f2e95bc7bc36695254b53656a4b2ad37da8ea0b69fbb4c3002702388fbf4ff3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "sourceOwnerSha256": "0dfccf6b1fff49e330e6cf98f9bb7d52c2bdcd2458fe38bc62750e552c79522e",
+      "currentSha256": "562f1c54cfb2debc5dafbd6e81f79e06eb8a351f313ce37b1a8af2f7d664baa1"
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sourceOwnerSha256": "a58b3446a16b0a59e37ce7c8a9f0015e2775de086e74e171b74b984f16a15a28",
+      "currentSha256": "07899f37a7ad2c99c87478af64b114c14cc710f1791efa6b73e11a45af7b4582"
+    }
+  ],
+  "allSourceProductionAndTestHashesCurrent": true
+}

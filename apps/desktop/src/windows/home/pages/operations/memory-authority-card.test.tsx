@@ -7,14 +7,14 @@ import type { MemoryOperationsView } from "./use-memory-operations.ts";
 const noop = async () => undefined;
 
 function view(overrides: Partial<MemoryOperationsView> = {}): MemoryOperationsView {
-  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, refresh: noop, submit: noop, submitSync: noop, configureSync: noop, cancel: noop, ...overrides };
+  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, tidy: null, tidyLoading: false, tidyError: null, submitTidy: noop, refresh: noop, submit: noop, submitSync: noop, configureSync: noop, cancel: noop, ...overrides };
 }
 
 function card(overrides: Partial<MemoryOperationsView> = {}): string {
   return renderToStaticMarkup(<MemoryAuthorityCard ops={view(overrides)} />);
 }
 
-const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((match) => match[1]);
+const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>(.*?)<\/button>/g)].map((match) => match[1]?.replace(/<[^>]*>/g, ""));
 const LIFECYCLE_BUTTONS = ["重新校验连接", "创建 Bank（nana）", "创建 Bank（yui）"];
 /** The lifecycle block's own markup up to its diagnostics, so replica Bank controls below it are not counted. */
 const lifecycleBlock = (markup: string) => markup.split("Hindsight 连接与 Bank")[1]!.split("技术诊断")[0]!;
@@ -29,7 +29,10 @@ describe("memory authority card", () => {
     expect(markup).toContain("已受理，等待 Hindsight 处理");
     expect(markup).toContain(automatic ? "已排定自动检查处理结果" : "稍后手动同步以检查处理结果");
     expect(markup).toContain("1 待写 / 0 失败 / 1 未知 / 2 父写");
-    expect(markup).toMatch(/<button(?![^>]* disabled="")[^>]*>立即同步<\/button>/);
+    const syncButton = [...markup.matchAll(/<button([^>]*)>(.*?)<\/button>/g)]
+      .find((match) => match[2]?.replace(/<[^>]*>/g, "") === "立即同步");
+    expect(syncButton).toBeDefined();
+    expect(syncButton?.[1]).not.toContain('disabled=""');
     expect(markup).not.toContain("HINDSIGHT_PENDING_REMAINS");
   });
 
@@ -96,7 +99,7 @@ describe("memory authority card", () => {
   it.each([{ name: "refresh", overrides: { loading: true } }, { name: "read failure", overrides: { error: "refresh failed" } }])("keeps last-good settings visible but locks stale saves during $name", ({ overrides }) => {
     const markup = card({ status: hindsightStatus(), ...overrides });
     expect(markup).toContain("已保存：自动");
-    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>保存同步设置<\/button>/);
+    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>保存同步设置(?:<span[^>]*><\/span>)?<\/button>/);
   });
   it("renders no Hindsight lifecycle block outside Hindsight authority", () => {
     expect(card({ status: localStatus() })).not.toContain("Hindsight 连接与 Bank");
@@ -128,7 +131,8 @@ describe("memory authority card", () => {
   });
 
   it("renders the skeleton before the first read and the retry line after a failed one", () => {
-    expect(card()).toContain("animate-pulse");
+    expect(card({ loading: true })).toContain("animate-pulse");
+    expect(card({ connectionReady: false, loading: true })).not.toContain("animate-pulse");
     const failed = card({ error: "deadline" });
     expect(failed).toContain('role="alert"');
     expect(failed).toContain("deadline");
@@ -137,7 +141,7 @@ describe("memory authority card", () => {
 
   it("renders Local mode without Bank controls", () => {
     const markup = card({ status: localStatus() });
-    expect(markup).toContain("Local（canonical） · epoch epoch-1");
+    expect(markup).toContain("Local（canonical）");
     expect(markup).not.toContain("立即同步");
     expect(markup).toContain("无进行中的操作。");
   });
@@ -172,11 +176,24 @@ describe("memory authority card", () => {
     expect(markup).toContain("执行中");
     const busy = card({ status: hindsightStatus({ operations: { active, recent: [] } }), busyKey: "sync:global" });
     expect(busy.match(/disabled=""/g)).toHaveLength(10);
-    expect(busy.match(/aria-busy="true"/g)).toHaveLength(2);
+    expect(busy.match(/<button[^>]*aria-busy="true"/g)).toHaveLength(2);
   });
 
   it("shows the last mutation feedback line", () => {
     const markup = card({ status: localStatus(), feedback: { tone: "warn", message: "Core 拒绝了该操作：MEMORY_OPERATION_BUSY" } });
     expect(markup).toContain("Core 拒绝了该操作：MEMORY_OPERATION_BUSY");
   });
+});
+
+it("keeps internal epoch, Bank and operation identities out of every rendered attribute and label", () => {
+  const privateBank = "private-bank-identity";
+  const active = operation({ request: { kind: "replica.sync", bankId: privateBank, syncKind: "incremental" } });
+  const markup = card({ status: hindsightStatus({ replica: [bankStatus(privateBank)], operations: { active: [active], recent: [] } }) });
+  expect(markup).not.toContain(privateBank);
+  expect(markup).not.toContain(active.operationId);
+  expect(markup).not.toContain("epoch-2");
+});
+
+it("ends first-load skeleton on a failed Memory read", () => {
+  expect(card({ loading: false, error: "failed" })).not.toContain("animate-pulse");
 });

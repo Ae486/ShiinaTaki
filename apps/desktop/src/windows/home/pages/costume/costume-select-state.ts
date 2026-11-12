@@ -12,7 +12,7 @@ import type { CostumeResultPayload } from "@/lib/costume-switch-event.js";
 export interface CostumeSelectState {
   /** The costume the pet has not settled yet — its row alone shows the indicator and the Cancel button. */
   pending: string | null;
-  /** The costume the PET confirmed wearing; null = follow the list's own remembered costume. */
+  /** The costume observed in the live Pet scene; null means empty or not currently observed. */
   selected: string | null;
   error: string | null;
 }
@@ -23,6 +23,7 @@ export type CostumeSelectAction =
   | { kind: "request"; costumeId: string }
   | { kind: "undeliverable"; costumeId: string; reason: string }
   | { kind: "result"; result: CostumeResultPayload }
+  | { kind: "observed"; costumeId: string | null }
   | { kind: "cancel" }
   | { kind: "timeout"; costumeId: string };
 
@@ -41,12 +42,10 @@ function failureText(costumeId: string, reason: string): string {
 function applyResult(state: CostumeSelectState, result: CostumeResultPayload): CostumeSelectState {
   const { costumeId, phase } = result;
   const ours = state.pending === costumeId;
-  // A succeeded switch is followed even unrequested: the pet IS wearing it, so the highlight would otherwise lie.
-  // The error line goes with it, always: a success is end-to-end proof the path works, so anything still on screen is
-  // stale by definition. The case that makes this concrete — the 45s deadline fires, the slow switch lands anyway, and
-  // "没有响应" would sit under a highlight that just moved. Two contradictory claims is the defect this batch fixes.
+  // Success clears stale failure state and triggers a fresh Pet observation in the adapter. An old result may arrive
+  // after a scene replacement, so its payload alone cannot claim the current scene still wears that costume.
   if (phase === "succeeded") {
-    return { pending: ours ? null : state.pending, selected: costumeId, error: null };
+    return { pending: ours ? null : state.pending, selected: null, error: null };
   }
   if (!ours || phase === "started") return state;
   if (phase === "failed") return { ...state, pending: null, error: failureText(costumeId, result.reason ?? "切换失败") };
@@ -55,6 +54,8 @@ function applyResult(state: CostumeSelectState, result: CostumeResultPayload): C
 
 export function reduceCostumeSelect(state: CostumeSelectState, action: CostumeSelectAction): CostumeSelectState {
   switch (action.kind) {
+    case "observed":
+      return { ...state, selected: action.costumeId };
     case "request":
       // The highlight must NOT follow the click (#74) — only a result moves it. A click during a switch is a safe
       // no-op that explains itself rather than stealing the pending row (#75).

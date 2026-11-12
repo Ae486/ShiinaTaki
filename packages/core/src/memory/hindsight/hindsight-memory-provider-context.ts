@@ -25,6 +25,7 @@ import { HindsightPolicyRefusal } from "./hindsight-policy-context.ts";
 import { HindsightError } from "./hindsight-errors.ts";
 import type { HindsightRuntimeSynchronizeInput } from "./hindsight-runtime-bank-service.ts";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
+import type { ObserveRecallEvidence } from "../memory-recall-evidence.ts";
 
 export interface HindsightMemoryWritePort {
   retain(context: MemoryProviderCallContext, request: RetainRequest): Promise<RetainResult>;
@@ -44,6 +45,7 @@ export interface HindsightMemoryProviderDeps {
   now?: () => string;
   signal?: AbortSignal;
   workFence?: CanonicalLocalWriteFence;
+  observeRecallEvidence?: ObserveRecallEvidence;
 }
 export type HindsightMemoryProviderState = ReturnType<typeof createHindsightMemoryProviderState>;
 

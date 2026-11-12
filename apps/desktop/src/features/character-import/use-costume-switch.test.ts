@@ -9,6 +9,8 @@ vi.mock("@/lib/character-asset-url.js", () => ({
   })),
 }));
 
+vi.mock("@/lib/costume-scene-event.js", () => ({ notifyCostumeSceneChanged: vi.fn() }));
+
 import { runGuardedSwitch, type SwitchGuard, type SwitchSink } from "./use-costume-switch.ts";
 
 interface Deferred<T> {
@@ -45,6 +47,8 @@ describe("manual costume single-flight release", () => {
       .mockImplementationOnce(() => firstReport.promise)
       .mockResolvedValueOnce(undefined);
     const client = {
+      characterCostumes: vi.fn(async () => ({ costumes: ["arbeit", "live_01"], defaultCostume: "arbeit",
+        settingsFilesByCostume: { arbeit: "model.json", live_01: "live.model3.json" } })),
       currentTimingPolicy: () => ({
         ...TIMING_POLICY_DEVELOPMENT_DEFAULTS,
         petCostumeTotalMs: 100,
@@ -69,7 +73,7 @@ describe("manual costume single-flight release", () => {
     };
 
     const first = runGuardedSwitch(
-      { client: client as never, scene: scene as never, costume: "arbeit", settingsFile: "model.json" },
+      { client: client as never, scene: scene as never, costume: "arbeit" },
       guard,
       sink,
     );
@@ -78,7 +82,7 @@ describe("manual costume single-flight release", () => {
     expect(guard.current.id).toBeNull();
 
     const second = runGuardedSwitch(
-      { client: client as never, scene: scene as never, costume: "live_01", settingsFile: "live.model3.json" },
+      { client: client as never, scene: scene as never, costume: "live_01" },
       guard,
       sink,
     );

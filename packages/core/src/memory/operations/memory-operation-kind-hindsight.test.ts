@@ -126,7 +126,8 @@ describe("hindsight.activate — claim, cancel and boot observation", () => {
       activeInFamily: () => undefined, latestInFamily: () => undefined, now: () => "2026-09-23T00:00:00.000Z" };
     const execution: MemoryOperationExecution<Extract<MemoryOperationRequest, { kind: "hindsight.activate" }>> = {
       operationId: crypto.randomUUID(), request: activate(h) as Extract<MemoryOperationRequest, { kind: "hindsight.activate" }>, ctx,
-      producer: running.producer!, running: () => undefined, tryClaim: () => true, checkpoint: vi.fn() };
+      producer: running.producer!, running: () => undefined, tryClaim: () => true, checkpoint: vi.fn(),
+      updateProducer: () => { throw new Error("Unexpected activation producer update; use checkpoint"); } };
     expect(await hindsightActivateKind.execute(execution)).toMatchObject({ state: "failed", reason: "runtime_unavailable", errorCode: "HINDSIGHT_ACTIVATION_INTERRUPTED" });
     expect(await hindsightActivateKind.execute({ ...execution, ctx: { ...ctx, hindsight: h.service }, tryClaim: () => false })).toBeNull();
   });
@@ -260,6 +261,7 @@ describe("hindsight.activate — binding repair", () => {
     const preparation = vi.spyOn(h.binding.runtime, "prepareHindsightActivation");
     const settlement = await hindsightActivateKind.execute({ operationId: crypto.randomUUID(), request, producer, ctx,
       running: () => undefined, tryClaim: () => true,
+      updateProducer: () => { throw new Error("Unexpected activation producer update; use checkpoint"); },
       checkpoint: (ref) => {
         if (ref?.kind !== "hindsight") throw new Error("fixture producer missing");
         if (ref.progress.phase === "completed") throw new Error("HINDSIGHT_ACTIVATION_INTERRUPTED");

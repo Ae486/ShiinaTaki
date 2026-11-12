@@ -15,6 +15,7 @@ import { CostumeIcon } from "@/lib/icons/costume-icon.js";
 import { McpIcon } from "@/lib/icons/mcp-icon.js";
 import { SkillIcon } from "@/lib/icons/skill-icon.js";
 import { ChatPage } from "./pages/chat/chat-page.tsx";
+import { QqmmPage } from "./pages/qqmm/qqmm-page.tsx";
 import { SettingsPage } from "./pages/settings/settings-page.tsx";
 import { OperationsPage } from "./pages/operations/operations-page.tsx";
 import { PerceptionPage } from "./pages/perception/perception-page.tsx";
@@ -22,6 +23,8 @@ import { CostumePage } from "./pages/costume/costume-page.tsx";
 import { McpPage } from "./pages/mcp/mcp-page.tsx";
 import { SkillsPage } from "./pages/skills/skills-page.tsx";
 import { MonitorPage } from "./pages/monitor/monitor-page.tsx";
+import { InitiativePage } from "./pages/initiative/initiative-page.tsx";
+import { SubagentsPage } from "./pages/subagents/subagents-page.tsx";
 export { DEFAULT_PAGE_ID } from "./default-page-id.ts";
 
 export interface HomePage {
@@ -33,6 +36,9 @@ export interface HomePage {
 
 export const HOME_PAGES = [
   { id: "chat", label: "聊天", icon: ChatIcon, component: ChatPage },
+  { id: "subagents", label: "子代理", icon: ChatIcon, component: SubagentsPage },
+  { id: "initiative", label: "主动互动", icon: ChatIcon, component: InitiativePage },
+  { id: "qqmm", label: "QQ 消息", icon: ChatIcon, component: QqmmPage },
   { id: "settings", label: "设置", icon: SettingsIcon, component: SettingsPage },
   { id: "operations", label: "运维", icon: OperationsIcon, component: OperationsPage },
   { id: "perception", label: "感知", icon: PerceptionIcon, component: PerceptionPage },

@@ -27,6 +27,7 @@ function local(available: boolean): MemoryOnboardingStatus {
 describe("Local onboarding card", () => {
   it("renders loading, read failure and last-good stale content with locked actions", () => {
     expect(card({ loading: true })).toContain("animate-pulse");
+    expect(card({ loading: true, connectionReady: false })).not.toContain("animate-pulse");
     const failed = card({ error: "read timeout", stale: true });
     expect(failed).toContain("状态读取失败：read timeout");
     expect(failed).toContain("暂无可用的引导状态");
@@ -84,7 +85,7 @@ describe("Local onboarding card", () => {
     const ready = card({ status: onboardingStatus({ run: onboardingRun(), actions: actions({ activate: true }) }) });
     expect(ready).toContain("准备就绪，等待启用");
     expect(ready).toContain("准备完成尚未切换权威");
-    expect(ready).toContain("启用本地记忆</button>");
+    expect(ready).toMatch(/<button[^>]*>启用本地记忆(?:<span[^>]*><\/span>)?<\/button>/);
   });
 
   it("renders activating, unknown and failed outcomes with server-offered recovery", () => {
@@ -118,7 +119,7 @@ describe("Local onboarding card", () => {
     const status = { ...local(true), custody: { openGroups: 2, recoverableGroups: 1 }, actions: actions({ reconcileSources: true }) };
     const markup = card({ status });
     expect(markup).toContain("待恢复来源组");
-    expect(markup).toContain("恢复未完成来源</button>");
+    expect(markup).toMatch(/<button[^>]*>恢复未完成来源(?:<span[^>]*><\/span>)?<\/button>/);
     expect(markup).toContain("本地记忆已启用");
   });
 
@@ -137,6 +138,6 @@ describe("Local onboarding card", () => {
     const markup = card({ status });
     expect(markup).toContain("当前使用 Hindsight");
     expect(markup).not.toContain("预览本地来源");
-    expect(markup).not.toContain("准备本地记忆</button>");
+    expect(markup).not.toMatch(/<button[^>]*>准备本地记忆(?:<span[^>]*><\/span>)?<\/button>/);
   });
 });

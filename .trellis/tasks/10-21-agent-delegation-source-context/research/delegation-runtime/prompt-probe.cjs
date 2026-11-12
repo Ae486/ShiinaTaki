@@ -1,0 +1,13 @@
+const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),ts=require(path.resolve('node_modules/typescript'));
+const root=path.resolve('.trellis/tasks/10-21-agent-delegation-source-context/research/delegation-runtime');
+const text=fs.readFileSync(path.join(root,'packages/harness/src/agent/harness-agent.ts'),'utf8');
+const sf=ts.createSourceFile('harness-agent.ts',text,ts.ScriptTarget.Latest,true);
+const cls=sf.statements.find(x=>ts.isClassDeclaration(x)&&x.name?.text==='HarnessAgent');
+const method=cls.members.find(x=>x.name?.getText(sf)==='_resolvePromptTurnInput');
+const exactMethod=method.getText(sf);
+const compiled=ts.transpileModule('class Probe { '+exactMethod+' }; globalThis.Probe=Probe;',{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+const ctx={};vm.runInNewContext(compiled,ctx);const probe=new ctx.Probe();
+const input=[{role:'system',content:'selected snapshot'},{role:'user',content:'first task'},{role:'assistant',content:'private result'},{role:'tool',content:[]},{role:'user',content:'follow up'}];
+const actual=probe._resolvePromptTurnInput({messages:input});
+const output={method:'Exact published private method isolated from class with TypeScript AST',inputRoles:input.map(x=>x.role),actual};
+fs.writeFileSync(path.join(root,'prompt-reduction-probe.json'),JSON.stringify(output,null,2)+'\n');console.log(JSON.stringify(output,null,2));

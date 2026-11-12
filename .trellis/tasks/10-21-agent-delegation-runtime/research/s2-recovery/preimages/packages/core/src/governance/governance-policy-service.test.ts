@@ -1,0 +1,111 @@
+import { CANONICAL_GOVERNANCE_REGISTRY, createGovernanceRegistry, type GovernanceRegistry } from "@taki/shared";
+import { afterEach, describe, expect, it } from "vitest";
+import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { openDatabase, type Database } from "../db/sqlite.ts";
+import { createGovernancePolicyRepo } from "./governance-policy-repo.ts";
+import { createGovernancePolicyService, GovernanceMutationError } from "./governance-policy-service.ts";
+
+const hostId = "11111111-1111-4111-8111-111111111111";
+const dbs: Database[] = [];
+afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
+
+function service(registry: GovernanceRegistry = CANONICAL_GOVERNANCE_REGISTRY) {
+  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+  dbs.push(db);
+  return createGovernancePolicyService(createGovernancePolicyRepo(db), registry);
+}
+
+function openService() {
+  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+  dbs.push(db);
+  return { db, policy: createGovernancePolicyService(createGovernancePolicyRepo(db)) };
+}
+
+describe("governance policy service", () => {
+  it("reads both classifier fields from its own registry without exposing mutable authority", () => {
+    const registry = createGovernanceRegistry({
+      ...CANONICAL_GOVERNANCE_REGISTRY,
+      descriptors: CANONICAL_GOVERNANCE_REGISTRY.descriptors.map((descriptor) => descriptor.capabilityId === "fs-write"
+        ? { ...descriptor, classifier: { ...descriptor.classifier, classifierId: "workspace-path-next", classifierRevision: 7 } }
+        : descriptor),
+    });
+    const policy = service(registry);
+    const before = policy.cells();
+    const metadata = policy.classifierMetadata("fs-write");
+    expect(metadata).toEqual({ classifierId: "workspace-path-next", classifierRevision: 7 });
+    Object.assign(metadata, { classifierId: "consumer-edit", classifierRevision: 99 });
+    expect(policy.classifierMetadata("fs-write")).toEqual({ classifierId: "workspace-path-next", classifierRevision: 7 });
+    expect(policy.cells()).toEqual(before);
+    expect(() => policy.classifierMetadata("unknown")).toThrow("unknown governance capability");
+  });
+
+  it("projects every registered cell/level and supports real optimistic mutations", () => {
+    const policy = service();
+    const expected = CANONICAL_GOVERNANCE_REGISTRY.descriptors
+      .reduce((count, descriptor) => count + descriptor.cells.length, 0) * 3;
+    expect(policy.cells().cells).toHaveLength(expected);
+    expect(policy.setLevel("strict", 1)).toMatchObject({ level: "strict", policyGeneration: 2 });
+    expect(policy.setCell({ key: "screenshot", level: "strict", posture: "deny", expectedPolicyGeneration: 2 })).toMatchObject({ policyGeneration: 3, cell: { effectivePosture: "deny" } });
+  });
+
+  it("enforces immutable and second-confirm override legality before persistence", () => {
+    const policy = service();
+    expect(() => policy.setCell({ key: "fs-write:self-escalation", level: "standard", posture: "auto", expectedPolicyGeneration: 1 })).toThrow(GovernanceMutationError);
+    expect(() => policy.setCell({ key: "exec:blocked", level: "standard", posture: "auto", expectedPolicyGeneration: 1 })).toThrow(/second confirmation/);
+    expect(policy.setCell({ key: "exec:blocked", level: "standard", posture: "auto", expectedPolicyGeneration: 1, secondConfirm: true })).toMatchObject({ policyGeneration: 2, cell: { effectivePosture: "auto" } });
+  });
+
+  it("normalizes factory-equal requests to reset/no-op, including immutable cells", () => {
+    const policy = service();
+    expect(policy.setCell({
+      key: "screenshot", level: "standard", posture: "ask", expectedPolicyGeneration: 1,
+    })).toMatchObject({ policyGeneration: 1, cell: { overridePosture: null, effectivePosture: "ask" } });
+    expect(policy.setCell({
+      key: "skill-load", level: "standard", posture: "auto", expectedPolicyGeneration: 1,
+    })).toMatchObject({ policyGeneration: 1, cell: { overridePosture: null, effectivePosture: "auto" } });
+  });
+
+  it("fails startup closed for current-revision unknown, stale-descriptor, or immutable override rows", () => {
+    for (const row of [
+      { key: "unknown-cell", level: "standard", posture: "deny", descriptorRevision: 1 },
+      { key: "screenshot", level: "standard", posture: "deny", descriptorRevision: 2 },
+      { key: "skill-load", level: "standard", posture: "deny", descriptorRevision: 1 },
+    ] as const) {
+      const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+      dbs.push(db);
+      db.prepare(
+        "INSERT INTO governance_cell_overrides (cell_key, level, posture, descriptor_revision, updated_at) " +
+        "VALUES (:key, :level, :posture, :descriptorRevision, 't')",
+      ).run(row);
+      expect(() => createGovernancePolicyService(createGovernancePolicyRepo(db))).toThrow();
+    }
+  });
+
+  it("accepts an exact legal current-revision override at startup", () => {
+    const { db } = openService();
+    db.prepare(
+      "INSERT INTO governance_cell_overrides (cell_key, level, posture, descriptor_revision, updated_at) " +
+      "VALUES ('screenshot', 'standard', 'deny', 1, 't')",
+    ).run();
+    expect(createGovernancePolicyService(createGovernancePolicyRepo(db)).cells().cells).toContainEqual(
+      expect.objectContaining({ key: "screenshot", level: "standard", overridePosture: "deny" }),
+    );
+  });
+
+  it("fails ask closed before Slice 4 and never treats Skill instructions as authority", () => {
+    const policy = service();
+    expect(policy.authorize({
+      identity: { capabilityId: "mcp.tool.call", ownerHostId: hostId, subject: { subjectId: "srv.tool", revision: "cfg-1" } },
+      cellKey: "mcp-tool-call",
+    })).toMatchObject({ allowed: false, code: "APPROVAL_REQUIRED" });
+    expect(policy.authorize({
+      identity: { capabilityId: "skill.load", ownerHostId: hostId, subject: { subjectId: "skill-a", revision: "hash-a" } },
+      cellKey: "skill-load",
+    })).toMatchObject({ allowed: true });
+    expect(policy.authorize({
+      identity: { capabilityId: "mcp.tool.call", ownerHostId: hostId, subject: { subjectId: "srv.tool", revision: "cfg-1" } },
+      cellKey: "mcp-tool-call",
+      denyConstraints: ["skill-markdown-cannot-grant"],
+    })).toMatchObject({ allowed: false, code: "GOVERNANCE_DENIED" });
+  });
+});

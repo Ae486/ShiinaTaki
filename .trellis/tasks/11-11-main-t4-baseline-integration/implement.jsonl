@@ -1,0 +1,8 @@
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Immutable historical receipts, exact schema branches and guarded convergence"}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Shared/Core/Rust governance and durable authorization contract"}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Preserve factual producer settlement, cancellation and restart contracts"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Quality gates and actual Node strip-only boot requirements"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/git-preview.md","reason":"Exact frozen inputs and bounded modern conflict inventory"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/persistence-lineages.md","reason":"Verified schema lineage,073+ convergence hazards and historical governance definitions"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/runtime-contracts.md","reason":"T4 authoritative stored precedence/live readiness and main preservation/test seams"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/plan-advisor.md","reason":"Independent challenge and retained high-impact implementation gates"}

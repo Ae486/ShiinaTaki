@@ -1,0 +1,114 @@
+[
+  {
+    "path": "packages/shared/src/prepared-publication-schema.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/shared/src/initiative-schema.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/shared/src/timeline-schema.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/shared/src/prepared-publication-schema.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/shared/src/timeline-schema.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/shared/src/index.md",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/timeline-repo.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/timeline-repo.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/run-delivery-repo.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/run-delivery-repo.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/index.md",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/057-source-context.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/057-source-context.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/index.md",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/pending-memory-repo.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/scheduled-task-repo.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/048-memory-operations.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/delivery/prepared-publication-source.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/delivery/prepared-publication.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/delivery/prepared-publication.test.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/delivery/index.md",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/agents/conversation-store.ts",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/agents/index.md",
+    "matchesS4": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/056-subagent-conversations.test.ts",
+    "matchesS4": true
+  }
+]

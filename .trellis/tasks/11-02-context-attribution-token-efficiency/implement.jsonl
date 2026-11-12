@@ -1,0 +1,12 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Resolve relevant Core and Shared layer requirements before implementation."}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Extend existing Core producers and Monitor projections without duplicate authority."}
+{"file": ".trellis/spec/backend/tool-disclosure.md", "reason": "Attribute active schemas and preserve the deferred same-loop reduction boundary."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Apply Monitor lifecycle and real UI validation requirements."}
+{"file": ".trellis/tasks/11-02-context-attribution-token-efficiency/research/planning-baseline.md", "reason": "Reuse dated evidence, reference mechanisms and limits; avoid repeating resolved research."}
+{"file": ".trellis/spec/backend/native-image-input.md", "reason": "Preserve verified native dispatch/source/lifetime while adding counts."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Optional counters cannot fail or retry completed model operations; raw payloads stay excluded."}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Reuse generation-guarded cache push and honest latest-request states."}
+{"file": ".trellis/tasks/11-02-context-attribution-token-efficiency/research/attribution-model-identity-diagnosis.md", "reason": "Preserve request/response model identity semantics and real-data regression coverage."}
+{"file": ".trellis/tasks/11-02-context-attribution-token-efficiency/research/pilot-plan-20261104.md", "reason": "Owner-approved bounded exec guidance and Avatar representation experiment; preserve production/data boundaries."}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Descriptions match actual execution, stay concise, and preserve current result and authority contracts."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Maintain real call/result fidelity, privacy exclusion, native pair validity and current-turn behavior."}

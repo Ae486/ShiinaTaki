@@ -18,6 +18,13 @@ Use this contract when changing any of the following:
 Passive detection of an otherwise silent half-open socket is not part of this contract. D59 bounds active work and
 recovers after an observed close/failure; heartbeat and sleep/resume detection remain T4 work.
 
+Native Desktop resolves the selected Core profile endpoint on every fresh generation, then performs begin/proof on
+that same socket. The native proof command validates the actual Home/Pet origin and profile-owned operator ID before
+returning a one-use proof. Bootstrap keys stay native. A saved reconnect token is sent only after server verification.
+Temporary discovery/helper failures use bounded generation recovery without erasing identity; explicit local auth
+failure stays visible and never silently enrolls again. Legacy browser pairing remains separate. Home timezone
+reporting reads the accepted physical client's device ID, not an unrelated legacy localStorage identity.
+
 ## 2. Signatures
 
 ```typescript
@@ -87,6 +94,9 @@ interface TimingPolicy {
   settings-family client, and no window assumes shared JavaScript memory.
 - Every attempt creates a fresh transport and a fresh `WsClient`. A candidate client is published only after its
   `connect` handshake and required per-generation restoration complete.
+- `WsTransport.send(payload): void` rejects unless the native socket is `WebSocket.OPEN`, before native `send()`.
+  CLOSING/CLOSED browsers can discard a send without throwing, leaving a cleanup RPC pending until its deadline.
+  The existing JSON-RPC rejection path must release that ID/deadline immediately; never buffer or replay the payload.
 - `connect` uses one captured `openAuthMs` budget across both physical open and authentication. Time spent opening is
   subtracted before the handshake request starts; expiry must not send a late `connect` frame.
 - A close or transient attempt failure retires that generation exactly once, publishes `reconnecting`, and schedules
@@ -100,6 +110,9 @@ interface TimingPolicy {
   unbounded authentication loop. Disposal cancels retry/stability timers and retires the current candidate.
 - Late callbacks from generation N must pass `isCurrent()` before changing UI state or the live scene after generation
   N+1 exists.
+- The presence source belongs to the physical client for its entire lifetime. React cleanup/remount suspends local
+  evidence without rotating or permanently retiring that source; socket retirement does end it. See
+  [User Presence and Presentation Feedback](user-presence-feedback.md).
 
 ### Retirement and request deadlines
 
@@ -121,7 +134,15 @@ interface TimingPolicy {
 - The development fallback is available before any Core connection exists. An invalid or failed `config.list`
   refresh keeps the last-good policy and emits a diagnostic; it never disables bootstrap reconnect.
 - One `WsClient` fan-outs `config.changed` to multiple local handlers and memoizes `config.subscribe`, so timing sync
-  and the Settings page share exactly one Core subscription request per generation.
+  and Settings share one accepted Core membership. Concurrent setup joins one request; rejection, invalid
+  acknowledgement or lost-ack timeout retires only that attempt so deliberate retry works on the same client.
+- Recovery after a config observation gap triggers one reconciliation through the existing timing owner even if no
+  later `config.changed` arrives. Genuinely concurrent `config.list` requests share one physical request; there is
+  no new timing store, persistent cache, recurring setup retry, or mutation replay.
+- Config list sharing is valid only while no verified `config.changed`, successful `config.set` or acknowledged
+  recovery gap intervenes. Retire that old flight's reuse eligibility before notifying consumers; keep its existing
+  promises intact for their own generation/update guards. An old success/failure finalizer must not clear a newer
+  shared flight. A malformed push or refused write does not invent an accepted config change.
 - A relevant change triggers a serialized full `config.list` reread. In-flight operations keep the duration captured
   when they began; a new value applies to later requests/retry attempts only.
 - No timing policy or connection authority is persisted to `localStorage`.
@@ -145,12 +166,13 @@ interface TimingPolicy {
 
 ### Mounted-page revalidation
 
-- Navigation away and back is never the refresh mechanism for mutable server-owned data. A mounted page either consumes
-  a committed notification with a durable cursor, or performs bounded idempotent revalidation on a named lifecycle
-  signal such as focus, visibility restoration, config/client generation replacement, or explicit invalidation.
+- A resource with meaningful producer events cannot require navigation away/back as its only way to become current.
+  Perception and extension resources subscribe to data-free hints and reconcile visible demand. Query-only management
+  snapshots deliberately reread on entry/re-entry, relevant outcome or explicit refresh. Ordinary focus is not a
+  generic refresh trigger; route and actual document visibility follow reactive-read-models.md.
 - Prefer a real producer notification when Core already owns a meaningful event. Do not invent a dead subscription for
-  data that has no producer, and do not create unrelated per-page polling loops. A bounded timer is allowed only when
-  the source has no event seam and the child task defines interval, visibility pause, cancellation, and request budget.
+  data that has no producer, and do not add page polling as a fallback. Resource reads use one owned flight plus one
+  trailing dirty obligation; real one-shot request/operation deadlines and existing transport liveness stay separate.
 - A background refresh preserves last-good content and sets `refreshing`; it does not regress to first-load `loading`.
   Failed revalidation marks the view stale/error without discarding readable last-good data. Retired-generation results
   are ignored through the same generation guard as restoration.
@@ -175,6 +197,7 @@ interface TimingPolicy {
 |-----------|-------------------|
 | Transport factory/client factory throws | Publish reconnecting and schedule a jittered retry |
 | Socket closes before open | Reject every `whenOpen` waiter; retire once; retry |
+| A request/cleanup reaches a non-OPEN native socket | Reject before browser dispatch; settle the RPC and release its deadline without a closed-socket console error |
 | Open consumes the total open/auth budget | Close/retire candidate; do not send `connect` afterward |
 | Pairing is required or auth is refused | Publish the specific terminal state; do not blind-retry |
 | A stored operator token is rejected with `AUTH_FAILED` | Clear only the token, keep the stable `deviceId`, create one fresh generation, then publish terminal `AUTH_FAILED` if it is rejected again |
@@ -211,6 +234,8 @@ interface TimingPolicy {
   states, stale callbacks, exact-once retirement, and disposal.
 - `ws-client.test.ts`: close-before-open, total open/auth budget, pending request/D29 settlement, native timeout cleanup,
   concurrent request isolation, late responses, config subscription memoization, and handler fan-out.
+- `ws-transport.test.ts`: CONNECTING/CLOSING/CLOSED never dispatch a native send; OPEN sends are unchanged. An actual
+  `createWsClient` cleanup request rejects immediately and leaves no request-deadline timer.
 - `timing-policy-schema.test.ts`, `timing-policy.test.ts`, `timing-policy-sync.test.ts`: complete keys, cross-field
   validation, last-good retention, serialized reread, and live-change behavior.
 - `restore-pet-connection.test.ts`: callback -> truthful report -> subscribe order, restoration failure, stale generation,
@@ -218,7 +243,7 @@ interface TimingPolicy {
 - `restore-chat-timeline.test.ts` plus store tests: subscribe-before-history, live-race dedup, removal tombstones,
   authoritative newest reconciliation, and older cursor preservation.
 - Monitor controller/view tests: retired-generation suppression, disabled-state clearing and Home-row removal,
-  list/trajectory pagination, semantic grouping without opaque labels, inspector-only copy controls, live cursor
+  list/trajectory pagination, semantic grouping/details with no technical identity/copy fallback, live cursor
   continuation, overflow recovery, and explicit unsubscribe on rebind/disposal.
 - Reactive page tests: focus/visibility/invalidation revalidation, one in-flight refresh, last-good preservation,
   stale/error recovery, disposal cancellation, lazy-page cursor/selection retention, tail-follow suspension, and

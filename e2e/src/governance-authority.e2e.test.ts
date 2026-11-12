@@ -29,7 +29,8 @@ describe("Core governance authority with an external taki-node", () => {
       expect(stack.node()?.child.exitCode ?? null).toBeNull();
       const socket = await stack.operator();
       const initial = PermissionLevelStateSchema.parse(await result(socket, "permission.levelGet", {}));
-      expect(initial).toMatchObject({ level: "standard", policyGeneration: 1 });
+      // Fresh SQLite retains the historical policy receipt; union-registry reconciliation invalidates it once.
+      expect(initial).toMatchObject({ level: "standard", policyGeneration: 2, registryRevision: 4 });
       await expect(stack.l1("screenshot", {})).resolves.toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
 
       const relaxed = PermissionLevelStateSchema.parse(await result(socket, "permission.levelSet", {

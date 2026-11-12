@@ -58,6 +58,15 @@ describe("createTimelineRepo.append", () => {
     expect(page.entries[0]).toMatchObject({ role: "tool", parts });
   });
 
+  it("preserves trusted image refs on their exact tool result while legacy results remain unchanged", () => {
+    const ref = `attachments/${"a".repeat(64)}.png`;
+    const parts: TimelinePart[] = [{ type: "tool-result", toolCallId: "capture", toolName: "extension_call",
+      output: { type: "json", value: { ok: true, width: 64 } }, imageRefs: [{ mediaType: "image/png", ref }] }];
+    repo.append({ characterId: "taki", role: "tool", content: "capture status", parts });
+    expect(repo.latestAscending("taki", 10)[0]?.parts).toEqual(parts);
+    expect(db.prepare("SELECT parts FROM timeline_messages").get()?.parts).toContain(ref);
+  });
+
   it("strips raw input from legacy timeline JSON before returning it", () => {
     const sentinel = "SENTINEL_LEGACY_DB_SECRET_83de";
     db.prepare(
@@ -77,6 +86,92 @@ describe("createTimelineRepo.append", () => {
     const row = repo.latestAscending("taki", 10)[0];
     expect(row?.parts).toEqual([{ type: "tool-call", toolCallId: "legacy-call", toolName: "exec" }]);
     expect(JSON.stringify(row)).not.toContain(sentinel);
+  });
+});
+
+describe("timeline tool display names", () => {
+  it("retains bounded names through writes and reads while scrubbing raw input only", () => {
+    const displayName = "🛠".repeat(120);
+    const output = { type: "json", value: { displayName: "x".repeat(300), input: "business input" }, hash: "business hash" };
+    const parts: TimelinePart[] = [
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName, input: { secret: "RAW_INPUT_SENTINEL" } },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName, output },
+    ];
+    const committed = repo.append({ characterId: "taki", role: "assistant", content: "canonical projection", parts });
+    const expected = [
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName, output },
+    ];
+    expect(committed.parts).toEqual(expected);
+    expect(repo.latestAscending("taki", 10)[0]?.parts).toEqual(expected);
+    expect(repo.pageBefore({ characterId: "taki", limit: 10 }).entries[0]?.parts).toEqual(expected);
+    const raw = String(db.prepare("SELECT parts FROM timeline_messages WHERE seq = :seq").get({ seq: committed.seq })?.parts);
+    expect(raw).toContain(displayName);
+    expect(raw).not.toContain("RAW_INPUT_SENTINEL");
+    expect(raw).toContain("business input");
+    expect(raw).toContain("business hash");
+  });
+
+  it("omits malformed optional names on append and legacy reads instead of rejecting the row", () => {
+    for (const displayName of [null, 17, {}, "", " \t\n", "x".repeat(241), "🛠".repeat(121)]) {
+      const parts = [
+        { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName, input: { secret: "RAW_INPUT_SENTINEL" } },
+        { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName, output: { type: "text", value: "done" } },
+      ];
+      const expected = [
+        { type: "tool-call", toolCallId: "c1", toolName: "opaque_route" },
+        { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", output: { type: "text", value: "done" } },
+      ];
+      const committed = repo.append({ characterId: "taki", role: "assistant", content: "canonical projection", parts: parts as TimelinePart[] });
+      expect(committed.parts).toEqual(expected);
+      const raw = String(db.prepare("SELECT parts FROM timeline_messages WHERE seq = :seq").get({ seq: committed.seq })?.parts);
+      expect(raw).not.toContain("displayName");
+      expect(raw).not.toContain("RAW_INPUT_SENTINEL");
+
+      db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = :seq")
+        .run({ seq: committed.seq, parts: JSON.stringify(parts) });
+      expect(repo.rangeAscending("taki", committed.seq - 1, committed.seq)[0]?.parts).toEqual(expected);
+    }
+  });
+});
+
+describe("timeline source preservation", () => {
+  it("keeps absent source context as SQL NULL and refuses malformed source evidence before a batch writes", () => {
+    const legacy = repo.append({ characterId: "taki", role: "user", content: "Original self-report." });
+    expect("sourceContext" in legacy).toBe(false);
+    expect(db.prepare("SELECT source_context_json AS source FROM timeline_messages WHERE seq=:seq").get({ seq: legacy.seq })?.source).toBeNull();
+    const malformed = { characterId: "taki", role: "assistant" as const, content: "Bad context", sourceContext: { materials: [{ label: "" }] } };
+    expect(() => repo.appendBatch([{ characterId: "taki", role: "assistant", content: "Must roll back" }, malformed])).toThrow();
+    expect(repo.latestAscending("taki", 10)).toEqual([legacy]);
+  });
+
+  it("does not silently discard corrupt stored source context", () => {
+    db.prepare(`INSERT INTO timeline_messages(id,character_id,role,content,source_context_json,created_at)
+      VALUES(:id,'taki','assistant','Original text','{"materials":[{"speaker":42}]}','2026-10-22T00:00:00.000Z')`)
+      .run({ id: "550e8400-e29b-41d4-a716-446655440000" });
+    expect(() => repo.latestAscending("taki", 10)).toThrow("corrupt source context JSON");
+  });
+
+  it("retains source context and exact tool material status without raw call inputs", () => {
+    const sourceContext = { generatedBy: { runId: "generation", attemptId: "attempt" },
+      materials: [{ label: "Interview", reference: "document:interview", speaker: "Guest" }] };
+    const sourceMaterials = [{ key: "interview", source: sourceContext.materials[0] }];
+    const output = { type: "json", value: { ok: false, reason: "unavailable" } };
+    const parts: TimelinePart[] = [
+      { type: "tool-call", toolCallId: "read", toolName: "read_file", input: { secret: "DO_NOT_RETAIN" } },
+      { type: "tool-result", toolCallId: "read", toolName: "read_file", output, sourceMaterials },
+    ];
+    const input = { characterId: "taki", role: "assistant" as const, content: "The guest's story.\n", sourceContext, parts };
+    const row = repo.append(input);
+    const expected = { ...input, parts: [{ type: "tool-call", toolCallId: "read", toolName: "read_file" }, parts[1]] };
+    expect(row).toMatchObject(expected);
+    for (const entry of [repo.latestAscending("taki", 10)[0], repo.rangeAscending("taki", 0, row.seq)[0],
+      repo.pageBefore({ characterId: "taki", limit: 10 }).entries[0]]) expect(entry).toMatchObject(expected);
+    expect(JSON.stringify(row)).not.toContain("DO_NOT_RETAIN");
+    sourceContext.materials[0]!.speaker = "Changed outside storage";
+    expect(repo.latestAscending("taki", 10)[0]?.sourceContext?.materials?.[0]?.speaker).toBe("Guest");
+    expect(() => db.prepare("UPDATE timeline_messages SET source_context_json='{}' WHERE seq=:seq").run({ seq: row.seq }))
+      .toThrow("timeline source context is immutable");
   });
 });
 
@@ -210,11 +305,16 @@ describe("timeline restart survival", () => {
     try {
       const first = openDatabase({ path: file, migrations: MIGRATIONS });
       createTimelineRepo(first).append({ characterId: "taki", role: "user", content: "before restart" });
+      createTimelineRepo(first).append({ characterId: "taki", role: "assistant", content: "[tool-call: captured_route]",
+        parts: [{ type: "tool-call", toolCallId: "captured-call", toolName: "captured_route", displayName: "Retired server · tool" }] });
       first.close(); // releases the OS file handle
 
       const second = openDatabase({ path: file, migrations: MIGRATIONS });
       const rows = createTimelineRepo(second).latestAscending("taki", 10);
-      expect(rows.at(-1)?.content).toBe("before restart");
+      expect(rows[0]?.content).toBe("before restart");
+      expect(rows[1]?.parts).toEqual([{
+        type: "tool-call", toolCallId: "captured-call", toolName: "captured_route", displayName: "Retired server · tool",
+      }]);
       second.close();
     } finally {
       rmSync(dir, { recursive: true, force: true });

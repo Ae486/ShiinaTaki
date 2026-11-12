@@ -17,7 +17,8 @@ function fresh() {
   const f = createCompanionFixture(); fixtures.push(f);
   const appended: number[] = []; const removed: number[] = [];
   const primaryPersistence = createPrimaryPersistence({ custody: createPrimaryMemoryCustody({ db: f.db, bootId: "boot-chat" }),
-    repo: createTimelineRepo(f.db), onAppend: (entry) => appended.push(entry.seq), onRemove: (ref) => removed.push(ref.seq) });
+    repo: createTimelineRepo(f.db), atomic: f.db.transaction,
+    onAppend: (entry) => appended.push(entry.seq), onRemove: (ref) => removed.push(ref.seq) });
   const groups = () => f.db.prepare("SELECT group_id,state,run_id,finalized_through_seq FROM primary_memory_groups ORDER BY created_at").all();
   const members = (groupId: unknown) => f.db.prepare("SELECT timeline_seq FROM primary_memory_members WHERE group_id=:id ORDER BY timeline_seq")
     .all({ id: String(groupId) }).map((row) => Number(row.timeline_seq));

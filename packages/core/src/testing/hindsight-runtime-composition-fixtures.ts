@@ -15,6 +15,7 @@ import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-autho
 import { createHindsightBankSetupRepo } from "../db/hindsight-bank-setup-repo.ts";
 import { createHindsightApplicationReplicaRepo } from "../db/hindsight-application-replica-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
+import { createHistoricalMainTimelineRepo } from "./memory-historical-timeline-fixture.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
@@ -64,7 +65,8 @@ export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | 
   const replica = createHindsightApplicationReplicaRepo({ db, tokenizer: createIntlSegmenterTokenizer({ stoplist: true }),
     bankScope: (bankId) => banks.find((bank) => bank.scope.bankId === bankId)!.bankScope });
   if (mode === "hindsight" && input.seed !== false) for (const bank of banks) seedReplica(replica, bank);
-  const timeline = createTimelineRepo(db); const summaries = createSummaryRepo(db); const owners: Array<() => Promise<void>> = [];
+  const timeline = input.coreMigrationHead === undefined ? createTimelineRepo(db) : createHistoricalMainTimelineRepo(db);
+  const summaries = createSummaryRepo(db); const owners: Array<() => Promise<void>> = [];
   const boot = { db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline, summaries, env: {}, logger, bootId: "fixture-boot",
     windowStart: () => 1, estimatedTokens: () => 0, budget: () => 100_000, compact: { triggerRatio: 0.8, keepMessages: 3 },
     onPolicyReviewChanged: input.onPolicyReviewChanged };

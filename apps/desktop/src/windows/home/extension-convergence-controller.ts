@@ -1,71 +1,106 @@
 /**
- * INPUT:  replaceable authenticated WsClient generations and extension.status reads
- * OUTPUT: current-client-only convergence snapshots with last-good read fallback
- * POS:    Home shared operator state guard; in-memory only, with no mutation, replay, or persisted cache
+ * INPUT:  replaceable authenticated clients, visible extension demand and real projection invalidations.
+ * OUTPUT: bounded extension.status reads with retained snapshots and separate connection/visibility lifetimes.
+ * POS:    Home extension projection — in-memory only, with no mutation, replay or persisted cache.
  */
 import type { ExtensionConvergenceResult } from "@taki/shared";
 import type { WsClient } from "@/lib/ws-client.js";
+import { createReadCoordinator, type ReadCoordinator } from "@/lib/read-coordinator.js";
+import { createReadObservation, type ReadObservation, type ReadObservationState } from "@/lib/read-observation.js";
 
-export type ExtensionConvergenceClient = Pick<WsClient, "extensionStatus">;
-export type ExtensionConvergenceState =
+export type ExtensionConvergenceClient = Pick<WsClient, "extensionStatus" | "subscribeExtensions" | "onExtensionChanged">;
+type ExtensionReadState =
   | { kind: "idle"; previous: ExtensionConvergenceResult | null }
   | { kind: "loading"; previous: ExtensionConvergenceResult | null }
   | { kind: "ready"; data: ExtensionConvergenceResult }
   | { kind: "failure"; previous: ExtensionConvergenceResult | null; message: string };
+export type ExtensionConvergenceState = ExtensionReadState & { observation: ReadObservationState };
 
 export interface ExtensionConvergenceController {
   replace(client: ExtensionConvergenceClient | null): void;
+  setVisible(visible: boolean): void;
   refresh(): Promise<void>;
+  invalidate(): Promise<void>;
+  invalidateLegacy(): Promise<void>;
   dispose(): void;
 }
 
-export function createExtensionConvergenceController(
-  publish: (state: ExtensionConvergenceState) => void,
-): ExtensionConvergenceController {
-  let client: ExtensionConvergenceClient | null = null;
-  let epoch = 0;
-  let token = 0;
-  let lastGood: ExtensionConvergenceResult | null = null;
+export function createExtensionConvergenceController(publish: (state: ExtensionConvergenceState) => void): ExtensionConvergenceController {
+  return new ExtensionReads(publish);
+}
 
-  async function refresh(): Promise<void> {
-    const candidate = client;
-    if (!candidate) return;
-    const capturedEpoch = epoch;
-    const capturedToken = ++token;
-    publish({ kind: "loading", previous: lastGood });
-    try {
-      const result = await candidate.extensionStatus();
-      if (!current(candidate, capturedEpoch, capturedToken)) return;
-      lastGood = result;
-      publish({ kind: "ready", data: result });
-    } catch (error) {
-      if (current(candidate, capturedEpoch, capturedToken)) {
-        publish({ kind: "failure", previous: lastGood, message: readable(error) });
-      }
+class ExtensionReads implements ExtensionConvergenceController {
+  private client: ExtensionConvergenceClient | null = null;
+  private lastGood: ExtensionConvergenceResult | null = null;
+  private visible = true;
+  private readEpoch = 0;
+  private needsRead = true;
+  private state: ExtensionReadState = { kind: "idle", previous: null };
+  private readonly publish: (state: ExtensionConvergenceState) => void;
+  private readonly reads: ReadCoordinator<ExtensionConvergenceResult>;
+  private readonly observation: ReadObservation;
+
+  constructor(publish: (state: ExtensionConvergenceState) => void) {
+    this.publish = publish;
+    this.reads = createReadCoordinator<ExtensionConvergenceResult>({
+      started: () => { this.needsRead = true; this.set({ kind: "loading", previous: this.lastGood }); },
+      loaded: (data) => { this.needsRead = false; this.lastGood = data; this.set({ kind: "ready", data }); },
+      failed: (cause) => this.fail(cause),
+      retired: () => { if (this.needsRead) this.set({ kind: "idle", previous: this.lastGood }); },
+    });
+    this.observation = createReadObservation({
+      changed: (observation) => {
+        if (observation === "subscribing") this.state = { kind: "loading", previous: this.lastGood };
+        if (this.visible) this.publish({ ...this.state, observation });
+      },
+      failed: (cause) => this.fail(cause),
+      invalidated: () => { void this.invalidate(); },
+    });
+  }
+
+  replace(client: ExtensionConvergenceClient | null): void {
+    if (this.client === client) return;
+    this.client = client;
+    this.readEpoch += 1;
+    this.needsRead = true;
+    this.reads.setActive(false);
+    this.reads.replace(client ? () => client.extensionStatus() : null);
+    this.state = { kind: "idle", previous: this.lastGood };
+    this.observation.replace(client ? {
+      subscribe: () => client.subscribeExtensions(),
+      onChanged: (changed) => client.onExtensionChanged((event) => { if (event.targets.includes("extension-status")) changed(event.revision); }),
+    } : null);
+    if (client) void this.refresh();
+    else this.set(this.state);
+  }
+
+  setVisible(visible: boolean): void {
+    if (this.visible === visible) return;
+    this.visible = visible;
+    this.readEpoch += 1;
+    this.reads.setActive(visible && this.observation.usable());
+    if (visible) {
+      this.set(this.state);
+      if (this.needsRead || this.observation.state() !== "live") void this.refresh();
     }
   }
 
-  function current(candidate: ExtensionConvergenceClient, capturedEpoch: number, capturedToken: number): boolean {
-    return client === candidate && epoch === capturedEpoch && token === capturedToken;
+  async refresh(): Promise<void> {
+    if (!this.client || !this.visible) return;
+    const token = this.readEpoch;
+    if (!this.observation.usable() && !await this.observation.prepare()) return;
+    if (token !== this.readEpoch || !this.visible) return;
+    this.reads.setActive(true);
+    await this.reads.demand();
   }
-
-  return {
-    replace(next) {
-      epoch += 1;
-      token += 1;
-      client = next;
-      publish(next ? { kind: "loading", previous: lastGood } : { kind: "idle", previous: lastGood });
-      if (next) void refresh();
-    },
-    refresh,
-    dispose() {
-      epoch += 1;
-      token += 1;
-      client = null;
-    },
-  };
-}
-
-function readable(error: unknown): string {
-  return error instanceof Error ? error.message : "无法读取扩展收敛状态";
+  invalidate(): Promise<void> { this.needsRead = true; return this.reads.invalidate(); }
+  invalidateLegacy(): Promise<void> { return this.observation.state() === "unsupported" ? this.invalidate() : Promise.resolve(); }
+  dispose(): void { this.replace(null); }
+  private set(state: ExtensionReadState): void {
+    this.state = state;
+    if (this.visible) this.publish({ ...state, observation: this.observation.state() });
+  }
+  private fail(cause: unknown): void {
+    this.set({ kind: "failure", previous: this.lastGood, message: cause instanceof Error ? cause.message : "无法读取扩展状态" });
+  }
 }

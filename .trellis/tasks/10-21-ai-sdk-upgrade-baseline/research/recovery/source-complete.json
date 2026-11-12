@@ -1,0 +1,24 @@
+{
+  "changedFiles": [
+    "packages/core/package.json",
+    "packages/core/src/agents/chat-agent.ts",
+    "packages/core/src/agents/index.md",
+    "packages/core/src/agents/provider-stream-failure.ts",
+    "packages/core/src/agents/run-observability-telemetry.test.ts",
+    "packages/core/src/agents/sdk-wire-compatibility.test.ts",
+    "packages/core/src/mcp/index.md",
+    "packages/core/src/mcp/mcp-http.test.ts",
+    "pnpm-lock.yaml"
+  ],
+  "sha256": {
+    "packages/core/package.json": "30604fd2035415faf5eb38c4cdd3603dd417612fabdc6eafaa2d93122cb52f58",
+    "packages/core/src/agents/chat-agent.ts": "766c4c99cf47f8f6d9d915ccaa446befda394c2a7d5b46a7a7872d4b06557af8",
+    "packages/core/src/agents/index.md": "a3ea9230c85abcb183f1c352e9cc747a25864f995c8d669d56ad034bab701e8e",
+    "packages/core/src/agents/provider-stream-failure.ts": "e5ba815d94944aaf3637cdca627f8d6e2b18172fc8776effc1ea0e0c93d2cc5a",
+    "packages/core/src/agents/run-observability-telemetry.test.ts": "973d6e5b7c5eba94ab9ced865607c441f7a05e9fc2f15d7b19222f5b0788c126",
+    "packages/core/src/agents/sdk-wire-compatibility.test.ts": "697d2effd0e8d31ff2ead98b39f8ff16d4ea30fd698640c39a7ddb7d97bb11a9",
+    "packages/core/src/mcp/index.md": "93b5f52fa877efbc73866ac92ea8dd222687e5b0913549a77b228951c5f5542e",
+    "packages/core/src/mcp/mcp-http.test.ts": "3b10903f4f51e8dc717622d97eb2ab1c4c0bd8ab05128dc45437f6c298847fd5",
+    "pnpm-lock.yaml": "2f66fc75926ca324f353dea4b01eb9fc81822202f8e7044721b87091a58b3391"
+  }
+}

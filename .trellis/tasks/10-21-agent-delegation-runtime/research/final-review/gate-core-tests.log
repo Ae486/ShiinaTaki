@@ -1,0 +1,11 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ✓ src/agents/turn-registry.test.ts (9 tests) 19ms
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  11:40:06
+   Duration  588ms (transform 67ms, setup 0ms, import 94ms, tests 19ms, environment 0ms)
+
+JSON report written to H:/TakiAgent-worktrees/t4/.trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-core-tests.json

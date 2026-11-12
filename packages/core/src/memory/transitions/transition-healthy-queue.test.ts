@@ -6,6 +6,7 @@ import { attachEffectExecutionContext } from "../../governance/governed-tool.ts"
 import { DEFAULT_TRANSITION_QUEUE_POLICY } from "../../db/memory-transition-repo.ts";
 import { readTransitionQueue, readQueueOutcome, readQueueExecution } from "../../db/memory-transition-queue-repo.ts";
 import * as hindsightModule from "../hindsight/hindsight-memory-subsystem.ts";
+import * as localModule from "../canonical-local-subsystem.ts";
 import { readVerifiedTransitionPublication } from "../../db/memory-transition-publication-reader.ts";
 import { openDatabase } from "../../db/sqlite.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
@@ -31,6 +32,80 @@ async function queueHarness() {
 }
 
 describe("complete healthy driver with actual queue and custody entrypoints", () => {
+  it("retains committed authority and queued intent when Local index initialization fails, then recovers without republishing", async () => {
+    const construct = localModule.createCanonicalLocalSubsystem;
+    vi.spyOn(localModule, "createCanonicalLocalSubsystem").mockImplementation((input) => {
+      const value = construct(input);
+      vi.spyOn(value.engine, "reconfigureSearch").mockRejectedValueOnce(new Error("MEMORY_SEARCH_INDEX_UNAVAILABLE"));
+      return value;
+    });
+    const h = await queueHarness();
+    try {
+      const quiesce = h.runtime.transitions.quiesce;
+      vi.spyOn(h.runtime.transitions, "quiesce").mockImplementationOnce(async (work) => { await h.retain("failed-local-index"); await quiesce(work); });
+      const admitted = h.owner.submit(await h.request()); await h.owner.stop();
+      const transitionId = admitted.producer?.kind === "transition" ? admitted.producer.transitionId : "";
+      expect(h.owner.status(admitted.operationId)).toMatchObject({ state: "outcome_unknown", result: { authorityCommitted: true } });
+      const marker = h.db.prepare("SELECT * FROM memory_authority_selection").get();
+      const receipts = h.db.prepare("SELECT * FROM memory_transition_receipts").all();
+      expect(receipts).toHaveLength(1);
+      expect(h.runtime.memory.searchStatus?.().ready).toBe(false);
+      const queue = readTransitionQueue(h.db, transitionId);
+      expect(queue).toHaveLength(1); expect(readQueueExecution(h.db, queue[0]!.intentId)).toBeUndefined();
+      h.clock.value = "2026-10-01T00:06:00.000Z";
+      const recovered = h.owner.submit(await h.request(transitionId)); await h.owner.stop();
+      expect(h.owner.status(recovered.operationId).state).toBe("completed");
+      expect(h.runtime.memory.searchStatus?.().ready).toBe(true);
+      expect(h.db.prepare("SELECT * FROM memory_authority_selection").get()).toEqual(marker);
+      expect(h.db.prepare("SELECT * FROM memory_transition_receipts").all()).toEqual(receipts);
+      expect(readQueueOutcome(h.db, queue[0]!.intentId)?.status).toBe("completed");
+    } finally { await h.close(); }
+  });
+
+  it("rejects late Local index initialization after runtime shutdown", async () => {
+    let entered!: () => void; const started = new Promise<void>((resolve) => { entered = resolve; });
+    let release!: () => void; const gate = new Promise<void>((resolve) => { release = resolve; });
+    const construct = localModule.createCanonicalLocalSubsystem;
+    vi.spyOn(localModule, "createCanonicalLocalSubsystem").mockImplementation((input) => {
+      const value = construct(input); const reconfigure = value.engine.reconfigureSearch!;
+      vi.spyOn(value.engine, "reconfigureSearch").mockImplementationOnce(async (policy, signal) => {
+        entered(); await gate; return reconfigure(policy, signal);
+      });
+      return value;
+    });
+    const h = await queueHarness();
+    try {
+      const quiesce = h.runtime.transitions.quiesce;
+      vi.spyOn(h.runtime.transitions, "quiesce").mockImplementationOnce(async (work) => { await h.retain("stopped-local-index"); await quiesce(work); });
+      const admitted = h.owner.submit(await h.request()); await started;
+      const marker = h.db.prepare("SELECT * FROM memory_authority_selection").get();
+      const stopping = h.runtime.stop(); release(); await stopping; await h.owner.stop();
+      expect(h.owner.status(admitted.operationId).state).toBe("outcome_unknown");
+      expect(h.db.prepare("SELECT * FROM memory_authority_selection").get()).toEqual(marker);
+      expect(h.db.prepare("SELECT count(*) AS n FROM memory_transition_receipts").get()?.n).toBe(1);
+      expect(h.db.prepare("SELECT count(*) AS n FROM memory_transition_queue_executions").get()?.n).toBe(0);
+    } finally { release(); await h.close(); }
+  });
+
+  it("applies the Local search projection before a queued retain uses the newly published target", async () => {
+    const h = await queueHarness();
+    let readyAtBind: boolean | undefined;
+    try {
+      const quiesce = h.runtime.transitions.quiesce;
+      vi.spyOn(h.runtime.transitions, "quiesce").mockImplementationOnce(async (work) => {
+        await h.retain("new-local-index"); await quiesce(work);
+      });
+      const bind = h.runtime.transitions.bind;
+      vi.spyOn(h.runtime.transitions, "bind").mockImplementation(async (transitionId) => {
+        const result = await bind(transitionId);
+        readyAtBind = h.runtime.memory.searchStatus?.().ready;
+        return result;
+      });
+      const admitted = h.owner.submit(await h.request()); await h.owner.stop();
+      expect(readyAtBind).toBe(true);
+      expect(h.owner.status(admitted.operationId).state).toBe("completed");
+    } finally { await h.close(); }
+  });
   it("commits queue custody before ACK, executes Local effects in order and exposes a revision conflict", async () => {
     const h = await queueHarness();
     try {

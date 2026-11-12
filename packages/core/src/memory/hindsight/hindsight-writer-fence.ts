@@ -38,7 +38,7 @@ export function fenceHindsightWriters(writers: HindsightWriters, fence: Canonica
       }
     } },
     tidy: { maybeRun: (characterId) => fence.admit(() => tidy.maybeRun(characterId)),
-      runNow: (characterId) => fence.admit(() => tidy.runNow(characterId)) },
+      runNow: (characterId, options) => fence.admit(() => tidy.runNow(characterId, options)) },
     writeMemory: (request) => fence.admit(() => writers.writeMemory(request)),
     // Chat keeps working through a capture: the Run's reads stay open and its write tools refuse structurally.
     captureRun: async (characterId, signal) => {

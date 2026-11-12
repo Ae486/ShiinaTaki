@@ -17,6 +17,8 @@ export function createRetainTool(
         "safe memory content. Use recall to retrieve existing memory.",
       WRITE_GATE_RULE,
       MEMORY_VOICE_RULE,
+      "Pending means durably queued or awaiting confirmation, not completed; do not blindly repeat the write. " +
+        "A completed zeroResult means no memories were created. Per-scope progress may differ.",
     ].join("\n\n"),
     inputSchema: z.strictObject({
       content: z.string().min(1).max(100_000).describe(

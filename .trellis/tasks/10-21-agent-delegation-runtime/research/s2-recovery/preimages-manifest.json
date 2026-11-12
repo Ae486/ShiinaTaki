@@ -1,0 +1,910 @@
+[
+  {
+    "file": "packages/core/src/activity/index.md",
+    "sha256": "ed5d5d7e51a2b8416b19778a68a983cbc224f8331b0e902ebb6bad2bf25d2ae1"
+  },
+  {
+    "file": "packages/core/src/agents/base-prompt.test.ts",
+    "sha256": "75582c71337f1311229c54f4966877b1108a87ac92fa91ddb62a9dd3b819ba9b"
+  },
+  {
+    "file": "packages/core/src/agents/base-prompt.ts",
+    "sha256": "8dc4fb4b1a082a4c878042fd04dc0938a7361f5c1cc0721ecefba3ffbcebe201"
+  },
+  {
+    "file": "packages/core/src/agents/chat-activity-projection.test.ts",
+    "sha256": "4d06882813c60c73c7fe092be57cdb068225515c7ad326270ecd4f7307758c59"
+  },
+  {
+    "file": "packages/core/src/agents/chat-activity-projection.ts",
+    "sha256": "620a4606605ffeb9bb0b9456cee820665c35efcccb9c01a75f693ad196ec1906"
+  },
+  {
+    "file": "packages/core/src/agents/chat-activity.test.ts",
+    "sha256": "a477e72aca60ec1f77163126182308f83ce7c0f96461b7cc4bab59cc8523a69f"
+  },
+  {
+    "file": "packages/core/src/agents/chat-activity.ts",
+    "sha256": "de8f15783888ce7f942d8e7a7c2b19d81685559a53d1267d040b1c3366f0769a"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-activity.test.ts",
+    "sha256": "9ee3fe0995fc480e31c2407211bcfd57ee3926920979a585006c7af08f28e7ee"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-approval.test.ts",
+    "sha256": "ed547ce67fe8f7f6f9145e4a503a73379a0a302bad0d13c38884569a7235bfec"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-baseline-integration.test.ts",
+    "sha256": "3a05380fd610f122a069480888c82717bfc3ca436a667ed4216b7afb8796660f"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-canonical-memory.test.ts",
+    "sha256": "98f3306e14754558640abef12d5c440b5e4b66c36f3da9674f5970c69287ea71"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-compaction-seam.test.ts",
+    "sha256": "a73d7178a610d526e98b5821d0f0208b52a87025e99398f58e98df6966f14405"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-costume.test.ts",
+    "sha256": "99392f134b78cda8a569eba9a67a36f214b85b20691a33fc45473668e91f3091"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-images.test.ts",
+    "sha256": "e55209b987f22a72b1c49d308ba1ddd76285295917fd69d3f59ec457c843262e"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-lifecycle.test.ts",
+    "sha256": "6512e83d471ee10292ae8a64d4b162318b9972f5d5be77b371db0b63f47745f3"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-memory-recall.test.ts",
+    "sha256": "70b4f5e546653a31b42e618713565f8acfd0757dac3350b15554f3f629388c7a"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-non-primary.test.ts",
+    "sha256": "99b7edf5d2897140c1d77e4bb52bd769f53eac27894ed86319df8c934cba20c3"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-overflow.test.ts",
+    "sha256": "135a9b83819f78ab397e18aaeec11576c6e50e21f281683b340c5d994fb748df"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-prefix-cache.test.ts",
+    "sha256": "5deaec389fb8201e065431db69630eb59d018d5bc656bff71ce2f3442434bf99"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-presentation.test.ts",
+    "sha256": "cd531ffb4f8810e51efbe26487574cbd8cb8e5650a9d4a846c461c1e5d1a2564"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-primary-commit.test.ts",
+    "sha256": "c0adc6c7811764189a3d0e0ebe25415d63b42399dff61ee026f29a2b36834346"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-tail.test.ts",
+    "sha256": "fde45dbdf17df6317570d120b9e7aaafbfc24e365661eee3d757746ba2951c2e"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-time.test.ts",
+    "sha256": "a59df54f220d06d23b9e6cf117a49400c90e8c6a9640e4a62dd865a23667b6be"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-tool-names.test.ts",
+    "sha256": "392db4c52d9ca44bda307ad9c1940cfff64079915e58a04cafc327682ca0b86a"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-tools.test.ts",
+    "sha256": "15095b0fe61e64039aa402664b829bc44296426dfc2bd595cfc7fdfe881eff37"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent-usage.test.ts",
+    "sha256": "070bfe4f63c74639d0558506e160c55eefa35eab90b2d3b727c0f6d53abee198"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent.test.ts",
+    "sha256": "a1d54bcf7d55ecb72895c40c02879007dca7a06106511276131fe681eb5a6d61"
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent.ts",
+    "sha256": "aeb37f6b696f6fded04c872aba93a99a1f63bb702f01a5d1ce545bb82f48fba2"
+  },
+  {
+    "file": "packages/core/src/agents/compaction-coordinator.ts",
+    "sha256": "6a47fe35e071299920733da20debe543902b4a2f6e59a5513d07b4a4d7b21b65"
+  },
+  {
+    "file": "packages/core/src/agents/compaction-pass.test.ts",
+    "sha256": "a397b94314defc2c7f54ae11986441c67e7542648a515814c2d8d2acc0d45c57"
+  },
+  {
+    "file": "packages/core/src/agents/compaction-pass.ts",
+    "sha256": "fb2c9ebe7a73f4b10707aa10c174682514715b271d2ab6fbb860222e101a35f8"
+  },
+  {
+    "file": "packages/core/src/agents/compaction-policy.ts",
+    "sha256": "c396552b1f254f0e04a8a4b8fec9c3f9933ad06948b0cdbefe3eca37829c1a3f"
+  },
+  {
+    "file": "packages/core/src/agents/compaction-slice4.test.ts",
+    "sha256": "653fd2fb78d622ed7285691653332f2098747f0ecfb63f3c912e567180c6816a"
+  },
+  {
+    "file": "packages/core/src/agents/context-reduction.test.ts",
+    "sha256": "469525f76cc593dada19d45315b6c57c5920341b72385e0e1dc7aa430cf739df"
+  },
+  {
+    "file": "packages/core/src/agents/context-reduction.ts",
+    "sha256": "ad2d8e9fb6d6980bd6679b065c646c9b51e3d6cbe1b61274e43224b9cb460fc0"
+  },
+  {
+    "file": "packages/core/src/agents/context-window.test.ts",
+    "sha256": "36df5dd58c1ea229bb0ffdb5b435a238d3a0fe84270865c8701a89fd7ab3a768"
+  },
+  {
+    "file": "packages/core/src/agents/context-window.ts",
+    "sha256": "12830f57dd59e1769d805d66944cbd398d0a22dc3f198b04dccc70197d1122bf"
+  },
+  {
+    "file": "packages/core/src/agents/conversation-store.test.ts",
+    "sha256": "ff5a1140d58ff75433681bcd5304996c15b6e9e32ca90267dbd86870ccf5d813"
+  },
+  {
+    "file": "packages/core/src/agents/conversation-store.ts",
+    "sha256": "c4602ac65a4e848886c1bec48aa58993051ef14e1ca45dca880b9ecee07a165d"
+  },
+  {
+    "file": "packages/core/src/agents/conversation-turn-writer.test.ts",
+    "sha256": "d1d820de87f2eda7245df10b03d0227d2adffccd76da227d13d916b7da94293d"
+  },
+  {
+    "file": "packages/core/src/agents/conversation-turn-writer.ts",
+    "sha256": "35475ea5109979d3bcd65c43351982f58903d816a700008177b74975ff26e46a"
+  },
+  {
+    "file": "packages/core/src/agents/heartbeat-respond-tool.test.ts",
+    "sha256": "bf06c99bd97df94d8fa889a40790cdab42676b04eaf32b0f480aacfc71dae117"
+  },
+  {
+    "file": "packages/core/src/agents/heartbeat-respond-tool.ts",
+    "sha256": "fdaf4ec49fc32c7b688501b026dd0d29fce654f0a0684add938afd957e01e3b0"
+  },
+  {
+    "file": "packages/core/src/agents/index.md",
+    "sha256": "2cb51d0fee22f1c4bf28fc1103e6a232a0642eb5536883fd1e421dd0b37b0ea8"
+  },
+  {
+    "file": "packages/core/src/agents/initiative-context.ts",
+    "sha256": "3afd62e33d1d4aeb47501eb4bc15678e05684906d6fd1d4ef5dc70436ae8a32b"
+  },
+  {
+    "file": "packages/core/src/agents/model-effect-middleware.ts",
+    "sha256": "0169fc5ec4f10170b1a3c3d4f19435e0ce1656fa14d74acecc34e9d37e1b9f0e"
+  },
+  {
+    "file": "packages/core/src/agents/model-observability.test.ts",
+    "sha256": "31270d32bb0da8e67587fecf53575a9f2deb94e481941ceffa6cde198561f2cf"
+  },
+  {
+    "file": "packages/core/src/agents/model-observability.ts",
+    "sha256": "10d9a06ebe031057af53c6fb65a27cb3e086988a84ce0335989527aa26e85e41"
+  },
+  {
+    "file": "packages/core/src/agents/overflow-error.test.ts",
+    "sha256": "dfc5742fe27757f08b2e6e5ef1df8aff91d362a827d32974c1609f1e3f67c51b"
+  },
+  {
+    "file": "packages/core/src/agents/overflow-error.ts",
+    "sha256": "f8f0290dc738f035f88a00276c5e284cf5be18178ee47ae88f48d9e1a86f15b7"
+  },
+  {
+    "file": "packages/core/src/agents/parallel-tool-effect.test.ts",
+    "sha256": "600c737d944dd35b7cc94e3651d901e5cf3ac383cc01f01fcbfe6b821e391a25"
+  },
+  {
+    "file": "packages/core/src/agents/parent-continuation-result-tool.ts",
+    "sha256": "cb743f025f72e95b3a797fad4c39f65aacb6a947133203ab92069929034f6c36"
+  },
+  {
+    "file": "packages/core/src/agents/replay-folds.test.ts",
+    "sha256": "d3616575540636411497744c7bc38b1a39c92374db99880138c62df0120c8d12"
+  },
+  {
+    "file": "packages/core/src/agents/replay-folds.ts",
+    "sha256": "27077ea9b8312b24a534620451faff3e33fd1a854212b003c038aab73d2cfb76"
+  },
+  {
+    "file": "packages/core/src/agents/replay-source-loader.test.ts",
+    "sha256": "c586c1030e92e77a81b7536cc2a022d72c44d80ad696b9c9fdf4dff1066c3f90"
+  },
+  {
+    "file": "packages/core/src/agents/replay-source-loader.ts",
+    "sha256": "c6695e9a346353465268ca44a41e7604c9bd59ea566313ad01a0de05d4fd01ff"
+  },
+  {
+    "file": "packages/core/src/agents/request-measurement.test.ts",
+    "sha256": "44b7e2197b89d1e92e6faf56605b2d2ea0eb750ff715d0bd29bfc5722ae23080"
+  },
+  {
+    "file": "packages/core/src/agents/request-measurement.ts",
+    "sha256": "698ca011ba74d5ab0b5edee0cbc7f2f37412b2be5b0235377a7bce4c7e01282f"
+  },
+  {
+    "file": "packages/core/src/agents/request-preparation.test.ts",
+    "sha256": "5b2aa9730efbd5740fe318ca0e34e414e1684d9d5853d535930a76966ef405af"
+  },
+  {
+    "file": "packages/core/src/agents/request-preparation.ts",
+    "sha256": "49b22cc3b57fe653b137b2e50897a79d2df5cec23f699baccc050ec5b78ae5e9"
+  },
+  {
+    "file": "packages/core/src/agents/retirement-selector.ts",
+    "sha256": "6c051b9310a7822ca887777572aae80ea73fe2302d2d6268a03a526b8fff6d16"
+  },
+  {
+    "file": "packages/core/src/agents/run-message-store.ts",
+    "sha256": "1bcb991dc105c470cae1ad36d3878aa08fed7acf88bbe23c61f3703b94a4e465"
+  },
+  {
+    "file": "packages/core/src/agents/run-observability-telemetry.test.ts",
+    "sha256": "dc81ce9bfecac42d5eeedafff643d1c33ef99dba6826795d12b1f87bb6a92150"
+  },
+  {
+    "file": "packages/core/src/agents/run-observability-telemetry.ts",
+    "sha256": "df248eadf43dfda206b79407db7a0b3c8133ecc51392133e9a2d37d71d7c8b89"
+  },
+  {
+    "file": "packages/core/src/agents/sdk-wire-compatibility.test.ts",
+    "sha256": "697d2effd0e8d31ff2ead98b39f8ff16d4ea30fd698640c39a7ddb7d97bb11a9"
+  },
+  {
+    "file": "packages/core/src/agents/slice-3c-whole-slice.integration.test.ts",
+    "sha256": "54e0269e03a2e193252e741426137c425566f2ed46aaca2202efe4b024524d5a"
+  },
+  {
+    "file": "packages/core/src/agents/subagent-delegate-tool.ts",
+    "sha256": "57acf39b7c954da581253d7104a49186465eda09caa740a8968c1b28add497a8"
+  },
+  {
+    "file": "packages/core/src/agents/subagent-inspect-tool.ts",
+    "sha256": "056211ec9cc45ae02523794730e22f4d31e67abbc704a5023a3a0aacac4d346c"
+  },
+  {
+    "file": "packages/core/src/agents/subagent-message-tool.ts",
+    "sha256": "5af45440ae7867642bc7c8d9a7b3ca1be3956f6bfc1114ae6d2b76860f697c3c"
+  },
+  {
+    "file": "packages/core/src/agents/subagent-result-tool.ts",
+    "sha256": "8396b219728b81fff6ea14ee7bdca4b197a66d6c176ed9a438af948cb4e96577"
+  },
+  {
+    "file": "packages/core/src/agents/subagent-stop-tool.ts",
+    "sha256": "7c5b5ebd5171859610b0e5caf921bb48d0e072f23d087777018d8d3c48ca0fcd"
+  },
+  {
+    "file": "packages/core/src/agents/subagent-tools.ts",
+    "sha256": "1c42a605faac2383d9eafc785b3fa659c438016c30bd9659e7afec2fa902ac18"
+  },
+  {
+    "file": "packages/core/src/agents/summary-quality.test.ts",
+    "sha256": "6578e626d2d442a313020d9184aff08086721711957d931f28136afba0d63c19"
+  },
+  {
+    "file": "packages/core/src/agents/summary-quality.ts",
+    "sha256": "fd87a783aab0e13b3d719f334764ad262cc309de220291964f41396818fbbdb1"
+  },
+  {
+    "file": "packages/core/src/agents/tool-disclosure.test.ts",
+    "sha256": "83d293ba244b0a6cc7a6dff04f5242ece717067139de411690429de81be30e58"
+  },
+  {
+    "file": "packages/core/src/agents/tool-disclosure.ts",
+    "sha256": "8adc44d9c484f7aab15e7ccfc75d3cd3dc0859ab159ab37954eee20336cd243c"
+  },
+  {
+    "file": "packages/core/src/agents/tool-invocation.test.ts",
+    "sha256": "3bb8fb451510f6deefc2e1e6551b567445bb52a6ab3c85c4101bb6b6bc1e69a6"
+  },
+  {
+    "file": "packages/core/src/agents/tool-invocation.ts",
+    "sha256": "c57ab27e0e8ec7d9d2efd7fa2c9a8dd86c41dbf3ac5b91e7907137bf39c603af"
+  },
+  {
+    "file": "packages/core/src/agents/tool-observability.test.ts",
+    "sha256": "6834b4b7c1f0be257fa5accf92886e1b0ce760adb8626e7fc90314af701b7e83"
+  },
+  {
+    "file": "packages/core/src/agents/tool-observability.ts",
+    "sha256": "77d74940ae0cc46dee036b1155fc465ae0320a4071fe878eafb7da4ddad628f7"
+  },
+  {
+    "file": "packages/core/src/agents/tool-outcome.test.ts",
+    "sha256": "2fcfaa4bbc3f13f4e1b1e531894665c20ea8b9f3d6887bd720ceaa60e9d67ce7"
+  },
+  {
+    "file": "packages/core/src/agents/tool-outcome.ts",
+    "sha256": "e33d0468574bd1e6ecb25f559465178f725bc1e512859de26ba19a89d135aae7"
+  },
+  {
+    "file": "packages/core/src/agents/tool-set-assembly.test.ts",
+    "sha256": "7e3ac4b1e46daf2f8f63f83cf20ac2f621492a98ec407943f10ee10d2c61f99c"
+  },
+  {
+    "file": "packages/core/src/agents/tool-set-assembly.ts",
+    "sha256": "6441597f8fe26f8526bb8108af58bc6a8ed35a26a9039046cb7cae7c95d7e0c2"
+  },
+  {
+    "file": "packages/core/src/agents/turn-activity-presentation.ts",
+    "sha256": "b21f9693ee9a9200a0a9cce9b941ae25e893b44e05f228efd6797bd77f343121"
+  },
+  {
+    "file": "packages/core/src/agents/turn-mapping.test.ts",
+    "sha256": "6912ec184f10efe552524dd361f645aa2175b60edbf829e3c82d348fa0697bf6"
+  },
+  {
+    "file": "packages/core/src/agents/turn-mapping.ts",
+    "sha256": "bf8f1b3f3aa9f97759225488c644599519929f79fdfc4695307b2c3a239e0172"
+  },
+  {
+    "file": "packages/core/src/agents/turn-presentation.test.ts",
+    "sha256": "653b363924588dc42e3443e5482d1f19c06a511cff6050e228479341c963f82d"
+  },
+  {
+    "file": "packages/core/src/agents/turn-presentation.ts",
+    "sha256": "4a3942d5bd778fad8c0ecdeae1af46fb10a853d2fc4de8c9567e8677422db365"
+  },
+  {
+    "file": "packages/core/src/agents/turn-queue-availability.test.ts",
+    "sha256": "bc0d20ec562386b554b0a314f201fb2f3182dea73adf233bb71ec4f31114cdc8"
+  },
+  {
+    "file": "packages/core/src/agents/turn-queue.test.ts",
+    "sha256": "40f2c7f351603feb9f4725bfa77d753c2300e16aac490458970543aec078c080"
+  },
+  {
+    "file": "packages/core/src/agents/turn-queue.ts",
+    "sha256": "99e59f86e9f7f7295b7f2b2db54f5a24a5308da1843e7f081aa5cc5b8701f4c5"
+  },
+  {
+    "file": "packages/core/src/agents/turn-recording.ts",
+    "sha256": "5cd7c35c7ec5cc3bc0207fe0bafc55bf47b1f3014962447952874683b3b3e12a"
+  },
+  {
+    "file": "packages/core/src/agents/turn-registry.test.ts",
+    "sha256": "6f4ac2065878893cebb173cf0df628cf0194eb3be0cad674968feb9ccc5e7866"
+  },
+  {
+    "file": "packages/core/src/agents/turn-registry.ts",
+    "sha256": "d718cea1513219295bf8218db2f033f2138dde42fecf812d5f5d85a59de77571"
+  },
+  {
+    "file": "packages/core/src/agents/turn-usage-report.ts",
+    "sha256": "79b598a5c12186abbb9700a480adfef56d13b09c2e6fbc80f144a757b446fb1f"
+  },
+  {
+    "file": "packages/core/src/agents/untrusted-fence.test.ts",
+    "sha256": "45357d09a1389a6602aa4450aad34372ea8b46ac9e279e1c6bb9dc86c80da3ec"
+  },
+  {
+    "file": "packages/core/src/agents/untrusted-fence.ts",
+    "sha256": "082c892e917c5b6970fda5a8a617ec55fa4641b32caae5a6c7146c966abc4e9a"
+  },
+  {
+    "file": "packages/core/src/agents/window-calibrator.test.ts",
+    "sha256": "360ef4b32a64183ab048370b7d257eac785e49a824934cb49cf54946818a3507"
+  },
+  {
+    "file": "packages/core/src/agents/window-calibrator.ts",
+    "sha256": "3f2d56de5d2e6eb6e51604722473a45aed8797707075b2347150e433f7613536"
+  },
+  {
+    "file": "packages/core/src/agents/work-context.ts",
+    "sha256": "39b3aa9806e8808f2cbc491d5077dad6e44d7e343ecd6588b08d72b56a832f50"
+  },
+  {
+    "file": "packages/core/src/agents/work-scope.ts",
+    "sha256": "447e559cfe0b0ef97e025c804387b907df74d38a4a2a582a23e60f528944cd63"
+  },
+  {
+    "file": "packages/core/src/approval/index.md",
+    "sha256": "de5573d10cdd71df0d6083d220ae32561b05879f0e569aa888fb0e8102a87aac"
+  },
+  {
+    "file": "packages/core/src/archive/index.md",
+    "sha256": "52c212778186503de02e2c6af61e495aff7f1b0635c59bbd707b98e10e743483"
+  },
+  {
+    "file": "packages/core/src/avatar/index.md",
+    "sha256": "4a4adfc32a1fea6af2d02a2fc82705ca3159868111d63ae90533be2e7d6373f7"
+  },
+  {
+    "file": "packages/core/src/boot/index.md",
+    "sha256": "2027b9d903c73b6e729a713f497b09cb4c45896a45d43880bd2c595810dc9171"
+  },
+  {
+    "file": "packages/core/src/capabilities/index.md",
+    "sha256": "7128a852dc44868dc5d6c42ab09ec471a490643f6bcb975d982c754143f19ccb"
+  },
+  {
+    "file": "packages/core/src/characters/index.md",
+    "sha256": "3a1af8f1b8a7add9c2b8567cfb94a56293b80b4405678e71a2df76cc6e709e62"
+  },
+  {
+    "file": "packages/core/src/co-watching/index.md",
+    "sha256": "8bfec8f601bf97dd67b74a846b08895c5a455a41e1f3777c8255cb1f124cbdf8"
+  },
+  {
+    "file": "packages/core/src/config/index.md",
+    "sha256": "027523e161f514071c1da019d61f0a1fe1fec2a5536f59494c0dbb471f02337c"
+  },
+  {
+    "file": "packages/core/src/db/index.md",
+    "sha256": "67de1bb45a53a4daf546dff85f8d5f3f6b5286497d9223d57f1e48af469a054d"
+  },
+  {
+    "file": "packages/core/src/db/migrations/index.md",
+    "sha256": "c23c9dd5c4e017f55a639b2b73bd4d0da4338a5b23b6a8804175dda3c09dbe79"
+  },
+  {
+    "file": "packages/core/src/db/run-message-repo.ts",
+    "sha256": "d01513a3930da92cf13162fe82a90502ace37da15e31159ebe8d9ea2f3c0ba24"
+  },
+  {
+    "file": "packages/core/src/db/subagent-execution-repo.ts",
+    "sha256": "15ea5769997f408b4fc9437d4e485a7fb19585b73f835176b08332c0d284bfcf"
+  },
+  {
+    "file": "packages/core/src/db/subagent-input-repo.ts",
+    "sha256": "103aab019d1283e0a208d899692d42bb7d247cad0ab22ba416e32b9577e01425"
+  },
+  {
+    "file": "packages/core/src/db/subagent-readers.ts",
+    "sha256": "9983f061d5fe580e46f0857a255b86c1162b22cd0a981c89a8194cf8e23da491"
+  },
+  {
+    "file": "packages/core/src/db/subagent-repo.test.ts",
+    "sha256": "5c2bf652ffb612ed368580919d453320410f19818542649a58d6fbdc151ecb3b"
+  },
+  {
+    "file": "packages/core/src/db/subagent-repo.ts",
+    "sha256": "79d01863fc8d8f55b5e0fa168fe005d59fbd9f03fdc6d388af3e1885190196e0"
+  },
+  {
+    "file": "packages/core/src/db/subagent-terminal.ts",
+    "sha256": "c0b1d4d37359fffcb8426df4f41d3621a903acd7ae933cb5a7c6d6beb21c94f5"
+  },
+  {
+    "file": "packages/core/src/delivery/direct-request-report.ts",
+    "sha256": "ea869707a9f43b046ed0abb2fbb5c7a5f8b2b50eea850c0139aca3df0a4da9eb"
+  },
+  {
+    "file": "packages/core/src/delivery/index.md",
+    "sha256": "8a3e974f500e6da28c18bbb4fd2894f4bc23a2edb4bd1016e148d8dae9284bf1"
+  },
+  {
+    "file": "packages/core/src/devices/index.md",
+    "sha256": "3d429d9457af09877066b40153b53afa91a0caba68054ab203a9e39a19dde345"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-composition.ts",
+    "sha256": "c69572c7932d9eefd506c97cc91b99842208c07a05515ab68b83ca80da97217b"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-effect-exactly-once.test.ts",
+    "sha256": "5c1c15f9f1d92cd21c9a578eec735b1aff606b7b48032f4e1d65c139273fefd9"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-registry.test.ts",
+    "sha256": "9020a81445f930562eda88e00a83a210a78fee39b3a1972a4e06894f84ddd0de"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-registry.ts",
+    "sha256": "89e13f5328515d252abf96b5c3b7387fe18cca8775054ff9752933b295c4e77b"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-run-context.test.ts",
+    "sha256": "176fe257e61059c0ada93fdf9c99ccfa48192638728f85d927bbfbc5086544a2"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-run-context.ts",
+    "sha256": "0a7bad4eca25a330ce53d718b19ec6ed0bb07f232ee72787f1bbe85d0004ad5d"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-sources.ts",
+    "sha256": "20afeb5a0184dda7bd45e4fe1a3b12e8c483d99166d86071c57be478034f0fdf"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-subscriptions.test.ts",
+    "sha256": "8929db6ece10640d33080a0366bdda82cb2c5699e5927c8e9c6013ddecfe6bfe"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-subscriptions.ts",
+    "sha256": "806efb1876c62501c881b8e98c727084197ff8703a024a373356357c8b2b1c16"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-tools.ts",
+    "sha256": "96bc31ac46386087f46e8521dc2c9dc8684d58380f4f0ffb55601342c4b45caa"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-transfer.test.ts",
+    "sha256": "98cab66b3523cbb52788c2ccf5a413f1e7dc1c95d2e0624708d7ff43c8c79720"
+  },
+  {
+    "file": "packages/core/src/extensions/extension-transfer.ts",
+    "sha256": "85492b4f332cb87e8d3de75d2ef7271bc4b2136137ba1d946b6b1b5195969755"
+  },
+  {
+    "file": "packages/core/src/extensions/index.md",
+    "sha256": "34d79f32f0bf00e49ae3b725a9c8d30c3046b9b3515a914423fef8dd790e260f"
+  },
+  {
+    "file": "packages/core/src/extensions/notify-extension-change.ts",
+    "sha256": "a73b26499ef73fc2c5c93b84d3761cb84faaeca010504d99d4fe38c6bd657d06"
+  },
+  {
+    "file": "packages/core/src/extensions/tool-disclosure-snapshot.test.ts",
+    "sha256": "f4a24507555207d59dd14ed27f212a509aa6db6c028379e6781fbaf4b8498d59"
+  },
+  {
+    "file": "packages/core/src/extensions/tool-disclosure-snapshot.ts",
+    "sha256": "3306c064ec605ed696fff7dbb49a04fac2779a28b0b6a1c403223d651f03dff1"
+  },
+  {
+    "file": "packages/core/src/governance/captured-tool-execution.test.ts",
+    "sha256": "d3ef5e36c2d24c830a099870ff2c441e705d30b0e30cc30b16e9d13d325b7d55"
+  },
+  {
+    "file": "packages/core/src/governance/captured-tool-execution.ts",
+    "sha256": "e751c2f16758246b2892a5f1829da9485d2534107a1029e1a0ea75fa432e1e92"
+  },
+  {
+    "file": "packages/core/src/governance/core-tool-governance-adapter.test.ts",
+    "sha256": "42c9fd18adad8e7f0b0524f4b0ada6b143418e1eed7861cbaa25a43283a8192c"
+  },
+  {
+    "file": "packages/core/src/governance/core-tool-governance-adapter.ts",
+    "sha256": "d608ffaf363ffeb404b7ed9d7be1b44af3118302fb3fada8bef126c872fe0524"
+  },
+  {
+    "file": "packages/core/src/governance/governance-policy-repo.test.ts",
+    "sha256": "893e41cb745ec48319dcc89102edc8cc1ddbc2d936d6e687ece2833007139aa9"
+  },
+  {
+    "file": "packages/core/src/governance/governance-policy-repo.ts",
+    "sha256": "1cca4be5692ca023cb611f3c0808226632d338c6ad68bad417e250e83ef957fb"
+  },
+  {
+    "file": "packages/core/src/governance/governance-policy-service.test.ts",
+    "sha256": "a2a1bc11106d54d4566f28bda3ffae5df5d270660cf93e90e16cdbdc636fd8f1"
+  },
+  {
+    "file": "packages/core/src/governance/governance-policy-service.ts",
+    "sha256": "4a0bfae48abd06011bf30b6ff68443d9aada9a20c5ff64c77194fcdc281befd5"
+  },
+  {
+    "file": "packages/core/src/governance/governed-tool-unattended.test.ts",
+    "sha256": "071c36dfe08287de5d81a4fa821da240c12a67de53270e77a3b49e91f61f9e9f"
+  },
+  {
+    "file": "packages/core/src/governance/governed-tool.test.ts",
+    "sha256": "3587a244523fc710a5f420559767ba2ef9aeb8f17a81b35c156005f751ccdeb1"
+  },
+  {
+    "file": "packages/core/src/governance/governed-tool.ts",
+    "sha256": "7abbf6a6dea57e863070b7bf63c12e92da7dc0326e7198566085572192b59d39"
+  },
+  {
+    "file": "packages/core/src/governance/index.md",
+    "sha256": "ebba4a400a025b74857623fc077559a5a8f32012c09411f34c0e5e3ad3661b69"
+  },
+  {
+    "file": "packages/core/src/harness/delegation-tools.ts",
+    "sha256": "89f5c233aba58e59d4608e3e1d98833560d27dac9d209dcda6b13013e7e01f9e"
+  },
+  {
+    "file": "packages/core/src/harness/effect-lifecycle-service.ts",
+    "sha256": "3f1f2dc8615e80fb27950d8bfa31f992ef875cf7e21cbe9e45939e5114046062"
+  },
+  {
+    "file": "packages/core/src/harness/index.md",
+    "sha256": "502b17f5c4aa9a5eb2b357faaa98894ef29e55d59ce0d37f177b19f2cdd52f43"
+  },
+  {
+    "file": "packages/core/src/harness/initiative-recovery.test.ts",
+    "sha256": "db2604427c9f17f1c726ff31e54f9a9e1452f81f3b1ae77d4b8f594ebd519be0"
+  },
+  {
+    "file": "packages/core/src/harness/initiative-recovery.ts",
+    "sha256": "b4080d67d9fbd1c88e52c7ad44d4180e206337f3f0f8648ffaf1484ac0ffe54c"
+  },
+  {
+    "file": "packages/core/src/harness/prepared-publication-authorization.test.ts",
+    "sha256": "d7b66cf1e557a1fd73f8d83d6698d1a86c117690920406b116bdf32af1e71e9e"
+  },
+  {
+    "file": "packages/core/src/harness/prepared-publication-authorization.ts",
+    "sha256": "bde0508d3043c52cc53a37d7b9366c4595bc5694561cd51cef57539e2afebd6e"
+  },
+  {
+    "file": "packages/core/src/harness/recovery-coordinator.test.ts",
+    "sha256": "18e1c96472e60e11f52b56a2fbf7ccdb28c61367b8cc297a5b84b4cc50dd62da"
+  },
+  {
+    "file": "packages/core/src/harness/recovery-coordinator.ts",
+    "sha256": "1bc3cc541f1c8e466c005907c133d6c7c95d4fee04a2f887548ca0466a36a0ae"
+  },
+  {
+    "file": "packages/core/src/harness/run-prepared-publication.ts",
+    "sha256": "e4fff3468d528c79f739e3ada3230b83e9d1c8efacccd172917dd11d0b8ceb4d"
+  },
+  {
+    "file": "packages/core/src/harness/run-service-memory-restore.test.ts",
+    "sha256": "85573f2f43f421bfd0a277f881edccc82760bb8e4b5f7e1acbb45feea4f07086"
+  },
+  {
+    "file": "packages/core/src/harness/run-service.test.ts",
+    "sha256": "485dd6dbfbe7f0c2d22af902af473127bfc2d3dcb1a53322c1b0aae18a4bd14f"
+  },
+  {
+    "file": "packages/core/src/harness/run-service.ts",
+    "sha256": "d4c4b30226934343d41f3095a72ecf238f057767b1340c1a18cc3ecd3c9b341c"
+  },
+  {
+    "file": "packages/core/src/harness/run-snapshot-capture-lifetime.test.ts",
+    "sha256": "fcf17ea0c5e689cfa4120114c7b0397b545e829789779af20ece6c9427edbc23"
+  },
+  {
+    "file": "packages/core/src/harness/run-snapshot-capture.test.ts",
+    "sha256": "9860e013bdbde521477a4785274ef6f2c2c396b28c3e33f9fd71f4b3fcf0102b"
+  },
+  {
+    "file": "packages/core/src/harness/run-snapshot-capture.ts",
+    "sha256": "d61c887631c9e5046a5b828f5b88aff44dbbe6c19c58e41334f7451f7ad6dab7"
+  },
+  {
+    "file": "packages/core/src/harness/run-work-binding.test.ts",
+    "sha256": "1897ab72b32a2f47d5187aa412cac6e883c03e60254aad9d15688eb87140d166"
+  },
+  {
+    "file": "packages/core/src/harness/run-work-binding.ts",
+    "sha256": "94f6801a9a97293a0efa18c847a98170faee5ebf00a9b98ef5e559a88a766db1"
+  },
+  {
+    "file": "packages/core/src/harness/run-work.test.ts",
+    "sha256": "40961cf23a4bc67fa291fc01650c29f4ee5f607bc3650fb96b8aa6861ca8368f"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-execution.ts",
+    "sha256": "bf98854dbd35e45fc06d6c7add41f75e45bde30f7477b2f0839f402599f435fd"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-queries.ts",
+    "sha256": "08b1aaa1010dc10c036706131f811d9541b287ca6c7282bf3b2a800621b12fad"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-service.test.ts",
+    "sha256": "2a0fed1883f9443acc6d6c4487a477799899745205de60767b8f9a51544ae9e4"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-service.ts",
+    "sha256": "d6a27c968543d205e0f5a5f2215bf4ed5e7c33e95952bff9c8cda92eac601121"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-state.ts",
+    "sha256": "106ac4e5a27a9c97e23e60ea91ced99bb8d8f9e2fbb0ac5282cc83bf51262558"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-subscriptions.ts",
+    "sha256": "f1bf352287455f8b6a9aca29b10061d9325a80a2924754c282dfc8b3b66d45b7"
+  },
+  {
+    "file": "packages/core/src/harness/subagent-tool-materials.ts",
+    "sha256": "523e93d6a43c91d53037857d905a4b0a4d254b6fb9006f6c96a659102c688e42"
+  },
+  {
+    "file": "packages/core/src/hosts/index.md",
+    "sha256": "084107a7b0ecac92e908be2e6a59de50fb6ab255764e8a05ee9865919499bd14"
+  },
+  {
+    "file": "packages/core/src/index.md",
+    "sha256": "09ab77f106c3a62f3e31cf13a91921ff4555f00719486ba8252b6f03c942a27e"
+  },
+  {
+    "file": "packages/core/src/initiative/backoff/index.md",
+    "sha256": "105c9a444afbc8ef014bd9baf1373a8f83e30551e5afba6c9cf9bf76cc0cdff6"
+  },
+  {
+    "file": "packages/core/src/initiative/index.md",
+    "sha256": "ca060363cd05be0d19ca4dd53cf85da9061e27251ba6a21165ed676c98cbb9a0"
+  },
+  {
+    "file": "packages/core/src/initiative/intentions/index.md",
+    "sha256": "f43c00ead149342887246350a412f61678552046d781d8df9c912495e2619a0b"
+  },
+  {
+    "file": "packages/core/src/initiative/patterns/index.md",
+    "sha256": "720fdff58de29bb7f3c965ecfd7851ada63a4df0bd53a5e69432d4f2a7aa66fe"
+  },
+  {
+    "file": "packages/core/src/initiative/wake/index.md",
+    "sha256": "5ff61a1e8b5a026ca7cc254c0fc73f6bea7abe05bf94f5b3225a5696d9a692c0"
+  },
+  {
+    "file": "packages/core/src/logging/index.md",
+    "sha256": "262b34018edca77d9f99ab3b8a4f7d254a2783255330322d4e31f34af579bf32"
+  },
+  {
+    "file": "packages/core/src/main.ts",
+    "sha256": "93b44a1cbfdfd10fec837176d39b244db708cc0d7bf968fbddc621a160a7e9f4"
+  },
+  {
+    "file": "packages/core/src/mcp/index.md",
+    "sha256": "93b5f52fa877efbc73866ac92ea8dd222687e5b0913549a77b228951c5f5542e"
+  },
+  {
+    "file": "packages/core/src/media/index.md",
+    "sha256": "c415e0ab6f33a4dc5362ac1da1fbcbc76fe8655688c1e1fd1585cb24b2dce5e7"
+  },
+  {
+    "file": "packages/core/src/memory/canonical-tools/index.md",
+    "sha256": "513ec1ace668b3a96bc9cd70a00dfb9bb1130b2fa926ea2381b3fdf9bbe2fd97"
+  },
+  {
+    "file": "packages/core/src/memory/hindsight/index.md",
+    "sha256": "3b39e707a8636aa354e22df564c212c19add0444c90690b54c3469bc8b7dbbad"
+  },
+  {
+    "file": "packages/core/src/memory/index.md",
+    "sha256": "899df60cb90ddf78f638a9dd736524b27660fdc826951db7174c34040998bb34"
+  },
+  {
+    "file": "packages/core/src/memory/legacy-migration/index.md",
+    "sha256": "22d4f539b9f2851cce4dd21a890930884fab2440bb776cf66334cf6724419921"
+  },
+  {
+    "file": "packages/core/src/memory/operations/index.md",
+    "sha256": "823a66eab0b7652aab0eb6281a032a1545065328da92fa3ceb860287f194d805"
+  },
+  {
+    "file": "packages/core/src/observability/index.md",
+    "sha256": "1a7469a8753cd333a90cc73007562aeb33cc91d92dee6813487c6820efb176a5"
+  },
+  {
+    "file": "packages/core/src/perception/index.md",
+    "sha256": "c01d337d52844cfc0d7ea27e867dd35ba5f4cd412c6f3c8b5e19ee5536acb99f"
+  },
+  {
+    "file": "packages/core/src/presence/index.md",
+    "sha256": "e4f8c156404a2eb3fd541b6e84a9c9ccc1fc2ca4c724450aeafa260c35255b4c"
+  },
+  {
+    "file": "packages/core/src/scheduler/index.md",
+    "sha256": "205a73e4c044179cfd4f13a415f4a77b3f6af31959f0d379b83c6ce4952c4d7f"
+  },
+  {
+    "file": "packages/core/src/secrets/index.md",
+    "sha256": "a12032ce364c335f5166c51f349976c5ea22505c4b0c1e878a9f88e4a38f3974"
+  },
+  {
+    "file": "packages/core/src/server/index.md",
+    "sha256": "ea9f5acf6639e54226a458f1b117a03b0ba309f326e78d241be97e2c27073568"
+  },
+  {
+    "file": "packages/core/src/server/methods/chat-activity-read.test.ts",
+    "sha256": "1df5253b05b621d63f30fcdea80049a981e601aaed16eae4b5c6b85f65932f66"
+  },
+  {
+    "file": "packages/core/src/server/methods/chat-activity-read.ts",
+    "sha256": "f097e5a0b2667580916464d2ec74e0ff100a6e8200f3f56bbc0ed567a98ede57"
+  },
+  {
+    "file": "packages/core/src/server/methods/chat-cancel.ts",
+    "sha256": "97b65ea4f1bc3b133c63ab807d0584b7bc7112b676bf098b126042333ff71f08"
+  },
+  {
+    "file": "packages/core/src/server/methods/chat-send-sdk-transport.test.ts",
+    "sha256": "aa6fe4d1416600a735bae85190da5e136b5db30f354b0d46aca1ec847353caa4"
+  },
+  {
+    "file": "packages/core/src/server/methods/chat-send.test.ts",
+    "sha256": "3eeb63d9a8925e257d5c98773aac77e5e4f4ad89ee7286b66c5e1867640f225d"
+  },
+  {
+    "file": "packages/core/src/server/methods/chat-send.ts",
+    "sha256": "dcf4af63e6159ead3866f4e75c8818158dc3e066e70baeb667703b5fc9f5f9eb"
+  },
+  {
+    "file": "packages/core/src/server/methods/index.md",
+    "sha256": "59ffb44ad156f742c7978cc2baef3d1b206b4e697891669d3ec7aa2e0f311669"
+  },
+  {
+    "file": "packages/core/src/server/methods/subagent-methods.ts",
+    "sha256": "c6431f825e5b66ed83bc2443833e3119b1fd5e6887d9c56bc3cdc169b7c7b2f9"
+  },
+  {
+    "file": "packages/core/src/skills/index.md",
+    "sha256": "d2c2559de16260e0e3993b57cf24ebb4937916d53c511773598020cf644a8452"
+  },
+  {
+    "file": "packages/core/src/testing/index.md",
+    "sha256": "879a6ea07638e76d358def2eebe8179e714345df348b4c72541e945612454103"
+  },
+  {
+    "file": "packages/core/src/testing/subagent-fixture.ts",
+    "sha256": "073bdda802ddc5f1a3b805288702a9fc3f793f4c04dae26ec0a73f5a2a953326"
+  },
+  {
+    "file": "packages/core/src/time/index.md",
+    "sha256": "a9df5725bef4a35eb95e1af34412d638d6cf5cf9e0b309a40d1378fbe2d79cba"
+  },
+  {
+    "file": "packages/core/src/workspace/index.md",
+    "sha256": "74eef3d8fdd87952dcd279af2d0a4fe335e7a849da3301ffefcb4be152b6ea6e"
+  },
+  {
+    "file": "packages/shared/src/governance-api.ts",
+    "sha256": "f05a4684b9857a078f2f023b8180d3b225024c90b19f74d2a1008ac5571ac2d2"
+  },
+  {
+    "file": "packages/shared/src/governance-evaluator.test.ts",
+    "sha256": "c528c90e25f93a22e8becbf0e2f4684a120b4751d483ab306a7f88806c732ebf"
+  },
+  {
+    "file": "packages/shared/src/governance-evaluator.ts",
+    "sha256": "c2ae445527c3c57c36fe74d54caf4b28b746c72fa4db4065da2ee9c19bd37e6e"
+  },
+  {
+    "file": "packages/shared/src/governance-presentation.test.ts",
+    "sha256": "1dbaf19cca376329b931d0cf5428ccb2939020ca992d4a414fae3c258bea3ef2"
+  },
+  {
+    "file": "packages/shared/src/governance-presentation.ts",
+    "sha256": "1be8097c1e4a34f34a9d2049f83aaa225720858f78eb0b9570b617b72ba0eef4"
+  },
+  {
+    "file": "packages/shared/src/governance-registry.test.ts",
+    "sha256": "fed73b49c81ca0433034d8223b01e7d5622eb5d08a7fa58b55f344d22fa51b50"
+  },
+  {
+    "file": "packages/shared/src/governance-registry.ts",
+    "sha256": "6e41c124e09927ddb52417a9d152b61d79eca2f46366ade9e3cc6868325180a1"
+  },
+  {
+    "file": "packages/shared/src/governance-schema.test.ts",
+    "sha256": "d6660da52e342ddec7f0f1028336ba45647ffaf22f1a766640f3e72ae709831c"
+  },
+  {
+    "file": "packages/shared/src/governance-schema.ts",
+    "sha256": "43bf928384f0a9ab6ebcd9943a1f4b4bbacb873dd0a972ed178be788be2b543d"
+  },
+  {
+    "file": "packages/shared/src/index.md",
+    "sha256": "1e4376857ce6509d45adcc0523b3871440e176331a6067a5c7ab14bdbe9e92cf"
+  },
+  {
+    "file": "packages/shared/src/index.ts",
+    "sha256": "434d13652d2b4b3b8b722a435accff518db14fee550b411ed9bebbd49dc66dde"
+  },
+  {
+    "file": "packages/shared/src/subagent-api-schema.ts",
+    "sha256": "af6df8129b21f11685a6f32766814423b0a811c6c169298d5bbd7398fdd61994"
+  },
+  {
+    "file": "packages/shared/src/subagent-result-schema.ts",
+    "sha256": "3f63c1901cfd5af9adc6d813ee634c6c5421687c321dc1f74581085dfb8b9e84"
+  },
+  {
+    "file": "packages/shared/src/subagent-schema.test.ts",
+    "sha256": "02de95ed08aadc3d1e3c5163b3e30383428e7456f57d55e5b1592eef77fc28ce"
+  },
+  {
+    "file": "packages/shared/src/subagent-schema.ts",
+    "sha256": "40baeed070be72b61501a083a2358494f994c839a77d4a1c9dce10f75035d456"
+  },
+  {
+    "file": "packages/shared/src/subagent-tool-schema.ts",
+    "sha256": "29a022fb8f9e72dd6838bd8bcd92d2d2ca24f921cd980369c4168ed2be0992de"
+  }
+]

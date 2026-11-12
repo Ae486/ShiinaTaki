@@ -27,16 +27,16 @@ export interface PairedDeviceStore {
 }
 
 export function createPairedDeviceStore(filePath: string): PairedDeviceStore {
-  const devices = loadDevices(filePath);
+  let devices = loadDevices(filePath);
   return {
     find(deviceId) {
       return devices.find((device) => device.deviceId === deviceId);
     },
     save(device) {
-      const index = devices.findIndex((existing) => existing.deviceId === device.deviceId);
-      if (index === -1) devices.push(device);
-      else devices[index] = device;
-      persistDevices(filePath, devices);
+      const next = devices.filter((existing) => existing.deviceId !== device.deviceId);
+      next.push(device);
+      persistDevices(filePath, next);
+      devices = next;
     },
   };
 }

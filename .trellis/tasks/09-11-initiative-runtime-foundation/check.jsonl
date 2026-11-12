@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-development rules and mandatory layer-specific reading."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend authority, component and connection/presentation contracts."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve missing details from named sources and installed APIs; never invent behavior."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/runtime-contracts.md", "reason": "Admission/context/terminal/continuation/timezone and runtime Skill integration contracts."}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Producer-first bounded Monitor/Trajectory queries, safe fields and replay."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Core-only DB writes, atomic state/evidence, migration lineage and post-commit events."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/decision-register.md", "reason": "Effective owner decisions, source precedence and superseded assumptions."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/baseline-snapshot-contract-2026-09-19.md", "reason": "Owner-approved pinned main source, preservation, combined-baseline gate and current Memory/Avatar ownership."}

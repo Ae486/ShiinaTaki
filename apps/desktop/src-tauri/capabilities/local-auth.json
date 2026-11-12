@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "local-auth",
+  "description": "Native Home and Pet operator admission; profile and role are derived by native commands.",
+  "windows": ["home", "pet"],
+  "permissions": ["allow-local-core-endpoint", "allow-local-operator-identity", "allow-local-operator-proof"]
+}

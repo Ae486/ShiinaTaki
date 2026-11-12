@@ -56,7 +56,11 @@ export async function runCoreChild({ realEndpoint } = {}) {
   process.on("message", (message) => {
     if (message === "probe") process.send?.({ kind: "probe", egress: counters });
     // Exercise Core's actual shutdown handler on Windows, where kill(SIGINT) is not graceful.
-    if (message === "shutdown") process.emit("SIGINT");
+    if (message === "shutdown") {
+      process.emit("SIGINT");
+      // Core exits naturally after its real handles drain; the harness must release its own IPC pin.
+      if (process.connected) process.disconnect();
+    }
   });
   await import(pathToFileURL(join(repository, "packages/core/src/main.ts")).href);
   process.send?.({ kind: "ready" });

@@ -5,6 +5,9 @@
  * POS:    core/memory — provider-specific background composition built as a draft and started by the runtime binding; Compaction remains Core-owned
  */
 import type { MemoryConfig } from "../config/memory-config.ts";
+import type { PrimaryConversationSourceRepo } from "../db/primary-conversation-source-repo.ts";
+import { createMemoryTidyReviewRepo } from "../db/memory-tidy-review-repo.ts";
+import type { SearchPolicyBinding } from "./memory-engine.ts";
 import { createCanonicalIngestionRepo } from "../db/canonical-ingestion-repo.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
@@ -27,6 +30,9 @@ export function createCanonicalLocalSubsystem(input: {
   db: Database; epochId: string; promptDir: string; timeline: TimelineRepo;
   utility: UtilitySlot; config: MemoryConfig; logger: Logger;
   boundIdentity?(): MemoryAuthorityIdentity | undefined;
+  captureConfig?: () => MemoryConfig; captureAssemblyConfig?: () => MemoryConfig; captureRetentionDays?: () => number;
+  retentionEnabled?: () => boolean; searchPolicy?: SearchPolicyBinding; currentPromptDir?: () => string;
+  primarySources?: PrimaryConversationSourceRepo; requestRun?: (characterId: string) => Promise<void>;
 }) {
   if (sourceTransition(input.db, input.epochId)) throw new Error("MEMORY_TRANSITION_OUTCOME_UNKNOWN");
   const fence = createCanonicalLocalWriteFence();
@@ -35,9 +41,14 @@ export function createCanonicalLocalSubsystem(input: {
   const events = createMemoryEventsRepo(input.db);
   const journal = createCanonicalIngestionRepo({ db: input.db, maintenance: engine.maintenanceStore });
   const ingestion = createCanonicalLocalIngestion({ provider: engine.provider, authority: engine.authority,
-    maintenance: engine.maintenanceStore, journal, timeline: input.timeline, autoState, slot: input.utility, events, config: input.config });
+    maintenance: engine.maintenanceStore, journal, timeline: input.timeline, autoState, slot: input.utility, events, config: input.config,
+    primarySources: input.primarySources, captureRetentionDays: input.captureRetentionDays });
   const tidy = createTidyPass({ view: engine.tidy, autoState, events, slot: input.utility,
-    config: input.config, logger: input.logger.child({ mod: "memory-tidy" }) });
+    config: input.config, captureConfig: () => {
+      if (engine.searchStatus?.().ready === false) throw new Error("MEMORY_SEARCH_INDEX_UNAVAILABLE");
+      return input.captureConfig?.() ?? input.config;
+    }, logger: input.logger.child({ mod: "memory-tidy" }),
+    checkpoints: createMemoryTidyReviewRepo(input.db, input.epochId), requestRun: input.requestRun });
   for (const bank of engine.authority.listBanks(input.epochId)) {
     if (bank.scope.kind === "character") ingestion.initializeBaseline(bank.scope.characterId);
   }
@@ -45,16 +56,18 @@ export function createCanonicalLocalSubsystem(input: {
     canQueue: () => sourceTransition(input.db, input.epochId) !== undefined,
     onIngestionFailed: (characterId) => input.logger.warn({ code: "MEMORY_INGESTION_FAILED", characterId }, "canonical memory ingestion failed; will retry") });
   // Retention starts only once the binding is published: a draft that fails installation must leave no worker behind.
-  let retention: { stop(): void } | undefined;
+  let retention: { stop(): void; runNow(): void } | undefined;
   const start = (): void => {
     retention ??= startSweeper({ name: "memory-retention", message: "canonical memory retention swept",
       sweep: engine.retentionSweep, logger: input.logger,
-      enabled: () => fence.writable() && engine.authority.authorityEpoch().epochId === input.epochId });
+      enabled: () => fence.writable() && engine.authority.authorityEpoch().epochId === input.epochId
+        && (input.retentionEnabled?.() ?? true) && engine.searchStatus?.().ready !== false });
   };
   const writeMemory: MemoryWriteOp = ({ layer, ...request }) => fenced.engine.writeEntry({ ...request, type: layer });
   return { engine: fenced.engine, maintenance: fenced.maintenance, memoryFlush: fenced.memoryFlush, tidy: fenced.tidy, writeMemory,
     fence, ingestion, provider: engine.provider, start,
-    stop: () => { fence.retire(); retention?.stop(); return ingestion.settle(); }, captureRun: fenced.captureRun,
+    resumeRetention: () => retention?.runNow(), importPrimarySources: ingestion.importPrimarySources,
+    stop: async () => { fence.retire(); retention?.stop(); await Promise.all([ingestion.settle(), tidy.stop()]); }, captureRun: fenced.captureRun,
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => {
       try { ingestion.recordPrimaryCommitted(commit); }
       catch { input.logger.warn({ code: "MEMORY_INGESTION_WITNESS_FAILED" }, "primary memory source witness was not committed"); }

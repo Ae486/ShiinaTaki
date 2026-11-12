@@ -125,6 +125,21 @@ afterEach(() => {
 });
 
 describe("connection generation promotion and retry", () => {
+  it("retires an incompatible display candidate without credential recovery, restoration or retry", async () => {
+    const recover = vi.fn(() => true);
+    const restore = vi.fn(async () => undefined);
+    const message = "Core 版本不支持完整命令审批，请更新 Core 后重试。";
+    const h = createHarness({ authenticate: async () => ({ ok: false, code: null, message }), recoverAuthFailure: recover, restore });
+    h.controller.start();
+    await flush();
+    expect(h.controller.snapshot()).toEqual({ client: null, status: { kind: "error", code: null, message } });
+    expect(h.clients[0]?.closeCalls).toBe(1);
+    expect(recover).not.toHaveBeenCalled();
+    expect(restore).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(h.clients).toHaveLength(1);
+    h.controller.dispose();
+  });
   it("publishes only authenticated/restored clients and replaces a closed generation with a fresh client", async () => {
     const order: string[] = [];
     const h = createHarness({

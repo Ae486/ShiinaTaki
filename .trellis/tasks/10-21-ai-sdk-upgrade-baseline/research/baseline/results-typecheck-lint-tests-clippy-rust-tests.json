@@ -1,0 +1,56 @@
+[
+  {
+    "name": "typecheck",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 62.99
+  },
+  {
+    "name": "lint",
+    "command": [
+      "pnpm.cmd",
+      "lint"
+    ],
+    "exitCode": 0,
+    "seconds": 42.7
+  },
+  {
+    "name": "tests",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "test"
+    ],
+    "exitCode": 1,
+    "seconds": 186.65
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "apps/desktop/src-tauri/Cargo.toml",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "seconds": 16.87
+  },
+  {
+    "name": "rust-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "apps/desktop/src-tauri/Cargo.toml"
+    ],
+    "exitCode": 0,
+    "seconds": 41.85
+  }
+]

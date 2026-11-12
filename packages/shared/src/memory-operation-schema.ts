@@ -19,6 +19,7 @@ import { MemoryTemplateApplyRequestSchema, MemoryTemplateRecoverRequestSchema, M
   MemoryTemplateResultSchema, MemoryTemplateErrorCodeSchema } from "./memory-template-operation-schema.ts";
 import { HindsightCandidateRequestSchema, HindsightCandidateProducerRefSchema, HindsightCandidateResultSchema,
   HindsightCandidateErrorCodeSchema } from "./hindsight-candidate-domain-schema.ts";
+import { MemoryTidyOutcomeSchema, MemoryTidyProgressSchema } from "./memory-tidy-outcome-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -37,7 +38,7 @@ export const MemoryOperationKindSchema = z.enum([
   "setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate", "hindsight.activate",
   "bank.provision", "connection.revalidate", "backup.capture", "backup.admit", "backup.verify",
   "transition.return-local", "transition.reenter-hindsight", "transition.emergency-local",
-  "template.apply", "template.recover",
+  "template.apply", "template.recover", "tidy", "index.rebuild",
   "candidate.prepare", "candidate.inspect", "candidate.resume",
 ]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
@@ -64,6 +65,8 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
     managedReceipt: HindsightManagedDeploymentReceiptSchema.optional(),
   }),
   z.strictObject({ kind: z.literal("replica.sync"), bankId: Id, syncKind: MemoryReplicaRunKindSchema }),
+  z.strictObject({ kind: z.literal("tidy"), characterId: z.string().min(1).max(160) }),
+  z.strictObject({ kind: z.literal("index.rebuild"), stoplist: z.boolean() }),
   MemoryLocalPrepareRequestSchema,
   MemoryLocalActivateRequestSchema,
   MemoryHindsightActivateRequestSchema,
@@ -94,6 +97,9 @@ export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   MemoryTransitionProducerRefSchema,
   MemoryTemplateProducerRefSchema,
   HindsightCandidateProducerRefSchema,
+  z.strictObject({ kind: z.literal("tidy"), characterId: z.string().min(1).max(160),
+    authorityEpochId: Id.nullable(), progress: MemoryTidyProgressSchema }),
+  z.strictObject({ kind: z.literal("index"), stoplist: z.boolean(), authorityEpochId: Id.nullable() }),
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -104,6 +110,8 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
     kind: z.literal("replica"), errorCode: MemoryReplicaErrorCodeSchema.nullable(),
     nextAction: MemoryReplicaNextActionSchema.nullable(), lastSuccessAt: Timestamp.nullable(),
   }),
+  z.strictObject({ kind: z.literal("tidy"), outcome: MemoryTidyOutcomeSchema }),
+  z.strictObject({ kind: z.literal("index"), indexed: z.int().nonnegative() }),
   MemoryLocalResultSchema,
   MemoryHindsightResultSchema,
   MemoryBankResultSchema,
@@ -130,6 +138,7 @@ const PRODUCER_KIND: Record<MemoryOperationKind, MemoryOperationProducerRef["kin
   "backup.capture": "backup", "backup.admit": "backup", "backup.verify": "backup",
   "transition.return-local": "transition", "transition.reenter-hindsight": "transition", "transition.emergency-local": "transition",
   "template.apply": "template", "template.recover": "template",
+  tidy: "tidy", "index.rebuild": "index",
   "candidate.prepare": "candidate", "candidate.inspect": "candidate", "candidate.resume": "candidate",
 };
 
@@ -191,6 +200,8 @@ export const MemoryOperationStatusResultSchema = z.strictObject({ operation: Mem
 export const MemoryOperationListParamsSchema = z.strictObject({
   includeTerminal: z.boolean().default(false),
   limit: z.int().min(1).max(50).default(20),
+  kind: MemoryOperationKindSchema.optional(),
+  characterId: z.string().min(1).max(160).optional(),
 });
 export const MemoryOperationListResultSchema = z.strictObject({ operations: z.array(MemoryOperationSchema).max(50) });
 export const MemoryOperationCancelParamsSchema = z.strictObject({ operationId: z.uuid() });

@@ -1,5 +1,5 @@
 /**
- * INPUT:  the shared Shell-capability route deps, the screenshot store/describe bridges, and an optional operator
+ * INPUT:  the shared Shell-capability route deps, screenshot/attachment stores, and an optional operator
  * OUTPUT: createCapabilityTools(deps) -> (interactive?) => the six Shell-routed capability tools as one ToolSet
  * POS:    core/capabilities — per-call construction binds the initiating operator socket (challenge ownership);
  *         the agent's per-turn bag, the unattended fallback, and the dev trigger all reuse this exact factory
@@ -20,6 +20,7 @@ import { createProcessListTool } from "./process-list-tool.ts";
 import { createScreenshotStore } from "./screenshot-store.ts";
 import { createScreenshotTool } from "./screenshot-tool.ts";
 import { createShellOpenTool } from "./shell-open-tool.ts";
+import type { AttachmentStore } from "../media/attachment-store.ts";
 
 export interface CapabilityToolsDeps {
   registry: ConnectionRegistry;
@@ -29,7 +30,7 @@ export interface CapabilityToolsDeps {
   governance: GovernancePolicyService;
   approval: ApprovalInteractionService;
   screenshotsDir: string;
-  describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
+  attachments: Pick<AttachmentStore, "save">;
   effects?: EffectLifecycleService;
 }
 
@@ -51,7 +52,7 @@ export function createCapabilityTools(
     ...createScreenshotTool({
       ...routeDeps(interactive),
       store: createScreenshotStore({ screenshotsDir: deps.screenshotsDir }),
-      describe: deps.describe,
+      attachments: deps.attachments,
     }),
     ...createProcessListTool(routeDeps(interactive)),
     ...createClipboardReadTool(routeDeps(interactive)),

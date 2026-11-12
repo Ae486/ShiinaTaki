@@ -16,10 +16,12 @@ import { DeploymentInvocationSchema, HindsightDeploymentRegistrationV1Schema,
   type DeploymentEffectV1, type DeploymentPlanV1, type CustodyLinkV1, type DeploymentInvocation } from "@taki/shared/hindsight-deployment";
 import { invocationFixture } from "./custody-test-fixtures.ts";
 import { fileDigest, sha256 } from "./installed-files.ts";
+import { prepareDeploymentKeyAdapter } from "../test-fixtures/deployment-key-adapter-fixture.ts";
 
-export async function deploymentFixture(root: string, keyAdapter: string, options: {
+export async function deploymentFixture(root: string, keyAdapter: string | undefined, options: {
   invalid?: HindsightCredentialSlot; inherited?: boolean;
 } = {}) {
+  keyAdapter ??= prepareDeploymentKeyAdapter(root);
   for (const name of ["catalog", "state", "state/docker-config", "native"]) mkdirSync(join(root, name), { recursive: true });
   writeFileSync(join(root, ".c2a-owned-fixture"), "C2A_FAKE_ONLY");
   writeFileSync(join(root, "native", ".c2a-owned-fixture"), "C2A_FAKE_ONLY");

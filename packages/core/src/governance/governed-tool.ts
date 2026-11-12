@@ -1,11 +1,10 @@
 /**
- * INPUT:  trusted canonical identity/cell sidecar, GovernancePolicyService, and an existing AI SDK Tool closure
- * OUTPUT: wrapGovernedTool(...) — execution-time common policy guard preserving the original tool protocol/closure
+ * INPUT:  canonical identity/cell, live policy/durable Approval, captured closure and trusted execution options
+ * OUTPUT: guarded interactive/unattended execution, attributed Effect outcomes and wait/dispatch observations
  * POS:    core/governance — explicit Core/MCP/Skill adapter primitive; presentation keys and tool metadata grant nothing
  */
 import type { Tool } from "ai";
 import type { CanonicalCapabilityIdentity } from "@taki/shared";
-import { MemoryErrorCodeSchema } from "@taki/shared";
 import type { GovernancePolicyService } from "./governance-policy-service.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { ApprovalPresentation } from "@taki/shared";
@@ -15,6 +14,8 @@ import type { EffectLifecycle } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { randomUUID } from "node:crypto";
 import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
+import { classifyToolOutcome } from "../agents/tool-outcome.ts";
+import { governedExecutionContext } from "./captured-tool-execution.ts";
 
 export interface GovernedToolBinding {
   identity: CanonicalCapabilityIdentity;
@@ -55,6 +56,7 @@ export interface GovernedEffectContext {
   attemptId: string;
   effects: EffectLifecycleService;
   toolObserver?: ToolEffectObserver;
+  signal?: AbortSignal;
 }
 
 export interface GovernedToolContext {
@@ -62,6 +64,7 @@ export interface GovernedToolContext {
   binding: GovernedToolBinding;
   interactive?: InteractiveGovernanceContext;
   effect?: GovernedEffectContext;
+  approval?: Pick<ApprovalInteractionService, "hasDurableAuthority">;
   dispatchLease?: GovernedDispatchLease;
 }
 
@@ -90,10 +93,14 @@ export function attachEffectExecutionContext(options: unknown, effect: EffectExe
 export function wrapGovernedTool(tool: Tool, context: GovernedToolContext): Tool {
   const execute = tool.execute;
   if (typeof execute !== "function") return tool;
-  return {
-    ...tool,
-    execute: (input, options) => executeGoverned({ execute, context, input, options }),
-  } as Tool;
+  const descriptors = Object.getOwnPropertyDescriptors(tool);
+  descriptors.execute = { ...descriptors.execute, value: ((input, options) => {
+      const effect = governedExecutionContext(options);
+      const interactive = effect && context.interactive ? { ...context.interactive, ...effect,
+        signal: options.abortSignal ?? effect.signal } : context.interactive;
+      return executeGoverned({ execute, context: effect ? { ...context, effect, interactive } : context, input, options });
+    }) satisfies NonNullable<Tool["execute"]> };
+  return Object.create(Object.getPrototypeOf(tool), descriptors) as Tool;
 }
 
 interface ExecuteGovernedArgs {
@@ -106,11 +113,29 @@ interface ExecuteGovernedArgs {
 async function executeGoverned(args: ExecuteGovernedArgs) {
   const { execute, context, input, options } = args;
   const { service, binding, interactive } = context;
+  if (options.abortSignal?.aborted || context.effect?.signal?.aborted || interactive?.signal?.aborted) {
+    return { ok: false, code: "CANCELLED", message: "Run execution was cancelled" };
+  }
   const decision = service.authorize(binding);
   recordGovernance(context, decision, options);
   if (decision.allowed) return executeWithEffect({ execute, context, input, options });
-  if (decision.code !== "APPROVAL_REQUIRED" || !interactive) return denied(decision, binding);
-  const requestedBinding = approvalBinding(binding, decision.evaluation);
+  if (decision.code !== "APPROVAL_REQUIRED") return denied(decision, binding);
+  const requestedBinding = approvalBinding(binding, decision.evaluation, service);
+  if (!interactive) {
+    return context.approval?.hasDurableAuthority(requestedBinding)
+      ? executeWithEffect({ execute, context, input, options }) : denied(decision, binding);
+  }
+  return executeInteractiveApproval(args, { interactive, decision, requestedBinding });
+}
+
+async function executeInteractiveApproval(args: ExecuteGovernedArgs, authorization: {
+  interactive: InteractiveGovernanceContext;
+  decision: Exclude<ReturnType<GovernancePolicyService["authorize"]>, { allowed: true }>;
+  requestedBinding: ReturnType<typeof approvalBinding>;
+}) {
+  const { execute, context, input, options } = args;
+  const { service, binding } = context;
+  const { interactive, decision, requestedBinding } = authorization;
   const handle = requestApproval({ interactive, binding, decision, requestedBinding });
   // A durable waiting Effect represents a real operator prompt. Session/always authority is already resolved and has
   // no canonical Approval ID, so it must proceed directly to target intent instead of creating an untraceable wait.
@@ -120,6 +145,7 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
       const effectId = randomUUID();
       waiting = interactive.effects.prepareWaiting({ ...effectIntent(context, interactive.runId, interactive.attemptId, effectId, input), effectId, approvalRef: { approvalId: handle.approvalId, policyGeneration: decision.evaluation.policyGeneration, approvalGeneration: interactive.approval.approvalGeneration(), bindingDigest: requestedBinding.decisionScopeDigest } });
       binding.effect?.onIntent?.(waiting, input);
+      observePhase(context, options, "approval");
     } catch {
       handle.cancel();
       return { ok: false, code: "STALE_EFFECT", message: "tool authorization became stale" };
@@ -136,11 +162,10 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
     const current = service.authorize(binding);
     recordGovernance(context, current, options);
     if (current.allowed) return executeWithEffect({ execute, context, input, options, waiting });
-    const currentBinding = approvalBinding(binding, current.evaluation);
     if (current.code === "APPROVAL_REQUIRED" && interactive.approval.isCurrentAuthority({
       connection: interactive.connection,
       decision: approved,
-      binding: currentBinding,
+      binding: approvalBinding(binding, current.evaluation, service),
       approvedBinding: requestedBinding,
       policyGeneration: current.evaluation.policyGeneration,
       approvedPolicyGeneration: decision.evaluation.policyGeneration,
@@ -175,6 +200,11 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
   const effects = context.effect?.effects ?? interactive?.effects;
   const runId = context.effect?.runId ?? interactive?.runId;
   const attemptId = context.effect?.attemptId ?? interactive?.attemptId;
+  if (options.abortSignal?.aborted || context.effect?.signal?.aborted || interactive?.signal?.aborted) {
+    if (waiting && effects?.settleWaiting) effects.settleWaiting({ effectId: waiting.effectId, runId: waiting.runId,
+      attemptId: waiting.attemptId, expectedVersion: waiting.version, outcome: "cancelled", errorCode: "cancelled" });
+    return { ok: false, code: "CANCELLED", message: "Run execution was cancelled" };
+  }
   const lease = context.dispatchLease;
   if (lease && !lease.acquire()) {
     if (waiting && effects?.settleWaiting) effects.settleWaiting({
@@ -196,16 +226,30 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
     if (effect && toolCallId) (context.effect?.toolObserver ?? interactive?.toolObserver)?.bindEffect({ toolCallId, effectId: effect.effectId });
     context.binding.effect?.onIntent?.(effect!, input);
     const executionOptions = effect ? withEffectContext(options, effect) : options;
-    const raw = await Promise.resolve(execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1])).catch((error: unknown) => {
-      if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: "failed", errorCode: "tool_error" });
+    observePhase(context, options, "executing");
+    let raw: unknown;
+    try {
+      // Invoke inside the bracket: evaluating execute() before Promise.resolve skips settlement on a synchronous throw.
+      raw = await execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1]);
+    } catch (error) {
+      const cancelled = options.abortSignal?.aborted || context.effect?.signal?.aborted;
+      if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: cancelled ? "cancelled" : "failed", errorCode: cancelled ? "cancelled" : "tool_error" });
       throw error;
-    });
+    }
     const result = lease?.acceptResult ? lease.acceptResult(raw) : raw;
     if (effect && effects) settleToolResult(effects, effect, result);
     return result;
   } finally {
     lease?.release();
   }
+}
+
+function observePhase(context: GovernedToolContext, options: unknown, phase: "approval" | "executing"): void {
+  const toolCallId = toolCallIdOf(options);
+  if (!toolCallId) return;
+  try {
+    (context.effect?.toolObserver ?? context.interactive?.toolObserver)?.phase?.({ toolCallId, phase });
+  } catch { /* Optional display observers cannot suppress an authorized dispatch or settle an Effect. */ }
 }
 
 function withEffectContext(options: unknown, effect: EffectLifecycle): unknown {
@@ -232,28 +276,16 @@ function effectIntent(context: GovernedToolContext, runId: string, attemptId: st
 }
 
 function settleToolResult(effects: EffectLifecycleService, effect: EffectLifecycle, result: unknown): void {
-  const failure = toolFailure(result);
+  const classified = classifyToolOutcome({ type: "tool-result", output: result });
   effects.settle({
     effectId: effect.effectId,
     runId: effect.runId,
     attemptId: effect.attemptId,
     expectedVersion: effect.version,
-    outcome: failure?.outcome ?? "completed",
-    summary: failure ? undefined : "tool completed",
-    errorCode: failure?.errorCode,
+    outcome: classified.outcome,
+    summary: classified.outcome === "completed" ? "tool completed" : undefined,
+    errorCode: classified.errorCode,
   });
-}
-
-function toolFailure(result: unknown) {
-  if (typeof result !== "object" || result === null || !("ok" in result) || (result as { ok?: unknown }).ok !== false) return undefined;
-  const failure = result as { code?: unknown; state?: unknown; error?: { code?: unknown } };
-  const canonicalCode = MemoryErrorCodeSchema.safeParse(failure.error?.code);
-  const code = canonicalCode.success ? canonicalCode.data : typeof failure.code === "string" ? failure.code : undefined;
-  const outcome = failure.state === "outcome_unknown" ? "outcome_unknown" as const
-    : failure.state === "cancelled" || code === "MEMORY_OPERATION_CANCELLED" ? "cancelled" as const
-      : code === "MEMORY_OUTCOME_UNKNOWN" ? "outcome_unknown" as const : "failed" as const;
-  const errorCode = code?.toLowerCase().slice(0, 100) ?? "tool_failed";
-  return { outcome, errorCode };
 }
 
 function recordGovernance(
@@ -304,19 +336,16 @@ function denied(
 function approvalBinding(
   binding: GovernedToolBinding,
   evaluation: ReturnType<GovernancePolicyService["evaluate"]>,
+  service: GovernancePolicyService,
 ) {
+  const classifier = service.classifierMetadata(binding.identity.capabilityId);
   const scope = {
     bindingRevision: 1 as const,
     identity: binding.identity,
     descriptorRevision: evaluation.descriptorRevision,
-    classifierId: classifierId(binding.identity.capabilityId),
-    classifierRevision: 1,
+    classifierId: classifier.classifierId,
+    classifierRevision: classifier.classifierRevision,
     cellKey: binding.cellKey,
   };
   return { ...scope, decisionScopeDigest: approvalDecisionScopeDigest(scope) };
-}
-
-function classifierId(capabilityId: string): string {
-  if (capabilityId === "mcp.tool.call") return "mcp-tool-call";
-  return "fixed-risk";
 }

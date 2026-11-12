@@ -32,6 +32,7 @@ export interface CanonicalIngestionRepo {
   unprocessedCount(scope: IngestionScope): number;
   hasApplicableSource(input: IngestionScope & { throughSeq: number }): boolean;
   advanceCoverage(input: IngestionScope & { throughSeq: number; now: string }): number;
+  coverageGap: CanonicalIngestionSourceRepo["coverageGap"];
   pending(scope: IngestionScope): CanonicalIngestionState | undefined;
   start(input: IngestionScope & { source: SanitizedCommittedSpan; now: string }): CanonicalIngestionState;
   saveGate(input: StateUpdate & { gate: CanonicalWriteGateDecision }): CanonicalIngestionState;
@@ -51,7 +52,7 @@ export function createCanonicalIngestionRepo(input: RepoInput): CanonicalIngesti
     primaryEntries: sources.primaryEntries, cursor: sources.cursor, eligibilityStartSeq: sources.eligibilityStartSeq,
     initializeBaseline: sources.initializeBaseline, pendingEntries: sources.pendingEntries,
     unprocessedCount: sources.unprocessedCount, hasApplicableSource: sources.hasApplicableSource,
-    advanceCoverage: sources.advanceCoverage,
+    advanceCoverage: sources.advanceCoverage, coverageGap: sources.coverageGap,
     pending: (scope) => pending(ctx.db, scope),
     start: (input) => start(ctx, input),
     saveGate: (input) => saveGate(ctx, input),
@@ -66,7 +67,7 @@ function pending(db: Database, scope: IngestionScope): CanonicalIngestionState |
   const row = db.prepare(`SELECT * FROM canonical_memory_ingestion_spans
     WHERE authority_epoch_id=:epoch AND character_id=:character AND state='pending'`)
     .get({ epoch: scope.epochId, character: scope.characterId });
-  return row ? parseState(row) : undefined;
+  return row ? parseCanonicalIngestionState(row) : undefined;
 }
 
 function start(ctx: RepoContext, input: IngestionScope & { source: SanitizedCommittedSpan; now: string }): CanonicalIngestionState {
@@ -156,17 +157,14 @@ function complete(ctx: RepoContext, input: StateUpdate): CanonicalIngestionState
     if (state.gate === null) throw new Error("MEMORY_INGESTION_INCOMPLETE");
     if (state.gate.decision === "keep") verifyCompletion(ctx, state);
     ctx.sources.assertClaimed(state);
-    const changed = ctx.db.prepare(`UPDATE canonical_memory_ingestion_cursors SET through_seq=MAX(through_seq,:through),updated_at=:at
-      WHERE authority_epoch_id=:epoch AND character_id=:character`)
-      .run({ epoch: state.epochId, character: state.characterId,
-        through: state.source.throughSeq, at: input.now });
-    if (changed.changes !== 1) throw new Error("MEMORY_INGESTION_STALE_CURSOR");
+    const completed = update(ctx.db, { ...state, state: "complete", updatedAt: input.now });
+    const throughSeq = ctx.sources.advanceCoverage({ ...state, throughSeq: state.source.throughSeq, now: input.now });
     ctx.db.prepare(`INSERT INTO memory_auto_state(character_id,last_episodic_seq,last_flush_seq)
       VALUES (:character,:through,:through) ON CONFLICT(character_id) DO UPDATE SET
       last_episodic_seq=MAX(memory_auto_state.last_episodic_seq,excluded.last_episodic_seq),
       last_flush_seq=MAX(memory_auto_state.last_flush_seq,excluded.last_flush_seq)`)
-      .run({ character: state.characterId, through: state.source.throughSeq });
-    return update(ctx.db, { ...state, state: "complete", updatedAt: input.now });
+      .run({ character: state.characterId, through: throughSeq });
+    return completed;
   });
 }
 
@@ -203,7 +201,7 @@ function requireState(db: Database, input: IngestionScope & { spanId: string }):
     WHERE authority_epoch_id=:epoch AND character_id=:character AND span_id=:span`)
     .get({ epoch: input.epochId, character: input.characterId, span: input.spanId });
   if (!row) throw new Error("MEMORY_INGESTION_NOT_FOUND");
-  return parseState(row);
+  return parseCanonicalIngestionState(row);
 }
 
 function update(db: Database, state: CanonicalIngestionState): CanonicalIngestionState {
@@ -219,7 +217,7 @@ function update(db: Database, state: CanonicalIngestionState): CanonicalIngestio
   return requireState(db, state);
 }
 
-function parseState(row: SqlRow): CanonicalIngestionState {
+export function parseCanonicalIngestionState(row: SqlRow): CanonicalIngestionState {
   try {
     const state = CanonicalIngestionStateSchema.parse({ epochId: row.authority_epoch_id, characterId: row.character_id,
       spanId: row.span_id, sourceHash: row.source_hash, source: JSON.parse(String(row.source_json)),

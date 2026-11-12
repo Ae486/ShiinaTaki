@@ -1,7 +1,13 @@
 # core/extensions/
-- extension-composition.ts — main.ts composition seam for compatibility Skill tools and per-Run Extension contexts
+- Request attribution — captured Host/runtime and extension guidance descriptors survive admission; direct MCP definitions and selected Skill/MCP bridge content retain supplier sidecars
+- notify-extension-change.ts — optional bounded producer observation; subscriber failure cannot affect lifecycle truth and no source data or follow-up work is emitted
+- extension-subscriptions.ts — opt-in connection membership and bounded microtask union of actual MCP/Skill/Host changes; isolated targeted fan-out and complete retirement
+- extension-composition.ts — main.ts composition seam for compatibility Skill tools, per-Run Extension contexts and trusted native screenshot projectors
 - extension-registry.ts — immutable per-Run host-qualified registry with collision rejection, bounded discovery/call, and Run-id-free stable model context while internal snapshots/results retain authority identity
-- extension-run-context.ts — one-shot Host/Skill/MCP Run assembly reused across model retries
-- extension-sources.ts — adapters from existing governed Skill/MCP/Host authorities into registry candidates
-- extension-tools.ts — AI SDK progressive discovery, description, and sealed call bridge
+- extension-run-context.ts — one-shot Host/Skill/MCP Run assembly with captured MCP display names and disclosure metadata reused across model retries
+- extension-sources.ts — captured registry adapters; MCP tools/names share one snapshot and Host calls retain per-execution Run/Attempt/abort identity; native capture projection applies only to sealed screenshot/ambient subjects
+- extension-tools.ts — AI SDK bounded discovery, next-step direct MCP tool description, and sealed call bridge
+- extension-tool-model-output.ts — compact model directory retaining functional selectors, Host disambiguation, availability and incomplete-result truth
+- extension-call-model-output.ts — captured Skill projection reuse; indirect MCP/unknown results preserve complete JSON, while trusted Host captures carry native sidecars through the sealed call result
+- tool-disclosure-snapshot.ts — frozen internal links from admitted descriptors to direct MCP tools and Core Skill-load identities; overflow tools remain deferred
 - extension-transfer.ts — fail-closed adapter for advertised, governed, explicit-target cross-Host transfer capabilities

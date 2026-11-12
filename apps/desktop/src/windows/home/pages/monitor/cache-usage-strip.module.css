@@ -1,0 +1,56 @@
+.group { flex: none; min-width: 0; }
+.strip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--trajectory-border);
+  color: var(--trajectory-caption);
+  background: var(--trajectory-muted);
+  font: 12px/1.4 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric, .coverage, .status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.label { color: var(--trajectory-text); }
+.ratio {
+  min-width: 64px;
+  color: var(--trajectory-text);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.coverage { flex-direction: column; align-items: flex-start; gap: 1px; }
+.status { flex: 1; justify-content: flex-end; flex-wrap: wrap; gap: 4px 8px; }
+.stale { color: var(--trajectory-text); }
+.retrySlot { display: inline-flex; width: 34px; height: 22px; align-items: center; }
+.retrySlot button {
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 3px;
+  color: var(--trajectory-text);
+  background: var(--trajectory-bg);
+  font: inherit;
+}
+.retrySlot button:hover:not(:disabled) { background: var(--trajectory-hover); }
+.retrySlot button:disabled { opacity: 0.5; cursor: default; }
+.retrySlot button:focus-visible { outline: 2px solid var(--trajectory-accent); outline-offset: 2px; }
+
+@container monitor-workspace (max-width: 760px) {
+  .strip { flex-wrap: wrap; gap: 4px 12px; }
+  .status { flex: 1 1 100%; justify-content: flex-start; }
+}
+
+@container monitor-workspace (max-width: 480px) {
+  .metric { flex-wrap: wrap; }
+}

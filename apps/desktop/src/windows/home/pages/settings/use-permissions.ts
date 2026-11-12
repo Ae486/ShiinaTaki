@@ -3,10 +3,12 @@
  * OUTPUT: usePermissions() — in-memory Core snapshot, current-generation-only reads/mutations, explicit conflict refetch.
  * POS:    ui/windows/home/pages/settings — the only React permission seam; never persists or replays mutations.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import type { PermissionCellSetParams, PermissionLevel } from "@taki/shared";
 import { useHomeClient } from "../../home-client-context.ts";
+import { usePageActive } from "../../page-visibility-store.ts";
 import { createPermissionController } from "./permission-controller.ts";
+import { usePermissionFeedback } from "./use-permission-feedback.ts";
 import {
   applyPermissionLoad,
   beginPermissionLoad,
@@ -14,6 +16,7 @@ import {
   failPermissionLoad,
   failPermissionMutation,
   previousData,
+  permissionMutationFeedback,
   type PermissionFeedback,
   type PermissionViewState,
 } from "./permission-state.ts";
@@ -21,6 +24,8 @@ import {
 export interface PermissionsView {
   state: PermissionViewState;
   connectionReady: boolean;
+  pending: string | null;
+  feedback: PermissionFeedback | null;
   refresh(): Promise<void>;
   setLevel(level: PermissionLevel): Promise<void>;
   setCell(input: Omit<PermissionCellSetParams, "expectedPolicyGeneration">): Promise<void>;
@@ -29,7 +34,10 @@ export interface PermissionsView {
 export function usePermissions(): PermissionsView {
   const { client, status } = useHomeClient();
   const ready = client && status.kind === "connected" ? client : null;
-  const [state, setState] = useState<PermissionViewState>(() => beginPermissionLoad(0, null));
+  const visible = usePageActive("settings");
+  const [pending, setPending] = useState<string | null>(null);
+  const notices = usePermissionFeedback();
+  const [state, setState] = useState<PermissionViewState>({ kind: "idle", token: 0, previous: null });
   const controller = useMemo(() => createPermissionController({
     loading: (previous) => setState((current) => beginPermissionLoad(current.token, previous)),
     loaded: ({ level, cells }, feedback) => setState((current) => applyPermissionLoad(current, {
@@ -39,19 +47,24 @@ export function usePermissions(): PermissionsView {
       feedback: feedback ?? null,
     })),
     loadFailed: (cause) => setState((current) => failPermissionLoad(current, current.token, cause)),
-    mutationStarted: (key) => setState((current) => beginPermissionMutation(current, current.token, key)),
-    mutationFailed: (cause) => setState((current) => failPermissionMutation(current, current.token, cause)),
+    mutationStarted: (key) => { setPending(key); notices.started(key); setState((current) => beginPermissionMutation(current, current.token, key)); },
+    mutationFailed: (cause) => { notices.report(permissionMutationFeedback(cause)); setState((current) => failPermissionMutation(current, current.token, cause)); },
+    idle: (previous) => setState((current) => ({ kind: "idle", token: current.token, previous })),
+    feedback: notices.report,
+    mutationSettled: () => setPending(null),
   }), []);
 
-  useEffect(() => {
-    setState((current) => beginPermissionLoad(current.token + 1, previousData(current)));
+  useLayoutEffect(() => controller.setVisible(visible), [controller, visible]);
+  useLayoutEffect(() => {
+    notices.reset();
+    setState((current) => ({ kind: "idle", token: current.token + 1, previous: previousData(current) }));
     controller.replace(ready);
     return () => controller.replace(null);
-  }, [controller, ready]);
+  }, [controller, ready, notices.reset]);
   useEffect(() => () => controller.dispose(), [controller]);
 
   const generation = state.kind === "ready" ? state.data.policyGeneration : null;
-  const refresh = useCallback((feedback?: PermissionFeedback) => controller.refresh(feedback), [controller]);
+  const refresh = useCallback(() => controller.refresh(), [controller]);
   const setLevel = useCallback(async (level: PermissionLevel) => {
     if (generation !== null) await controller.setLevel(level, generation);
   }, [controller, generation]);
@@ -59,5 +72,5 @@ export function usePermissions(): PermissionsView {
     if (generation !== null) await controller.setCell(input, generation);
   }, [controller, generation]);
 
-  return { state, connectionReady: ready !== null, refresh, setLevel, setCell };
+  return { state, connectionReady: ready !== null, pending, feedback: notices.feedback, refresh, setLevel, setCell };
 }

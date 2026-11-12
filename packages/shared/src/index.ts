@@ -1,311 +1,344 @@
 /**
- * INPUT:  n/a
- * OUTPUT: the @taki/shared schemas, types and helpers consumed across package boundaries
- * POS:    shared — the package's only public entry (no export *; no internal barrels)
+ * INPUT: cross-process schemas, pure helpers and frozen compatibility definitions
+ * OUTPUT: the @taki/shared public named protocol API
+ * POS: shared — sole public export boundary; no runtime implementation logic
  */
-export { PingSchema, PongSchema } from "./ping-schema.ts";
-export type { Ping, Pong } from "./ping-schema.ts";
-
-export { JSON_RPC_APP_ERROR, JSON_RPC_ERROR_CODES, JsonRpcClientFrameSchema, JsonRpcErrorObjectSchema, JsonRpcErrorResponseSchema, JsonRpcIdSchema, JsonRpcInboundFrameSchema, JsonRpcNotificationSchema, JsonRpcRequestSchema, JsonRpcSuccessResponseSchema } from "./json-rpc-schema.ts";
-export type { JsonRpcClientFrame, JsonRpcErrorObject, JsonRpcErrorResponse, JsonRpcId, JsonRpcInboundFrame, JsonRpcNotification, JsonRpcRequest, JsonRpcSuccessResponse } from "./json-rpc-schema.ts";
-
-export { ErrorCodeSchema } from "./error-code-schema.ts";
-export type { ErrorCode } from "./error-code-schema.ts";
-
-export { MemoryReplicaRequestSchema, type MemoryReplicaRequest } from "./memory-replica-request-schema.ts";
+export { resolveHistoricalGovernanceRegistry } from "./governance-registry-history.ts";
+export {
+  PingSchema, PongSchema, type Ping, type Pong,
+} from "./ping-schema.ts";
+export {
+  JSON_RPC_APP_ERROR, JSON_RPC_ERROR_CODES, JsonRpcClientFrameSchema, JsonRpcErrorObjectSchema,
+  JsonRpcErrorResponseSchema, JsonRpcIdSchema, JsonRpcInboundFrameSchema, JsonRpcNotificationSchema,
+  JsonRpcRequestSchema, JsonRpcSuccessResponseSchema, type JsonRpcClientFrame, type JsonRpcErrorObject,
+  type JsonRpcErrorResponse, type JsonRpcId, type JsonRpcInboundFrame, type JsonRpcNotification, type JsonRpcRequest,
+  type JsonRpcSuccessResponse,
+} from "./json-rpc-schema.ts";
+export {
+  ErrorCodeSchema, type ErrorCode,
+} from "./error-code-schema.ts";
+export {
+  MemoryReplicaRequestSchema, type MemoryReplicaRequest,
+} from "./memory-replica-request-schema.ts";
 export {
   HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_METHODS, HOST_CONTROL_PROTOCOL_VERSION,
-  CapabilityAuthorizationLineageSchema, CapabilityAuthorizationSchema, CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema, CapabilityExecuteSchema,
-  CapabilityChallengeSchema, CapabilityExecutionKindSchema, CapabilityResumeSchema,
-  CapabilitySettlementStateSchema, HostCapabilityDescriptorSchema, HostCapabilityGovernanceSupportSchema, HostCatalogPublishParamsSchema,
+  CapabilityAuthorizationLineageSchema, CapabilityAuthorizationSchema, CapabilityCancellationSchema,
+  CapabilityCancelReasonSchema, CapabilityCancelSchema, CapabilityExecuteSchema, CapabilityChallengeSchema,
+  CapabilityExecutionKindSchema, CapabilityResumeSchema, CapabilitySettlementStateSchema,
+  HostCapabilityDescriptorSchema, HostCapabilityGovernanceSupportSchema, HostCatalogPublishParamsSchema,
   HostDeclarationSchema, HostFrameAckSchema, HostFrameRejectReasonSchema, HostLocalReadinessSchema,
-  HostChallengePresentationSchema, HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostGovernanceEvidenceSchema,
-  HostGovernanceCellSchema, HostGovernanceProjectionPayloadSchema, HostGovernanceProjectionSchema, HostProtocolRangeSchema,
-  HostSkillDescriptorSchema, HostWorkspaceDescriptorSchema, PositiveGenerationSchema, Sha256HexSchema,
-  canonicalCapabilityChallenge, canonicalHostGovernanceProjection, canonicalHostOperationControl,
+  HostChallengePresentationSchema, HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema,
+  HostGovernanceEvidenceSchema, HostGovernanceCellSchema, HostGovernanceProjectionPayloadSchema,
+  HostGovernanceProjectionSchema, HostProtocolRangeSchema, HostSkillDescriptorSchema, HostWorkspaceDescriptorSchema,
+  PositiveGenerationSchema, Sha256HexSchema, canonicalCapabilityChallenge, canonicalHostGovernanceProjection,
+  canonicalHostOperationControl, type CapabilityAuthorization, type CapabilityAuthorizationLineage,
+  type CapabilityCancellation, type CapabilityCancel, type CapabilityCancelReason, type CapabilityChallenge,
+  type CapabilityExecutionKind, type CapabilityExecute, type CapabilityResume, type CapabilitySettlementState,
+  type HostCapabilityDescriptor, type HostCapabilityGovernanceSupport, type HostCatalogPublishParams,
+  type HostChallengePresentation, type HostDeclaration, type HostFrameAck, type HostFrameRejectReason,
+  type HostLocalReadiness, type HostMcpDescriptor, type HostNegotiation, type HostOperationControl,
+  type HostGovernanceProjection, type HostGovernanceProjectionPayload, type HostGovernanceCell,
+  type HostGovernanceEvidence, type HostProtocolRange, type HostSkillDescriptor, type HostWorkspaceDescriptor,
 } from "./host-control-api.ts";
-export type {
-  CapabilityAuthorization, CapabilityAuthorizationLineage, CapabilityCancellation, CapabilityCancel, CapabilityCancelReason, CapabilityChallenge,
-  CapabilityExecutionKind, CapabilityExecute, CapabilityResume, CapabilitySettlementState, HostCapabilityDescriptor, HostCapabilityGovernanceSupport,
-  HostCatalogPublishParams, HostChallengePresentation, HostDeclaration, HostFrameAck, HostFrameRejectReason, HostLocalReadiness,
-  HostMcpDescriptor, HostNegotiation, HostOperationControl, HostGovernanceProjection, HostGovernanceProjectionPayload,
-  HostGovernanceCell, HostGovernanceEvidence, HostProtocolRange, HostSkillDescriptor,
-  HostWorkspaceDescriptor,
-} from "./host-control-api.ts";
-
-export { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
-export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
-
-export { CHAT_METHODS, ChatCancelParamsSchema, ChatCancelResultSchema, ChatCompleteSchema, ChatDeltaSchema, ChatErrorSchema, ChatSendParamsSchema, ChatSendResultSchema, IMAGE_MEDIA_TYPES, ImageAttachmentSchema, MAX_ATTACHMENTS_PER_MESSAGE } from "./chat-schema.ts";
-export type { ChatCancelParams, ChatCancelResult, ChatComplete, ChatDelta, ChatError, ChatSendParams, ChatSendResult, ImageAttachment } from "./chat-schema.ts";
-
+export {
+  CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema, type ConnectParams, type ConnectResult,
+  type Role, LocalAuthChallengeSchema, LocalAuthRequestSchema, localAuthTranscript, type LocalAuthChallenge,
+  type LocalAuthRequest,
+} from "./connect-schema.ts";
+export {
+  CHAT_METHODS, ChatCancelParamsSchema, ChatCancelResultSchema, ChatCompleteSchema, ChatDeltaSchema, ChatErrorSchema,
+  ChatSendParamsSchema, ChatSendResultSchema, IMAGE_MEDIA_TYPES, ImageAttachmentSchema, MAX_ATTACHMENTS_PER_MESSAGE,
+  type ChatCancelParams, type ChatCancelResult, type ChatComplete, type ChatDelta, type ChatError, type ChatSendParams,
+  type ChatSendResult, type ImageAttachment,
+} from "./chat-schema.ts";
 export {
   RUN_METHODS, RunInitiatorSchema, RunProvenanceSchema, DeliveryClassSchema, ContextModeSchema, RunStateSchema,
   AttemptStateSchema, RunOutcomeSchema, RetryabilitySchema, RunOperationPhaseSchema, TriggerRequestSchema,
   SnapshotReferenceSchema, RunHostReferenceSchema, RunExtensionReferenceSchema, RunGovernanceReferenceSchema,
   RunMemoryReferenceSchema, RunContextDecisionSchema, RunReplayDecisionSchema, RunBudgetReferenceSchema,
   RunImplementationReferenceSchema, RunSnapshotSchema, AttemptSchema, RunReceiptSchema, RunSchema,
-  RunStatusParamsSchema, RunStatusResultSchema,
-  QueueStateSchema, QueueListParamsSchema, QueueEntrySchema, QueueListResultSchema,
-  RecoveryClassificationSchema, RecoveryReportSchema,
+  RunStatusParamsSchema, RunStatusResultSchema, QueueStateSchema, QueueListParamsSchema, QueueEntrySchema,
+  QueueListResultSchema, RecoveryClassificationSchema, RecoveryReportSchema, type RunInitiator, type RunProvenance,
+  type DeliveryClass, type ContextMode, type RunState, type AttemptState, type RunOutcome, type Retryability,
+  type RunOperationPhase, type TriggerRequest, type SnapshotReference, type RunHostReference,
+  type RunExtensionReference, type RunGovernanceReference, type RunMemoryReference, type RunSnapshot, type Attempt,
+  type RunReceipt, type Run, type RunStatusParams, type RunStatusResult, type RunContextDecision,
+  type RunReplayDecision, type RunBudgetReference, type RunImplementationReference, type QueueState,
+  type QueueListParams, type QueueEntry, type QueueListResult, type RecoveryClassification, type RecoveryReport,
 } from "./harness-schema.ts";
-export { SCHEDULED_TASK_METHODS, ScheduleAtSchema, ScheduleEverySchema, ScheduleCronSchema, SchedulePatternSchema, ScheduleTimezoneSchema, ScheduledTaskSchema, ScheduledTaskCreateParamsSchema, ScheduledTaskUpdateParamsSchema, ScheduledTaskRevisionParamsSchema, ScheduledTaskListParamsSchema, ScheduledTaskListResultSchema, ScheduledTaskMutationResultSchema } from "./scheduled-task-schema.ts";
-export type { SchedulePattern, ScheduleTimezone, ScheduledTask, ScheduledTaskCreateParams, ScheduledTaskUpdateParams, ScheduledTaskRevisionParams, ScheduledTaskListParams, ScheduledTaskListResult, ScheduledTaskMutationResult } from "./scheduled-task-schema.ts";
-
-export { RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema, RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema } from "./run-event-schema.ts";
-export type { RunEvent, RunEventCategory, RunEventKind, RunEventPayload, RunEventCursor, RunEventSummary, RunEventInspector } from "./run-event-schema.ts";
-export { MONITOR_MODE_CONFIG_KEY, OBSERVABILITY_METHODS, MonitorModeSchema, MonitorStateParamsSchema, MonitorStateResultSchema, RunMonitorCursorSchema, RunMonitorListParamsSchema, RunMonitorSummarySchema, RunMonitorListResultSchema, TrajectoryRowSchema, TrajectoryParamsSchema, TrajectoryResultSchema, TrajectoryInspectParamsSchema, TrajectoryInspectorSchema, RunMonitorSubscribeParamsSchema, RunMonitorSubscribeResultSchema, RunMonitorUnsubscribeParamsSchema, RunMonitorUnsubscribeResultSchema, RunMonitorEventSchema } from "./observability-schema.ts";
-export type { MonitorMode, MonitorStateResult, RunMonitorCursor, RunMonitorListParams, RunMonitorSummary, RunMonitorListResult, TrajectoryRow, TrajectoryParams, TrajectoryResult, TrajectoryInspectParams, TrajectoryInspector, RunMonitorSubscribeParams, RunMonitorEvent } from "./observability-schema.ts";
-export { observabilityLabel, observabilityLabels } from "./observability-presentation.ts";
-export { EFFECT_SCHEMA_VERSION, EffectKindSchema, EffectStateSchema, EffectReplayPostureSchema, EffectOutcomeSchema, EffectSourceRefSchema, EffectExecutorRefSchema, ApprovalEffectRefSchema, EffectLifecycleSchema, UsageQualitySchema, InputTokenDetailsSchema, OutputTokenDetailsSchema, UsageRecordSchema } from "./effect-lifecycle-schema.ts";
-export type { EffectLifecycle, ApprovalEffectRef, UsageRecord } from "./effect-lifecycle-schema.ts";
-export type {
-  RunInitiator, RunProvenance, DeliveryClass, ContextMode, RunState, AttemptState, RunOutcome, Retryability,
-  RunOperationPhase, TriggerRequest, SnapshotReference, RunHostReference, RunExtensionReference,
-  RunGovernanceReference, RunMemoryReference, RunSnapshot, Attempt, RunReceipt, Run, RunStatusParams,
-  RunStatusResult, RunContextDecision, RunReplayDecision, RunBudgetReference, RunImplementationReference,
-  QueueState, QueueListParams, QueueEntry, QueueListResult, RecoveryClassification, RecoveryReport,
-} from "./harness-schema.ts";
-
-export { TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema, TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema, TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema, TimelineToolOutputSchema } from "./timeline-schema.ts";
-export type { TimelineAppended, TimelineEntry, TimelineHistoryParams, TimelineHistoryResult, TimelinePart, TimelineRemoved, TimelineRole, TimelineSubscribeParams, TimelineSubscribeResult, TimelineToolOutput } from "./timeline-schema.ts";
-
-export { MEMORY_METHODS, MemoryAutoStatusSchema, MemoryStatusParamsSchema, MemoryStatusResultSchema, MemorySummaryStatusSchema, MemoryTidyDefectsSchema, MemoryTidyParamsSchema, MemoryTidyResultSchema, MemoryWindowSlotSchema } from "./memory-schema.ts";
-export type { MemoryAutoStatus, MemoryStatusParams, MemoryStatusResult, MemorySummaryStatus, MemoryTidyDefects, MemoryTidyParams, MemoryTidyResult, MemoryWindowSlot } from "./memory-schema.ts";
-
-export { CONFIG_METHODS, ConfigApplySchema, ConfigChangedSchema, ConfigEntrySchema, ConfigInputSchema, ConfigListParamsSchema, ConfigListResultSchema, ConfigRefusalReasonSchema, ConfigSetParamsSchema, ConfigSetResultSchema, ConfigSubscribeParamsSchema, ConfigSubscribeResultSchema, ConfigValueSchema } from "./config-schema.ts";
-export type { ConfigApply, ConfigChanged, ConfigEntry, ConfigInput, ConfigListParams, ConfigListResult, ConfigRefusalReason, ConfigSetParams, ConfigSetResult, ConfigSubscribeParams, ConfigSubscribeResult, ConfigValue } from "./config-schema.ts";
-
 export {
-  TIMING_CONFIG_KEYS,
-  TIMING_POLICY_DEVELOPMENT_DEFAULTS,
-  TimingDurationMsSchema,
-  TimingPolicySchema,
-  isTimingConfigKey,
-  timingPolicyCandidate,
+  SCHEDULED_TASK_METHODS, ScheduleAtSchema, ScheduleEverySchema, ScheduleCronSchema, SchedulePatternSchema,
+  ScheduleTimezoneSchema, ScheduledTaskSchema, ScheduledTaskCreateParamsSchema, ScheduledTaskUpdateParamsSchema,
+  ScheduledTaskRevisionParamsSchema, ScheduledTaskListParamsSchema, ScheduledTaskListResultSchema,
+  ScheduledTaskMutationResultSchema, type SchedulePattern, type ScheduleTimezone, type ScheduledTask,
+  type ScheduledTaskCreateParams, type ScheduledTaskUpdateParams, type ScheduledTaskRevisionParams,
+  type ScheduledTaskListParams, type ScheduledTaskListResult, type ScheduledTaskMutationResult,
+} from "./scheduled-task-schema.ts";
+export {
+  RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema,
+  RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema,
+  type RunEvent, type RunEventCategory, type RunEventKind, type RunEventPayload, type RunEventCursor,
+  type RunEventSummary, type RunEventInspector, RunEventV1Schema, type RunEventV1,
+} from "./run-event-schema.ts";
+export {
+  MONITOR_MODE_CONFIG_KEY, OBSERVABILITY_METHODS, MonitorModeSchema, MonitorStateParamsSchema,
+  MonitorStateResultSchema, RunMonitorCursorSchema, RunMonitorListParamsSchema, RunMonitorSummarySchema,
+  RunMonitorListResultSchema, TrajectoryRowSchema, TrajectoryParamsSchema, TrajectoryResultSchema,
+  TrajectoryInspectParamsSchema, TrajectoryInspectorSchema, RunMonitorSubscribeParamsSchema,
+  RunMonitorSubscribeResultSchema, RunMonitorUnsubscribeParamsSchema, RunMonitorUnsubscribeResultSchema,
+  RunMonitorEventSchema, type MonitorMode, type MonitorStateResult, type RunMonitorCursor, type RunMonitorListParams,
+  type RunMonitorSummary, type RunMonitorListResult, type TrajectoryRow, type TrajectoryParams, type TrajectoryResult,
+  type TrajectoryInspectParams, type TrajectoryInspector, type RunMonitorSubscribeParams, type RunMonitorEvent,
+} from "./observability-schema.ts";
+export {
+  observabilityLabel, observabilityLabels, observabilityUsageDetails,
+} from "./observability-presentation.ts";
+export {
+  EFFECT_SCHEMA_VERSION, EffectKindSchema, EffectStateSchema, EffectReplayPostureSchema, EffectOutcomeSchema,
+  EffectSourceRefSchema, EffectExecutorRefSchema, ApprovalEffectRefSchema, EffectLifecycleSchema, UsageQualitySchema,
+  InputTokenDetailsSchema, OutputTokenDetailsSchema, UsageRecordSchema, type EffectLifecycle, type ApprovalEffectRef,
+  type UsageRecord,
+} from "./effect-lifecycle-schema.ts";
+export {
+  TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema,
+  TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema,
+  TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema,
+  TimelineToolOutputSchema, type TimelineAppended, type TimelineEntry, type TimelineHistoryParams,
+  type TimelineHistoryResult, type TimelinePart, type TimelineRemoved, type TimelineRole, type TimelineSubscribeParams,
+  type TimelineSubscribeResult, type TimelineToolOutput, TimelineCommittedSchema, type TimelineCommitted,
+} from "./timeline-schema.ts";
+export {
+  MEMORY_METHODS, MemoryAutoStatusSchema, MemoryStatusParamsSchema, MemoryStatusResultSchema,
+  MemorySummaryStatusSchema, MemoryTidyDefectsSchema, MemoryTidyParamsSchema, MemoryTidyResultSchema,
+  MemoryWindowSlotSchema, type MemoryAutoStatus, type MemoryStatusParams, type MemoryStatusResult,
+  type MemorySummaryStatus, type MemoryTidyDefects, type MemoryTidyParams, type MemoryTidyResult,
+  type MemoryWindowSlot,
+} from "./memory-schema.ts";
+export {
+  CONFIG_METHODS, ConfigApplySchema, ConfigChangedSchema, ConfigEntrySchema, ConfigInputSchema, ConfigListParamsSchema,
+  ConfigListResultSchema, ConfigRefusalReasonSchema, ConfigSetParamsSchema, ConfigSetResultSchema,
+  ConfigSubscribeParamsSchema, ConfigSubscribeResultSchema, ConfigValueSchema, type ConfigApply, type ConfigChanged,
+  type ConfigEntry, type ConfigInput, type ConfigListParams, type ConfigListResult, type ConfigRefusalReason,
+  type ConfigSetParams, type ConfigSetResult, type ConfigSubscribeParams, type ConfigSubscribeResult, type ConfigValue,
+  ConfigApplicationSchema, type ConfigApplication,
+} from "./config-schema.ts";
+export {
+  TIMING_CONFIG_KEYS, TIMING_POLICY_DEVELOPMENT_DEFAULTS, TimingDurationMsSchema, TimingPolicySchema,
+  isTimingConfigKey, timingPolicyCandidate, type TimingConfigKey, type TimingPolicy, type TimingPolicyField,
 } from "./timing-policy-schema.ts";
-export type { TimingConfigKey, TimingPolicy, TimingPolicyField } from "./timing-policy-schema.ts";
-
 export {
-  MEDIA_METHODS,
-  MediaClearParamsSchema,
-  MediaClearResultSchema,
-  MediaGetParamsSchema,
-  MediaGetResultSchema,
-  MediaUsageParamsSchema,
-  MediaUsageResultSchema,
+  MEDIA_METHODS, MediaClearParamsSchema, MediaClearResultSchema, MediaGetParamsSchema, MediaGetResultSchema,
+  MediaUsageParamsSchema, MediaUsageResultSchema, type MediaClearParams, type MediaClearResult, type MediaGetParams,
+  type MediaGetResult, type MediaUsageParams, type MediaUsageResult,
 } from "./media-schema.ts";
-export type {
-  MediaClearParams,
-  MediaClearResult,
-  MediaGetParams,
-  MediaGetResult,
-  MediaUsageParams,
-  MediaUsageResult,
-} from "./media-schema.ts";
-
 export {
-  CHARACTER_METHODS,
-  CharacterCostumeResolutionParamsSchema,
-  CharacterCostumeResolutionResultSchema,
-  CharacterCostumesParamsSchema,
-  CharacterCostumesResultSchema,
-  CharacterIdSchema,
-  CharacterImportErrorSchema,
-  CharacterImportParamsSchema,
-  CharacterImportResultSchema,
-  CharacterListParamsSchema,
-  CharacterListResultSchema,
-  CharacterSourceSchema,
-  CharacterSummarySchema,
-  CostumeAvailabilitySchema,
+  CHARACTER_METHODS, CharacterCostumeResolutionParamsSchema, CharacterCostumeResolutionResultSchema,
+  CharacterCostumesParamsSchema, CharacterCostumesResultSchema, CharacterIdSchema, CharacterImportErrorSchema,
+  CharacterImportParamsSchema, CharacterImportResultSchema, CharacterListParamsSchema, CharacterListResultSchema,
+  CharacterSourceSchema, CharacterSummarySchema, CostumeAvailabilitySchema, type CharacterCostumeResolutionParams,
+  type CharacterCostumeResolutionResult, type CharacterCostumesParams, type CharacterCostumesResult, type CharacterId,
+  type CharacterImportError, type CharacterImportParams, type CharacterImportResult, type CharacterListParams,
+  type CharacterListResult, type CharacterSource, type CharacterSummary, type CostumeAvailability,
 } from "./character-schema.ts";
-export type {
-  CharacterCostumeResolutionParams,
-  CharacterCostumeResolutionResult,
-  CharacterCostumesParams,
-  CharacterCostumesResult,
-  CharacterId,
-  CharacterImportError,
-  CharacterImportParams,
-  CharacterImportResult,
-  CharacterListParams,
-  CharacterListResult,
-  CharacterSource,
-  CharacterSummary,
-  CostumeAvailability,
-} from "./character-schema.ts";
-
 export {
-  AVATAR_METHODS,
-  AvatarCommandSchema,
-  AvatarReportParamsSchema,
-  AvatarReportResultSchema,
-  AvatarSubscribeParamsSchema,
-  AvatarSubscribeResultSchema,
+  AVATAR_METHODS, AvatarCommandSchema, AvatarReportParamsSchema, AvatarReportResultSchema, AvatarSubscribeParamsSchema,
+  AvatarSubscribeResultSchema, type AvatarCommand, type AvatarReportParams, type AvatarReportResult,
+  type AvatarSubscribeParams, type AvatarSubscribeResult, AvatarOutcomeParamsSchema, AvatarOutcomeResultSchema,
+  AvatarOutcomeSchema, AvatarRejectReasonSchema, type AvatarOutcome, type AvatarOutcomeParams,
+  type AvatarOutcomeResult, type AvatarRejectReason,
 } from "./avatar-schema.ts";
-export type {
-  AvatarCommand,
-  AvatarReportParams,
-  AvatarReportResult,
-  AvatarSubscribeParams,
-  AvatarSubscribeResult,
-} from "./avatar-schema.ts";
-
 export {
-  APPROVAL_BINDING_REVISION, APPROVAL_DISCLOSURE_REVISION, APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION, ApprovalChoiceSchema, ApprovalClosedReasonSchema, ApprovalClosedSchema, ApprovalDecisionBindingSchema, ApprovalDecisionInertReasonSchema, ApprovalDecisionListItemSchema, ApprovalDecisionProvenanceSchema, ApprovalDecisionScopeSchema, ApprovalDecisionUsabilitySchema, ApprovalSafeLabelsSchema, ApprovalDisclosureAckSchema, ApprovalDurableDecisionBindingSchema, ApprovalDurableDecisionSchema, ApprovalStoredDurableDecisionBindingSchema, ApprovalListParamsSchema, ApprovalListResultSchema, ApprovalPresentationSchema, ApprovalRespondStatusSchema, ApprovalRevokeParamsSchema, ApprovalRevokeResultSchema, ApprovalRevokeStatusSchema, CanonicalApprovalRequestSchema, CanonicalApprovalRespondParamsSchema, CanonicalApprovalRespondResultSchema, canonicalApprovalDecisionScope, canonicalApprovalDurableDecisionBinding, canonicalStoredApprovalDurableDecisionBinding,
+  APPROVAL_BINDING_REVISION, APPROVAL_DISCLOSURE_REVISION, APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION,
+  ApprovalChoiceSchema, ApprovalClosedReasonSchema, ApprovalClosedSchema, ApprovalDecisionBindingSchema,
+  ApprovalDecisionInertReasonSchema, ApprovalDecisionListItemSchema, ApprovalDecisionProvenanceSchema,
+  ApprovalDecisionScopeSchema, ApprovalDecisionUsabilitySchema, ApprovalSafeLabelsSchema, ApprovalDisclosureAckSchema,
+  ApprovalDurableDecisionBindingSchema, ApprovalDurableDecisionSchema, ApprovalStoredDurableDecisionBindingSchema,
+  ApprovalListParamsSchema, ApprovalListResultSchema, ApprovalPresentationSchema, ApprovalRespondStatusSchema,
+  ApprovalRevokeParamsSchema, ApprovalRevokeResultSchema, ApprovalRevokeStatusSchema, CanonicalApprovalRequestSchema,
+  CanonicalApprovalRespondParamsSchema, CanonicalApprovalRespondResultSchema, canonicalApprovalDecisionScope,
+  canonicalApprovalDurableDecisionBinding, canonicalStoredApprovalDurableDecisionBinding, type ApprovalChoice,
+  type ApprovalClosed, type ApprovalClosedReason, type ApprovalDecisionBinding, type ApprovalDecisionListItem,
+  type ApprovalDecisionProvenance, type ApprovalDecisionScope, type ApprovalDecisionUsability, type ApprovalSafeLabels,
+  type ApprovalDisclosureAck, type ApprovalDurableDecision, type ApprovalDurableDecisionBinding,
+  type ApprovalListParams, type ApprovalListResult, type ApprovalStoredDurableDecisionBinding,
+  type ApprovalPresentation, type ApprovalRevokeParams, type ApprovalRevokeResult, type CanonicalApprovalRequest,
+  type CanonicalApprovalRespondParams, type CanonicalApprovalRespondResult, APPROVAL_COMMAND_DISCLOSURE_REVISION,
+  ApprovalCommandDisclosureSchema, reconstructApprovalCommand, type ApprovalCommandDisclosure,
 } from "./approval-api.ts";
-export type {
-  ApprovalChoice, ApprovalClosed, ApprovalClosedReason, ApprovalDecisionBinding, ApprovalDecisionListItem, ApprovalDecisionProvenance, ApprovalDecisionScope, ApprovalDecisionUsability, ApprovalSafeLabels, ApprovalDisclosureAck, ApprovalDurableDecision, ApprovalDurableDecisionBinding, ApprovalListParams, ApprovalListResult, ApprovalStoredDurableDecisionBinding, ApprovalPresentation, ApprovalRevokeParams, ApprovalRevokeResult, CanonicalApprovalRequest, CanonicalApprovalRespondParams, CanonicalApprovalRespondResult,
-} from "./approval-api.ts";
-export { LegacyApprovalRequestSchema, LegacyApprovalRespondParamsSchema, LegacyApprovalRespondResultSchema, LegacyApprovalScopeSchema } from "./legacy-approval-schema.ts";
-export type { LegacyApprovalRequest, LegacyApprovalRespondParams, LegacyApprovalRespondResult, LegacyApprovalScope } from "./legacy-approval-schema.ts";
-
 export {
-  CANONICAL_GOVERNANCE_REGISTRY, CanonicalCapabilityIdentitySchema, CanonicalCapabilitySubjectSchema, CapabilityGovernanceDescriptorSchema,
-  GOVERNANCE_REGISTRY_REVISION, GovernanceApprovalMemorySchema, GovernanceCellDescriptorSchema, GovernanceClassifierAuthoritySchema,
-  GovernanceEvaluationInputSchema, GovernanceEvaluationReasonSchema, GovernanceEvaluationResultSchema, GovernanceExecutionCodeSchema, GovernanceOverrideModeSchema,
-  GovernanceOverrideSchema, GovernanceRegistrySchema, GovernanceRevisionSchema, GovernanceStableIdSchema,
-  LegacyPermissionCellKeySchema, LegacyPermissionCellSetParamsSchema,
-  LegacyPermissionCellStateSchema, LegacyPermissionLevelStateSchema, PERMISSION_METHODS,
-  PermissionCellKeySchema, PermissionDecisionKeySchema, PermissionCellsGetParamsSchema,
-  PermissionCellSetParamsSchema, PermissionCellSetResultSchema, PermissionCellsStateSchema,
-  PermissionCellStateSchema, PermissionLevelGetParamsSchema, PermissionLevelSchema,
-  PermissionLevelSetParamsSchema, PermissionLevelStateSchema, PermissionPostureSchema,
-  createGovernanceRegistry, evaluateGovernance, governanceCell, governanceDescriptor,
+  LegacyApprovalRequestSchema, LegacyApprovalRespondParamsSchema, LegacyApprovalRespondResultSchema,
+  LegacyApprovalScopeSchema, type LegacyApprovalRequest, type LegacyApprovalRespondParams,
+  type LegacyApprovalRespondResult, type LegacyApprovalScope,
+} from "./legacy-approval-schema.ts";
+export {
+  CANONICAL_GOVERNANCE_REGISTRY, CanonicalCapabilityIdentitySchema, CanonicalCapabilitySubjectSchema,
+  CapabilityGovernanceDescriptorSchema, GOVERNANCE_REGISTRY_REVISION, GovernanceApprovalMemorySchema,
+  GovernanceCellDescriptorSchema, GovernanceClassifierAuthoritySchema, GovernanceEvaluationInputSchema,
+  GovernanceEvaluationReasonSchema, GovernanceEvaluationResultSchema, GovernanceExecutionCodeSchema,
+  GovernanceOverrideModeSchema, GovernanceOverrideSchema, GovernanceRegistrySchema, GovernanceRevisionSchema,
+  GovernanceStableIdSchema, LegacyPermissionCellKeySchema, LegacyPermissionCellSetParamsSchema,
+  LegacyPermissionCellStateSchema, LegacyPermissionLevelStateSchema, PERMISSION_METHODS, PermissionCellKeySchema,
+  PermissionDecisionKeySchema, PermissionCellsGetParamsSchema, PermissionCellSetParamsSchema,
+  PermissionCellSetResultSchema, PermissionCellsStateSchema, PermissionCellStateSchema, PermissionLevelGetParamsSchema,
+  PermissionLevelSchema, PermissionLevelSetParamsSchema, PermissionLevelStateSchema, PermissionPostureSchema,
+  createGovernanceRegistry, evaluateGovernance, governanceCell, governanceDescriptor, type CanonicalCapabilityIdentity,
+  type CanonicalCapabilitySubject, type CapabilityGovernanceDescriptor, type GovernanceCellDescriptor,
+  type GovernanceEvaluationInput, type GovernanceEvaluationResult, type GovernanceExecutionCode,
+  type GovernanceOverride, type GovernanceRegistry, type LegacyPermissionCellSetParams, type LegacyPermissionCellState,
+  type LegacyPermissionLevelState, type PermissionCellKey, type PermissionDecisionKey, type PermissionCellsGetParams,
+  type PermissionCellSetParams, type PermissionCellSetResult, type PermissionCellsState, type PermissionCellState,
+  type PermissionLevelGetParams, type PermissionLevel, type PermissionLevelSetParams, type PermissionLevelState,
+  type PermissionPosture,
 } from "./governance-api.ts";
-export type {
-  CanonicalCapabilityIdentity, CanonicalCapabilitySubject, CapabilityGovernanceDescriptor,
-  GovernanceCellDescriptor, GovernanceEvaluationInput, GovernanceEvaluationResult, GovernanceExecutionCode,
-  GovernanceOverride, GovernanceRegistry, LegacyPermissionCellSetParams,
-  LegacyPermissionCellState, LegacyPermissionLevelState, PermissionCellKey, PermissionDecisionKey,
-  PermissionCellsGetParams, PermissionCellSetParams, PermissionCellSetResult, PermissionCellsState,
-  PermissionCellState, PermissionLevelGetParams, PermissionLevel, PermissionLevelSetParams,
-  PermissionLevelState, PermissionPosture,
-} from "./governance-api.ts";
-
-export { EXTENSION_DISCOVERY_BUDGET, EXTENSION_CALL_ERROR_CODES, EXTENSION_KINDS, EXTENSION_METHODS, ExtensionCollisionSchema, ExtensionConvergenceResultSchema, ExtensionCallErrorCodeSchema, ExtensionCallModeSchema, ExtensionCallParamsSchema, ExtensionCallResultSchema, ExtensionDescribeParamsSchema, ExtensionDescribeResultSchema, ExtensionDescriptorSchema, ExtensionDiscoverParamsSchema, ExtensionDiscoverResultSchema, ExtensionDiscoveryBudgetSchema, ExtensionHostSnapshotSchema, ExtensionIdentitySchema, ExtensionKindSchema, ExtensionRunSnapshotSchema, ExtensionStatusParamsSchema } from "./extension-discovery-schema.ts";
-export type { ExtensionCallMode, ExtensionCallErrorCode, ExtensionCallParams, ExtensionCallResult, ExtensionCollision, ExtensionConvergenceResult, ExtensionDescriptor, ExtensionDescribeParams, ExtensionDescribeResult, ExtensionDiscoverParams, ExtensionDiscoverResult, ExtensionDiscoveryBudget, ExtensionHostSnapshot, ExtensionIdentity, ExtensionKind, ExtensionRunSnapshot, ExtensionStatusParams } from "./extension-discovery-schema.ts";
-
-export { PERCEPTION_METHODS, PerceptionActivityEntrySchema, PerceptionCardParamsSchema, PerceptionCardSchema, PerceptionPauseGetParamsSchema, PerceptionPauseSetParamsSchema, PerceptionPauseStateSchema, PerceptionSamplingStatusSchema } from "./perception-schema.ts";
-export type {
-  PerceptionActivityEntry,
-  PerceptionCard,
-  PerceptionCardParams,
-  PerceptionPauseGetParams,
-  PerceptionPauseSetParams,
-  PerceptionPauseState,
-  PerceptionSamplingStatus,
+export {
+  EXTENSION_DISCOVERY_BUDGET, EXTENSION_CALL_ERROR_CODES, EXTENSION_KINDS, EXTENSION_METHODS, ExtensionCollisionSchema,
+  ExtensionConvergenceResultSchema, ExtensionCallErrorCodeSchema, ExtensionCallModeSchema, ExtensionCallParamsSchema,
+  ExtensionCallResultSchema, ExtensionDescribeParamsSchema, ExtensionDescribeResultSchema, ExtensionDescriptorSchema,
+  ExtensionDiscoverParamsSchema, ExtensionDiscoverResultSchema, ExtensionDiscoveryBudgetSchema,
+  ExtensionHostSnapshotSchema, ExtensionIdentitySchema, ExtensionKindSchema, ExtensionRunSnapshotSchema,
+  ExtensionStatusParamsSchema, type ExtensionCallMode, type ExtensionCallErrorCode, type ExtensionCallParams,
+  type ExtensionCallResult, type ExtensionCollision, type ExtensionConvergenceResult, type ExtensionDescriptor,
+  type ExtensionDescribeParams, type ExtensionDescribeResult, type ExtensionDiscoverParams,
+  type ExtensionDiscoverResult, type ExtensionDiscoveryBudget, type ExtensionHostSnapshot, type ExtensionIdentity,
+  type ExtensionKind, type ExtensionRunSnapshot, type ExtensionStatusParams,
+} from "./extension-discovery-schema.ts";
+export {
+  PERCEPTION_METHODS, PerceptionActivityEntrySchema, PerceptionCardParamsSchema, PerceptionCardSchema,
+  PerceptionPauseGetParamsSchema, PerceptionPauseSetParamsSchema, PerceptionPauseStateSchema,
+  PerceptionSamplingStatusSchema, type PerceptionActivityEntry, type PerceptionCard, type PerceptionCardParams,
+  type PerceptionPauseGetParams, type PerceptionPauseSetParams, type PerceptionPauseState,
+  type PerceptionSamplingStatus, PerceptionChangedSchema, PerceptionSubscribeParamsSchema,
+  PerceptionSubscribeResultSchema, type PerceptionChanged, type PerceptionSubscribeParams,
+  type PerceptionSubscribeResult,
 } from "./perception-schema.ts";
-
 export {
-  CAPABILITY_METHODS,
-  CapabilityErrorCodeSchema,
-  CapabilityErrorSchema,
-  CapabilityRequestSchema,
-  CapabilityRespondParamsSchema,
-  CapabilityRespondResultSchema,
+  CAPABILITY_METHODS, CapabilityErrorCodeSchema, CapabilityErrorSchema, CapabilityRequestSchema,
+  CapabilityRespondParamsSchema, CapabilityRespondResultSchema, type CapabilityError, type CapabilityErrorCode,
+  type CapabilityRequest, type CapabilityRespondParams, type CapabilityRespondResult,
 } from "./capability-schema.ts";
-export type {
-  CapabilityError, CapabilityErrorCode, CapabilityRequest,
-  CapabilityRespondParams, CapabilityRespondResult,
-} from "./capability-schema.ts";
-
 export {
-  ClipboardReadOutputSchema, ClipboardWriteOutputSchema, ExecOutputSchema,
-  ForegroundWindowOutputSchema, ProcessInfoSchema, ProcessListOutputSchema,
-  ScreenshotOutputSchema, ShellOpenOutputSchema,
-} from "./capability-outputs.ts";
-export type {
-  ClipboardReadOutput, ClipboardWriteOutput, ExecOutput, ForegroundWindowOutput,
-  ProcessInfo, ProcessListOutput, ScreenshotOutput, ShellOpenOutput,
+  ClipboardReadOutputSchema, ClipboardWriteOutputSchema, ExecOutputSchema, ForegroundWindowOutputSchema,
+  ProcessInfoSchema, ProcessListOutputSchema, ScreenshotOutputSchema, ShellOpenOutputSchema, type ClipboardReadOutput,
+  type ClipboardWriteOutput, type ExecOutput, type ForegroundWindowOutput, type ProcessInfo, type ProcessListOutput,
+  type ScreenshotOutput, type ShellOpenOutput,
 } from "./capability-outputs.ts";
 export {
   SECRET_METHODS, SecretCatalogHealthSchema, SecretClearParamsSchema, SecretClearResultSchema, SecretListParamsSchema,
   SecretListResultSchema, SecretPresenceParamsSchema, SecretPresenceResultSchema, SecretProvenanceSchema,
-  SecretProvenanceSourceSchema, SecretRefSchema, SecretRefusalReasonSchema, SecretSetParamsSchema, SecretSetResultSchema,
+  SecretProvenanceSourceSchema, SecretRefSchema, SecretRefusalReasonSchema, SecretSetParamsSchema,
+  SecretSetResultSchema, type SecretCatalogHealth, type SecretClearParams, type SecretClearResult,
+  type SecretListParams, type SecretListResult, type SecretPresenceParams, type SecretPresenceResult,
+  type SecretProvenance, type SecretProvenanceSource, type SecretRef, type SecretRefusalReason, type SecretSetParams,
+  type SecretSetResult,
 } from "./secret-catalog-schema.ts";
-export type { SecretCatalogHealth, SecretClearParams, SecretClearResult, SecretListParams, SecretListResult, SecretPresenceParams, SecretPresenceResult, SecretProvenance, SecretProvenanceSource, SecretRef, SecretRefusalReason, SecretSetParams, SecretSetResult } from "./secret-catalog-schema.ts";
 export {
   HINDSIGHT_API_VERSION, HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_COMPATIBILITY_VERSION, HINDSIGHT_ERROR_CODES,
   HindsightBankLlmHealthProjectionSchema, HindsightBankSetupProjectionSchema, HindsightCompatibilityProjectionSchema,
   HindsightCompatibilitySupportSchema, HindsightConnectionProjectionSchema, HindsightDeploymentModeSchema,
-  HindsightErrorCodeSchema, HindsightLlmOperationHealthSchema, HindsightModelProjectionSchema, HindsightSetupErrorSchema,
-} from "./hindsight-connection-schema.ts";
-export type {
-  HindsightBankLlmHealthProjection, HindsightBankSetupProjection, HindsightCompatibilityProjection,
-  HindsightCompatibilitySupport, HindsightConnectionProjection, HindsightDeploymentMode, HindsightErrorCode,
-  HindsightModelProjection, HindsightSetupError,
+  HindsightErrorCodeSchema, HindsightLlmOperationHealthSchema, HindsightModelProjectionSchema,
+  HindsightSetupErrorSchema, type HindsightBankLlmHealthProjection, type HindsightBankSetupProjection,
+  type HindsightCompatibilityProjection, type HindsightCompatibilitySupport, type HindsightConnectionProjection,
+  type HindsightDeploymentMode, type HindsightErrorCode, type HindsightModelProjection, type HindsightSetupError,
+  HindsightApplicationStateContractSchema, HindsightApplicationReflectContractSchema,
 } from "./hindsight-connection-schema.ts";
 export {
   HINDSIGHT_METHODS, HindsightDisableParamsSchema, HindsightLlmHealthParamsSchema, HindsightLlmHealthResultSchema,
   HindsightManagedDeploymentReceiptSchema, HindsightSetupParamsSchema, HindsightSetupPhaseSchema,
-  HindsightSetupSnapshotSchema, HindsightStatusParamsSchema, HindsightStatusResultSchema, HindsightValidateParamsSchema,
+  HindsightSetupSnapshotSchema, HindsightStatusParamsSchema, HindsightStatusResultSchema,
+  HindsightValidateParamsSchema, type HindsightDisableParams, type HindsightLlmHealthParams,
+  type HindsightLlmHealthResult, type HindsightManagedDeploymentReceipt, type HindsightSetupParams,
+  type HindsightSetupPhase, type HindsightSetupSnapshot, type HindsightStatusParams, type HindsightValidateParams,
 } from "./hindsight-setup-schema.ts";
-export type {
-  HindsightDisableParams, HindsightLlmHealthParams, HindsightLlmHealthResult, HindsightManagedDeploymentReceipt,
-  HindsightSetupParams, HindsightSetupPhase, HindsightSetupSnapshot, HindsightStatusParams, HindsightValidateParams,
-} from "./hindsight-setup-schema.ts";
-export { MAX_MCP_TOOL_COUNT, MCP_METHODS, MCP_SECRET_REF_MARKER, McpAddParamsSchema, McpCandidateFailureReasonSchema, McpCandidateOutcomeSchema, McpDesiredServerSchema, McpDisableParamsSchema, McpEditParamsSchema, McpEnableParamsSchema, McpEnvMapSchema, McpFieldValueSchema, McpGetParamsSchema, McpGetResultSchema, McpHttpConfigSchema, McpListParamsSchema, McpListResultSchema, McpMutationResultSchema, McpRefusalReasonSchema, McpRemoveParamsSchema, McpRemoveResultSchema, McpReconnectParamsSchema, McpRuntimePhaseSchema, McpSelectedToolsSchema, McpServerConfigSchema, McpServerIdSchema, McpServerStatusSchema, McpServerViewSchema, McpStatusParamsSchema, McpStatusResultSchema, McpStdioConfigSchema, McpTestParamsSchema, McpTestResultSchema, McpToolKeyCollisionSchema, McpToolNameSchema, McpToolSkipCodeSchema, McpToolSkipIssueSchema, type McpAddParams, type McpCandidateFailureReason, type McpCandidateOutcome, type McpDesiredServer, type McpDisableParams, type McpEditParams, type McpEnableParams, type McpGetParams, type McpGetResult, type McpListParams, type McpListResult, type McpMutationResult, type McpRefusalReason, type McpRemoveParams, type McpRemoveResult, type McpReconnectParams, type McpServerConfig, type McpServerStatus, type McpServerView, type McpStatusParams, type McpStatusResult, type McpTestParams, type McpTestResult, type McpToolKeyCollision, type McpToolSkipIssue } from "./mcp-lifecycle-schema.ts";
-
-export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";
-export { SKILL_METHODS, SKILL_IMPORT_MAX_BYTES, SKILL_FILE_MAX_BYTES, SKILL_MD_MAX_BYTES, SKILL_TOTAL_MAX_BYTES, SKILL_FILE_COUNT_MAX, SKILL_RESOURCE_MAX_BYTES, SKILL_NAME_PATTERN, SKILL_NAME_MAX_LENGTH, SKILL_DESCRIPTION_MAX_LENGTH, SKILL_COMPATIBILITY_MAX_LENGTH, SKILL_RELATIVE_PATH_MAX_LENGTH, SKILL_SOURCE_LOCATOR_MAX_LENGTH, SKILL_SCAN_VERSION_MAX_LENGTH, SKILL_FAILURE_REASON_MAX_LENGTH, SkillSourceKindSchema, SkillLifecycleStateSchema, SkillTrustSchema, SkillScanVerdictSchema, SkillRuntimeStateSchema, SkillScanFindingCodeSchema, SkillScanFindingSchema, SkillStandardMetadataSchema, SkillFileEntrySchema, SkillImportSourceSchema, SkillPackageViewSchema, SkillListParamsSchema, SkillInspectParamsSchema, SkillImportParamsSchema, SkillMutationParamsSchema, SkillReconcileParamsSchema, SkillInspectResultSchema, SkillListResultSchema, SkillMutationResultSchema, SkillRemoveResultSchema, SkillReconcileResultSchema, SkillRefusalReasonSchema } from "./skill-lifecycle-schema.ts";
-export type { SkillSourceKind, SkillLifecycleState, SkillTrust, SkillScanVerdict, SkillRuntimeState, SkillScanFindingCode, SkillScanFinding, SkillStandardMetadata, SkillFileEntry, SkillImportSource, SkillPackageView, SkillListParams, SkillInspectParams, SkillImportParams, SkillMutationParams, SkillReconcileParams, SkillInspectResult, SkillListResult, SkillMutationResult, SkillRemoveResult, SkillReconcileResult, SkillRefusalReason } from "./skill-lifecycle-schema.ts";
-
+export {
+  MAX_MCP_TOOL_COUNT, MCP_METHODS, MCP_SECRET_REF_MARKER, McpAddParamsSchema, McpCandidateFailureReasonSchema,
+  McpCandidateOutcomeSchema, McpDesiredServerSchema, McpDisableParamsSchema, McpEditParamsSchema,
+  McpEnableParamsSchema, McpEnvMapSchema, McpFieldValueSchema, McpGetParamsSchema, McpGetResultSchema,
+  McpHttpConfigSchema, McpListParamsSchema, McpListResultSchema, McpMutationResultSchema, McpRefusalReasonSchema,
+  McpRemoveParamsSchema, McpRemoveResultSchema, McpReconnectParamsSchema, McpRuntimePhaseSchema,
+  McpSelectedToolsSchema, McpServerConfigSchema, McpServerIdSchema, McpServerStatusSchema, McpServerViewSchema,
+  McpStatusParamsSchema, McpStatusResultSchema, McpStdioConfigSchema, McpTestParamsSchema, McpTestResultSchema,
+  McpToolKeyCollisionSchema, McpToolNameSchema, McpToolSkipCodeSchema, McpToolSkipIssueSchema, type McpAddParams,
+  type McpCandidateFailureReason, type McpCandidateOutcome, type McpDesiredServer, type McpDisableParams,
+  type McpEditParams, type McpEnableParams, type McpGetParams, type McpGetResult, type McpListParams,
+  type McpListResult, type McpMutationResult, type McpRefusalReason, type McpRemoveParams, type McpRemoveResult,
+  type McpReconnectParams, type McpServerConfig, type McpServerStatus, type McpServerView, type McpStatusParams,
+  type McpStatusResult, type McpTestParams, type McpTestResult, type McpToolKeyCollision, type McpToolSkipIssue,
+} from "./mcp-lifecycle-schema.ts";
+export {
+  DEFAULT_WS_HOST, DEFAULT_WS_PORT,
+} from "./ws-defaults.ts";
+export {
+  SKILL_METHODS, SKILL_IMPORT_MAX_BYTES, SKILL_FILE_MAX_BYTES, SKILL_MD_MAX_BYTES, SKILL_TOTAL_MAX_BYTES,
+  SKILL_FILE_COUNT_MAX, SKILL_RESOURCE_MAX_BYTES, SKILL_NAME_PATTERN, SKILL_NAME_MAX_LENGTH,
+  SKILL_DESCRIPTION_MAX_LENGTH, SKILL_COMPATIBILITY_MAX_LENGTH, SKILL_RELATIVE_PATH_MAX_LENGTH,
+  SKILL_SOURCE_LOCATOR_MAX_LENGTH, SKILL_SCAN_VERSION_MAX_LENGTH, SKILL_FAILURE_REASON_MAX_LENGTH,
+  SkillSourceKindSchema, SkillLifecycleStateSchema, SkillTrustSchema, SkillScanVerdictSchema, SkillRuntimeStateSchema,
+  SkillScanFindingCodeSchema, SkillScanFindingSchema, SkillStandardMetadataSchema, SkillFileEntrySchema,
+  SkillImportSourceSchema, SkillPackageViewSchema, SkillListParamsSchema, SkillInspectParamsSchema,
+  SkillImportParamsSchema, SkillMutationParamsSchema, SkillReconcileParamsSchema, SkillInspectResultSchema,
+  SkillListResultSchema, SkillMutationResultSchema, SkillRemoveResultSchema, SkillReconcileResultSchema,
+  SkillRefusalReasonSchema, type SkillSourceKind, type SkillLifecycleState, type SkillTrust, type SkillScanVerdict,
+  type SkillRuntimeState, type SkillScanFindingCode, type SkillScanFinding, type SkillStandardMetadata,
+  type SkillFileEntry, type SkillImportSource, type SkillPackageView, type SkillListParams, type SkillInspectParams,
+  type SkillImportParams, type SkillMutationParams, type SkillReconcileParams, type SkillInspectResult,
+  type SkillListResult, type SkillMutationResult, type SkillRemoveResult, type SkillReconcileResult,
+  type SkillRefusalReason,
+} from "./skill-lifecycle-schema.ts";
 export {
   JsonValueSchema, MemoryAuthorityEpochSchema, MemoryBankScopeSchema, CanonicalMemoryBankSchema,
   MemoryProvenanceSchema, CanonicalMemorySourceSchema, CanonicalMemoryUnitSchema, CanonicalDerivedPayloadSchema,
   CanonicalDerivedMemorySchema, TakiMemoryPolicyProjectionSchema, CanonicalMemoryRecordSchema,
-  MemoryProviderCapabilitiesSchema, MEMORY_ERROR_POLICY, MemoryErrorCodeSchema, MemoryErrorSchema,
-} from "./memory-provider-domain-schema.ts";
-export type {
-  JsonValue, MemoryAuthorityEpoch, MemoryBankScope, CanonicalMemoryBank, MemoryProvenance, CanonicalMemorySource,
-  CanonicalMemoryUnit, CanonicalDerivedPayload, CanonicalDerivedMemory, TakiMemoryPolicyProjection,
-  CanonicalMemoryRecord, MemoryProviderCapabilities, MemoryErrorCode, MemoryError,
+  MemoryProviderCapabilitiesSchema, MEMORY_ERROR_POLICY, MemoryErrorCodeSchema, MemoryErrorSchema, type JsonValue,
+  type MemoryAuthorityEpoch, type MemoryBankScope, type CanonicalMemoryBank, type MemoryProvenance,
+  type CanonicalMemorySource, type CanonicalMemoryUnit, type CanonicalDerivedPayload, type CanonicalDerivedMemory,
+  type TakiMemoryPolicyProjection, type CanonicalMemoryRecord, type MemoryProviderCapabilities, type MemoryErrorCode,
+  type MemoryError,
 } from "./memory-provider-domain-schema.ts";
 export {
-  RetainRequestSchema, RetainResultSchema, RetainCompletedResultSchema, RetainBankProgressSchema, RecallRequestSchema, RecallScoreSchema, RecallHitSchema, RecallResultSchema,
-  ReflectRequestSchema, ReflectResultSchema, EditableMemoryPatchSchema, MutationRequestSchema, UpdateMemoryRequestSchema,
-  InvalidateMemoryRequestSchema, RestoreMemoryRequestSchema, MutationResultSchema, EditResultSchema, InvalidateResultSchema,
-  RestoreResultSchema, AppliedMutationResultSchema,
-} from "./memory-provider-operation-schema.ts";
-export type {
-  RetainRequest, RetainResult, RetainCompletedResult, RetainBankProgress, RecallRequest, RecallResult, ReflectRequest, ReflectResult, EditableMemoryPatch,
-  MutationRequest, UpdateMemoryRequest, InvalidateMemoryRequest, RestoreMemoryRequest, MutationResult, AppliedMutationResult,
+  RetainRequestSchema, RetainResultSchema, RetainCompletedResultSchema, RetainBankProgressSchema, RecallRequestSchema,
+  RecallScoreSchema, RecallHitSchema, RecallResultSchema, ReflectRequestSchema, ReflectResultSchema,
+  EditableMemoryPatchSchema, MutationRequestSchema, UpdateMemoryRequestSchema, InvalidateMemoryRequestSchema,
+  RestoreMemoryRequestSchema, MutationResultSchema, EditResultSchema, InvalidateResultSchema, RestoreResultSchema,
+  AppliedMutationResultSchema, type RetainRequest, type RetainResult, type RetainCompletedResult,
+  type RetainBankProgress, type RecallRequest, type RecallResult, type ReflectRequest, type ReflectResult,
+  type EditableMemoryPatch, type MutationRequest, type UpdateMemoryRequest, type InvalidateMemoryRequest,
+  type RestoreMemoryRequest, type MutationResult, type AppliedMutationResult, RecallPendingOverlayEntrySchema,
+  RecallPendingMutationOverlayEntrySchema, PendingMutationResultSchema, type RecallPendingOverlayEntry,
+  type RecallPendingMutationOverlayEntry, type PendingMutationResult,
 } from "./memory-provider-operation-schema.ts";
 export {
-  MemorySuccessEnvelopeSchema, MemoryErrorEnvelopeSchema, RetainEnvelopeSchema, RecallEnvelopeSchema, ReflectEnvelopeSchema,
-  EditEnvelopeSchema, InvalidateEnvelopeSchema, RestoreEnvelopeSchema,
-} from "./memory-provider-envelope-schema.ts";
-export type {
-  MemoryResult, RetainEnvelope, RecallEnvelope, ReflectEnvelope, EditEnvelope, InvalidateEnvelope, RestoreEnvelope,
+  MemorySuccessEnvelopeSchema, MemoryErrorEnvelopeSchema, RetainEnvelopeSchema, RecallEnvelopeSchema,
+  ReflectEnvelopeSchema, EditEnvelopeSchema, InvalidateEnvelopeSchema, RestoreEnvelopeSchema, type MemoryResult,
+  type RetainEnvelope, type RecallEnvelope, type ReflectEnvelope, type EditEnvelope, type InvalidateEnvelope,
+  type RestoreEnvelope,
 } from "./memory-provider-envelope-schema.ts";
 export {
   MEMORY_REPLICA_PAGE_LIMIT, MemoryReplicaObjectKindSchema, MemoryReplicaPayloadSchema, MemoryReplicaRecordSchema,
-  MemoryReplicaJournalRecordSchema, MemoryReplicaJournalPageSchema, MemoryReplicaCheckpointSchema, MemoryReplicaLeaseSchema,
+  MemoryReplicaJournalRecordSchema, MemoryReplicaJournalPageSchema, MemoryReplicaCheckpointSchema,
+  MemoryReplicaLeaseSchema, type MemoryReplicaObjectKind, type MemoryReplicaPayload, type MemoryReplicaRecord,
+  type MemoryReplicaJournalRecord, type MemoryReplicaJournalPage, type MemoryReplicaCheckpoint,
+  type MemoryReplicaLease,
 } from "./memory-replica-schema.ts";
 export {
-  REPLICA_AUTO_INTERVAL_MS, REPLICA_FULL_RECONCILIATION_INTERVAL_MS, REPLICA_RETRY_DELAYS_MS,
-  MemoryReplicaBankSchema, MemoryReplicaScheduleConfigSchema, MemoryReplicaSyncStateSchema, MemoryReplicaSyncStatusSchema,
-  MemoryReplicaRunKindSchema, MemoryReplicaScheduledRunSchema, MemoryReplicaRunResultSchema, MemoryReplicaErrorCodeSchema,
-} from "./memory-replica-schedule-schema.ts";
-export type {
-  MemoryReplicaBank, MemoryReplicaScheduleConfig, MemoryReplicaSyncState, MemoryReplicaSyncStatus,
-  MemoryReplicaRunKind, MemoryReplicaScheduledRun, MemoryReplicaRunResult, MemoryReplicaErrorCode,
+  REPLICA_AUTO_INTERVAL_MS, REPLICA_FULL_RECONCILIATION_INTERVAL_MS, REPLICA_RETRY_DELAYS_MS, MemoryReplicaBankSchema,
+  MemoryReplicaScheduleConfigSchema, MemoryReplicaSyncStateSchema, MemoryReplicaSyncStatusSchema,
+  MemoryReplicaRunKindSchema, MemoryReplicaScheduledRunSchema, MemoryReplicaRunResultSchema,
+  MemoryReplicaErrorCodeSchema, type MemoryReplicaBank, type MemoryReplicaScheduleConfig, type MemoryReplicaSyncState,
+  type MemoryReplicaSyncStatus, type MemoryReplicaRunKind, type MemoryReplicaScheduledRun, type MemoryReplicaRunResult,
+  type MemoryReplicaErrorCode,
 } from "./memory-replica-schedule-schema.ts";
 export {
   PendingMemoryOperationSchema, PendingMemoryRefSchema, PendingMemoryIntentSchema, PendingMemoryNativeReceiptSchema,
   MemoryDerivedCompletionEvidenceSchema, MemoryDerivedCompletionRequestSchema, MemoryDerivedCompletionResultSchema,
-  PendingMemoryPhaseSchema, PendingMemoryStateSchema, PendingMemoryRecordSchema,
-  PendingMemorySummarySchema, PendingMemoryOverlayEntrySchema,
+  PendingMemoryPhaseSchema, PendingMemoryStateSchema, PendingMemoryRecordSchema, PendingMemorySummarySchema,
+  PendingMemoryOverlayEntrySchema, type PendingMemoryOperation, type PendingMemoryRef, type PendingMemoryIntent,
+  type PendingMemoryNativeReceipt, type MemoryDerivedCompletionEvidence, type MemoryDerivedCompletionRequest,
+  type MemoryDerivedCompletionResult, type PendingMemoryPhase, type PendingMemoryState, type PendingMemoryRecord,
+  type PendingMemorySummary, type PendingMemoryOverlayEntry,
 } from "./pending-memory-schema.ts";
-export type {
-  PendingMemoryOperation, PendingMemoryRef, PendingMemoryIntent, PendingMemoryNativeReceipt,
-  MemoryDerivedCompletionEvidence, MemoryDerivedCompletionRequest, MemoryDerivedCompletionResult,
-  PendingMemoryPhase, PendingMemoryState, PendingMemoryRecord,
-  PendingMemorySummary, PendingMemoryOverlayEntry,
-} from "./pending-memory-schema.ts";
-export { HindsightJournalChangeSchema, HindsightJournalPageSchema } from "./hindsight-journal-schema.ts";
+export {
+  HindsightJournalChangeSchema, HindsightJournalPageSchema, type HindsightJournalChange, type HindsightJournalPage,
+} from "./hindsight-journal-schema.ts";
 export {
   HINDSIGHT_NATIVE_RESULT_VERSION, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_NATIVE_RESULT_PAGE_SIZE,
   HindsightNativeIdentitySchema, HindsightNativeOperationKindSchema, HindsightNativeRetainItemSchema,
@@ -313,328 +346,711 @@ export {
   HindsightNativeReferenceSchema, HindsightNativeInputResultSchema, HindsightNativeMutationResultSchema,
   HindsightNativeResultManifestSchema, HindsightNativeResultSchema, HindsightNativeReceiptReasonSchema,
   HindsightNativeResultStatusSchema, HindsightNativeResultPageSchema, HindsightNativeResultErrorSchema,
-  HindsightNativeWriteResponseSchema,
-  PendingMemoryDispatchProtocolSchema, PendingMemoryDispatchSchema, PendingMemoryNativeResultReceiptSchema,
-} from "./hindsight-native-result-schema.ts";
-export type {
-  HindsightNativeIdentity, HindsightNativeOperationKind, HindsightNativeRetainItem, HindsightTrackedRetainRequest,
-  HindsightNativeMutation, HindsightTrackedMutationRequest, HindsightNativeReference, HindsightNativeInputResult,
-  HindsightNativeResult, HindsightNativeResultStatus, HindsightNativeResultPage, PendingMemoryDispatchProtocol,
-  HindsightNativeWriteResponse,
-  PendingMemoryDispatch, PendingMemoryNativeResultReceipt,
+  HindsightNativeWriteResponseSchema, PendingMemoryDispatchProtocolSchema, PendingMemoryDispatchSchema,
+  PendingMemoryNativeResultReceiptSchema, type HindsightNativeIdentity, type HindsightNativeOperationKind,
+  type HindsightNativeRetainItem, type HindsightTrackedRetainRequest, type HindsightNativeMutation,
+  type HindsightTrackedMutationRequest, type HindsightNativeReference, type HindsightNativeInputResult,
+  type HindsightNativeResult, type HindsightNativeResultStatus, type HindsightNativeResultPage,
+  type PendingMemoryDispatchProtocol, type HindsightNativeWriteResponse, type PendingMemoryDispatch,
+  type PendingMemoryNativeResultReceipt,
 } from "./hindsight-native-result-schema.ts";
 export {
   nativeProofJson, nativeStringPairs, nativeNormalizedTime, nativeRetainRequestFields, nativeMutationRequestFields,
   nativeReferenceFields, nativeResultFields, nativeReceiptFields,
 } from "./hindsight-native-proof-encoding.ts";
-export type { HindsightJournalChange, HindsightJournalPage } from "./hindsight-journal-schema.ts";
-export type {
-  MemoryReplicaObjectKind, MemoryReplicaPayload, MemoryReplicaRecord, MemoryReplicaJournalRecord,
-  MemoryReplicaJournalPage, MemoryReplicaCheckpoint, MemoryReplicaLease,
-} from "./memory-replica-schema.ts";
 export {
-  MEMORY_MIGRATION_METHODS, MemoryMigrationActivateParamsSchema, MemoryMigrationActivationSchema, MemoryMigrationDryRunParamsSchema,
-  MemoryMigrationExceptionPageSchema, MemoryMigrationExceptionSchema, MemoryMigrationExceptionsParamsSchema,
-  MemoryMigrationExcludeParamsSchema, MemoryMigrationReportSchema, MemoryMigrationRunParamsSchema,
-  MemoryMigrationResumeParamsSchema, MemoryMigrationStageParamsSchema, MemoryMigrationStatusSchema, MemoryMigrationVerifySchema,
+  MEMORY_MIGRATION_METHODS, MemoryMigrationActivateParamsSchema, MemoryMigrationActivationSchema,
+  MemoryMigrationDryRunParamsSchema, MemoryMigrationExceptionPageSchema, MemoryMigrationExceptionSchema,
+  MemoryMigrationExceptionsParamsSchema, MemoryMigrationExcludeParamsSchema, MemoryMigrationReportSchema,
+  MemoryMigrationRunParamsSchema, MemoryMigrationResumeParamsSchema, MemoryMigrationStageParamsSchema,
+  MemoryMigrationStatusSchema, MemoryMigrationVerifySchema, type MemoryMigrationActivation, type MemoryMigrationReport,
+  type MemoryMigrationStatus, type MemoryMigrationVerify,
 } from "./memory-migration-schema.ts";
-export type { MemoryMigrationActivation, MemoryMigrationReport, MemoryMigrationStatus, MemoryMigrationVerify } from "./memory-migration-schema.ts";
 export {
   HINDSIGHT_CUTOVER_METHODS, HindsightCutoverStatusParamsSchema, HindsightCutoverStatusSchema,
-  HindsightCutoverVerifyParamsSchema, HindsightCutoverVerifyResultSchema,
-  HindsightAuthorityActivationSchema, HindsightDocumentProjectionSchema, HindsightFactMappingSchema,
-  HindsightFactPageSchema, HindsightFactProjectionSchema, HindsightImportLedgerSchema, HindsightImportStatusSchema,
+  HindsightCutoverVerifyParamsSchema, HindsightCutoverVerifyResultSchema, HindsightAuthorityActivationSchema,
+  HindsightDocumentProjectionSchema, HindsightFactMappingSchema, HindsightFactPageSchema,
+  HindsightFactProjectionSchema, HindsightImportLedgerSchema, HindsightImportStatusSchema,
   HindsightOperationResultSchema, HindsightOperationStatusSchema, HindsightReplicaCheckpointSchema,
   HindsightRetainRequestSchema, HindsightRetainResultSchema, HindsightLogicalObjectKindSchema,
   HindsightLogicalPayloadSchema, HindsightLogicalSnapshotRecordSchema, HindsightLogicalSnapshotCountsSchema,
   HindsightLogicalSnapshotManifestSchema, HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema,
-} from "./hindsight-cutover-schema.ts";
-export type {
-  HindsightCutoverStatus, HindsightCutoverVerifyResult,
-  HindsightAuthorityActivation, HindsightDocumentProjection, HindsightFactMapping, HindsightFactPage,
-  HindsightFactProjection, HindsightImportLedger, HindsightImportStatus, HindsightOperationResult,
-  HindsightOperationStatus, HindsightReplicaCheckpoint, HindsightRetainRequest, HindsightRetainResult,
-  HindsightLogicalObjectKind, HindsightLogicalPayload, HindsightLogicalSnapshotRecord,
-  HindsightLogicalSnapshotCounts, HindsightLogicalSnapshotManifest, HindsightLogicalSnapshotMetadata,
-  HindsightLogicalSnapshotPage,
+  type HindsightCutoverStatus, type HindsightCutoverVerifyResult, type HindsightAuthorityActivation,
+  type HindsightDocumentProjection, type HindsightFactMapping, type HindsightFactPage, type HindsightFactProjection,
+  type HindsightImportLedger, type HindsightImportStatus, type HindsightOperationResult, type HindsightOperationStatus,
+  type HindsightReplicaCheckpoint, type HindsightRetainRequest, type HindsightRetainResult,
+  type HindsightLogicalObjectKind, type HindsightLogicalPayload, type HindsightLogicalSnapshotRecord,
+  type HindsightLogicalSnapshotCounts, type HindsightLogicalSnapshotManifest, type HindsightLogicalSnapshotMetadata,
+  type HindsightLogicalSnapshotPage,
 } from "./hindsight-cutover-schema.ts";
 export {
-  HINDSIGHT_LOCAL_COVERAGE_MAX_RECORDS, HINDSIGHT_LOCAL_COVERAGE_ENCODING,
-  HindsightLocalCoverageRecordSchema, HindsightLocalCoverageCatchUpSchema,
-  HindsightLocalCoverageManifestSchema, HindsightLocalCoverageComparisonSchema,
-} from "./hindsight-local-coverage-schema.ts";
-export type {
-  HindsightLocalCoverageKind, HindsightLocalCoverageRecord, HindsightLocalCoverageCatchUp,
-  HindsightLocalCoverageManifest, HindsightLocalCoverageDifference, HindsightLocalCoverageComparison,
-  HindsightLocalCoverageStatus,
+  HINDSIGHT_LOCAL_COVERAGE_MAX_RECORDS, HINDSIGHT_LOCAL_COVERAGE_ENCODING, HindsightLocalCoverageRecordSchema,
+  HindsightLocalCoverageCatchUpSchema, HindsightLocalCoverageManifestSchema, HindsightLocalCoverageComparisonSchema,
+  type HindsightLocalCoverageKind, type HindsightLocalCoverageRecord, type HindsightLocalCoverageCatchUp,
+  type HindsightLocalCoverageManifest, type HindsightLocalCoverageDifference, type HindsightLocalCoverageComparison,
+  type HindsightLocalCoverageStatus,
 } from "./hindsight-local-coverage-schema.ts";
 export {
-  HINDSIGHT_SOURCE_EVIDENCE_VERSION, HINDSIGHT_SOURCE_GAP_LIMIT,
-  HindsightPreparedSourceSchema, HindsightSourceProjectionScopeSchema,
-  HindsightSourceBindingKeySchema, HindsightSourceObjectBindingSchema, HindsightSourceConfirmationSchema,
-  HindsightSourceBankBindingSchema,
+  HINDSIGHT_SOURCE_EVIDENCE_VERSION, HINDSIGHT_SOURCE_GAP_LIMIT, HindsightPreparedSourceSchema,
+  HindsightSourceProjectionScopeSchema, HindsightSourceBindingKeySchema, HindsightSourceObjectBindingSchema,
+  HindsightSourceConfirmationSchema, HindsightSourceBankBindingSchema, type HindsightSourcePreparationGap,
+  type HindsightPreparedSource, type HindsightSourceProjectionScope, type HindsightSourceBindingKey,
+  type HindsightSourceObjectBinding, type HindsightSourceConfirmation, type HindsightSourceBankBinding,
 } from "./hindsight-source-evidence-schema.ts";
-export type {
-  HindsightSourcePreparationGap, HindsightPreparedSource,
-  HindsightSourceProjectionScope, HindsightSourceBindingKey, HindsightSourceObjectBinding, HindsightSourceConfirmation,
-  HindsightSourceBankBinding,
-} from "./hindsight-source-evidence-schema.ts";
-export { HindsightCurrentCaptureSchema } from "./hindsight-current-capture-schema.ts";
-export type { HindsightCurrentDisposition, HindsightCurrentCapture } from "./hindsight-current-capture-schema.ts";
-export { HindsightCurrentJsonObjectSchema, HindsightCurrentCanonicalBankSchema, HindsightCurrentCanonicalSourceSchema,
-  HindsightCurrentCanonicalUnitSchema, HindsightCurrentCanonicalRecordSchema, HindsightCurrentCanonicalDerivedPayloadSchema } from "./hindsight-current-canonical-schema.ts";
+export {
+  HindsightCurrentCaptureSchema, type HindsightCurrentDisposition, type HindsightCurrentCapture,
+} from "./hindsight-current-capture-schema.ts";
+export {
+  HindsightCurrentJsonObjectSchema, HindsightCurrentCanonicalBankSchema, HindsightCurrentCanonicalSourceSchema,
+  HindsightCurrentCanonicalUnitSchema, HindsightCurrentCanonicalRecordSchema,
+  HindsightCurrentCanonicalDerivedPayloadSchema, HindsightCurrentCanonicalDerivedSchema,
+} from "./hindsight-current-canonical-schema.ts";
 export {
   HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_CURRENT_STATE_VERSION, HINDSIGHT_CURRENT_STATE_ENCODING,
-  HINDSIGHT_CURRENT_STATE_MAX_RECORDS, HINDSIGHT_CURRENT_STATE_MAX_BYTES,
-  HindsightCurrentTransferRequestSchema, HindsightCurrentTransferResultSchema,
-  HindsightCurrentMappingPageSchema, HindsightCurrentTransferFailureSchema,
+  HINDSIGHT_CURRENT_STATE_MAX_RECORDS, HINDSIGHT_CURRENT_STATE_MAX_BYTES, HindsightCurrentTransferRequestSchema,
+  HindsightCurrentTransferResultSchema, HindsightCurrentMappingPageSchema, HindsightCurrentTransferFailureSchema,
+  type HindsightCurrentSourceWitness, type HindsightCurrentTransferRequest, type HindsightCurrentMapping,
+  type HindsightCurrentTransferResult, type HindsightCurrentMappingPage, type HindsightCurrentTransferFailure,
 } from "./hindsight-current-state-schema.ts";
-export type { HindsightCurrentSourceWitness, HindsightCurrentTransferRequest,
-  HindsightCurrentMapping, HindsightCurrentTransferResult, HindsightCurrentMappingPage,
-  HindsightCurrentTransferFailure } from "./hindsight-current-state-schema.ts";
 export { hindsightCurrentStateJson } from "./hindsight-current-state-encoding.ts";
-export { HindsightSnapshotRecordWireSchema, HindsightSnapshotMetadataWireSchema,
-  HindsightSnapshotPageWireSchema } from "./hindsight-native-snapshot-schema.ts";
-export type { HindsightSnapshotMetadataWire, HindsightSnapshotPageWire, HindsightSnapshotRecordWire } from "./hindsight-native-snapshot-schema.ts";
-export { HindsightPreparedCurrentBankSchema, HindsightCurrentImportEvidenceSchema } from "./hindsight-current-evidence-schema.ts";
-export type { HindsightCurrentPreparationGap, HindsightPreparedCurrentBank,
-  HindsightCurrentImportEvidence } from "./hindsight-current-evidence-schema.ts";
-export { HindsightCurrentStatusSchema } from "./hindsight-current-status-schema.ts";
-export type { HindsightCurrentStatus } from "./hindsight-current-status-schema.ts";
-export { HindsightCurrentNativeObservationSchema, HindsightCurrentNativeInvalidationSchema,
-  hindsightCurrentObservationProvesDrift } from "./hindsight-current-invalidation-schema.ts";
-export type { HindsightCurrentNativeObservation, HindsightCurrentNativeInvalidation } from "./hindsight-current-invalidation-schema.ts";
-export { HindsightCutoverVerificationRequestSchema, HindsightCutoverCertificateSchema,
-  HindsightCutoverEvidencePageSchema, HindsightCutoverVerificationStatusSchema, HindsightCutoverVerificationFailureSchema,
-  HindsightCurrentVerificationCandidateSchema, HindsightCurrentVerificationEvidenceSchema } from "./hindsight-cutover-verification-schema.ts";
-export type { HindsightCutoverVerificationRequest, HindsightCutoverRequirement, HindsightCutoverEvidenceRecord,
-  HindsightCutoverCertificate, HindsightCutoverEvidencePage, HindsightCutoverVerificationStatus,
-  HindsightCutoverVerificationFailure, HindsightCurrentVerificationCandidate,
-  HindsightCurrentVerificationEvidence } from "./hindsight-cutover-verification-schema.ts";
-export { TAKI_MEMORY_DEFAULT_IMPORTANCE, TakiApplicationPolicyBasisSchema, TakiApplicationAssessmentFailureSchema,
-  TakiApplicationAssessmentSchema, TakiApplicationMemoryBodySchema } from "./memory-policy-assessment-schema.ts";
-export type { TakiApplicationPolicyBasis, TakiApplicationAssessmentFailure, TakiApplicationAssessment,
-  TakiApplicationMemoryBody } from "./memory-policy-assessment-schema.ts";
-export { HINDSIGHT_APPLICATION_STATE_VERSION, HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_APPLICATION_PART_BYTES, HINDSIGHT_APPLICATION_RESPONSE_BYTES,
-  HINDSIGHT_APPLICATION_UPLOAD_BYTES, TakiApplicationNamespaceSchema, TakiApplicationNativeVersionSchema,
-  TakiApplicationNativeTombstoneSchema, TakiApplicationArtifactKeySchema, TakiApplicationArtifactVersionSchema,
-  TakiApplicationCheckpointSchema, TakiApplicationBodyRefSchema, TakiApplicationInitializeResponseSchema,
-  TakiApplicationFailureCodeSchema, TakiApplicationTimeSchema, TakiApplicationIdSchema,
-  TakiApplicationObjectKindSchema } from "./hindsight-application-primitives-schema.ts";
-export { HINDSIGHT_APPLICATION_DEFAULT_TTL_SECONDS, HINDSIGHT_APPLICATION_MAX_TTL_SECONDS } from "./hindsight-application-primitives-schema.ts";
-export type { TakiApplicationNamespace, TakiApplicationNativeVersion, TakiApplicationNativeTombstone,
-  TakiApplicationArtifactKey, TakiApplicationArtifactVersion, TakiApplicationCheckpoint, TakiApplicationBodyRef,
-  TakiApplicationBodySchema, TakiApplicationFailureCode, TakiApplicationInitializeResponse } from "./hindsight-application-primitives-schema.ts";
-export { TakiApplicationJsonValueSchema, TakiApplicationJsonObjectSchema, hindsightApplicationWireJson } from "./hindsight-application-json.ts";
+export {
+  HindsightSnapshotRecordWireSchema, HindsightSnapshotMetadataWireSchema, HindsightSnapshotPageWireSchema,
+  type HindsightSnapshotMetadataWire, type HindsightSnapshotPageWire, type HindsightSnapshotRecordWire,
+} from "./hindsight-native-snapshot-schema.ts";
+export {
+  HindsightPreparedCurrentBankSchema, HindsightCurrentImportEvidenceSchema, type HindsightCurrentPreparationGap,
+  type HindsightPreparedCurrentBank, type HindsightCurrentImportEvidence,
+} from "./hindsight-current-evidence-schema.ts";
+export {
+  HindsightCurrentStatusSchema, type HindsightCurrentStatus,
+} from "./hindsight-current-status-schema.ts";
+export {
+  HindsightCurrentNativeObservationSchema, HindsightCurrentNativeInvalidationSchema,
+  hindsightCurrentObservationProvesDrift, type HindsightCurrentNativeObservation,
+  type HindsightCurrentNativeInvalidation,
+} from "./hindsight-current-invalidation-schema.ts";
+export {
+  HindsightCutoverVerificationRequestSchema, HindsightCutoverCertificateSchema, HindsightCutoverEvidencePageSchema,
+  HindsightCutoverVerificationStatusSchema, HindsightCutoverVerificationFailureSchema,
+  HindsightCurrentVerificationCandidateSchema, HindsightCurrentVerificationEvidenceSchema,
+  type HindsightCutoverVerificationRequest, type HindsightCutoverRequirement, type HindsightCutoverEvidenceRecord,
+  type HindsightCutoverCertificate, type HindsightCutoverEvidencePage, type HindsightCutoverVerificationStatus,
+  type HindsightCutoverVerificationFailure, type HindsightCurrentVerificationCandidate,
+  type HindsightCurrentVerificationEvidence,
+} from "./hindsight-cutover-verification-schema.ts";
+export {
+  TAKI_MEMORY_DEFAULT_IMPORTANCE, TakiApplicationPolicyBasisSchema, TakiApplicationAssessmentFailureSchema,
+  TakiApplicationAssessmentSchema, TakiApplicationMemoryBodySchema, type TakiApplicationPolicyBasis,
+  type TakiApplicationAssessmentFailure, type TakiApplicationAssessment, type TakiApplicationMemoryBody,
+} from "./memory-policy-assessment-schema.ts";
+export {
+  HINDSIGHT_APPLICATION_STATE_VERSION, HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_APPLICATION_PART_BYTES,
+  HINDSIGHT_APPLICATION_RESPONSE_BYTES, HINDSIGHT_APPLICATION_UPLOAD_BYTES, TakiApplicationNamespaceSchema,
+  TakiApplicationNativeVersionSchema, TakiApplicationNativeTombstoneSchema, TakiApplicationArtifactKeySchema,
+  TakiApplicationArtifactVersionSchema, TakiApplicationCheckpointSchema, TakiApplicationBodyRefSchema,
+  TakiApplicationInitializeResponseSchema, TakiApplicationFailureCodeSchema, TakiApplicationTimeSchema,
+  TakiApplicationIdSchema, TakiApplicationObjectKindSchema, HINDSIGHT_APPLICATION_DEFAULT_TTL_SECONDS,
+  HINDSIGHT_APPLICATION_MAX_TTL_SECONDS, type TakiApplicationNamespace, type TakiApplicationNativeVersion,
+  type TakiApplicationNativeTombstone, type TakiApplicationArtifactKey, type TakiApplicationArtifactVersion,
+  type TakiApplicationCheckpoint, type TakiApplicationBodyRef, type TakiApplicationBodySchema,
+  type TakiApplicationFailureCode, type TakiApplicationInitializeResponse,
+} from "./hindsight-application-primitives-schema.ts";
+export {
+  TakiApplicationJsonValueSchema, TakiApplicationJsonObjectSchema, hindsightApplicationWireJson,
+} from "./hindsight-application-json.ts";
 export { parseHindsightApplicationJson } from "./hindsight-application-json-reader.ts";
-export { HINDSIGHT_APPLICATION_ENCODING, HINDSIGHT_APPLICATION_NATIVE_ENCODING,
-  hindsightApplicationDigestJson, hindsightApplicationTaggedJson } from "./hindsight-application-encoding.ts";
-export type { HindsightApplicationDigestDomain } from "./hindsight-application-encoding.ts";
-export { RecallPendingOverlayEntrySchema, RecallPendingMutationOverlayEntrySchema,
-  PendingMutationResultSchema } from "./memory-provider-operation-schema.ts";
-export type { RecallPendingOverlayEntry, RecallPendingMutationOverlayEntry, PendingMutationResult } from "./memory-provider-operation-schema.ts";
-export { HindsightNativeRecallRequestSchema, HindsightNativeRecallResponseSchema,
-  HindsightNativeReflectRequestSchema, HindsightNativeReflectResponseSchema } from "./hindsight-native-runtime-schema.ts";
-export type { HindsightNativeRecallRequest, HindsightNativeRecallResponse,
-  HindsightNativeReflectRequest, HindsightNativeReflectResponse } from "./hindsight-native-runtime-schema.ts";
-export { TakiApplicationBankBodySchema, TakiApplicationSourceBodySchema, TakiApplicationSourceEvidenceBodySchema, TakiApplicationBlockBodySchema,
-  TakiApplicationBindingSchema, TakiApplicationArtifactSchema, TakiApplicationActorSchema, TakiApplicationCommandSchema,
-  TakiApplicationCommandsSchema, TakiApplicationCommitRequestSchema, TakiApplicationCommitReceiptSchema,
-  TakiApplicationCommitStatusSchema, TakiApplicationErrorResponseSchema, TakiApplicationAffectedVersionsSchema } from "./hindsight-application-artifact-schema.ts";
-export type { TakiApplicationBankBody, TakiApplicationSourceBody, TakiApplicationSourceEvidenceBody, TakiApplicationBlockBody, TakiApplicationBinding,
-  TakiApplicationArtifact, TakiApplicationActor, TakiApplicationCommand, TakiApplicationCommands,
-  TakiApplicationCommitRequest, TakiApplicationCommitReceipt, TakiApplicationCommitStatus,
-  TakiApplicationErrorResponse, TakiApplicationAffectedVersions } from "./hindsight-application-artifact-schema.ts";
-export { TakiApplicationBodyUploadRequestSchema, TakiApplicationBodyUploadStatusSchema, TakiApplicationBodyPartRequestSchema,
-  TakiApplicationBodyPartReceiptSchema, TakiApplicationBodyPartSchema } from "./hindsight-application-body-schema.ts";
-export type { TakiApplicationBodyUploadRequest, TakiApplicationBodyUploadStatus, TakiApplicationBodyPartRequest,
-  TakiApplicationBodyPartReceipt, TakiApplicationBodyPart } from "./hindsight-application-body-schema.ts";
-export { TakiApplicationNativePayloadSchema, TakiApplicationNativeRecordSchema, TakiApplicationNativeSourceEvidenceSchema,
-  TakiApplicationNativeHeadSchema } from "./hindsight-application-native-schema.ts";
-export type { TakiApplicationNativePayload, TakiApplicationNativeRecord, TakiApplicationNativeSourceEvidence,
-  TakiApplicationNativeHead } from "./hindsight-application-native-schema.ts";
-export { TakiApplicationSelectorSchema, TakiApplicationRecordDescriptorSchema, TakiApplicationRecordPageSchema,
+export {
+  HINDSIGHT_APPLICATION_ENCODING, HINDSIGHT_APPLICATION_NATIVE_ENCODING, hindsightApplicationDigestJson,
+  hindsightApplicationTaggedJson, type HindsightApplicationDigestDomain,
+} from "./hindsight-application-encoding.ts";
+export {
+  HindsightNativeRecallRequestSchema, HindsightNativeRecallResponseSchema, HindsightNativeReflectRequestSchema,
+  HindsightNativeReflectResponseSchema, type HindsightNativeRecallRequest, type HindsightNativeRecallResponse,
+  type HindsightNativeReflectRequest, type HindsightNativeReflectResponse,
+} from "./hindsight-native-runtime-schema.ts";
+export {
+  TakiApplicationBankBodySchema, TakiApplicationSourceBodySchema, TakiApplicationSourceEvidenceBodySchema,
+  TakiApplicationBlockBodySchema, TakiApplicationBindingSchema, TakiApplicationArtifactSchema,
+  TakiApplicationActorSchema, TakiApplicationCommandSchema, TakiApplicationCommandsSchema,
+  TakiApplicationCommitRequestSchema, TakiApplicationCommitReceiptSchema, TakiApplicationCommitStatusSchema,
+  TakiApplicationErrorResponseSchema, TakiApplicationAffectedVersionsSchema, type TakiApplicationBankBody,
+  type TakiApplicationSourceBody, type TakiApplicationSourceEvidenceBody, type TakiApplicationBlockBody,
+  type TakiApplicationBinding, type TakiApplicationArtifact, type TakiApplicationActor, type TakiApplicationCommand,
+  type TakiApplicationCommands, type TakiApplicationCommitRequest, type TakiApplicationCommitReceipt,
+  type TakiApplicationCommitStatus, type TakiApplicationErrorResponse, type TakiApplicationAffectedVersions,
+} from "./hindsight-application-artifact-schema.ts";
+export {
+  TakiApplicationBodyUploadRequestSchema, TakiApplicationBodyUploadStatusSchema, TakiApplicationBodyPartRequestSchema,
+  TakiApplicationBodyPartReceiptSchema, TakiApplicationBodyPartSchema, type TakiApplicationBodyUploadRequest,
+  type TakiApplicationBodyUploadStatus, type TakiApplicationBodyPartRequest, type TakiApplicationBodyPartReceipt,
+  type TakiApplicationBodyPart,
+} from "./hindsight-application-body-schema.ts";
+export {
+  TakiApplicationNativePayloadSchema, TakiApplicationNativeRecordSchema, TakiApplicationNativeSourceEvidenceSchema,
+  TakiApplicationNativeHeadSchema, type TakiApplicationNativePayload, type TakiApplicationNativeRecord,
+  type TakiApplicationNativeSourceEvidence, type TakiApplicationNativeHead,
+} from "./hindsight-application-native-schema.ts";
+export {
+  TakiApplicationSelectorSchema, TakiApplicationRecordDescriptorSchema, TakiApplicationRecordPageSchema,
   TakiApplicationReadBundleManifestSchema, TakiApplicationSnapshotRequestSchema, TakiApplicationHydrateRequestSchema,
   TakiApplicationStateChangeManifestSchema, TakiApplicationStateChangePageSchema, TakiApplicationPruneRequestSchema,
   TakiApplicationReadContextSchema, TakiApplicationReflectAdmissionSchema, TakiApplicationReflectRequestSchema,
-  TakiApplicationReflectResponseSchema } from "./hindsight-application-read-schema.ts";
-export type { TakiApplicationSelector, TakiApplicationRecordDescriptor, TakiApplicationRecordPage,
-  TakiApplicationReadBundleManifest, TakiApplicationSnapshotRequest, TakiApplicationHydrateRequest,
-  TakiApplicationStateChangeManifest, TakiApplicationStateChangePage, TakiApplicationReadContext,
-  TakiApplicationReflectAdmission, TakiApplicationReflectRequest, TakiApplicationReflectResponse } from "./hindsight-application-read-schema.ts";
-export { TakiApplicationBodyContentSchema, parseTakiApplicationBody } from "./hindsight-application-content-schema.ts";
-export type { TakiApplicationBodyContent } from "./hindsight-application-content-schema.ts";
-export { HindsightApplicationStateContractSchema, HindsightApplicationReflectContractSchema } from "./hindsight-connection-schema.ts";
-export { HindsightApplicationReplicaPayloadSchema, HindsightApplicationReplicaRecordSchema } from "./hindsight-application-replica-schema.ts";
-export type { HindsightApplicationReplicaPayload, HindsightApplicationReplicaRecord } from "./hindsight-application-replica-schema.ts";
-export { HindsightMemoryRecallResultV1Schema, HindsightMemoryReflectResultV1Schema, HindsightMemoryMutationResultV1Schema,
+  TakiApplicationReflectResponseSchema, type TakiApplicationSelector, type TakiApplicationRecordDescriptor,
+  type TakiApplicationRecordPage, type TakiApplicationReadBundleManifest, type TakiApplicationSnapshotRequest,
+  type TakiApplicationHydrateRequest, type TakiApplicationStateChangeManifest, type TakiApplicationStateChangePage,
+  type TakiApplicationReadContext, type TakiApplicationReflectAdmission, type TakiApplicationReflectRequest,
+  type TakiApplicationReflectResponse,
+} from "./hindsight-application-read-schema.ts";
+export {
+  TakiApplicationBodyContentSchema, parseTakiApplicationBody, type TakiApplicationBodyContent,
+} from "./hindsight-application-content-schema.ts";
+export {
+  HindsightApplicationReplicaPayloadSchema, HindsightApplicationReplicaRecordSchema,
+  type HindsightApplicationReplicaPayload, type HindsightApplicationReplicaRecord,
+} from "./hindsight-application-replica-schema.ts";
+export {
+  HindsightMemoryRecallResultV1Schema, HindsightMemoryReflectResultV1Schema, HindsightMemoryMutationResultV1Schema,
   HindsightMemoryRetainResultV1Schema, HindsightMemoryRetainCompletedResultV1Schema,
   HindsightMemoryRecallEnvelopeV1Schema, HindsightMemoryReflectEnvelopeV1Schema,
-  HindsightMemoryMutationEnvelopeV1Schema, HindsightMemoryRetainEnvelopeV1Schema } from "./hindsight-memory-consumer-schema.ts";
-export type { HindsightMemoryRecallResultV1, HindsightMemoryReflectResultV1, HindsightMemoryMutationResultV1,
-  HindsightMemoryRetainResultV1, HindsightMemoryRetainCompletedResultV1 } from "./hindsight-memory-consumer-schema.ts";
+  HindsightMemoryMutationEnvelopeV1Schema, HindsightMemoryRetainEnvelopeV1Schema, type HindsightMemoryRecallResultV1,
+  type HindsightMemoryReflectResultV1, type HindsightMemoryMutationResultV1, type HindsightMemoryRetainResultV1,
+  type HindsightMemoryRetainCompletedResultV1,
+} from "./hindsight-memory-consumer-schema.ts";
 export {
   MEMORY_OPERATION_METHODS, MEMORY_OPERATION_TERMINAL_STATES, MemoryOperationKindSchema, MemoryOperationStateSchema,
-  MemoryOperationReasonSchema, MemoryOperationRefusalReasonSchema, MemoryOperationRequestSchema, MemoryOperationProducerRefSchema,
-  MemoryReplicaNextActionSchema, MemoryOperationResultSchema, MemoryOperationSchema, MemoryOperationSubmitParamsSchema,
-  MemoryOperationSubmitResultSchema, MemoryOperationStatusParamsSchema, MemoryOperationStatusResultSchema,
-  MemoryOperationListParamsSchema, MemoryOperationListResultSchema, MemoryOperationCancelParamsSchema,
-  MemoryOperationCancelResultSchema, MemoryOperationSubscribeParamsSchema, MemoryOperationSubscribeResultSchema,
-  MemoryOperationChangedSchema, MemoryOperationErrorCodeSchema,
-} from "./memory-operation-schema.ts";
-export { MEMORY_REPLICA_METHODS, MemoryReplicaConfigureParamsSchema, MemoryReplicaConfigureResultSchema, MemoryReplicaChangedSchema } from "./memory-replica-rpc-schema.ts";
-export type { MemoryReplicaConfigureParams, MemoryReplicaConfigureResult, MemoryReplicaChanged } from "./memory-replica-rpc-schema.ts";
-export type {
-  MemoryOperationKind, MemoryOperationState, MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest,
-  MemoryOperationProducerRef, MemoryOperationResult, MemoryOperation, MemoryOperationSubmitParams, MemoryOperationSubmitResult,
-  MemoryOperationStatusParams, MemoryOperationStatusResult, MemoryOperationListParams, MemoryOperationListResult,
-  MemoryOperationCancelParams, MemoryOperationCancelResult, MemoryOperationSubscribeResult, MemoryOperationChanged, MemoryOperationErrorCode,
+  MemoryOperationReasonSchema, MemoryOperationRefusalReasonSchema, MemoryOperationRequestSchema,
+  MemoryOperationProducerRefSchema, MemoryReplicaNextActionSchema, MemoryOperationResultSchema, MemoryOperationSchema,
+  MemoryOperationSubmitParamsSchema, MemoryOperationSubmitResultSchema, MemoryOperationStatusParamsSchema,
+  MemoryOperationStatusResultSchema, MemoryOperationListParamsSchema, MemoryOperationListResultSchema,
+  MemoryOperationCancelParamsSchema, MemoryOperationCancelResultSchema, MemoryOperationSubscribeParamsSchema,
+  MemoryOperationSubscribeResultSchema, MemoryOperationChangedSchema, MemoryOperationErrorCodeSchema,
+  type MemoryOperationKind, type MemoryOperationState, type MemoryOperationReason, type MemoryOperationRefusalReason,
+  type MemoryOperationRequest, type MemoryOperationProducerRef, type MemoryOperationResult, type MemoryOperation,
+  type MemoryOperationSubmitParams, type MemoryOperationSubmitResult, type MemoryOperationStatusParams,
+  type MemoryOperationStatusResult, type MemoryOperationListParams, type MemoryOperationListResult,
+  type MemoryOperationCancelParams, type MemoryOperationCancelResult, type MemoryOperationSubscribeResult,
+  type MemoryOperationChanged, type MemoryOperationErrorCode,
 } from "./memory-operation-schema.ts";
 export {
-  MEMORY_AUTHORITY_METHODS, MemoryRuntimeUnavailableReasonSchema, MemoryAuthorityStatusParamsSchema, MemoryAuthorityStatusSchema,
+  MEMORY_REPLICA_METHODS, MemoryReplicaConfigureParamsSchema, MemoryReplicaConfigureResultSchema,
+  MemoryReplicaChangedSchema, type MemoryReplicaConfigureParams, type MemoryReplicaConfigureResult,
+  type MemoryReplicaChanged,
+} from "./memory-replica-rpc-schema.ts";
+export {
+  MEMORY_AUTHORITY_METHODS, MemoryRuntimeUnavailableReasonSchema, MemoryAuthorityStatusParamsSchema,
+  MemoryAuthorityStatusSchema, type MemoryRuntimeUnavailableReason, type MemoryAuthorityStatus,
+  type MemoryAuthorityStatusParams,
 } from "./memory-authority-status-schema.ts";
-export type { MemoryRuntimeUnavailableReason, MemoryAuthorityStatus, MemoryAuthorityStatusParams } from "./memory-authority-status-schema.ts";
-export { MemoryPolicyReviewStatusSchema, type MemoryPolicyReviewStatus } from "./memory-policy-review-schema.ts";
-export { MemoryLocalErrorCodeSchema, MemoryLocalPrepareSourceSchema, MemoryLocalPrepareRequestSchema, MemoryLocalActivateRequestSchema,
-  MemoryLocalProgressSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema } from "./memory-local-operation-schema.ts";
-export type { MemoryLocalErrorCode, MemoryLocalPrepareSource, MemoryLocalPrepareRequest, MemoryLocalActivateRequest,
-  MemoryLocalProgress, MemoryLocalProducerRef, MemoryLocalResult } from "./memory-local-operation-schema.ts";
-export { MEMORY_ONBOARDING_METHODS, MemoryOnboardingPreviewParamsSchema, MemoryOnboardingPreviewResultSchema,
-  MemoryOnboardingStatusParamsSchema, MemoryOnboardingReceiptSchema, MemoryOnboardingRunSchema, MemoryOnboardingActionsSchema,
-  MemoryOnboardingStatusSchema, MemoryOnboardingExceptionsParamsSchema, MemoryOnboardingExceptionsResultSchema,
-  MemoryOnboardingExcludeParamsSchema, MemoryOnboardingExcludeResultSchema, MemoryOnboardingSubscribeParamsSchema,
-  MemoryOnboardingSubscribeResultSchema, MemoryOnboardingChangedSchema } from "./memory-local-onboarding-schema.ts";
-export type { MemoryOnboardingPreviewParams, MemoryOnboardingPreviewResult, MemoryOnboardingStatusParams, MemoryOnboardingStatus,
-  MemoryOnboardingRun, MemoryOnboardingActions, MemoryOnboardingReceipt, MemoryOnboardingExceptionsParams,
-  MemoryOnboardingExceptionsResult, MemoryOnboardingExcludeParams, MemoryOnboardingExcludeResult,
-  MemoryOnboardingChanged, MemoryOnboardingSubscribeResult } from "./memory-local-onboarding-schema.ts";
-export { MemoryHindsightActivationErrorCodeSchema, MemoryHindsightActivateSourceSchema, MemoryHindsightActivateRequestSchema, MemoryHindsightPhaseSchema,
-  MemoryHindsightProgressSchema, MemoryHindsightProducerBankSchema, MemoryHindsightProducerRefSchema, MemoryHindsightBlockingSchema, MemoryHindsightResultSchema } from "./memory-hindsight-operation-schema.ts";
-export type { MemoryHindsightActivationErrorCode, MemoryHindsightActivateSource, MemoryHindsightActivateRequest, MemoryHindsightPhase, MemoryHindsightProgress,
-  MemoryHindsightProducerBank, MemoryHindsightProducerRef, MemoryHindsightBlocking, MemoryHindsightResult } from "./memory-hindsight-operation-schema.ts";
-export { MEMORY_ACTIVATION_METHODS, MemoryActivationStatusParamsSchema, MemoryActivationReceiptSchema, MemoryActivationRunSchema, MemoryActivationBankSchema,
-  MemoryActivationActionsSchema, MemoryActivationStatusSchema } from "./memory-activation-schema.ts";
-export type { MemoryActivationStatusParams, MemoryActivationReceipt, MemoryActivationRun, MemoryActivationBank, MemoryActivationActions, MemoryActivationStatus } from "./memory-activation-schema.ts";
-export { HindsightBankReadinessSchema, MemoryHindsightStatusSectionSchema, MemoryHindsightLifecycleErrorCodeSchema, MemoryHindsightLifecycleOriginSchema, MemoryBankProvisionRequestSchema, MemoryConnectionRevalidateRequestSchema, MemoryBankProducerRefSchema, MemoryConnectionProducerRefSchema, MemoryBankResultSchema, MemoryConnectionResultSchema } from "./memory-hindsight-lifecycle-schema.ts";
-export type { HindsightBankReadiness, MemoryHindsightStatusSection, MemoryHindsightLifecycleErrorCode, MemoryHindsightLifecycleOrigin, MemoryBankProvisionRequest, MemoryConnectionRevalidateRequest, MemoryBankProducerRef, MemoryConnectionProducerRef, MemoryBankResult, MemoryConnectionResult } from "./memory-hindsight-lifecycle-schema.ts";
-export { HindsightBackupIdSchema, HindsightBackupRouteSchema, HindsightBackupInboxFileSchema, HindsightCredentialCustodySchema, HindsightBackupNativeProofSchema, HindsightBackupManifestSchema, HindsightBackupPairMismatchReasonSchema, HindsightBackupPairMismatchSchema, HindsightBackupNativeRequestSchema, HindsightBackupArchiveProofSchema, HindsightNativeArchiveManifestSchema,
-  HindsightBackupStatusSectionSchema, HindsightIncidentManifestSchema, MemoryBackupErrorCodeSchema, MemoryBackupCaptureRequestSchema, MemoryBackupAdmitRequestSchema, MemoryBackupVerifyRequestSchema, MemoryBackupProducerRefSchema, MemoryBackupResultSchema } from "./hindsight-backup-schema.ts";
-export type { HindsightBackupRoute, HindsightCredentialCustody, HindsightBackupNativeProof, HindsightBackupBank, HindsightBackupManifest, HindsightBackupPairMismatchReason, HindsightBackupPairMismatch, HindsightBackupNativeRequest, HindsightBackupArchiveProof, HindsightNativeArchiveManifest,
-  HindsightBackupStatusSection, HindsightIncidentManifest, MemoryBackupErrorCode, MemoryBackupCaptureRequest, MemoryBackupAdmitRequest, MemoryBackupVerifyRequest, MemoryBackupProducerRef, MemoryBackupResult } from "./hindsight-backup-schema.ts";
-export { MemoryTransitionKindSchema, MemoryTransitionErrorCodeSchema, MemoryTransitionBankSchema, MemoryTransitionIdentitySchema, MemoryTransitionRecoverySchema, MemoryTransitionResolutionSchema,
-  MemoryTransitionRequestSchema, MemoryTransitionQueuePolicySchema, MemoryTransitionIntentSchema, MemoryTransitionAttemptSchema,
-  MemoryTransitionFinalProofSchema, MemoryTransitionReceiptSchema, MemoryTransitionResultSchema, MemoryTransitionProducerRefSchema,
-  MemoryTransitionStatusSchema, type MemoryTransitionIdentity, type MemoryTransitionRequest, type MemoryTransitionIntent,
-  type MemoryTransitionAttempt, type MemoryTransitionFinalProof, type MemoryTransitionReceipt, type MemoryTransitionResult, type MemoryTransitionRecovery, type MemoryTransitionResolution } from "./memory-transition-schema.ts";
-export { MemoryTransitionCommandSchema, MemoryTransitionQueuedIntentSchema, MemoryTransitionQueueExecutionSchema, MemoryTransitionQueueOutcomeSchema,
-  type MemoryTransitionQueuedIntent, type MemoryTransitionQueueExecution, type MemoryTransitionQueueOutcome } from "./memory-transition-queue-schema.ts";
-export { HINDSIGHT_TRANSITION_BUILD, HINDSIGHT_TRANSITION_VERSION, HINDSIGHT_TRANSITION_MAX_BYTES,
-  HindsightTransitionUnusedScopeSchema, HindsightTransitionAcquireSchema, HindsightTransitionExecutorSchema, HindsightTransitionClaimSchema,
-  HindsightTransitionProofSchema, HindsightTransitionOutcomeRequestSchema, HindsightTransitionOutcomeSchema,
-  HindsightTransitionStatusSchema, HindsightTransitionFailureSchema, HindsightTransitionAuxiliaryPageSchema,
-  type HindsightTransitionUnusedScope, type HindsightTransitionAcquire, type HindsightTransitionExecutor, type HindsightTransitionClaim,
-  type HindsightTransitionProof, type HindsightTransitionOutcomeRequest, type HindsightTransitionOutcome,
-  type HindsightTransitionStatus, type HindsightTransitionFailure, type HindsightTransitionAuxiliaryPage } from "./hindsight-transition-schema.ts";
-export { HindsightTransitionNativeDescriptorSchema, HindsightTransitionApplicationDescriptorSchema, HindsightTransitionDeltaRequestSchema,
-  HindsightTransitionDeltaResultSchema, type HindsightTransitionNativeDescriptor, type HindsightTransitionApplicationDescriptor,
-  type HindsightTransitionDeltaRequest, type HindsightTransitionDeltaResult } from "./hindsight-transition-delta-schema.ts";
-export { MemoryTransitionHistoricalReferenceSchema, type MemoryTransitionHistoricalReference,
+export {
+  MemoryPolicyReviewStatusSchema, type MemoryPolicyReviewStatus,
+} from "./memory-policy-review-schema.ts";
+export {
+  MemoryLocalErrorCodeSchema, MemoryLocalPrepareSourceSchema, MemoryLocalPrepareRequestSchema,
+  MemoryLocalActivateRequestSchema, MemoryLocalProgressSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema,
+  type MemoryLocalErrorCode, type MemoryLocalPrepareSource, type MemoryLocalPrepareRequest,
+  type MemoryLocalActivateRequest, type MemoryLocalProgress, type MemoryLocalProducerRef, type MemoryLocalResult,
+} from "./memory-local-operation-schema.ts";
+export {
+  MEMORY_ONBOARDING_METHODS, MemoryOnboardingPreviewParamsSchema, MemoryOnboardingPreviewResultSchema,
+  MemoryOnboardingStatusParamsSchema, MemoryOnboardingReceiptSchema, MemoryOnboardingRunSchema,
+  MemoryOnboardingActionsSchema, MemoryOnboardingStatusSchema, MemoryOnboardingExceptionsParamsSchema,
+  MemoryOnboardingExceptionsResultSchema, MemoryOnboardingExcludeParamsSchema, MemoryOnboardingExcludeResultSchema,
+  MemoryOnboardingSubscribeParamsSchema, MemoryOnboardingSubscribeResultSchema, MemoryOnboardingChangedSchema,
+  type MemoryOnboardingPreviewParams, type MemoryOnboardingPreviewResult, type MemoryOnboardingStatusParams,
+  type MemoryOnboardingStatus, type MemoryOnboardingRun, type MemoryOnboardingActions, type MemoryOnboardingReceipt,
+  type MemoryOnboardingExceptionsParams, type MemoryOnboardingExceptionsResult, type MemoryOnboardingExcludeParams,
+  type MemoryOnboardingExcludeResult, type MemoryOnboardingChanged, type MemoryOnboardingSubscribeResult,
+} from "./memory-local-onboarding-schema.ts";
+export {
+  MemoryHindsightActivationErrorCodeSchema, MemoryHindsightActivateSourceSchema, MemoryHindsightActivateRequestSchema,
+  MemoryHindsightPhaseSchema, MemoryHindsightProgressSchema, MemoryHindsightProducerBankSchema,
+  MemoryHindsightProducerRefSchema, MemoryHindsightBlockingSchema, MemoryHindsightResultSchema,
+  type MemoryHindsightActivationErrorCode, type MemoryHindsightActivateSource, type MemoryHindsightActivateRequest,
+  type MemoryHindsightPhase, type MemoryHindsightProgress, type MemoryHindsightProducerBank,
+  type MemoryHindsightProducerRef, type MemoryHindsightBlocking, type MemoryHindsightResult,
+} from "./memory-hindsight-operation-schema.ts";
+export {
+  MEMORY_ACTIVATION_METHODS, MemoryActivationStatusParamsSchema, MemoryActivationReceiptSchema,
+  MemoryActivationRunSchema, MemoryActivationBankSchema, MemoryActivationActionsSchema, MemoryActivationStatusSchema,
+  type MemoryActivationStatusParams, type MemoryActivationReceipt, type MemoryActivationRun, type MemoryActivationBank,
+  type MemoryActivationActions, type MemoryActivationStatus,
+} from "./memory-activation-schema.ts";
+export {
+  HindsightBankReadinessSchema, MemoryHindsightStatusSectionSchema, MemoryHindsightLifecycleErrorCodeSchema,
+  MemoryHindsightLifecycleOriginSchema, MemoryBankProvisionRequestSchema, MemoryConnectionRevalidateRequestSchema,
+  MemoryBankProducerRefSchema, MemoryConnectionProducerRefSchema, MemoryBankResultSchema, MemoryConnectionResultSchema,
+  type HindsightBankReadiness, type MemoryHindsightStatusSection, type MemoryHindsightLifecycleErrorCode,
+  type MemoryHindsightLifecycleOrigin, type MemoryBankProvisionRequest, type MemoryConnectionRevalidateRequest,
+  type MemoryBankProducerRef, type MemoryConnectionProducerRef, type MemoryBankResult, type MemoryConnectionResult,
+} from "./memory-hindsight-lifecycle-schema.ts";
+export {
+  HindsightBackupIdSchema, HindsightBackupRouteSchema, HindsightBackupInboxFileSchema,
+  HindsightCredentialCustodySchema, HindsightBackupNativeProofSchema, HindsightBackupManifestSchema,
+  HindsightBackupPairMismatchReasonSchema, HindsightBackupPairMismatchSchema, HindsightBackupNativeRequestSchema,
+  HindsightBackupArchiveProofSchema, HindsightNativeArchiveManifestSchema, HindsightBackupStatusSectionSchema,
+  HindsightIncidentManifestSchema, MemoryBackupErrorCodeSchema, MemoryBackupCaptureRequestSchema,
+  MemoryBackupAdmitRequestSchema, MemoryBackupVerifyRequestSchema, MemoryBackupProducerRefSchema,
+  MemoryBackupResultSchema, type HindsightBackupRoute, type HindsightCredentialCustody,
+  type HindsightBackupNativeProof, type HindsightBackupBank, type HindsightBackupManifest,
+  type HindsightBackupPairMismatchReason, type HindsightBackupPairMismatch, type HindsightBackupNativeRequest,
+  type HindsightBackupArchiveProof, type HindsightNativeArchiveManifest, type HindsightBackupStatusSection,
+  type HindsightIncidentManifest, type MemoryBackupErrorCode, type MemoryBackupCaptureRequest,
+  type MemoryBackupAdmitRequest, type MemoryBackupVerifyRequest, type MemoryBackupProducerRef, type MemoryBackupResult,
+} from "./hindsight-backup-schema.ts";
+export {
+  MemoryTransitionKindSchema, MemoryTransitionErrorCodeSchema, MemoryTransitionBankSchema,
+  MemoryTransitionIdentitySchema, MemoryTransitionRecoverySchema, MemoryTransitionResolutionSchema,
+  MemoryTransitionRequestSchema, MemoryTransitionQueuePolicySchema, MemoryTransitionIntentSchema,
+  MemoryTransitionAttemptSchema, MemoryTransitionFinalProofSchema, MemoryTransitionReceiptSchema,
+  MemoryTransitionResultSchema, MemoryTransitionProducerRefSchema, MemoryTransitionStatusSchema,
+  type MemoryTransitionIdentity, type MemoryTransitionRequest, type MemoryTransitionIntent,
+  type MemoryTransitionAttempt, type MemoryTransitionFinalProof, type MemoryTransitionReceipt,
+  type MemoryTransitionResult, type MemoryTransitionRecovery, type MemoryTransitionResolution,
+} from "./memory-transition-schema.ts";
+export {
+  MemoryTransitionCommandSchema, MemoryTransitionQueuedIntentSchema, MemoryTransitionQueueExecutionSchema,
+  MemoryTransitionQueueOutcomeSchema, type MemoryTransitionQueuedIntent, type MemoryTransitionQueueExecution,
+  type MemoryTransitionQueueOutcome,
+} from "./memory-transition-queue-schema.ts";
+export {
+  HINDSIGHT_TRANSITION_BUILD, HINDSIGHT_TRANSITION_VERSION, HINDSIGHT_TRANSITION_MAX_BYTES,
+  HindsightTransitionUnusedScopeSchema, HindsightTransitionAcquireSchema, HindsightTransitionExecutorSchema,
+  HindsightTransitionClaimSchema, HindsightTransitionProofSchema, HindsightTransitionOutcomeRequestSchema,
+  HindsightTransitionOutcomeSchema, HindsightTransitionStatusSchema, HindsightTransitionFailureSchema,
+  HindsightTransitionAuxiliaryPageSchema, type HindsightTransitionUnusedScope, type HindsightTransitionAcquire,
+  type HindsightTransitionExecutor, type HindsightTransitionClaim, type HindsightTransitionProof,
+  type HindsightTransitionOutcomeRequest, type HindsightTransitionOutcome, type HindsightTransitionStatus,
+  type HindsightTransitionFailure, type HindsightTransitionAuxiliaryPage,
+} from "./hindsight-transition-schema.ts";
+export {
+  HindsightTransitionNativeDescriptorSchema, HindsightTransitionApplicationDescriptorSchema,
+  HindsightTransitionDeltaRequestSchema, HindsightTransitionDeltaResultSchema,
+  type HindsightTransitionNativeDescriptor, type HindsightTransitionApplicationDescriptor,
+  type HindsightTransitionDeltaRequest, type HindsightTransitionDeltaResult,
+} from "./hindsight-transition-delta-schema.ts";
+export {
+  MemoryTransitionHistoricalReferenceSchema, type MemoryTransitionHistoricalReference,
   MemoryTransitionLocalStateSchema, MemoryTransitionLocalCaptureSchema, MemoryTransitionNativeEvidenceSchema,
-  MemoryTransitionScopeMappingSchema, MemoryTransitionObjectMappingSchema, MemoryTransitionCandidateSchema, MemoryTransitionCommonBaselineSchema,
-  type MemoryTransitionLocalState, type MemoryTransitionLocalCapture, type MemoryTransitionNativeEvidence, type MemoryTransitionScopeMapping,
-  type MemoryTransitionObjectMapping, type MemoryTransitionCandidate, type MemoryTransitionCommonBaseline } from "./memory-transition-candidate-schema.ts";
-export { MemoryTransitionPreparationSchema, MemoryTransitionDeltaEvidenceSchema, MemoryTransitionUnusedInventorySchema,
-  type MemoryTransitionPreparation, type MemoryTransitionDeltaEvidence, type MemoryTransitionUnusedInventory } from "./memory-transition-preparation-schema.ts";
-export { HindsightCurrentCanonicalDerivedSchema } from "./hindsight-current-canonical-schema.ts";
-export { HINDSIGHT_TRANSITION_SOURCE_EVIDENCE_VERSION, HindsightTransitionSourceUploadSchema, HindsightTransitionSourcePartSchema,
-  type HindsightTransitionSourceUpload, type HindsightTransitionSourcePart } from "./hindsight-transition-source-schema.ts";
-export { MemoryTransitionSourceAliasSchema, MemoryTransitionSourceReferenceSchema, MemoryTransitionSourceSetSchema, MemoryTransitionSourceUploadSchema, MemoryTransitionSourceUploadAttemptSchema,
-  MemoryTransitionPendingSourceSchema, type MemoryTransitionPendingSource,
-  type MemoryTransitionSourceAlias, type MemoryTransitionSourceReference, type MemoryTransitionSourceSet, type MemoryTransitionSourceUpload, type MemoryTransitionSourceUploadAttempt } from "./memory-transition-source-schema.ts";
-export { MemoryTransitionCustodySchema, MemoryTransitionPublicationSchema, MemoryTransitionSourceDispositionSchema,
-  type MemoryTransitionCustody, type MemoryTransitionPublication, type MemoryTransitionSourceDisposition } from "./memory-transition-publication-schema.ts";
-export { MEMORY_TRANSITION_METHODS, MemoryHealthyTransitionKindSchema, MemoryTransitionPreviewParamsSchema, MemoryTransitionPreviewSchema,
-  MemoryHealthyTransitionPreviewSchema, MemoryEmergencyTransitionPreviewSchema, type MemoryHealthyTransitionPreview, type MemoryEmergencyTransitionPreview,
-  MemoryTransitionDriverBankSchema, MemoryTransitionNativeCommandSchema, MemoryTransitionNativeObservationSchema, MemoryTransitionUndispatchedSchema,
-  MemoryTransitionProgressSchema, MemoryTransitionReadParamsSchema, MemoryTransitionReadSchema, type MemoryTransitionPreview,
-  type MemoryTransitionDriverBank, type MemoryTransitionNativeCommand, type MemoryTransitionNativeObservation,
-  type MemoryTransitionUndispatched, type MemoryTransitionRead } from "./memory-transition-driver-schema.ts";
-export { MemoryTransitionActionReasonSchema, MemoryTransitionActionSchema, MemoryTransitionOverviewParamsSchema, MemoryTransitionEmergencyDisclosureSchema,
-  MemoryTransitionOverviewSchema, type MemoryTransitionActionReason, type MemoryTransitionOverview } from "./memory-transition-operator-schema.ts";
-export { MemoryEmergencyCaptureSchema, MemoryEmergencyBankCoverageSchema, MemoryEmergencySnapshotSchema,
-  MemorySurvivingBankEvidenceSchema, MemoryEmergencyCandidateSchema, type MemoryEmergencyCandidate, type MemorySurvivingBankEvidence,
-  MemoryEmergencyUnknownEffectSchema, MemoryEmergencyPublicationSchema, type MemoryEmergencyUnknownEffect, type MemoryEmergencyPublication,
-  type MemoryEmergencyCapture, type MemoryEmergencyBankCoverage, type MemoryEmergencySnapshot } from "./memory-transition-emergency-schema.ts";
-export { HINDSIGHT_CONFIGURATION_BUILD, HINDSIGHT_CONFIGURATION_VERSION, HINDSIGHT_CONFIGURATION_MAX_BYTES,
+  MemoryTransitionScopeMappingSchema, MemoryTransitionObjectMappingSchema, MemoryTransitionCandidateSchema,
+  MemoryTransitionCommonBaselineSchema, type MemoryTransitionLocalState, type MemoryTransitionLocalCapture,
+  type MemoryTransitionNativeEvidence, type MemoryTransitionScopeMapping, type MemoryTransitionObjectMapping,
+  type MemoryTransitionCandidate, type MemoryTransitionCommonBaseline,
+} from "./memory-transition-candidate-schema.ts";
+export {
+  MemoryTransitionPreparationSchema, MemoryTransitionDeltaEvidenceSchema, MemoryTransitionUnusedInventorySchema,
+  type MemoryTransitionPreparation, type MemoryTransitionDeltaEvidence, type MemoryTransitionUnusedInventory,
+} from "./memory-transition-preparation-schema.ts";
+export {
+  HINDSIGHT_TRANSITION_SOURCE_EVIDENCE_VERSION, HindsightTransitionSourceUploadSchema,
+  HindsightTransitionSourcePartSchema, type HindsightTransitionSourceUpload, type HindsightTransitionSourcePart,
+} from "./hindsight-transition-source-schema.ts";
+export {
+  MemoryTransitionSourceAliasSchema, MemoryTransitionSourceReferenceSchema, MemoryTransitionSourceSetSchema,
+  MemoryTransitionSourceUploadSchema, MemoryTransitionSourceUploadAttemptSchema, MemoryTransitionPendingSourceSchema,
+  type MemoryTransitionPendingSource, type MemoryTransitionSourceAlias, type MemoryTransitionSourceReference,
+  type MemoryTransitionSourceSet, type MemoryTransitionSourceUpload, type MemoryTransitionSourceUploadAttempt,
+} from "./memory-transition-source-schema.ts";
+export {
+  MemoryTransitionCustodySchema, MemoryTransitionPublicationSchema, MemoryTransitionSourceDispositionSchema,
+  type MemoryTransitionCustody, type MemoryTransitionPublication, type MemoryTransitionSourceDisposition,
+} from "./memory-transition-publication-schema.ts";
+export {
+  MEMORY_TRANSITION_METHODS, MemoryHealthyTransitionKindSchema, MemoryTransitionPreviewParamsSchema,
+  MemoryTransitionPreviewSchema, MemoryHealthyTransitionPreviewSchema, MemoryEmergencyTransitionPreviewSchema,
+  type MemoryHealthyTransitionPreview, type MemoryEmergencyTransitionPreview, MemoryTransitionDriverBankSchema,
+  MemoryTransitionNativeCommandSchema, MemoryTransitionNativeObservationSchema, MemoryTransitionUndispatchedSchema,
+  MemoryTransitionProgressSchema, MemoryTransitionReadParamsSchema, MemoryTransitionReadSchema,
+  type MemoryTransitionPreview, type MemoryTransitionDriverBank, type MemoryTransitionNativeCommand,
+  type MemoryTransitionNativeObservation, type MemoryTransitionUndispatched, type MemoryTransitionRead,
+} from "./memory-transition-driver-schema.ts";
+export {
+  MemoryTransitionActionReasonSchema, MemoryTransitionActionSchema, MemoryTransitionOverviewParamsSchema,
+  MemoryTransitionEmergencyDisclosureSchema, MemoryTransitionOverviewSchema, type MemoryTransitionActionReason,
+  type MemoryTransitionOverview,
+} from "./memory-transition-operator-schema.ts";
+export {
+  MemoryEmergencyCaptureSchema, MemoryEmergencyBankCoverageSchema, MemoryEmergencySnapshotSchema,
+  MemorySurvivingBankEvidenceSchema, MemoryEmergencyCandidateSchema, type MemoryEmergencyCandidate,
+  type MemorySurvivingBankEvidence, MemoryEmergencyUnknownEffectSchema, MemoryEmergencyPublicationSchema,
+  type MemoryEmergencyUnknownEffect, type MemoryEmergencyPublication, type MemoryEmergencyCapture,
+  type MemoryEmergencyBankCoverage, type MemoryEmergencySnapshot,
+} from "./memory-transition-emergency-schema.ts";
+export {
+  HINDSIGHT_CONFIGURATION_BUILD, HINDSIGHT_CONFIGURATION_VERSION, HINDSIGHT_CONFIGURATION_MAX_BYTES,
   HINDSIGHT_CONFIGURATION_TTL_MS, HINDSIGHT_CONFIGURATION_METHODS, HindsightObservedModelIdentifierSchema,
   HindsightObservedProfileSchema, HindsightConfigurationObservationSchema, HindsightConfigurationRefusalSchema,
   HindsightConfigurationScopeSchema, HindsightConfigurationParamsSchema, HindsightConfigurationComparisonSchema,
   HindsightConfigurationStatusSchema, type HindsightObservedProfile, type HindsightConfigurationObservation,
   type HindsightConfigurationRefusal, type HindsightConfigurationScope, type HindsightConfigurationParams,
-  type HindsightConfigurationComparison, type HindsightConfigurationStatus } from "./hindsight-configuration-observation-schema.ts";
-export { HINDSIGHT_TEMPLATE_BUILD, HINDSIGHT_TEMPLATE_VERSION, HINDSIGHT_TEMPLATE_MAX_BYTES,
-  HindsightTemplateHashSchema, HindsightTemplateIdSchema, HindsightTemplateTextSchema, HindsightTemplateNameSchema,
-  HindsightTemplateTagsSchema, HindsightTemplateModelIdSchema, HindsightTemplateJsonSchema, HindsightTemplateObjectSchema,
+  type HindsightConfigurationComparison, type HindsightConfigurationStatus,
+} from "./hindsight-configuration-observation-schema.ts";
+export {
+  HINDSIGHT_TEMPLATE_BUILD, HINDSIGHT_TEMPLATE_VERSION, HINDSIGHT_TEMPLATE_MAX_BYTES, HindsightTemplateHashSchema,
+  HindsightTemplateIdSchema, HindsightTemplateTextSchema, HindsightTemplateNameSchema, HindsightTemplateTagsSchema,
+  HindsightTemplateModelIdSchema, HindsightTemplateJsonSchema, HindsightTemplateObjectSchema,
   HindsightTemplateConfigKeySchema, HindsightTemplateTriggerSchema, HindsightTemplateModelDefinitionSchema,
   HindsightTemplateDirectiveDefinitionSchema, HindsightTemplatePresenceSchema, HindsightTemplateTargetSchema,
-  HindsightTemplateConfigEntrySchema, HindsightTemplateSelectorsSchema, HindsightTemplateLabelGroupSchema, HindsightTemplateLabelsSchema,
-  isHindsightTemplateConfigValue,
-  type HindsightTemplateConfigKey, type HindsightTemplateModelDefinition, type HindsightTemplateDirectiveDefinition,
-  type HindsightTemplatePresence, type HindsightTemplateTarget, type HindsightTemplateSelectors,
-  type HindsightTemplateLabelGroup, type HindsightTemplateLabels } from "./hindsight-template-definition-schema.ts";
-export { HindsightTemplateObjectProofSchema, HindsightTemplateSnapshotRequestSchema, HindsightTemplateSnapshotSchema,
-  HindsightTemplateChangesSchema, HindsightTemplateApplyRequestSchema, HindsightTemplateChildSchema, HindsightTemplateReceiptSchema,
-  HindsightTemplateResultRequestSchema, HindsightTemplateRefreshResultRequestSchema, HindsightTemplateResultSchema, HindsightTemplateRefreshResultSchema, HindsightTemplateFailureSchema,
-  HindsightTemplateLabelEvidenceSchema, HindsightTemplateLabelEvidenceRequestSchema, HindsightTemplateLabelEvidenceResultSchema,
-  HindsightTemplateBackupEvidenceSchema, type HindsightTemplateSnapshot, type HindsightTemplateChanges,
-  type HindsightTemplateApplyRequest, type HindsightTemplateReceipt } from "./hindsight-template-schema.ts";
-export { hindsightTemplateHashJson, normalizeHindsightTemplateSelectors, normalizeHindsightTemplateSnapshot,
+  HindsightTemplateConfigEntrySchema, HindsightTemplateSelectorsSchema, HindsightTemplateLabelGroupSchema,
+  HindsightTemplateLabelsSchema, isHindsightTemplateConfigValue, type HindsightTemplateConfigKey,
+  type HindsightTemplateModelDefinition, type HindsightTemplateDirectiveDefinition, type HindsightTemplatePresence,
+  type HindsightTemplateTarget, type HindsightTemplateSelectors, type HindsightTemplateLabelGroup,
+  type HindsightTemplateLabels,
+} from "./hindsight-template-definition-schema.ts";
+export {
+  HindsightTemplateObjectProofSchema, HindsightTemplateSnapshotRequestSchema, HindsightTemplateSnapshotSchema,
+  HindsightTemplateChangesSchema, HindsightTemplateApplyRequestSchema, HindsightTemplateChildSchema,
+  HindsightTemplateReceiptSchema, HindsightTemplateResultRequestSchema, HindsightTemplateRefreshResultRequestSchema,
+  HindsightTemplateResultSchema, HindsightTemplateRefreshResultSchema, HindsightTemplateFailureSchema,
+  HindsightTemplateLabelEvidenceSchema, HindsightTemplateLabelEvidenceRequestSchema,
+  HindsightTemplateLabelEvidenceResultSchema, HindsightTemplateBackupEvidenceSchema, type HindsightTemplateSnapshot,
+  type HindsightTemplateChanges, type HindsightTemplateApplyRequest, type HindsightTemplateReceipt,
+} from "./hindsight-template-schema.ts";
+export {
+  hindsightTemplateHashJson, normalizeHindsightTemplateSelectors, normalizeHindsightTemplateSnapshot,
   normalizeHindsightTemplateChanges, normalizeHindsightTemplateRequest, normalizeHindsightTemplateReceipt,
-  type HindsightTemplateHashDomain } from "./hindsight-template-encoding.ts";
-export { MemoryTemplateUserChoicesSchema, MemoryTemplateUserRevisionSchema,
-  type MemoryTemplateUserChoices, type MemoryTemplateUserRevision } from "./memory-template-user-schema.ts";
-export { MemoryTemplateDerivedParamsSchema, MemoryTemplateDerivedObservationSchema,
-  type MemoryTemplateDerivedParams, type MemoryTemplateDerivedObservation } from "./memory-template-derived-schema.ts";
-export { MemoryTemplateErrorCodeSchema, MemoryTemplateApplyRequestSchema, MemoryTemplateRecoverRequestSchema, MemoryTemplateRequestSchema,
-  MemoryTemplatePhaseSchema, MemoryTemplateProducerRefSchema, MemoryTemplateResultSchema,
-  type MemoryTemplateErrorCode, type MemoryTemplateRequest, type MemoryTemplateProducerRef, type MemoryTemplateResult } from "./memory-template-operation-schema.ts";
-export { MEMORY_TEMPLATE_METHODS, MEMORY_TEMPLATE_DETAIL_MAX_BYTES, MemoryTemplatePreviewParamsSchema, MemoryTemplateBankSummarySchema,
-  MemoryTemplatePreviewSchema, MemoryTemplateDetailParamsSchema, MemoryTemplateDetailSchema, MemoryTemplateStatusParamsSchema,
-  MemoryTemplateBankProgressSchema, MemoryTemplateBankStatusSchema, MemoryTemplateStatusSchema, type MemoryTemplatePreviewParams, type MemoryTemplateBankSummary,
-  type MemoryTemplatePreview, type MemoryTemplateDetail, type MemoryTemplateStatus } from "./memory-template-schema.ts";
-export { HindsightBackupNativeRequestV1Schema, HindsightBackupNativeProofBodyV1Schema, HindsightBackupNativeProofV1Schema,
+  type HindsightTemplateHashDomain,
+} from "./hindsight-template-encoding.ts";
+export {
+  MemoryTemplateUserChoicesSchema, MemoryTemplateUserRevisionSchema, type MemoryTemplateUserChoices,
+  type MemoryTemplateUserRevision,
+} from "./memory-template-user-schema.ts";
+export {
+  MemoryTemplateDerivedParamsSchema, MemoryTemplateDerivedObservationSchema, type MemoryTemplateDerivedParams,
+  type MemoryTemplateDerivedObservation,
+} from "./memory-template-derived-schema.ts";
+export {
+  MemoryTemplateErrorCodeSchema, MemoryTemplateApplyRequestSchema, MemoryTemplateRecoverRequestSchema,
+  MemoryTemplateRequestSchema, MemoryTemplatePhaseSchema, MemoryTemplateProducerRefSchema, MemoryTemplateResultSchema,
+  type MemoryTemplateErrorCode, type MemoryTemplateRequest, type MemoryTemplateProducerRef, type MemoryTemplateResult,
+} from "./memory-template-operation-schema.ts";
+export {
+  MEMORY_TEMPLATE_METHODS, MEMORY_TEMPLATE_DETAIL_MAX_BYTES, MemoryTemplatePreviewParamsSchema,
+  MemoryTemplateBankSummarySchema, MemoryTemplatePreviewSchema, MemoryTemplateDetailParamsSchema,
+  MemoryTemplateDetailSchema, MemoryTemplateStatusParamsSchema, MemoryTemplateBankProgressSchema,
+  MemoryTemplateBankStatusSchema, MemoryTemplateStatusSchema, type MemoryTemplatePreviewParams,
+  type MemoryTemplateBankSummary, type MemoryTemplatePreview, type MemoryTemplateDetail, type MemoryTemplateStatus,
+} from "./memory-template-schema.ts";
+export {
+  HindsightBackupNativeRequestV1Schema, HindsightBackupNativeProofBodyV1Schema, HindsightBackupNativeProofV1Schema,
   HindsightBackupArchiveProofV1Schema, HindsightBackupManifestV1BaseSchema, HindsightBackupManifestV1Schema,
   type HindsightBackupNativeRequestV1, type HindsightBackupNativeProofBodyV1, type HindsightBackupNativeProofV1,
-  type HindsightBackupArchiveProofV1, type HindsightBackupManifestV1 } from "./hindsight-backup-v1-schema.ts";
-export { HindsightBackupNativeRequestV2Schema, HindsightBackupNativeProofBodyV2Schema, HindsightBackupNativeProofV2Schema,
+  type HindsightBackupArchiveProofV1, type HindsightBackupManifestV1,
+} from "./hindsight-backup-v1-schema.ts";
+export {
+  HindsightBackupNativeRequestV2Schema, HindsightBackupNativeProofBodyV2Schema, HindsightBackupNativeProofV2Schema,
   HindsightBackupNativeResponseV2Schema, HindsightBackupArchiveProofV2Schema, HindsightBackupManifestV2BaseSchema,
-  HindsightBackupManifestV2Schema, HindsightTemplateBackupObservationRequestSchema, HindsightTemplateBackupObservationResponseSchema,
-  type HindsightBackupNativeRequestV2, type HindsightBackupNativeProofBodyV2, type HindsightBackupNativeProofV2,
-  type HindsightBackupNativeResponseV2, type HindsightBackupArchiveProofV2, type HindsightBackupManifestV2,
-  type HindsightTemplateBackupObservationRequest, type HindsightTemplateBackupObservationResponse } from "./hindsight-backup-v2-schema.ts";
-export { HINDSIGHT_TEMPLATE_BACKUP_VERSION, HINDSIGHT_TEMPLATE_BACKUP_BUILD, HINDSIGHT_TEMPLATE_BACKUP_OBSERVATION_PATH,
+  HindsightBackupManifestV2Schema, HindsightTemplateBackupObservationRequestSchema,
+  HindsightTemplateBackupObservationResponseSchema, type HindsightBackupNativeRequestV2,
+  type HindsightBackupNativeProofBodyV2, type HindsightBackupNativeProofV2, type HindsightBackupNativeResponseV2,
+  type HindsightBackupArchiveProofV2, type HindsightBackupManifestV2, type HindsightTemplateBackupObservationRequest,
+  type HindsightTemplateBackupObservationResponse,
+} from "./hindsight-backup-v2-schema.ts";
+export {
+  HINDSIGHT_TEMPLATE_BACKUP_VERSION, HINDSIGHT_TEMPLATE_BACKUP_BUILD, HINDSIGHT_TEMPLATE_BACKUP_OBSERVATION_PATH,
   HindsightTemplateBackupReceiptTupleSchema, HindsightTemplateBackupReceiptInventorySchema,
   HindsightTemplateBackupConfigurationObservationSchema, HindsightTemplateBackupBankProofV2Schema,
-  HindsightTemplateBackupFailureSchema, type HindsightTemplateBackupFailure,
-  type HindsightTemplateBackupReceiptTuple, type HindsightTemplateBackupReceiptInventory,
-  type HindsightTemplateBackupConfigurationObservation, type HindsightTemplateBackupBankProofV2 } from "./hindsight-template-backup-schema.ts";
-export { HindsightTemplateBackupBankAttestationSchema, HindsightTemplateBackupAttestationSchema,
-  type HindsightTemplateBackupBankAttestation, type HindsightTemplateBackupAttestation } from "./hindsight-template-backup-attestation-schema.ts";
-export { HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES, HINDSIGHT_BACKUP_APPLY_MAX_BYTES, HINDSIGHT_BACKUP_PROOF_MAX_BYTES,
-  HINDSIGHT_BACKUP_MANIFEST_MAX_BYTES, HINDSIGHT_BACKUP_OBSERVATION_WRAPPER_MAX_BYTES, HINDSIGHT_BACKUP_OBSERVATION_REQUEST_MAX_BYTES,
-  HINDSIGHT_TEMPLATE_BACKUP_HASH_DOMAINS, hindsightTemplateBackupHashJson, hindsightBackupJsonBytes,
-  normalizeHindsightBackupRequestV2, hindsightTemplateBackupRequestValue, hindsightTemplateBackupReceiptsValue,
-  hindsightTemplateBackupDatabaseValue, hindsightTemplateBackupInheritedValue, hindsightTemplateBackupObservationValue,
-  type HindsightTemplateBackupHashDomain } from "./hindsight-template-backup-encoding.ts";
-export { MemoryTransitionTemplateCommitmentSchema, MemoryTransitionTemplateAssociationSchema,
-  type MemoryTransitionTemplateCommitment, type MemoryTransitionTemplateAssociation } from "./memory-transition-template-schema.ts";
-export { HINDSIGHT_CANDIDATE_VERSION, HINDSIGHT_CANDIDATE_PROFILE, HindsightCandidateRefusalReasonSchema, HindsightCandidateSubjectSchema,
-  HindsightCandidateRefusalSchema, HindsightCandidateTableFamilySchema, HindsightCandidateColumnSchema, HindsightCandidateArchiveManifestSchema,
-  HindsightCandidateSchemaInventorySchema, HindsightCandidateTableInventorySchema, HindsightCandidateBankInventorySchema,
-  HindsightCandidateInventorySchema, HindsightCandidateOwnershipSchema, HindsightCandidatePhysicalIdentitySchema,
+  HindsightTemplateBackupFailureSchema, type HindsightTemplateBackupFailure, type HindsightTemplateBackupReceiptTuple,
+  type HindsightTemplateBackupReceiptInventory, type HindsightTemplateBackupConfigurationObservation,
+  type HindsightTemplateBackupBankProofV2,
+} from "./hindsight-template-backup-schema.ts";
+export {
+  HindsightTemplateBackupBankAttestationSchema, HindsightTemplateBackupAttestationSchema,
+  type HindsightTemplateBackupBankAttestation, type HindsightTemplateBackupAttestation,
+} from "./hindsight-template-backup-attestation-schema.ts";
+export {
+  HINDSIGHT_BACKUP_V2_REQUEST_MAX_BYTES, HINDSIGHT_BACKUP_APPLY_MAX_BYTES, HINDSIGHT_BACKUP_PROOF_MAX_BYTES,
+  HINDSIGHT_BACKUP_MANIFEST_MAX_BYTES, HINDSIGHT_BACKUP_OBSERVATION_WRAPPER_MAX_BYTES,
+  HINDSIGHT_BACKUP_OBSERVATION_REQUEST_MAX_BYTES, HINDSIGHT_TEMPLATE_BACKUP_HASH_DOMAINS,
+  hindsightTemplateBackupHashJson, hindsightBackupJsonBytes, normalizeHindsightBackupRequestV2,
+  hindsightTemplateBackupRequestValue, hindsightTemplateBackupReceiptsValue, hindsightTemplateBackupDatabaseValue,
+  hindsightTemplateBackupInheritedValue, hindsightTemplateBackupObservationValue,
+  type HindsightTemplateBackupHashDomain,
+} from "./hindsight-template-backup-encoding.ts";
+export {
+  MemoryTransitionTemplateCommitmentSchema, MemoryTransitionTemplateAssociationSchema,
+  type MemoryTransitionTemplateCommitment, type MemoryTransitionTemplateAssociation,
+} from "./memory-transition-template-schema.ts";
+export {
+  HINDSIGHT_CANDIDATE_VERSION, HINDSIGHT_CANDIDATE_PROFILE, HindsightCandidateRefusalReasonSchema,
+  HindsightCandidateSubjectSchema, HindsightCandidateRefusalSchema, HindsightCandidateTableFamilySchema,
+  HindsightCandidateColumnSchema, HindsightCandidateArchiveManifestSchema, HindsightCandidateSchemaInventorySchema,
+  HindsightCandidateTableInventorySchema, HindsightCandidateBankInventorySchema, HindsightCandidateInventorySchema,
+  HindsightCandidateOwnershipSchema, HindsightCandidatePhysicalIdentitySchema,
   HindsightCandidateRestoredInventorySchema, HindsightCandidateEvidenceSchema, HindsightCandidateVerificationSchema,
-  HindsightCandidateEnvironmentSchema, HindsightCandidateProvenanceSchema,
-  type HindsightCandidateRefusalReason, type HindsightCandidateSubject, type HindsightCandidateRefusal, type HindsightCandidateTableFamily,
-  type HindsightCandidateColumn, type HindsightCandidateArchiveManifest, type HindsightCandidateSchemaInventory, type HindsightCandidateInventory,
-  type HindsightCandidateOwnership, type HindsightCandidatePhysicalIdentity, type HindsightCandidateRestoredInventory,
-  type HindsightCandidateVerification, type HindsightCandidateEnvironment, type HindsightCandidateProvenance } from "./hindsight-candidate-schema.ts";
+  HindsightCandidateEnvironmentSchema, HindsightCandidateProvenanceSchema, type HindsightCandidateRefusalReason,
+  type HindsightCandidateSubject, type HindsightCandidateRefusal, type HindsightCandidateTableFamily,
+  type HindsightCandidateColumn, type HindsightCandidateArchiveManifest, type HindsightCandidateSchemaInventory,
+  type HindsightCandidateInventory, type HindsightCandidateOwnership, type HindsightCandidatePhysicalIdentity,
+  type HindsightCandidateRestoredInventory, type HindsightCandidateVerification, type HindsightCandidateEnvironment,
+  type HindsightCandidateProvenance,
+} from "./hindsight-candidate-schema.ts";
+export {
+  CHAT_ACTIVITY_MAX_ITEMS, CHAT_ACTIVITY_MAX_TEXT_BYTES, ChatActivitySchema, ChatActivityReadParamsSchema,
+  ChatActivityReadResultSchema, ChatActivityOutcomeSchema, ChatActivityPhaseSchema, ChatActivityMessageSchema,
+  ChatActivityTerminalSchema, ChatActivityToolStatusSchema, ChatActivityTextItemSchema, ChatActivityToolItemSchema,
+  ChatActivityItemSchema, utf8TextBytes, appendedUtf8TextBytes, chatActivityItemTextBytes, type ChatActivity,
+  type ChatActivityReadParams, type ChatActivityReadResult, type ChatActivityOutcome, type ChatActivityPhase,
+  type ChatActivityTerminal, type ChatActivityIdentity, type ChatActivityToolStatus, type ChatActivityTextItem,
+  type ChatActivityToolItem, type ChatActivityItem,
+} from "./chat-activity-schema.ts";
+export {
+  TimelinePresentationSchema, TimelineItemReferenceSchema, TimelineTextReferenceSchema, TimelineToolReferenceSchema,
+  validTimelinePresentation, sanitizeTimelinePresentations, type TimelinePresentation, type TimelineItemReference,
+  type TimelineTextReference, type TimelineToolReference,
+} from "./timeline-presentation-schema.ts";
+export {
+  AuxiliaryCallSourceSchema, AuxiliaryUsageCountsSchema, AuxiliaryModelCallStatusSchema, AuxiliaryModelCallSchema,
+  AuxiliaryUsageCursorSchema, AuxiliaryUsageQuerySchema, AuxiliaryUsageCounterAggregateSchema,
+  AuxiliaryUsageStateCountsSchema, AuxiliaryUsageCacheAggregateSchema, AuxiliaryUsageResultSchema,
+  type AuxiliaryCallSource, type AuxiliaryUsageCounts, type AuxiliaryModelCallStatus, type AuxiliaryModelCall,
+  type AuxiliaryUsageCursor, type AuxiliaryUsageQuery, type AuxiliaryUsageCounterAggregate,
+  type AuxiliaryUsageStateCounts, type AuxiliaryUsageCacheAggregate, type AuxiliaryUsageResult,
+} from "./auxiliary-usage-schema.ts";
+export {
+  MODEL_CAPABILITIES_METHOD, ModelCapabilitiesParamsSchema, ModelCapabilitiesResultSchema,
+  type ModelCapabilitiesParams, type ModelCapabilitiesResult,
+} from "./model-capability-schema.ts";
+export {
+  getCapabilityLabel, getPermissionCellDisplay, PERMISSION_OVERRIDE_LABELS, PERMISSION_POSTURE_LABELS,
+} from "./governance-presentation.ts";
+export {
+  captureToolDisplayNames, formatMcpToolDisplayName, getKnownToolDisplayName, getValidToolDisplayName,
+} from "./tool-presentation.ts";
+export {
+  EXTENSION_CHANGE_TARGETS, ExtensionChangedSchema, ExtensionChangeTargetSchema, ExtensionSubscribeParamsSchema,
+  ExtensionSubscribeResultSchema, type ExtensionChanged, type ExtensionChangeTarget, type ExtensionSubscribeParams,
+  type ExtensionSubscribeResult,
+} from "./extension-change-schema.ts";
+export {
+  InitiativeSourceSchema, InitiativeContextManifestSchema, InitiativeSelectedContextSchema,
+  InitiativePresentationSchema, HeartbeatDecisionSchema, DeliveryStateSchema, DeliveryRecordSchema,
+  InitiativePolicyReasonSchema, InitiativePolicyStatusSchema, type InitiativeContextManifest,
+  type InitiativeSelectedContext, type InitiativePresentation, type HeartbeatDecision, type DeliveryRecord,
+  type InitiativePolicyStatus, HeartbeatDecisionToolInputSchema, type HeartbeatDecisionToolInput,
+} from "./initiative-schema.ts";
+export {
+  InitiativeEventKindSchema, InitiativeEventPayloadSchema, RunEventV2Schema, type InitiativeEventPayload,
+  type RunEventV2,
+} from "./initiative-event-schema.ts";
+export {
+  PRESENCE_METHODS, PresenceReportParamsSchema, PresenceReportResultSchema, PresenceReadParamsSchema,
+  PresenceSnapshotSchema, type PresenceReportParams, type PresenceReportResult, type PresenceSnapshot,
+} from "./presence-schema.ts";
+export {
+  TimelinePresentationReportParamsSchema, type TimelinePresentationReportParams,
+} from "./timeline-presentation-report-schema.ts";
+export {
+  USER_TIMEZONE_METHODS, UserTimezoneNameSchema, UserTimezoneStateSchema, UserTimezoneRefusalReasonSchema,
+  UserTimezoneReadParamsSchema, UserTimezoneReadResultSchema, UserTimezoneUpdateParamsSchema,
+  UserTimezoneReportParamsSchema, UserTimezoneMutationResultSchema, type UserTimezoneState,
+  type UserTimezoneRefusalReason, type UserTimezoneReadParams, type UserTimezoneReadResult,
+  type UserTimezoneUpdateParams, type UserTimezoneReportParams, type UserTimezoneMutationResult,
+} from "./user-timezone-schema.ts";
+export {
+  InteractionPatternConditionSchema, InteractionPatternContextSelectorSchema, InteractionPatternDefinitionSchema,
+  InteractionPatternStateSchema, InteractionPatternChangeSchema, InteractionPatternOriginSchema,
+  InteractionPatternRevisionSchema, InteractionPatternViewSchema, type InteractionPatternCondition,
+  type InteractionPatternContextSelector, type InteractionPatternDefinition, type InteractionPatternState,
+  type InteractionPatternChange, type InteractionPatternOrigin, type InteractionPatternRevision,
+  type InteractionPatternView,
+} from "./interaction-pattern-schema.ts";
+export {
+  INTERACTION_PATTERN_METHODS, InteractionPatternListParamsSchema, InteractionPatternListResultSchema,
+  InteractionPatternGetParamsSchema, InteractionPatternGetResultSchema, InteractionPatternHistoryParamsSchema,
+  InteractionPatternHistoryResultSchema, InteractionPatternProposeParamsSchema, InteractionPatternConfirmParamsSchema,
+  InteractionPatternChangeStateParamsSchema, InteractionPatternRollbackParamsSchema,
+  InteractionPatternRefusalReasonSchema, InteractionPatternMutationResultSchema, InteractionPatternChangedSchema,
+  type InteractionPatternListParams, type InteractionPatternListResult, type InteractionPatternGetParams,
+  type InteractionPatternGetResult, type InteractionPatternHistoryParams, type InteractionPatternHistoryResult,
+  type InteractionPatternProposeParams, type InteractionPatternConfirmParams, type InteractionPatternChangeStateParams,
+  type InteractionPatternRollbackParams, type InteractionPatternRefusalReason, type InteractionPatternMutationResult,
+  type InteractionPatternChanged,
+} from "./interaction-pattern-protocol.ts";
+export {
+  InitiativeForegroundFactSchema, InitiativePresenceReturnSchema, InitiativeCompletionFactSchema,
+  InitiativeDueIntentionSchema, InitiativeWakeReasonSchema, InitiativeWakeEvaluationSchema,
+  InitiativeWakePolicyStatusSchema, type InitiativeForegroundFact, type InitiativePresenceReturn,
+  type InitiativeCompletionFact, type InitiativeDueIntention, type InitiativeWakeReason, type InitiativeWakeEvaluation,
+  type InitiativeWakePolicyStatus, INITIATIVE_WAKE_METHODS, InitiativeWakeReadParamsSchema,
+  InitiativeWakeChangedSchema, type InitiativeWakeReadParams, type InitiativeWakeChanged, InitiativeViewingFactSchema,
+  type InitiativeViewingFact,
+} from "./initiative-wake-schema.ts";
+export {
+  INITIATIVE_SETUP_METHODS, InitiativeSetupReadParamsSchema, InitiativeSeedIdSchema, InitiativeSetupStatusSchema,
+  InitiativeSetupInstallSkillParamsSchema, InitiativeSetupInstallSkillResultSchema,
+  InitiativeSetupProposeSeedParamsSchema, type InitiativeSetupReadParams, type InitiativeSetupStatus,
+  type InitiativeSetupInstallSkillParams, type InitiativeSetupInstallSkillResult,
+  type InitiativeSetupProposeSeedParams,
+} from "./initiative-setup-schema.ts";
+export {
+  InitiativeIntentionPlanSchema, InitiativeIntentionSourceSchema, InitiativeIntentionDispositionSchema,
+  InitiativeIntentionSchema, InitiativeIntentionRefusalSchema, InitiativeIntentionPlanResultSchema,
+  type InitiativeIntentionPlan, type InitiativeIntentionSource, type InitiativeIntentionDisposition,
+  type InitiativeIntention, type InitiativeIntentionRefusal, type InitiativeIntentionPlanResult,
+} from "./initiative-intention-schema.ts";
+export {
+  INITIATIVE_BACKOFF_METHODS, InitiativeBackoffStatusSchema, InitiativeBackoffResetParamsSchema,
+  InitiativeBackoffReadParamsSchema, InitiativeBackoffChangedSchema, type InitiativeBackoffStatus,
+  type InitiativeBackoffResetParams, type InitiativeBackoffReadParams, type InitiativeBackoffChanged,
+} from "./initiative-backoff-schema.ts";
+export {
+  ACCEPTED_WORK_PROVIDER, RunWorkTransitionSchema, RunWorkHoldSchema, RunWorkRefusalSchema, RunWorkResultSchema,
+  RunWorkEventSchema, type RunWorkTransition, type RunWorkHold, type RunWorkRefusal, type RunWorkResult,
+  type RunWorkEvent,
+} from "./run-work-schema.ts";
+export {
+  PREPARED_PUBLICATION_PROVIDER, PreparedPublicationRequestSchema, PreparedPublicationRunInputSchema,
+  PreparedPublicationSourceSchema, PreparedPublicationAuthorizationScopeSchema, PreparedPublicationValiditySchema,
+  PreparedPublicationCandidateSchema, PreparedPublicationEditSchema, PreparedPublicationResultSchema,
+  type PreparedPublicationRequest, type PreparedPublicationRunInput, type PreparedPublicationSource,
+  type PreparedPublicationAuthorizationScope, type PreparedPublicationValidity, type PreparedPublicationCandidate,
+  type PreparedPublicationEdit, type PreparedPublicationResult,
+} from "./prepared-publication-schema.ts";
+export {
+  CoWatchingPublicationSourceSchema, type CoWatchingPublicationSource,
+} from "./co-watching-publication-schema.ts";
+export {
+  MediaAccessProbeResultSchema, type MediaAccessProbeResult,
+} from "./media-access-schema.ts";
+export {
+  MediaAnalysisStartSchema, type MediaAnalysisStart, MediaAnalysisFailureSchema, type MediaAnalysisFailure,
+  MediaAnalysisJobSchema, type MediaAnalysisJob, MediaAnalysisControlResultSchema, type MediaAnalysisControlResult,
+  MediaRecommendationStartSchema, type MediaRecommendationStart, MediaRecommendationBatchSchema,
+  type MediaRecommendationBatch, MediaRecommendationControlResultSchema, type MediaRecommendationControlResult,
+} from "./media-analysis-schema.ts";
+export {
+  CO_WATCHING_INVITATION_METHODS, CoWatchingInvitationReadParamsSchema, CoWatchingInvitationSchema,
+  CoWatchingInvitationReadResultSchema, CoWatchingInvitationRespondSchema, CoWatchingInvitationRespondResultSchema,
+  type CoWatchingInvitation, type CoWatchingInvitationReadResult, type CoWatchingInvitationRespond,
+  type CoWatchingInvitationRespondResult,
+} from "./co-watching-invitation-schema.ts";
+export {
+  CO_WATCHING_ANALYSIS_PAGE_CHARS, CoWatchingAnalysisViewSchema, CoWatchingAnalysisReadParamsSchema,
+  CoWatchingAnalysisReadFailureSchema, CoWatchingAnalysisReadResultSchema, type CoWatchingAnalysisReadParams,
+  type CoWatchingAnalysisReadResult,
+} from "./co-watching-analysis-read-schema.ts";
+export {
+  CO_WATCHING_METHODS, CO_WATCHING_SKILL, CoWatchingAnalysisSchema, CoWatchingCatalogSchema,
+  CoWatchingAnalysisRequestSchema, type CoWatchingAnalysisRequest, CoWatchingInviteSchema, type CoWatchingInvite,
+  CoWatchingRegisterSchema, CoWatchingRemoveSchema, CoWatchingReadParamsSchema, CoWatchingSubscribeSchema,
+  CoWatchingStartSchema, CoWatchingStopSchema, CoWatchingReviseSchema, CoWatchingChangedSchema, CoWatchingPlanSchema,
+  CoWatchingStatusSchema, CoWatchingFailureSchema, CoWatchingSessionSchema, CoWatchingReadResultSchema,
+  CoWatchingControlResultSchema, type CoWatchingAnalysis, type CoWatchingRegister, type CoWatchingStart,
+  type CoWatchingPlan, type CoWatchingFailure, type CoWatchingSession, type CoWatchingReadResult,
+  type CoWatchingControlResult, CoWatchingSubscribeResultSchema, type CoWatchingChanged,
+} from "./co-watching-schema.ts";
+export {
+  BROWSER_PLAYBACK_METHODS, BROWSER_PLAYBACK_ENABLED_KEY, BROWSER_PLAYBACK_FRESH_MS, BROWSER_PLAYBACK_MAX_SOURCES,
+  BrowserMediaIdentitySchema, BrowserPlayerIdentitySchema, BrowserPlaybackSampleSchema, BrowserPlaybackReportSchema,
+  BrowserPlaybackAckSchema, BrowserPlaybackViewSchema, BrowserPlaybackReadParamsSchema,
+  BrowserPlaybackReadResultSchema, BrowserPlaybackReadyParamsSchema, BrowserPlaybackControlSchema,
+  type BrowserPlaybackControl, BrowserAttachmentHelloSchema, BrowserAttachmentFrameSchema, BrowserAttachmentPairSchema,
+  BrowserAttachmentSetupResultSchema, type BrowserAttachmentPair, type BrowserMediaIdentity,
+  type BrowserPlayerIdentity, type BrowserPlaybackSample, type BrowserPlaybackReport, type BrowserPlaybackAck,
+  type BrowserPlaybackView, type BrowserPlaybackReadResult,
+} from "./browser-playback-schema.ts";
+export {
+  MaterialSourceSchema, GenerationOriginSchema, SourceContextSchema, ContextMaterialSchema, ToolSourceMaterialSchema,
+  MaterialRefSchema, type MaterialSource, type GenerationOrigin, type SourceContext, type ContextMaterial,
+  type ToolSourceMaterial, type MaterialRef,
+} from "./context-source-schema.ts";
+export {
+  PrivateMessageSchema, RunMessageSchema, RunMessageBatchSchema, type PrivateMessage, type RunMessage,
+  type RunMessageBatch,
+} from "./run-message-schema.ts";
+export {
+  SubagentToolSelectionSchema, SubagentInitialContextSchema, SubagentTargetSchema, SubagentWorkTokenSchema,
+  SubagentWorkScopeSchema, SubagentConversationSchema, SubagentSenderSchema, SubagentCompletionPolicySchema,
+  SubagentInputRequestSchema, SubagentInputSchema, SubagentReplyAcceptanceSchema, type SubagentToolSelection,
+  type SubagentInitialContext, type SubagentTarget, type SubagentWorkToken, type SubagentWorkScope,
+  type SubagentConversation, type SubagentSender, type SubagentInputRequest, type SubagentInput,
+  type SubagentReplyAcceptance,
+} from "./subagent-schema.ts";
+export {
+  SubagentProposalSchema, ParentContinuationProposalSchema, SubagentCompletionStateSchema,
+  SubagentCompletionReasonSchema, SubagentResultSchema, ParentContinuationResultSchema, SubagentPublicationSchema,
+  SubagentResultGroupSchema, SubagentExecutionSchema, type SubagentProposal, type ParentContinuationProposal,
+  type SubagentCompletionReason, type SubagentResult, type ParentContinuationResult, type SubagentPublication,
+  type SubagentResultGroup, type SubagentExecution,
+} from "./subagent-result-schema.ts";
+export {
+  SubagentDelegateToolSchema, SubagentMessageToolSchema, SubagentResultToolSchema, ParentContinuationToolSchema,
+  SubagentInspectToolSchema, type SubagentDelegateTool, type SubagentMessageTool,
+} from "./subagent-tool-schema.ts";
+export {
+  SubagentValiditySchema, type SubagentValidity,
+} from "./subagent-validity-schema.ts";
+export {
+  SubagentCheckInPolicySchema, SubagentWorkProgressSchema, SubagentCheckInSchema, SubagentTokenUsageSchema,
+  type SubagentCheckInPolicy, type SubagentWorkProgress, type SubagentCheckIn, type SubagentTokenUsage,
+} from "./subagent-progress-schema.ts";
+export {
+  SubagentAttentionParamsSchema, SubagentAttentionResultSchema, type SubagentAttentionParams,
+  type SubagentAttentionResult, SubagentInboxRetryParamsSchema, SubagentInboxRetryResultSchema,
+  type SubagentInboxRetryParams, type SubagentInboxRetryResult,
+} from "./subagent-attention-schema.ts";
+export {
+  SubagentInboxRecoveryParamsSchema, SubagentInboxRecoveryResultSchema, SubagentInboxResumeParamsSchema,
+  SubagentInboxResumeResultSchema, type SubagentInboxResumeParams, type SubagentInboxRecoveryParams,
+  type SubagentInboxRecoveryResult, type SubagentInboxResumeResult, SubagentInteractionSchema, SubagentEventSchema,
+  SubagentInputWaitSchema, SubagentInboxActionSchema, SubagentHandleEventToolSchema, type SubagentHandleEventToolInput,
+  SubagentReadInboxToolSchema, type SubagentInteraction, type SubagentEvent, type SubagentInputWait,
+  type SubagentInboxAction,
+} from "./subagent-inbox-schema.ts";
+export {
+  SubagentConversationParamsSchema, SubagentConversationEntrySchema, SubagentConversationResultSchema,
+  SubagentConversationBodyParamsSchema, SubagentConversationBodyResultSchema, type SubagentConversationBodyParams,
+  type SubagentConversationBodyResult, SubagentActivityReadParamsSchema, SubagentActivityReadResultSchema,
+  SubagentActivitySchema, SubagentActivitySubscribeParamsSchema, type SubagentConversationParams,
+  type SubagentConversationResult, type SubagentConversationEntry, type SubagentActivityReadResult,
+  type SubagentActivity,
+} from "./subagent-conversation-schema.ts";
+export {
+  SubagentContextSummarySchema, SubagentContextSummaryWitnessSchema, SubagentSelfHistoryRequestSchema,
+  SubagentSelfHistoryResultSchema, type SubagentContextSummary, type SubagentContextSummaryWitness,
+  type SubagentSelfHistoryRequest, type SubagentSelfHistoryResult,
+} from "./subagent-context-schema.ts";
+export {
+  SUBAGENT_METHODS, SubagentSummarySchema, SubagentListParamsSchema, SubagentListResultSchema,
+  SubagentHistoryParamsSchema, SubagentHistoryResultSchema, SubagentResultParamsSchema, SubagentResultViewSchema,
+  SubagentSendParamsSchema, SubagentStopParamsSchema, SubagentContinueParamsSchema, SubagentControlResultSchema,
+  SubagentSubscribeParamsSchema, SubagentSubscribeResultSchema, SubagentChangedSchema, type SubagentSummary,
+  type SubagentControlResult, type SubagentChanged, type SubagentResultView, type SubagentListParams,
+  type SubagentHistoryParams, type SubagentResultParams, type SubagentSendParams, type SubagentStopParams,
+  type SubagentContinueParams, type SubagentListResult, type SubagentHistoryResult,
+} from "./subagent-api-schema.ts";
+export {
+  MemoryTidyToolNameSchema, MemoryTidyIssueSchema, MemoryTidyFailureReasonSchema, MemoryTidyFailureDetailsSchema,
+  type MemoryTidyIssue, type MemoryTidyFailureReason, type MemoryTidyFailureDetails,
+} from "./memory-tidy-diagnostics-schema.ts";
+export {
+  MemoryTidyProgressSchema, MemoryTidyOutcomeSchema, type MemoryTidyProgress, type MemoryTidyOutcome,
+} from "./memory-tidy-outcome-schema.ts";
+export {
+  CACHE_USAGE_METHODS, CacheUsageWindowSnapshotSchema, CacheUsageUpdateSchema, CacheUsageSubscribeParamsSchema,
+  CacheUsageUnsubscribeParamsSchema, CacheUsageUnsubscribeResultSchema, type CacheUsageWindowSnapshot,
+  type CacheUsageUpdate, type CacheUsageSubscribeParams,
+} from "./cache-usage-schema.ts";
+export {
+  CONTEXT_CATEGORIES, CONTEXT_CONTENT_ORIGINS, CONTEXT_REQUEST_SCHEMA_VERSION, ContextCategorySchema,
+  ContextContentOriginSchema, ContextWindowSnapshotSchema, RequestCompositionSchema,
+  ContextRequestMeasuredPayloadSchema, ContextRequestMeasuredEventSchema, LatestPrimaryRequestSnapshotSchema,
+  type ContextCategory, type ContextContentOrigin, type ContextWindowSnapshot, type RequestComposition,
+  type ContextRequestMeasuredPayload, type ContextRequestMeasuredEvent, type LatestPrimaryRequestSnapshot,
+} from "./request-attribution-schema.ts";
+export {
+  MaintenanceKindSchema, MaintenanceOperationRefSchema, type MaintenanceOperationRef,
+} from "./maintenance-operation-ref-schema.ts";
+export {
+  MAINTENANCE_MONITOR_METHODS, MaintenanceMonitorParamsSchema, MaintenanceMonitorSummarySchema,
+  MaintenanceMonitorSnapshotSchema, MaintenanceMonitorUpdateSchema, MaintenanceMonitorUnsubscribeParamsSchema,
+  MaintenanceMonitorUnsubscribeResultSchema, type MaintenanceMonitorParams, type MaintenanceMonitorSummary,
+  type MaintenanceMonitorSnapshot, type MaintenanceMonitorUpdate,
+} from "./maintenance-monitor-schema.ts";
+export {
+  MODEL_PROFILE_METHODS, ModelSlotSchema, ModelProfileFormSchema, ModelProfileDraftSchema, ActiveModelProfileSchema,
+  ModelProfileStatusSchema, ModelProfilesResultSchema, ModelProfilesParamsSchema, ModelProfileSaveParamsSchema,
+  ModelProfileTestParamsSchema, ModelProfileTestResultSchema, ModelProfilesChangedSchema, type ModelSlot,
+  type ModelProfileForm, type ModelProfileStatus, type ModelProfilesResult, type ModelProfileSaveParams,
+  type ModelProfileTestParams, type ModelProfileTestResult, type ModelProfilesChanged,
+} from "./model-profile-schema.ts";

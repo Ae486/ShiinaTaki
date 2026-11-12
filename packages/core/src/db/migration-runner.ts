@@ -20,7 +20,7 @@ export interface MigrationNullableTextColumn {
 }
 
 export interface MigrationSchemaObject {
-  type: "table" | "index";
+  type: "table" | "index" | "trigger";
   name: string;
   sql: string;
 }
@@ -79,7 +79,7 @@ function applySchemaBranch(db: Database, branches: readonly MigrationSchemaBranc
       throw new Error(`migration schema branch ${branch.name} requires empty ${table}: historical rows have no proven identity mapping`);
     }
   }
-  assertNoUnknownIncomingReferences(db, schema, branch.replacedTables ?? []);
+  assertNoUnknownIncomingReferences(db, schema, branch);
   db.exec(branch.sql);
 }
 
@@ -102,10 +102,14 @@ function normalizedSchemaSql(sql: string): string {
   return JSON.stringify(tokens);
 }
 
-function assertNoUnknownIncomingReferences(db: Database, schema: SqlRow[], replacedTables: readonly string[]): void {
+function assertNoUnknownIncomingReferences(db: Database, schema: SqlRow[], branch: MigrationSchemaBranch): void {
+  const replacedTables = branch.replacedTables ?? [];
   if (replacedTables.length === 0) return;
   const replaced = new Set(replacedTables.map(foldSqlName));
   for (const row of schema) {
+    // Exact attached triggers were matched above and are deliberately reinstalled by the branch.
+    if (row.type === "trigger" && typeof row.tbl_name === "string" && replaced.has(foldSqlName(row.tbl_name))
+      && branch.schema.some((object) => object.type === "trigger" && object.name === row.name)) continue;
     if ((row.type === "view" || row.type === "trigger") && typeof row.sql === "string" &&
       schemaTokens(row.sql).some((token) => replaced.has(sqlTokenName(token)))) {
       throw new Error(`unsupported incoming schema reference from ${String(row.name)} to a replaced migration table`);

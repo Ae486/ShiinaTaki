@@ -1,0 +1,115 @@
+# core/db/
+- run-work-transition.ts — same-ledger quiescent accepted-purpose wait/resume with exact Attempt/version and atomic v3 evidence
+- initiative-completion-source.ts — read-only bounded actual terminal background Runs and Class A publication exclusions
+- user-timezone-repo.ts — validated reads and CAS replacement of the existing singleton with mode, designated device and last confirmation provenance
+- effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events
+- run-repo.ts — durable Run aggregate with atomic admission/context evidence, original snapshot reads, CAS lifecycle/retry transitions and bounded Receipt/status references
+- run-event-repo.ts — immutable contiguous event appends, indexed bounded forward/tail/before pages, exact event lookup, and synchronous summary aggregation; immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
+- run-event-live.ts — post-commit best-effort observer bus with bounded durable backfill, bounded live queues, and independent cursor isolation; post-commit best-effort observer bus with cursor isolation
+- run-observability-aggregate.ts — SQL event/usage/effect summary facts with complete-bucket unknown semantics and no full-ledger materialization
+- run-event-projection.ts — deterministic replay/projection anchor and readable summary mapper
+- run-event-factory.ts — bounded canonical lifecycle/recovery event construction and transition predicates
+- run-recovery-repo.ts — durable recovery classification writer with recovery-owned event source and queue projection
+- run-readers.ts — strict Run/Attempt/Receipt aggregate reads and original immutable snapshot lookup shared by the lifecycle writer
+- run-row-mappers.ts — strict Run/Attempt/Receipt row parsing and deterministic snapshot digests
+- scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
+- sqlite.ts — DatabaseSync wrapper (open/pragmas/transaction/close); the ONLY node:sqlite importer; toSafeInteger; DatabaseSync wrapper with commit-failure rollback and aborted-transaction SQL isolation; the only node:sqlite importer
+- migration-runner.ts — startup migration runner: applies version > max(applied), one transaction each, tracked; max-version migrations with conservative bare-TEXT guards, exact schema branches and atomic SQL/receipt tracking
+- timeline-repo.ts — validated transactional Timeline batches, optional presentation round-trip, canonical paging and defense-in-depth raw-input scrubbing; timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary)
+- memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / listActiveInLayer / countActiveSince / search / resolvePath; the 4-column bm25 weights are baked in at construction from config; the retention + tidy-trigger reads anchor on COALESCE(updated_at, created_at)
+- memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush / setTidy (per-character auto-write + tidy watermarks)
+- memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
+- privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
+- summary-repo.ts — conversation_summary SQL: get / upsert / getMeta (the per-character rolling compaction summary + its through_seq coverage — T5-R3, batch 7; getMeta returns the text LENGTH only, for the operator status read)
+- compaction-operation-repo.ts — fenced per-Character compaction cursor, immutable bounded lifecycle evidence, cancellation/restart reconciliation, and atomic summary CAS commit
+- window-state-repo.ts — slot_window_state SQL: get / set / list (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6; list feeds memory.status)
+- config-repo.ts — config SQL: get / all / upsert / delete (the sparse operator-set settings store; a row that is not a JSON primitive throws at the boundary)
+- ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides
+- ../approval/approval-state-repo.ts — Approval SQL aggregate: durable generation/revisions + canonical always-allow decisions
+- migrations/ — numbered TS-constant migrations + their ordered registry
+- hindsight-connection-repo.ts — singleton sanitized Hindsight setup state with optimistic revision writes
+- hindsight-bank-setup-repo.ts — deterministic per-Bank template/setup evidence repository
+- hindsight-cutover-run-repo.ts — B4 lifecycle/leases, explicit Local coverage selection, and bounded truthful status/verification
+- hindsight-local-coverage-reader.ts — complete active Local payload witnesses and typed source/record reads
+- hindsight-local-coverage-b2.ts — actual historical B2 record comparison and conservative missing/unproven coverage diagnostics
+- hindsight-local-coverage-repo.ts — immutable versioned Local manifests, complete-state comparison and writer-reserved preparation reads
+- hindsight-local-coverage-guard.ts — current-coverage readiness/promotion refusals and historical/null-aware status
+- hindsight-local-bank-binding.ts — shared Local scope to verified B3 native Bank mapping for confirmation and cutover Bank-set validation
+- hindsight-local-coverage-fixtures.ts — test support using real Local/B2 producers; no runtime wiring
+- hindsight-source-evidence-repo.ts — immutable typed source/unit evidence, verified Local/native Bank binding and exact native-object confirmation
+- hindsight-current-capture-reader.ts — complete typed Local capture and explicit disposition for every frozen witness
+- hindsight-current-capture-json.ts — raw-backed JSON own-key restoration and mismatch refusal without modifying legacy readers
+- hindsight-current-capture-repo.ts — writer-reserved immutable D78 capture tied to the selected Local manifest and lease
+- hindsight-current-preparation-repo.ts — frozen structured transfer command, exact B3 baseline and explicit representation gaps
+- hindsight-current-import-repo.ts — immutable validated current-version native result and complete object mappings
+- hindsight-current-candidate-repo.ts — immutable native required-set candidate for bounded verification retries and recovery
+- hindsight-current-verification-repo.ts — exact certificate/evidence/snapshot persistence and atomic raw replica publication
+- hindsight-current-replica-publication.ts — monotonic raw checkpoint publication and cache reconstruction from retained verified evidence
+- hindsight-current-cutover-guard.ts — current proof and raw replica checks for readiness/promotion, including verified snapshot retention
+- hindsight-current-status-repo.ts — current-manifest durable progress counts with unavailable/null for unverifiable evidence
+- hindsight-current-invalidation-repo.ts — immutable authenticated native drift observations and preparation/candidate refusal after restart
+- hindsight-current-fixtures.ts — owned Local/B3/native wire test fixtures; no runtime wiring or live provider calls
+- hindsight-replica-repo.ts — atomic logical snapshot staging, published replica records, and per-Bank checkpoint repository
+- hindsight-replica-sync-repo.ts — transaction-local Authority/Bank/lease/deadline guards, journal and reconciliation/reset, atomic canonical/FTS/cache publication, and checkpoint-last CAS
+- hindsight-replica-record-store.ts — strict native B5 persistence and explicit lossless application projection branches, kind-aware FTS repair/search and separate current projection digests
+- hindsight-replica-checkpoint-store.ts — checkpoint read and predecessor CAS publication
+- hindsight-replica-lease-repo.ts — persisted per-Bank owner/run/fence lease lifecycle and exact-token expiry CAS renewal
+- hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims and unclaimed-manual cancel, lease-bound settlement, and restart recovery
+- hindsight-replica-schedule-state.ts — deterministic retry precedence, independent due intervals, and manual-mode transitions
+- hindsight-replica-snapshot-cache.ts — payload-and-witness digests bound to Bank/lineage/generation/page hash, with atomic pruning and journal invalidation
+- pending-memory-repo.ts — idempotent Pending Memory admission, Bank/authority/lease/CAS guards, truthful summaries, and separate overlay reads
+- pending-memory-store.ts — immutable intent/dispatch storage, versioned factual proof integrity, old-row reads and CAS writes
+- pending-memory-transition.ts — versioned native factual and legacy derived transitions, stage-preserving retry and supersession
+- hindsight-authority-repo.ts — writer-reserved current Local/precondition checks, activation receipts and atomic Local-to-Hindsight promotion
+- canonical-memory-authority-repo.ts — explicit Local authority epoch and scoped Bank persistence
+- structured-memory-block-repo.ts — revisioned Core-owned Memory Blocks, writer enforcement, atomic absent/existing CAS and budgeted rendering
+- canonical-memory-repo.ts — canonical source/unit/policy/receipt aggregate with atomic retain and revisioned lifecycle
+- canonical-memory-maintenance-contract.ts — internal scoped Local maintenance, retention, ingestion and copy contracts
+- canonical-memory-maintenance-repo.ts — Local maintenance composition with one shared tokenizer and synchronous transactions
+- canonical-memory-maintenance-storage.ts — shared Local authority/Bank fences, transaction boundary, snapshots and receipts
+- canonical-memory-maintenance-records.ts — lossless canonical mappings, CAS writes, lineage and shared visible-valid sparse publication
+- canonical-memory-maintenance-journal.ts — semantic request hashing and compact historical maintenance receipt replay
+- canonical-memory-maintenance-query.ts — Global/active-Character records, scoped sources and all-Bank retention metadata
+- canonical-memory-maintenance-mutations.ts — policy edits and T5 reinforcement; canonical invalidation/restore reuse
+- canonical-memory-maintenance-evidence.ts — versioned inert source-to-fact evidence within logical source metadata
+- canonical-memory-maintenance-ingestion.ts — atomic original-source/new-fact/duplicate-proof batches and receipt reads
+- canonical-ingestion-repo.ts — durable fixed-span Write Gate/extraction state, per-Bank receipts and atomic completion
+- primary-memory-source-read.ts — exact Timeline witness to original provider ingestion span lookup using owning validated codecs
+- canonical-ingestion-source-repo.ts — exact primary commit evidence, epoch/span assignment, persistent eligibility baseline and guarded retirement coverage
+- canonical-memory-maintenance-copy.ts — same-Bank copies and complete cross-Bank support/source remapping with retirement
+- canonical-memory-maintenance-retention.ts — activity-only rolling deletion with source cleanup and historical identity retention
+- canonical-memory-maintenance-fixtures.ts — owned SQLite-only canonical test fixtures; no runtime wiring
+- canonical-memory-sparse-repo.ts — rebuildable canonical FTS5/BM25 projection with hidden/invalidated exclusion before publication and result limits
+- ../observability/observability-query-service.ts — read-only deterministic Run projection and redacted inspector
+- hindsight-application-bootstrap-evidence.ts — original Bank/source/unit and Block bodies addressed by their proven native identities
+- hindsight-application-command-contract.ts — validated durable-job types, separately scoped intent identity and bounded direct body closure
+- hindsight-application-command-fixtures.ts — real command repositories plus an immutable, typed in-memory D77 transport fixture
+- hindsight-application-command-repo.ts — transaction-safe original UUID/time allocation, CAS dispatch and immutable remote completion receipts
+- hindsight-application-command-storage.ts — complete byte-preserving job reads and conflict-checked body inserts
+- hindsight-application-replica-blocks.ts — internal exact-revision Core Block restoration with local-edit conflict detection
+- hindsight-application-replica-cache.ts — guarded immutable body-download progress without readable-state or checkpoint publication
+- hindsight-application-replica-checkpoint.ts — transaction-local publication guards and checkpoint-last paired CAS
+- hindsight-application-replica-codec.ts — lossless local byte encoding, corruption checks and explicit application projection digests
+- hindsight-application-replica-contract.ts — application replica publication, checkpoint and read contracts
+- hindsight-application-replica-evidence.ts — immutable evidence persistence and exact-reference reconstruction across restart
+- hindsight-application-replica-heads.ts — current exact bindings, monotonic native evolution and remote-assessment work indexes
+- hindsight-application-replica-publication.ts — atomic evidence/head/Canonical/FTS/Block publication followed by the native/application checkpoint pair
+- hindsight-application-replica-query.ts — integrity-checked Canonical reads, policy-filtered search and durable binding/assessment work
+- hindsight-application-replica-records.ts — byte-preserving application record writes, explicit FTS projection and scoped safe reads
+- hindsight-application-replica-repo.ts — createHindsightApplicationReplicaRepo — durable paired checkpoints, exact reads and policy work
+- hindsight-ingestion-durability.ts — verified source coverage or a refusal; queue promises alone never establish durability
+- hindsight-ingestion-guard.ts — synchronous authority/namespace fences for ingestion plans and durable coverage
+- hindsight-ingestion-repo.ts — restart-safe Hindsight source ingestion journal and receipt-verified retirement coverage
+- hindsight-ingestion-source-repo.ts — durable source witnesses, immutable eligibility baseline and claim/coverage checks
+- hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
+- hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
+- memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent reads, restart reconciliation by owner boot id
+- hindsight-memory-write-storage.ts — independently hashed byte-preserving state reads and CAS replacement
+- hindsight-policy-work-contract.ts — exact durable work identities, lease/result schemas and immutable proposal validation
+- hindsight-policy-work-repo.ts — durable claims, original prompt/results, explicit retry and terminal queue progress
+- hindsight-policy-work-storage.ts — complete hash-checked journal reads and version-CAS state updates
+- hindsight-runtime-admission-repo.ts — integrity-checked last-verified D77 and guarded-reflect support across restart
+- hindsight-runtime-memory-view.ts — complete current Canonical memory rows for internal prompt/report staging
+- initiative-opportunity-repo.ts — Core-wide model admission reservation, exact Run linkage and first-intent charging independent of delivery; canonical UTC windows
+- run-delivery-repo.ts — immutable decision/output identity and exact held-slot lookup; final Attempt/Character/class/source guards, atomic Timeline/quota/evidence writes and civil-day-aware timezone charge carry
+- run-delivery-transition.ts — guarded Run/continuation hold/resume CAS preserving the original active Attempt and refusing unfinished Effects

@@ -1,0 +1,2501 @@
+{
+  "phase": "exercise-passed",
+  "state": {
+    "available": true,
+    "runs": [
+      {
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "parent_run_id": null,
+        "initiator": "primary",
+        "state": "completed",
+        "outcome": "completed",
+        "active_attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "queued_at": "2026-11-12T11:24:12.219Z",
+        "terminal_at": "2026-11-12T11:24:12.750Z"
+      },
+      {
+        "run_id": "a7880bd0-dd58-474e-93f6-b49a48c94f53",
+        "parent_run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "initiator": "subagent",
+        "state": "waiting",
+        "outcome": null,
+        "active_attempt_id": "e6f5f9e5-40f2-48ce-bd55-eddc2bf42065",
+        "queued_at": "2026-11-12T11:24:12.496Z",
+        "terminal_at": null
+      },
+      {
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "parent_run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "initiator": "subagent",
+        "state": "completed",
+        "outcome": "completed",
+        "active_attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "queued_at": "2026-11-12T11:24:12.536Z",
+        "terminal_at": "2026-11-12T11:24:12.699Z"
+      },
+      {
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "parent_run_id": null,
+        "initiator": "subagent",
+        "state": "completed",
+        "outcome": "completed",
+        "active_attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "queued_at": "2026-11-12T11:24:12.763Z",
+        "terminal_at": "2026-11-12T11:24:13.292Z"
+      },
+      {
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "parent_run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "initiator": "subagent",
+        "state": "completed",
+        "outcome": "completed",
+        "active_attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "queued_at": "2026-11-12T11:24:13.254Z",
+        "terminal_at": "2026-11-12T11:24:13.383Z"
+      },
+      {
+        "run_id": "f5131601-734a-4a11-b7a8-56b733c6a088",
+        "parent_run_id": null,
+        "initiator": "subagent",
+        "state": "running",
+        "outcome": null,
+        "active_attempt_id": "8e7b4402-66c2-41c3-a512-6076a91c4ceb",
+        "queued_at": "2026-11-12T11:24:13.398Z",
+        "terminal_at": null
+      }
+    ],
+    "attempts": [
+      {
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "ordinal": 1,
+        "state": "completed",
+        "outcome": "completed",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "a7880bd0-dd58-474e-93f6-b49a48c94f53",
+        "attempt_id": "e6f5f9e5-40f2-48ce-bd55-eddc2bf42065",
+        "ordinal": 1,
+        "state": "effect_running",
+        "outcome": null,
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "ordinal": 1,
+        "state": "completed",
+        "outcome": "completed",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "ordinal": 1,
+        "state": "completed",
+        "outcome": "completed",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "ordinal": 1,
+        "state": "completed",
+        "outcome": "completed",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "f5131601-734a-4a11-b7a8-56b733c6a088",
+        "attempt_id": "8e7b4402-66c2-41c3-a512-6076a91c4ceb",
+        "ordinal": 1,
+        "state": "effect_running",
+        "outcome": null,
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      }
+    ],
+    "effects": [
+      {
+        "effect_id": "9ec6e315-067d-4b4f-8828-d1b451e53da2",
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "319d4d2333543f6a67a81ba98977b55b2c1128f89d0676ea7cced570d8cc2cb7",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:12.330Z",
+        "settled_at": "2026-11-12T11:24:12.453Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "b138ea6c-cc39-4b35-a2cf-71f76b176fd0",
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.manage\"}",
+        "started_at": "2026-11-12T11:24:12.470Z",
+        "settled_at": "2026-11-12T11:24:12.528Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "b740393f-1e8f-49ed-8d6e-4f3318458f0c",
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "027b4da3e8ed5bd2a4f06d0a3e280f267831810308ed8c156e7e34289323a7d2",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:12.570Z",
+        "settled_at": "2026-11-12T11:24:12.661Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "ea43dc0a-2822-456b-878f-171ed20b060e",
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "cb7a8edc710c423c480b73a55aa16fcff87a6ddd2558f57796460eea79293cc2",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:12.591Z",
+        "settled_at": "2026-11-12T11:24:12.724Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "8c169485-e2c3-4cac-b456-5b02f7753064",
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.result\"}",
+        "started_at": "2026-11-12T11:24:12.671Z",
+        "settled_at": "2026-11-12T11:24:12.674Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "56281c6c-c635-40ab-b114-f28719c60a05",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "2686de575d685f1d32c924248d3d177389115dc5b159248fcb80f0a86ce015c2",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:12.789Z",
+        "settled_at": "2026-11-12T11:24:13.120Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "5bf6a983-4647-46ec-a220-433351987af3",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.read\"}",
+        "started_at": "2026-11-12T11:24:13.127Z",
+        "settled_at": "2026-11-12T11:24:13.132Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "9830e1b0-b56c-4696-a6a0-09ab21d85ecc",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "7fe7c47325250103c8fd47e8a4efb62d741480664b5d4781e4cab3e563be5bcd",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:13.149Z",
+        "settled_at": "2026-11-12T11:24:13.223Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "c3f4ec7d-fdb4-412c-bed5-beef91d476e3",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.manage\"}",
+        "started_at": "2026-11-12T11:24:13.230Z",
+        "settled_at": "2026-11-12T11:24:13.245Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "164a7275-b002-4c65-87f9-f4f3444a68a6",
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "6863022ad13ec3ea2cdbba62f06c3ae86767d3389c07c67f81f54ef3b6d97b1d",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:13.280Z",
+        "settled_at": "2026-11-12T11:24:13.361Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "89df002d-b16e-483c-a0f1-0ccba876e662",
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.result\"}",
+        "started_at": "2026-11-12T11:24:13.368Z",
+        "settled_at": "2026-11-12T11:24:13.371Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "139e3f3f-a06b-43bb-a42c-b726f2b44bce",
+        "run_id": "f5131601-734a-4a11-b7a8-56b733c6a088",
+        "attempt_id": "8e7b4402-66c2-41c3-a512-6076a91c4ceb",
+        "kind": "model",
+        "state": "intent_committed",
+        "input_digest": "9491cb51a9ce9391b87a594eacafbd3a73ab37fd6311f4f0f9283e6b678e8937",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:24:13.421Z",
+        "settled_at": null,
+        "outcome": null,
+        "error_code": null
+      }
+    ],
+    "deliveries": [],
+    "subagent_conversations": [
+      {
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "character_id": "taki",
+        "created_by_run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "label": "Exact question fixture",
+        "initial_context_json": "{\"kind\":\"fresh\"}",
+        "initial_context_digest": "37bd51ee2f097ec864985df00a5985f142be519681f761408cc963a4da7936c3",
+        "stop_origin": null,
+        "control_version": 4,
+        "next_input_seq": 3,
+        "active_run_id": null,
+        "created_at": "2026-11-12T11:24:12.475Z"
+      }
+    ],
+    "subagent_inputs": [
+      {
+        "input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "input_seq": 1,
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "work_seq": 1,
+        "operation_key": "delegate:43520fcafd2ee3b3548b8df2248a5b22978d2c9cbbfeb802d517ca1c969292fd",
+        "request_digest": "8afed997f81006513957a35a188910b1206a882f99db88ab4c88faeb14c6a84f",
+        "input_kind": "work",
+        "sender_kind": "parent",
+        "sender_run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "sender_owner_ref": null,
+        "direction_text": "Request the missing latency; keep the review pending, then choose Amber using the exact owner's answer.",
+        "materials_json": "[]",
+        "tool_selection_json": "{\"mode\":\"allow\",\"names\":[\"complete_subagent\"]}",
+        "completion_policy": "request_parent",
+        "work_expires_at": null,
+        "consumed_run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "consumed_attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "consumed_step": 0,
+        "consumed_effect_id": "b740393f-1e8f-49ed-8d6e-4f3318458f0c",
+        "reply_acceptance_json": "{\"characterId\":\"taki\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"primaryRunId\":\"cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026\",\"primaryAttemptId\":\"555a9bcc-7705-4f96-9722-cc58bec2d2bc\",\"userEntryId\":\"3b4c5308-d803-41f8-aa9d-46c7fab4a9b3\",\"userSeq\":1,\"userContentDigest\":\"5f2b2aa097a396b424ed7feac90e9472966d980988a095ea44ae3c4d627d15f6\",\"originalWording\":\"Run the isolated latency decision.\",\"purpose\":\"One delayed answer to this original user request\",\"acceptedAt\":\"2026-11-12T11:24:12.485Z\",\"acceptedRootRunId\":\"a7880bd0-dd58-474e-93f6-b49a48c94f53\",\"validity\":{\"kind\":\"until_cancelled\"}}",
+        "created_at": "2026-11-12T11:24:12.479Z",
+        "validity_json": "{\"kind\":\"until_cancelled\"}",
+        "reply_to_event_id": null
+      },
+      {
+        "input_id": "ac1e00e2-d21b-4ba2-853e-293e61903879",
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "input_seq": 2,
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "work_seq": 2,
+        "operation_key": "inbox:617e89ae-5b29-478a-95f4-0989de0677cb:event:a05c995f05502db1600053e7b463bc3645057fb8ae34aeaeb55de73254f65b72",
+        "request_digest": "1d59650f694b9a2320194a44bddd68d52f8e09d1bef4fe3cc397f4f5f069c730",
+        "input_kind": "message",
+        "sender_kind": "parent",
+        "sender_run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "sender_owner_ref": null,
+        "direction_text": "OWNER_ANSWER_300: maximum latency is 300 milliseconds.",
+        "materials_json": "[]",
+        "tool_selection_json": null,
+        "completion_policy": "request_parent",
+        "work_expires_at": null,
+        "consumed_run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "consumed_attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "consumed_step": 0,
+        "consumed_effect_id": "164a7275-b002-4c65-87f9-f4f3444a68a6",
+        "reply_acceptance_json": null,
+        "created_at": "2026-11-12T11:24:13.239Z",
+        "validity_json": "{\"kind\":\"until_cancelled\"}",
+        "reply_to_event_id": "617e89ae-5b29-478a-95f4-0989de0677cb"
+      }
+    ],
+    "subagent_executions": [
+      {
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "trigger_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "admission_digest": "4012bc81bf973676a1f9d5787290f90f7b22c86e4975711fd2212c471ef7ed78",
+        "completion_policy": "request_parent",
+        "through_work_seq": 1,
+        "work_token_json": "{\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"throughWorkSeq\":1,\"controlVersion\":1}",
+        "proposal_json": null,
+        "proposal_attempt_id": null,
+        "proposal_digest": null,
+        "proposal_token_digest": null,
+        "terminal_messages_json": null,
+        "terminal_messages_attempt_id": null,
+        "result_json": "{\"runId\":\"e2cd3e28-571d-4ece-841c-52f6728b6894\",\"attemptId\":\"80bad683-578a-46fb-8eef-58b79608dbbe\",\"outcome\":\"completed\",\"body\":\"[tool-call: interact_parent]\",\"outputKind\":\"unstructured\",\"sourceContext\":{\"generatedBy\":{\"runId\":\"e2cd3e28-571d-4ece-841c-52f6728b6894\",\"attemptId\":\"80bad683-578a-46fb-8eef-58b79608dbbe\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\"}},\"receiptId\":\"aa8ed78f-dabe-4d60-8c6f-3e0863d5a1d3\",\"settledAt\":\"2026-11-12T11:24:12.699Z\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"throughWorkSeq\":1,\"workExpiresAt\":null,\"currentness\":\"current\"}",
+        "result_digest": "85d36e7c888658a6b03c4e5b59fbb1d9973471d1869fb2656164239829457b54",
+        "settled_at": "2026-11-12T11:24:12.699Z",
+        "completion_state": "pending",
+        "completion_reason": null,
+        "parent_run_id": null,
+        "parent_admission_digest": null,
+        "parent_proposal_json": null,
+        "parent_proposal_attempt_id": null,
+        "parent_proposal_digest": null,
+        "parent_terminal_messages_json": null,
+        "parent_terminal_messages_attempt_id": null,
+        "parent_result_json": null,
+        "parent_result_digest": null,
+        "parent_settled_at": null,
+        "publication_json": null
+      },
+      {
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "trigger_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "admission_digest": "a38791204c0e980f3c81a61590d722a32b4c8536d5e48b41649e52204b97e05b",
+        "completion_policy": "request_parent",
+        "through_work_seq": 2,
+        "work_token_json": "{\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"throughWorkSeq\":2,\"controlVersion\":3}",
+        "proposal_json": "{\"text\":\"FINAL_AMBER_250: Amber satisfies the owner's 300 millisecond limit.\",\"sourceContext\":{}}",
+        "proposal_attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "proposal_digest": "ba823bd41e486e088bc06ac8dccae4028914ef8091a1fb15bff3c8e0bd38d53b",
+        "proposal_token_digest": "7273614c316894dfb221d5e1d6b46f4f32cd56caa12d2f8ff40146e7f44d9896",
+        "terminal_messages_json": null,
+        "terminal_messages_attempt_id": null,
+        "result_json": "{\"runId\":\"a9354155-c227-41a7-8a3a-e812a3839b87\",\"attemptId\":\"93eb560b-f820-47f0-9b02-8bc60b334e81\",\"outcome\":\"completed\",\"body\":\"FINAL_AMBER_250: Amber satisfies the owner's 300 millisecond limit.\",\"outputKind\":\"validated\",\"sourceContext\":{\"generatedBy\":{\"runId\":\"a9354155-c227-41a7-8a3a-e812a3839b87\",\"attemptId\":\"93eb560b-f820-47f0-9b02-8bc60b334e81\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\"}},\"receiptId\":\"11d441e6-04f6-4f6e-aac9-240fbd4fba99\",\"settledAt\":\"2026-11-12T11:24:13.383Z\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"throughWorkSeq\":2,\"workExpiresAt\":null,\"currentness\":\"current\"}",
+        "result_digest": "421572940a7ab854695927d4a3d2b2536bd407539b235d761f6c52e18e03d0b4",
+        "settled_at": "2026-11-12T11:24:13.383Z",
+        "completion_state": "pending",
+        "completion_reason": null,
+        "parent_run_id": null,
+        "parent_admission_digest": null,
+        "parent_proposal_json": null,
+        "parent_proposal_attempt_id": null,
+        "parent_proposal_digest": null,
+        "parent_terminal_messages_json": null,
+        "parent_terminal_messages_attempt_id": null,
+        "parent_result_json": null,
+        "parent_result_digest": null,
+        "parent_settled_at": null,
+        "publication_json": null
+      }
+    ],
+    "run_messages": [
+      {
+        "seq": 1,
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "Request the missing latency; keep the review pending, then choose Amber using the exact owner's answer.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "model_effect_id": "b740393f-1e8f-49ed-8d6e-4f3318458f0c",
+        "model_input_digest": "027b4da3e8ed5bd2a4f06d0a3e280f267831810308ed8c156e7e34289323a7d2",
+        "batch_digest": "3c3fb246002966a27e85fd6fe289b917d460f3ae18297fa0cf40765da681ed63",
+        "created_at": "2026-11-12T11:24:12.574Z"
+      },
+      {
+        "seq": 2,
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "[tool-call: interact_parent]",
+        "parts_json": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-f4ab065e-c9d9-467f-8b70-ed0367092309\",\"toolName\":\"interact_parent\",\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "e296c3823e4fe8fefef17dc77baab3ca488f5399169d92e78afd20a71f950c98",
+        "created_at": "2026-11-12T11:24:12.683Z"
+      },
+      {
+        "seq": 3,
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "step_number": 0,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: interact_parent -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-f4ab065e-c9d9-467f-8b70-ed0367092309\",\"toolName\":\"interact_parent\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"proposed\":true,\"accepted\":false}},\"contextOrigin\":\"builtin\",\"sourceMaterials\":[{\"key\":\"result\"}]}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "e296c3823e4fe8fefef17dc77baab3ca488f5399169d92e78afd20a71f950c98",
+        "created_at": "2026-11-12T11:24:12.684Z"
+      },
+      {
+        "seq": 4,
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "[tool-call: read_agent_inbox]",
+        "parts_json": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-a6821ff3-6235-4f3e-bad8-605a4d39b981\",\"toolName\":\"read_agent_inbox\",\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "447be3d232fbf92049a39280173b058a5893a11a691f495b742662f70df26da6",
+        "created_at": "2026-11-12T11:24:13.138Z"
+      },
+      {
+        "seq": 5,
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "step_number": 0,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: read_agent_inbox -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-a6821ff3-6235-4f3e-bad8-605a4d39b981\",\"toolName\":\"read_agent_inbox\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"eventId\":\"617e89ae-5b29-478a-95f4-0989de0677cb\",\"kind\":\"needs_input\",\"state\":\"delivered\",\"target\":{\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"expectedRunId\":null,\"expectedControlVersion\":2},\"current\":{\"worker\":\"Exact question fixture\",\"state\":\"needs_input\",\"stopOrigin\":null,\"latestCompletionId\":\"e2cd3e28-571d-4ece-841c-52f6728b6894\"},\"pendingRequest\":{\"eventId\":\"617e89ae-5b29-478a-95f4-0989de0677cb\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"state\":\"open\",\"reason\":\"question\",\"checkIn\":null},\"text\":\"QUESTION_MARKER: What is the owner's latency limit?\",\"nextOffset\":null,\"absent\":false,\"sourceContext\":{\"generatedBy\":{\"runId\":\"e2cd3e28-571d-4ece-841c-52f6728b6894\",\"attemptId\":\"80bad683-578a-46fb-8eef-58b79608dbbe\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\"}}}},\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "447be3d232fbf92049a39280173b058a5893a11a691f495b742662f70df26da6",
+        "created_at": "2026-11-12T11:24:13.138Z"
+      },
+      {
+        "seq": 6,
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "step_number": 1,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "[tool-call: handle_agent_event]",
+        "parts_json": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-d173d4f1-b35e-4f66-8659-6e7b14d02c89\",\"toolName\":\"handle_agent_event\",\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "e4fbc331e2387c6cfdb17a54408f9e07845097451dab603844e1317efbbfb55c",
+        "created_at": "2026-11-12T11:24:13.276Z"
+      },
+      {
+        "seq": 7,
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "step_number": 1,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: handle_agent_event -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-d173d4f1-b35e-4f66-8659-6e7b14d02c89\",\"toolName\":\"handle_agent_event\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"eventId\":\"617e89ae-5b29-478a-95f4-0989de0677cb\",\"disposition\":\"answered_child\"}},\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "e4fbc331e2387c6cfdb17a54408f9e07845097451dab603844e1317efbbfb55c",
+        "created_at": "2026-11-12T11:24:13.276Z"
+      },
+      {
+        "seq": 8,
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "Request the missing latency; keep the review pending, then choose Amber using the exact owner's answer.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "model_effect_id": "164a7275-b002-4c65-87f9-f4f3444a68a6",
+        "model_input_digest": "6863022ad13ec3ea2cdbba62f06c3ae86767d3389c07c67f81f54ef3b6d97b1d",
+        "batch_digest": "3c3fb246002966a27e85fd6fe289b917d460f3ae18297fa0cf40765da681ed63",
+        "created_at": "2026-11-12T11:24:13.283Z"
+      },
+      {
+        "seq": 9,
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "step_number": 0,
+        "message_index": 1,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "OWNER_ANSWER_300: maximum latency is 300 milliseconds.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "ac1e00e2-d21b-4ba2-853e-293e61903879",
+        "model_effect_id": "164a7275-b002-4c65-87f9-f4f3444a68a6",
+        "model_input_digest": "6863022ad13ec3ea2cdbba62f06c3ae86767d3389c07c67f81f54ef3b6d97b1d",
+        "batch_digest": "e3315ab38db8eeaf9e6b94f710cea439d5cd70b8ed616a9ebd3eb781a48ace05",
+        "created_at": "2026-11-12T11:24:13.283Z"
+      },
+      {
+        "seq": 10,
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "[tool-call: complete_subagent]",
+        "parts_json": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-865f0973-d548-45b5-974e-d3162230a760\",\"toolName\":\"complete_subagent\",\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "f62567a43624702648766096490c7f6c8c621a7614032a80e750b2900a9fbaf3",
+        "created_at": "2026-11-12T11:24:13.376Z"
+      },
+      {
+        "seq": 11,
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "step_number": 0,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: complete_subagent -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-865f0973-d548-45b5-974e-d3162230a760\",\"toolName\":\"complete_subagent\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"proposed\":true,\"accepted\":false}},\"contextOrigin\":\"builtin\",\"sourceMaterials\":[{\"key\":\"result\"}]}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "f62567a43624702648766096490c7f6c8c621a7614032a80e750b2900a9fbaf3",
+        "created_at": "2026-11-12T11:24:13.377Z"
+      }
+    ],
+    "subagent_events": [
+      {
+        "seq": 1,
+        "event_id": "617e89ae-5b29-478a-95f4-0989de0677cb",
+        "character_id": "taki",
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "kind": "needs_input",
+        "producer_run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "producer_attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "producer_key": "interaction:0:call-f4ab065e-c9d9-467f-8b70-ed0367092309",
+        "body": "QUESTION_MARKER: What is the owner's latency limit?",
+        "body_digest": "31bf7f7c4e8c854a4c8b65abd874dc455b88992face5d9693131c4e2e54d19e2",
+        "source_context_json": "{\"generatedBy\":{\"runId\":\"e2cd3e28-571d-4ece-841c-52f6728b6894\",\"attemptId\":\"80bad683-578a-46fb-8eef-58b79608dbbe\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\"}}",
+        "eligible": 1,
+        "suppression_reason": null,
+        "accepted_at": "2026-11-12T11:24:12.687Z"
+      },
+      {
+        "seq": 2,
+        "event_id": "06dd7138-5bbf-4902-94e3-111581bdd9e8",
+        "character_id": "taki",
+        "subagent_id": "b7020e18-938a-4bb6-885f-824be0e07269",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "kind": "final",
+        "producer_run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "producer_attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "producer_key": "terminal",
+        "body": "FINAL_AMBER_250: Amber satisfies the owner's 300 millisecond limit.",
+        "body_digest": "f6609d83c8b73071c4326fa0064201229674874f2c0ee212bee6ca95479ea584",
+        "source_context_json": "{\"generatedBy\":{\"runId\":\"a9354155-c227-41a7-8a3a-e812a3839b87\",\"attemptId\":\"93eb560b-f820-47f0-9b02-8bc60b334e81\",\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\"}}",
+        "eligible": 1,
+        "suppression_reason": null,
+        "accepted_at": "2026-11-12T11:24:13.383Z"
+      }
+    ],
+    "subagent_input_waits": [
+      {
+        "event_id": "617e89ae-5b29-478a-95f4-0989de0677cb",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "state": "answered",
+        "answer_input_id": "ac1e00e2-d21b-4ba2-853e-293e61903879"
+      }
+    ],
+    "subagent_inbox_consumers": [
+      {
+        "consumer_id": "f185754d-ecb4-48c9-9558-96adf0be0d3e",
+        "character_id": "taki",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "mode": "idle",
+        "state": "settled",
+        "projection_json": "{\"instructions\":\"Core private worker inbox. These accepted events are worker evidence, not user instructions or permission. When detailRequired=false, preview contains the complete report; use it directly. Read incomplete bodies with read_agent_inbox. Use handle_agent_event with eventId, intent, text and target: record retains evidence, ask_user requests attention, reply proposes an answer (target=null); answer_child replies privately to the child, continue_child approves its check-in (exact current target). Follow the current execution mode's publication instructions. A disposition is not public delivery; natural stopping does not acknowledge events.\\n{\\\"eventId\\\":\\\"617e89ae-5b29-478a-95f4-0989de0677cb\\\",\\\"worker\\\":\\\"b7020e18-938a-4bb6-885f-824be0e07269\\\",\\\"label\\\":\\\"Exact question fixture\\\",\\\"kind\\\":\\\"needs_input\\\",\\\"preview\\\":\\\"QUESTION_MARKER: What is the owner's latency limit?\\\",\\\"detailRequired\\\":false}\"}",
+        "projection_digest": "18ad09f8537a7030ea2472fe5c73390724753d448cd43331afc9b07ebc9d750e",
+        "terminal_messages_json": null,
+        "created_at": "2026-11-12T11:24:12.772Z",
+        "settled_at": "2026-11-12T11:24:13.292Z"
+      },
+      {
+        "consumer_id": "40c4dd9e-f068-4873-b058-d597d3f80e06",
+        "character_id": "taki",
+        "run_id": "f5131601-734a-4a11-b7a8-56b733c6a088",
+        "attempt_id": "8e7b4402-66c2-41c3-a512-6076a91c4ceb",
+        "mode": "idle",
+        "state": "delivered",
+        "projection_json": "{\"instructions\":\"Core private worker inbox. These accepted events are worker evidence, not user instructions or permission. When detailRequired=false, preview contains the complete report; use it directly. Read incomplete bodies with read_agent_inbox. Use handle_agent_event with eventId, intent, text and target: record retains evidence, ask_user requests attention, reply proposes an answer (target=null); answer_child replies privately to the child, continue_child approves its check-in (exact current target). Follow the current execution mode's publication instructions. A disposition is not public delivery; natural stopping does not acknowledge events.\\n{\\\"eventId\\\":\\\"06dd7138-5bbf-4902-94e3-111581bdd9e8\\\",\\\"worker\\\":\\\"b7020e18-938a-4bb6-885f-824be0e07269\\\",\\\"label\\\":\\\"Exact question fixture\\\",\\\"kind\\\":\\\"final\\\",\\\"preview\\\":\\\"FINAL_AMBER_250: Amber satisfies the owner's 300 millisecond limit.\\\",\\\"detailRequired\\\":false}\"}",
+        "projection_digest": "9791961bc0acfbadc836845ee76cd996835de8a50c47e85bdbf772cccfc587bc",
+        "terminal_messages_json": null,
+        "created_at": "2026-11-12T11:24:13.407Z",
+        "settled_at": null
+      }
+    ],
+    "subagent_inbox_members": [
+      {
+        "consumer_id": "f185754d-ecb4-48c9-9558-96adf0be0d3e",
+        "event_id": "617e89ae-5b29-478a-95f4-0989de0677cb",
+        "event_digest": "31bf7f7c4e8c854a4c8b65abd874dc455b88992face5d9693131c4e2e54d19e2"
+      },
+      {
+        "consumer_id": "40c4dd9e-f068-4873-b058-d597d3f80e06",
+        "event_id": "06dd7138-5bbf-4902-94e3-111581bdd9e8",
+        "event_digest": "f6609d83c8b73071c4326fa0064201229674874f2c0ee212bee6ca95479ea584"
+      }
+    ],
+    "subagent_inbox_deliveries": [
+      {
+        "consumer_id": "f185754d-ecb4-48c9-9558-96adf0be0d3e",
+        "model_effect_id": "56281c6c-c635-40ab-b114-f28719c60a05",
+        "model_input_digest": "2686de575d685f1d32c924248d3d177389115dc5b159248fcb80f0a86ce015c2",
+        "step_number": 0,
+        "projection_digest": "18ad09f8537a7030ea2472fe5c73390724753d448cd43331afc9b07ebc9d750e",
+        "created_at": "2026-11-12T11:24:12.790Z"
+      },
+      {
+        "consumer_id": "f185754d-ecb4-48c9-9558-96adf0be0d3e",
+        "model_effect_id": "9830e1b0-b56c-4696-a6a0-09ab21d85ecc",
+        "model_input_digest": "7fe7c47325250103c8fd47e8a4efb62d741480664b5d4781e4cab3e563be5bcd",
+        "step_number": 1,
+        "projection_digest": "18ad09f8537a7030ea2472fe5c73390724753d448cd43331afc9b07ebc9d750e",
+        "created_at": "2026-11-12T11:24:13.149Z"
+      },
+      {
+        "consumer_id": "40c4dd9e-f068-4873-b058-d597d3f80e06",
+        "model_effect_id": "139e3f3f-a06b-43bb-a42c-b726f2b44bce",
+        "model_input_digest": "9491cb51a9ce9391b87a594eacafbd3a73ab37fd6311f4f0f9283e6b678e8937",
+        "step_number": 0,
+        "projection_digest": "9791961bc0acfbadc836845ee76cd996835de8a50c47e85bdbf772cccfc587bc",
+        "created_at": "2026-11-12T11:24:13.422Z"
+      }
+    ],
+    "subagent_event_actions": [
+      {
+        "event_id": "617e89ae-5b29-478a-95f4-0989de0677cb",
+        "operation_key": "event:a05c995f05502db1600053e7b463bc3645057fb8ae34aeaeb55de73254f65b72",
+        "consumer_id": "f185754d-ecb4-48c9-9558-96adf0be0d3e",
+        "model_effect_id": "9830e1b0-b56c-4696-a6a0-09ab21d85ecc",
+        "invocation_id": "6ea8e9ff-a208-4d6a-859b-b67994f4ae10",
+        "tool_call_id": "call-d173d4f1-b35e-4f66-8659-6e7b14d02c89",
+        "action_json": "{\"kind\":\"answered_child\",\"target\":{\"subagentId\":\"b7020e18-938a-4bb6-885f-824be0e07269\",\"workInputId\":\"41bea91d-fcc1-49e6-830a-07f8aad544c4\",\"expectedRunId\":null,\"expectedControlVersion\":2},\"replyToEventId\":\"617e89ae-5b29-478a-95f4-0989de0677cb\",\"direction\":\"OWNER_ANSWER_300: maximum latency is 300 milliseconds.\"}",
+        "action_digest": "ac3a46aad259e60400c53bcc069931f96eab4185db7c69a21ad9bc9636393225",
+        "result_json": "{\"ok\":true,\"eventId\":\"617e89ae-5b29-478a-95f4-0989de0677cb\",\"disposition\":\"answered_child\",\"inputId\":\"ac1e00e2-d21b-4ba2-853e-293e61903879\"}",
+        "created_at": "2026-11-12T11:24:13.240Z"
+      }
+    ],
+    "subagent_speech_publications": [],
+    "subagent_context_summaries": [],
+    "subagent_context_summary_intents": [],
+    "subagent_context_summary_failures": [],
+    "subagent_work_progress": [
+      {
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "completed_steps": 2,
+        "interval_start_steps": 0,
+        "interval_steps": 50,
+        "parent_approval_limit": 3,
+        "consecutive_parent_approvals": 0,
+        "tracking": "work_start",
+        "last_user_input_id": null
+      }
+    ],
+    "subagent_task_steps": [
+      {
+        "model_effect_id": "b740393f-1e8f-49ed-8d6e-4f3318458f0c",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "step_number": 0,
+        "completed_ordinal": 1
+      },
+      {
+        "model_effect_id": "164a7275-b002-4c65-87f9-f4f3444a68a6",
+        "work_input_id": "41bea91d-fcc1-49e6-830a-07f8aad544c4",
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "step_number": 0,
+        "completed_ordinal": 2
+      }
+    ],
+    "subagent_checkins": [],
+    "subagent_user_attention": [],
+    "timeline_messages": [
+      {
+        "seq": 1,
+        "id": "3b4c5308-d803-41f8-aa9d-46c7fab4a9b3",
+        "character_id": "taki",
+        "role": "user",
+        "content": "Run the isolated latency decision.",
+        "parts": null,
+        "created_at": "2026-11-12T11:24:12.255Z",
+        "presentation": null,
+        "source_context_json": null,
+        "primary_source_id": "1d3f9baa-4183-408e-a2bb-4bca53f28f22"
+      },
+      {
+        "seq": 2,
+        "id": "0a7d4f20-b264-4378-9f24-a77ba60cedf1",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "[tool-call: delegate_subagent]",
+        "parts": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-82069a64-a16c-4a92-9da2-16e4baf6b516\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\",\"contextOrigin\":\"builtin\"}]",
+        "created_at": "2026-11-12T11:24:12.733Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"5f4effe7-76c3-470b-90fb-4a42844f3545\",\"entryIndex\":0,\"entryCount\":3,\"activitySeq\":6,\"references\":[{\"itemId\":\"350e30dc-d850-4a7b-a6f8-9f1b1e5539a2\",\"order\":0,\"kind\":\"tool\",\"partIndex\":0,\"outcome\":\"completed\",\"durationMs\":67}]}",
+        "source_context_json": null,
+        "primary_source_id": "1d3f9baa-4183-408e-a2bb-4bca53f28f22"
+      },
+      {
+        "seq": 3,
+        "id": "8677ca69-84d2-4244-b72b-1c8b66e6ee22",
+        "character_id": "taki",
+        "role": "tool",
+        "content": "[tool-result: delegate_subagent -> text]",
+        "parts": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-82069a64-a16c-4a92-9da2-16e4baf6b516\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\",\"output\":{\"type\":\"text\",\"value\":\"{\\\"ok\\\":true,\\\"worker\\\":\\\"Exact question fixture\\\",\\\"state\\\":\\\"queued\\\",\\\"accepted\\\":true,\\\"reporting\\\":\\\"request_parent\\\",\\\"nextAction\\\":\\\"Reports will enter your inbox. Continue useful work or end this reply while they are pending; handle the reports when delivered.\\\",\\\"target\\\":{\\\"subagentId\\\":\\\"b7020e18-938a-4bb6-885f-824be0e07269\\\",\\\"workInputId\\\":\\\"41bea91d-fcc1-49e6-830a-07f8aad544c4\\\",\\\"expectedRunId\\\":null,\\\"expectedControlVersion\\\":0}}\"},\"contextOrigin\":\"builtin\"}]",
+        "created_at": "2026-11-12T11:24:12.734Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"5f4effe7-76c3-470b-90fb-4a42844f3545\",\"entryIndex\":1,\"entryCount\":3,\"activitySeq\":6,\"references\":[{\"itemId\":\"350e30dc-d850-4a7b-a6f8-9f1b1e5539a2\",\"order\":0,\"kind\":\"tool\",\"partIndex\":0,\"outcome\":\"completed\",\"durationMs\":67}]}",
+        "source_context_json": null,
+        "primary_source_id": "1d3f9baa-4183-408e-a2bb-4bca53f28f22"
+      },
+      {
+        "seq": 4,
+        "id": "61fb01f3-bf1a-4c49-8e9d-b8241fa41067",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "The main conversation remains available.",
+        "parts": null,
+        "created_at": "2026-11-12T11:24:12.735Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"5f4effe7-76c3-470b-90fb-4a42844f3545\",\"entryIndex\":2,\"entryCount\":3,\"activitySeq\":6,\"references\":[{\"itemId\":\"304afe7d-1c57-4126-899d-c5af81d81cb9\",\"order\":1,\"kind\":\"text\",\"start\":0,\"end\":40}]}",
+        "source_context_json": null,
+        "primary_source_id": "1d3f9baa-4183-408e-a2bb-4bca53f28f22"
+      }
+    ],
+    "run_usage": [
+      {
+        "usage_id": "4e7eb80e-47ec-4fc8-b47a-a2852d383995",
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "effect_id": "9ec6e315-067d-4b4f-8828-d1b451e53da2",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-11-12T11:24:12.453Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "f36813e5-2126-43fb-a5e3-a8bcbc3abaa6",
+        "run_id": "e2cd3e28-571d-4ece-841c-52f6728b6894",
+        "attempt_id": "80bad683-578a-46fb-8eef-58b79608dbbe",
+        "effect_id": "b740393f-1e8f-49ed-8d6e-4f3318458f0c",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-11-12T11:24:12.661Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "64524fa0-89aa-4f9a-9c4d-8fcea51173e8",
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "attempt_id": "555a9bcc-7705-4f96-9722-cc58bec2d2bc",
+        "effect_id": "ea43dc0a-2822-456b-878f-171ed20b060e",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-11-12T11:24:12.724Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "ad8076c5-aff0-4112-a5af-ef0704a2e004",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "effect_id": "56281c6c-c635-40ab-b114-f28719c60a05",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-11-12T11:24:13.120Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "a7478909-fd6e-4233-a6be-91eb3fac8a33",
+        "run_id": "1b8059ee-aead-41d5-b259-85ecb94e6d78",
+        "attempt_id": "c4754d3f-7920-4c21-a4e0-346c3f7fd28d",
+        "effect_id": "9830e1b0-b56c-4696-a6a0-09ab21d85ecc",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-11-12T11:24:13.223Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "d73e41df-ca9c-473f-9fdb-32793c6d163d",
+        "run_id": "a9354155-c227-41a7-8a3a-e812a3839b87",
+        "attempt_id": "93eb560b-f820-47f0-9b02-8bc60b334e81",
+        "effect_id": "164a7275-b002-4c65-87f9-f4f3444a68a6",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-11-12T11:24:13.361Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null,
+        "cache_read_observed": 0
+      }
+    ],
+    "canonical_memory_sources": [],
+    "canonical_memory_units": [],
+    "canonical_memory_policy": [],
+    "canonical_memory_operation_receipts": [],
+    "canonical_memory_primary_commits": [
+      {
+        "timeline_seq": 1,
+        "authority_epoch_id": "e1b57a52-582f-4d74-aa32-f591dd1d44dc",
+        "character_id": "taki",
+        "entry_id": "3b4c5308-d803-41f8-aa9d-46c7fab4a9b3",
+        "entry_digest": "a5f06776bfcc2833c7ca656a99c668de742bbd452dd77aa1a409d89df9563fca",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "committed_at": "2026-11-12T11:24:12.747Z"
+      },
+      {
+        "timeline_seq": 2,
+        "authority_epoch_id": "e1b57a52-582f-4d74-aa32-f591dd1d44dc",
+        "character_id": "taki",
+        "entry_id": "0a7d4f20-b264-4378-9f24-a77ba60cedf1",
+        "entry_digest": "10d8301203bd6170f8111606724e522bcddfab1562879d5d0fa962d26a34008d",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "committed_at": "2026-11-12T11:24:12.747Z"
+      },
+      {
+        "timeline_seq": 3,
+        "authority_epoch_id": "e1b57a52-582f-4d74-aa32-f591dd1d44dc",
+        "character_id": "taki",
+        "entry_id": "8677ca69-84d2-4244-b72b-1c8b66e6ee22",
+        "entry_digest": "2d9acc168bd8836f9afdf1f8012c310d58cae8b7765f2931c178396a94df8830",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "committed_at": "2026-11-12T11:24:12.748Z"
+      },
+      {
+        "timeline_seq": 4,
+        "authority_epoch_id": "e1b57a52-582f-4d74-aa32-f591dd1d44dc",
+        "character_id": "taki",
+        "entry_id": "61fb01f3-bf1a-4c49-8e9d-b8241fa41067",
+        "entry_digest": "5d414259862d220af66d3583731353bdb8b7fcbea0a2d7067897a6260e55ff3c",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "cbcb7eb7-8ae4-4645-99a8-a6ed76bcb026",
+        "committed_at": "2026-11-12T11:24:12.748Z"
+      }
+    ]
+  },
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "delegate_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 1,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 2,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "delegate_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 3,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "handle_agent_event",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_agent_inbox",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 4,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "handle_agent_event",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_agent_inbox",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 5,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 6,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "handle_agent_event",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_agent_inbox",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 7,
+      "upstreamAttempted": true
+    }
+  ],
+  "turns": [
+    {
+      "prompt": "Run the isolated latency decision.",
+      "status": "complete",
+      "text": "The main conversation remains available."
+    }
+  ]
+}

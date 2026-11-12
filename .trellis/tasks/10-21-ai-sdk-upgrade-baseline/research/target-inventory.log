@@ -1,0 +1,104 @@
+{
+  "node": "v24.18.0",
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "packages": {
+    "ai": {
+      "version": "7.0.148",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\ai@7.0.148_zod@4.4.3\\node_modules\\ai\\package.json",
+      "engines": {
+        "node": ">=22"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "dependencies": {
+        "@ai-sdk/gateway": {
+          "version": "4.0.121",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+gateway@4.0.121_zod@4.4.3\\node_modules\\@ai-sdk\\gateway\\package.json"
+        },
+        "@ai-sdk/provider": {
+          "version": "4.0.31",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.31\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        "@ai-sdk/provider-utils": {
+          "version": "5.0.65",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.65_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        }
+      }
+    },
+    "@ai-sdk/mcp": {
+      "version": "2.0.81",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+mcp@2.0.81_zod@4.4.3\\node_modules\\@ai-sdk\\mcp\\package.json",
+      "engines": {
+        "node": ">=22"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "dependencies": {
+        "@ai-sdk/provider": {
+          "version": "4.0.31",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.31\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        "@ai-sdk/provider-utils": {
+          "version": "5.0.65",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.65_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        },
+        "cross-spawn": {
+          "version": "7.0.6",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\cross-spawn@7.0.6\\node_modules\\cross-spawn\\package.json"
+        },
+        "pkce-challenge": {
+          "specifier": "^5.0.1",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\pkce-challenge@5.0.1\\node_modules\\pkce-challenge\\dist\\index.node.cjs"
+        }
+      }
+    },
+    "@ai-sdk/openai-compatible": {
+      "version": "3.0.75",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+openai-compatible@3.0.75_zod@4.4.3\\node_modules\\@ai-sdk\\openai-compatible\\package.json",
+      "engines": {
+        "node": ">=22"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "dependencies": {
+        "@ai-sdk/provider": {
+          "version": "4.0.31",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider@4.0.31\\node_modules\\@ai-sdk\\provider\\package.json"
+        },
+        "@ai-sdk/provider-utils": {
+          "version": "5.0.65",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\@ai-sdk+provider-utils@5.0.65_zod@4.4.3\\node_modules\\@ai-sdk\\provider-utils\\package.json"
+        }
+      }
+    },
+    "zod": {
+      "version": "4.4.3",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\zod@4.4.3\\node_modules\\zod\\package.json",
+      "dependencies": {}
+    },
+    "cross-spawn": {
+      "version": "7.0.6",
+      "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\cross-spawn@7.0.6\\node_modules\\cross-spawn\\package.json",
+      "engines": {
+        "node": ">= 8"
+      },
+      "dependencies": {
+        "path-key": {
+          "version": "3.1.1",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\path-key@3.1.1\\node_modules\\path-key\\package.json"
+        },
+        "shebang-command": {
+          "version": "2.0.0",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\shebang-command@2.0.0\\node_modules\\shebang-command\\package.json"
+        },
+        "which": {
+          "version": "2.0.2",
+          "path": "H:\\TakiAgent-worktrees\\t4\\node_modules\\.pnpm\\which@2.0.2\\node_modules\\which\\package.json"
+        }
+      }
+    }
+  }
+}

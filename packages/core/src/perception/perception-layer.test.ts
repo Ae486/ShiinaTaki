@@ -11,7 +11,7 @@ import type { PrivacyPauseStore } from "./privacy-pause.ts";
 
 const POLL_MS = 30_000; // the activity + ambient layers share this cadence
 const SHOT = { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 };
-const OFF: AmbientScreenshotConfig = { enabled: false, retention: { mode: "drop-after-describe" } };
+const OFF: AmbientScreenshotConfig = { enabled: false, retention: { mode: "drop-after-consumption" } };
 
 function sampleOf(processName: string, windowTitle: string): ForegroundWindowOutput {
   return { available: true, processName, windowTitle, idleSeconds: 0 };
@@ -19,7 +19,6 @@ function sampleOf(processName: string, windowTitle: string): ForegroundWindowOut
 
 interface LayerOptions {
   ambient?: AmbientScreenshotConfig;
-  describe?: (input: { dataBase64: string; mediaType: string }) => Promise<string | null>;
   dir?: string;
   /** A production-shaped WS round-trip. Zero (the default) makes every reply land before the next sampler's tick
    *  callback even runs, which HIDES the ordering the two independent round-trips really have. */
@@ -38,7 +37,6 @@ function layerFor(sample: ForegroundWindowOutput | (() => ForegroundWindowOutput
   const perception = createPerceptionLayer({
     route,
     hasNode: () => true,
-    describe: opts.describe,
     ambient: opts.ambient ?? OFF,
     ambientShotsDir: opts.dir ?? join(tmpdir(), "taki-ambient-unused"),
     pauseStore: opts.pauseStore,
@@ -50,8 +48,8 @@ function layerFor(sample: ForegroundWindowOutput | (() => ForegroundWindowOutput
 const routedTo = (route: ReturnType<typeof vi.fn>, capability: string): number =>
   route.mock.calls.filter((call) => call[0] === capability).length;
 
-const AMBIENT_ON: AmbientScreenshotConfig = { enabled: true, retention: { mode: "drop-after-describe" } };
-const AMBIENT_REFRESH_MS = 5 * 60 * 1000; // the layer's re-describe window: after it, a still window is due again
+const AMBIENT_ON: AmbientScreenshotConfig = { enabled: true, retention: { mode: "drop-after-consumption" } };
+const AMBIENT_REFRESH_MS = 5 * 60 * 1000; // the layer's refresh window: after it, a still window is due again
 const ROUTE_DELAY_MS = 50; // one WS round-trip: enough that a reply lands AFTER the sibling sampler's tick, as in production
 
 /**
@@ -72,7 +70,7 @@ async function withAmbientLayer(
   let sample = sampleOf("Code.exe", "main.ts");
   const { perception, route } = layerFor(
     () => sample,
-    { ambient: AMBIENT_ON, describe: vi.fn(async () => "an editor window"), dir, delayMs: opts.delayMs },
+    { ambient: AMBIENT_ON, dir, delayMs: opts.delayMs },
   );
   perception.start();
   try {
@@ -87,6 +85,35 @@ async function withAmbientLayer(
 describe("createPerceptionLayer", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
+
+  it("replaces retention schedules without losing activity or duplicating timers", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "taki-ambient-reconfigure-"));
+    const { perception } = layerFor(sampleOf("Code.exe", "main.ts"), {
+      ambient: { enabled: false, retention: { mode: "keep" } }, dir,
+    });
+    try {
+      perception.start();
+      perception.start();
+      await vi.advanceTimersByTimeAsync(POLL_MS);
+      const activity = perception.activity.state.current();
+      expect(activity).toBeDefined();
+      expect(vi.getTimerCount()).toBe(1);
+      for (let i = 0; i < 5; i++) {
+        perception.reconfigureAmbient(AMBIENT_ON);
+        expect(vi.getTimerCount()).toBe(3);
+        perception.reconfigureAmbient({ enabled: false, retention: { mode: "keep" } });
+        expect(vi.getTimerCount()).toBe(1);
+        expect(perception.activity.state.current()).toEqual(activity);
+      }
+      perception.dispose();
+      perception.reconfigureAmbient(AMBIENT_ON);
+      perception.start();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      perception.dispose();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 
   it("threads the shared Privacy Pause into the foreground sampler (production wiring, not just the dep)", async () => {
     const { perception, route } = layerFor(sampleOf("Code.exe", "main.ts"));
@@ -135,13 +162,11 @@ describe("createPerceptionLayer", () => {
   });
 
   it("never routes screenshot-ambient with the factory (OFF) config, however long it runs", async () => {
-    const describe = vi.fn(async () => "a screen");
-    const { perception, route } = layerFor(sampleOf("Code.exe", "main.ts"), { describe });
+    const { perception, route } = layerFor(sampleOf("Code.exe", "main.ts"), {});
     perception.start();
     await vi.advanceTimersByTimeAsync(20 * POLL_MS);
     expect(routedTo(route, "foreground-window")).toBeGreaterThan(0); // the low-sensitivity half still runs
     expect(routedTo(route, "screenshot-ambient")).toBe(0);
-    expect(describe).not.toHaveBeenCalled();
     expect(perception.renderContext(Date.now())).not.toContain("Screen");
     perception.activity.sampler.stop();
   });
@@ -164,13 +189,11 @@ describe("createPerceptionLayer", () => {
     expect(perception.card(Date.now()).samplingStatus.foreground).toBe(false);
   });
 
-  it("captures, scrubs and renders a fenced screen block once ambient sampling is enabled", async () => {
+  it("captures native pixels and renders fenced source guidance once ambient sampling is enabled", async () => {
     const dir = mkdtempSync(join(tmpdir(), "taki-ambient-"));
     try {
-      const describe = vi.fn(async () => "VS Code, an email draft to alice@example.com is open");
       const { perception, route } = layerFor(sampleOf("Code.exe", "main.ts"), {
-        ambient: { enabled: true, retention: { mode: "drop-after-describe" } },
-        describe,
+        ambient: { enabled: true, retention: { mode: "drop-after-consumption" } },
         dir,
       });
       perception.start();
@@ -180,10 +203,12 @@ describe("createPerceptionLayer", () => {
 
       const rendered = perception.renderContext(Date.now());
       expect(rendered).toContain('<untrusted-observation source="ambient-screen-sampler">');
-      expect(rendered).toContain("[redacted:email]"); // scrubbed BEFORE it could reach the prompt
+      expect(rendered).toContain("native visual evidence");
       expect(rendered).not.toContain("alice@example.com");
       expect(rendered).toContain("foreground-activity-sampler"); // both perception sections join here
-      // drop-after-describe leaves no raw frame behind.
+      // drop-after-consumption leaves no raw frame behind.
+      expect(readdirSync(dir)).toHaveLength(1);
+      perception.acquireScreenInput()!.release();
       expect(readdirSync(dir)).toHaveLength(0);
       perception.ambient.stop();
       perception.activity.sampler.stop();
@@ -202,7 +227,7 @@ describe("createPerceptionLayer", () => {
       show(sampleOf("1Password", "Chase Visa"));
       // The very next tick is the refresh-due one AND the first tick that sees the password manager. Before the seal,
       // T3a merely DROPPED that sample, leaving the editor entry live and only ~30s old — inside the 60s freshness
-      // tolerance — so this tick captured the password manager and shipped the pixels to a remote vision endpoint.
+      // tolerance — so this tick captured the password manager and shipped the pixels to a primary model.
       await vi.advanceTimersByTimeAsync(4 * POLL_MS);
       expect(routedTo(route, "screenshot-ambient")).toBe(1); // not one frame of it ever left the machine
     });
@@ -235,7 +260,7 @@ describe("createPerceptionLayer", () => {
         show(sampleOf("1Password", "Chase Visa"));
         // Tick 2: T3a's reply is still in flight, so the recorded entry still says the editor and is only one poll
         // old — well inside the freshness tolerance, and the seal cannot have fired. This is the tick that used to
-        // photograph a password manager and ship the pixels to a REMOTE vision endpoint. The final gate — one fresh
+        // photograph a password manager and ship the pixels to a primary model. The final gate — one fresh
         // foreground route immediately before the capture — is what refuses it.
         await vi.advanceTimersByTimeAsync(POLL_MS);
         expect(routedTo(route, "screenshot-ambient")).toBe(0);

@@ -57,6 +57,7 @@ export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], stri
   admitted: "已受理（未认领）", running: "执行中", waiting: "已受理，等待 Hindsight 处理", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
 };
 export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string> = {
+  tidy: "整理记忆", "index.rebuild": "更新记忆检索",
   "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本",
   "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆", "hindsight.activate": "启用 Hindsight",
   "bank.provision": "创建 Bank", "connection.revalidate": "重新校验连接",
@@ -70,14 +71,14 @@ const UNKNOWN = "未知";
 export function memoryAuthorityView(status: MemoryAuthorityStatus): MemoryAuthorityView {
   const hindsight = status.authority.mode === "hindsight" && status.runtime.available;
   return {
-    headline: `${MODE_LABEL[status.authority.mode]}${status.authority.epochId ? ` · epoch ${status.authority.epochId}` : ""}`,
+    headline: MODE_LABEL[status.authority.mode],
     runtimeLine: status.runtime.available ? "运行时可用" : `运行时不可用：${MEMORY_RUNTIME_UNAVAILABLE_LABEL[status.runtime.unavailableReason ?? "connection_unavailable"]}`,
     setupLine: `${status.setup.phase}${status.setup.latestError ? ` · ${status.setup.latestError.code}` : ""}`,
     hindsight,
     banks: authorityBanks(status),
     pending: (status.pending ?? []).map((entry) => ({ bankId: entry.bankId, pending: entry.summary.pendingCount,
       failed: entry.summary.failedCount, unknown: entry.summary.unknownCount, parentWrites: entry.parentWritesPending })),
-    active: status.operations.active.map(activeRow),
+    active: status.operations.active.map((operation) => activeRow(operation, status)),
   };
 }
 
@@ -92,7 +93,7 @@ function authorityBanks(status: MemoryAuthorityStatus): BankRow[] {
   for (const review of reviews.values()) {
     if (banks.some((bank) => bank.bankId === review.bankId)) continue;
     const scope = status.hindsight?.banks.find((bank) => bank.nativeBankId === review.bankId);
-    banks.push({ bankId: review.bankId, label: scope ? bankScopeLabel(scope.scope, scope.characterId) : review.bankId,
+    banks.push({ bankId: review.bankId, label: scope ? bankScopeLabel(scope.scope, scope.characterId) : "记忆库（范围未知）",
       state: UNKNOWN, lastSuccess: UNKNOWN, lastAttempt: UNKNOWN, nextDue: UNKNOWN, error: UNKNOWN, nextAction: UNKNOWN, retryKind: null,
       schedule: null, review: memoryPolicyReviewView(review) });
   }
@@ -117,8 +118,12 @@ function bankRow(bank: NonNullable<MemoryAuthorityStatus["replica"]>[number]): O
   };
 }
 
-function activeRow(operation: MemoryOperation): ActiveOperationRow {
-  const target = operation.request.kind === "replica.sync" ? ` · ${operation.request.bankId} (${operation.request.syncKind})` : "";
+function activeRow(operation: MemoryOperation, status: MemoryAuthorityStatus): ActiveOperationRow {
+  const request = operation.request;
+  const replica = request.kind === "replica.sync" ? status.replica?.find((bank) => bank.bankId === request.bankId) : undefined;
+  const bank = replica ?? (request.kind === "replica.sync" ? status.hindsight?.banks.find((bank) => bank.nativeBankId === request.bankId) : undefined);
+  const name = bank ? bank.scope === "global" ? "共享记忆" : `角色记忆 · ${bank.characterId}` : "记忆库";
+  const target = request.kind === "replica.sync" ? ` · ${name}（${request.syncKind === "full" ? "完整对账" : "增量同步"}）` : "";
   return {
     operationId: operation.operationId,
     label: `${MEMORY_OPERATION_KIND_LABEL[operation.kind]}${target} · ${MEMORY_OPERATION_STATE_LABEL[operation.state]}`,

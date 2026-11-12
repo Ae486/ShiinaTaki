@@ -6,6 +6,7 @@
  * POS:    core/memory — authority marker routing seam; canonical mode never invokes the legacy factory
  */
 import type { Database } from "../db/sqlite.ts";
+import { forwardRenderedContextText } from "../agents/context-attribution.ts";
 import type { MemoryEngine } from "./memory-engine.ts";
 import type { MemorySubsystem } from "./bootstrap.ts";
 import { readCurrentMemoryAuthorityIdentity, readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
@@ -171,9 +172,20 @@ function bootConstruct(input: SelectMemoryRuntimeInput, selection: MemoryAuthori
 }
 
 function delegatingEngine(current: () => MemoryEngine): MemoryEngine {
+  const assemble: MemoryEngine["assemble"] = (input) => {
+    const engine = current();
+    return forwardRenderedContextText(assemble, engine.assemble, engine.assemble(input));
+  };
   return {
+    searchStatus: () => current().searchStatus?.() ?? { ready: true, stoplist: null },
+    reconfigureRanking: (weights) => { current().reconfigureRanking?.(weights); },
     reconcile: () => current().reconcile(),
-    assemble: (input) => current().assemble(input),
+    reconfigureSearch: (config, signal) => {
+      const rebuild = current().reconfigureSearch;
+      if (!rebuild) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+      return rebuild(config, signal);
+    },
+    assemble,
     createTools: (characterId, seq) => current().createTools(characterId, seq),
     createBackgroundTools: (characterId, seq) => current().createBackgroundTools(characterId, seq),
     writeEntry: (input) => current().writeEntry(input),
@@ -183,7 +195,7 @@ function delegatingEngine(current: () => MemoryEngine): MemoryEngine {
       hardDelete: (path) => current().retention.hardDelete(path),
     },
     tidy: {
-      captureReview: (characterId) => current().tidy.captureReview?.(characterId) ?? current().tidy,
+      captureReview: (characterId, options) => current().tidy.captureReview?.(characterId, options) ?? current().tidy,
       listActive: (characterId) => current().tidy.listActive(characterId),
       countSince: (characterId, since) => current().tidy.countSince(characterId, since),
       readBlock: (ref) => current().tidy.readBlock(ref),

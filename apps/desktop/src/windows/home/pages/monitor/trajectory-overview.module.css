@@ -1,0 +1,237 @@
+/* DSH TrajectoryTimeline.module.css adaptation; DeepSeek MIT, see third-party-notices.md. */
+.root {
+  position: relative;
+  z-index: 3;
+  isolation: isolate;
+  flex: none;
+  border-bottom: 1px solid var(--trajectory-border);
+  user-select: none;
+}
+
+.plot {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  height: 50px;
+  overflow: hidden;
+  background: var(--trajectory-muted);
+}
+
+.labels {
+  position: relative;
+  border-right: 1px solid var(--trajectory-hairline);
+  color: var(--trajectory-caption);
+  font: 10px/1 var(--font-sans);
+}
+
+.labels span {
+  position: absolute;
+  right: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 8px;
+}
+
+.labels span:nth-child(1) {
+  top: 7px;
+}
+
+.labels span:nth-child(2) {
+  top: 21px;
+}
+
+.labels span:nth-child(3) {
+  top: 35px;
+}
+
+.track {
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.track[data-panning='true'] {
+  cursor: grabbing;
+}
+
+.track:focus-visible {
+  outline: 1px solid var(--trajectory-accent);
+  outline-offset: -1px;
+}
+
+.lanes {
+  position: absolute;
+  z-index: 2;
+  top: 7px;
+  right: 0;
+  bottom: 7px;
+  left: 0;
+}
+
+.span {
+  position: absolute;
+  top: calc(var(--span-lane) * 14px);
+  left: var(--span-left);
+  width: max(2px, var(--span-width));
+  height: 8px;
+  min-width: 2px;
+  border-radius: 1px;
+  background: var(--trajectory-secondary);
+  opacity: 0.78;
+}
+
+.span[data-kind='model'] {
+  --model-color: color-mix(in srgb, var(--trajectory-accent) 60%, var(--color-danger-soft));
+  --first-output-color: color-mix(in srgb, var(--model-color) 54%, var(--trajectory-muted));
+  background: var(--model-color);
+  opacity: 1;
+}
+
+.span[data-first-output='true'] {
+  background: linear-gradient(to right, var(--first-output-color) 0, var(--first-output-color) var(--first-output), var(--model-color) var(--first-output), var(--model-color) 100%);
+}
+
+.span[data-kind='tool'] {
+  background: var(--color-warn);
+  opacity: 1;
+}
+
+.span[data-error='true'] {
+  background: var(--color-danger);
+}
+
+.span[data-marker='true'] {
+  width: 2px;
+}
+
+.span[data-focus='outside'] {
+  opacity: 0.2;
+}
+
+.span[data-search-match='false'] {
+  opacity: 0.14;
+}
+
+.span:hover, .span[data-current='true'] {
+  z-index: 1;
+  opacity: 1;
+  box-shadow: 0 0 0 1px var(--trajectory-muted), 0 0 0 2px var(--trajectory-accent);
+}
+
+.selection {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: var(--range-left);
+  width: max(1px, var(--range-width));
+  background: color-mix(in srgb, var(--trajectory-accent) 12%, transparent);
+  box-shadow: -100vw 0 0 100vw color-mix(in srgb, var(--trajectory-bg) 58%, transparent), 100vw 0 0 100vw color-mix(in srgb, var(--trajectory-bg) 58%, transparent);
+  pointer-events: none;
+}
+
+.selection::before, .selection::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--trajectory-accent);
+  content: '';
+}
+
+.selection::before {
+  left: 0;
+}
+
+.selection::after {
+  right: 0;
+}
+
+.earlier {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 28px;
+  align-items: center;
+  padding-left: 3px;
+  border: 0;
+  color: var(--trajectory-secondary);
+  background: linear-gradient(to right, var(--trajectory-muted) 0, var(--trajectory-muted) 38%, transparent 100%);
+  font: 13px/1 var(--font-sans);
+  opacity: 0.72;
+}
+
+.earlier:hover {
+  opacity: 1;
+}
+
+.empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--trajectory-caption);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.reset {
+  position: absolute;
+  z-index: 5;
+  right: 3px;
+  top: 1px;
+  height: 16px;
+  padding: 0 4px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 2px;
+  color: var(--trajectory-caption);
+  background: var(--trajectory-bg);
+  font: 10px/1 var(--font-sans);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 10;
+  top: 53px;
+  right: 8px;
+  display: grid;
+  gap: 3px;
+  max-width: min(420px, calc(100% - 16px));
+  padding: 8px 10px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 4px;
+  color: var(--trajectory-text);
+  background: var(--trajectory-bg);
+  box-shadow: var(--shadow-overlay);
+  font-size: 11px;
+  pointer-events: none;
+  animation: reveal 0s 500ms both;
+}
+
+.tooltip strong {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+
+.tooltip span {
+  color: var(--trajectory-caption);
+}
+
+@keyframes reveal {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+}

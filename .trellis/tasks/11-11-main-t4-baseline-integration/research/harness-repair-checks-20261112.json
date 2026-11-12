@@ -1,0 +1,56 @@
+{
+  "observedAt": "2026-11-12T09:23:27.097Z",
+  "kind": "browser-harness-scoped-checks",
+  "branch": "integration/main-t4-20261111",
+  "normalLint": "repository ignores .trellis",
+  "forcedLint": {
+    "nodeGlobalsSupplied": true,
+    "baselineMessages": [
+      {
+        "ruleId": "max-params",
+        "severity": 2,
+        "message": "Async function 'homeStep' has too many parameters (4). Maximum allowed is 3."
+      }
+    ],
+    "currentMessages": [
+      {
+        "ruleId": "max-params",
+        "severity": 2,
+        "message": "Async function 'homeStep' has too many parameters (4). Maximum allowed is 3."
+      }
+    ],
+    "added": []
+  },
+  "sourceChecks": [
+    {
+      "path": ".trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/home-browser.mjs",
+      "sha256": "e3d7e9d54dd3be1156673ce12e3d5765ecfc749d69099a151d07478751f87d7c",
+      "utf8Bom": false,
+      "trailingWhitespace": false
+    },
+    {
+      "path": ".trellis/tasks/11-11-main-t4-baseline-integration/research/run-controlled-journey.ps1",
+      "sha256": "04be7674281d66995e721682fe93bfc2b87fe08d45d551cb82e81faf224388ed",
+      "utf8Bom": false,
+      "trailingWhitespace": false
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "journey-20261112.log",
+      "sha256": "5d9b3f32e7c8cf2f77fe16251e927f612da766b4c86d2d80f4508887a31d74ea"
+    },
+    {
+      "name": "journey-launch-20261112.json",
+      "sha256": "9ff9210cf2d16c74225bb34c32d6f213ce73495a4184dafe30a25b87ada4f942"
+    },
+    {
+      "name": "journey-20261112T091953650Z-205e97e8.log",
+      "sha256": "9d462fb413ba247aeb23fbf23ca91d865860702171cf79c9351cc97684afbdcd"
+    },
+    {
+      "name": "journey-launch-20261112T091953650Z-205e97e8.json",
+      "sha256": "f46bb70e8501cce3f88b511d909efdede31b460ed433960dc21872c08cb97aaf"
+    }
+  ]
+}

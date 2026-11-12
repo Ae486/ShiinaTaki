@@ -9,6 +9,7 @@
 import { ActionButton } from "../../action-button.tsx";
 import { Badge } from "../../badge.tsx";
 import { SelectionTile } from "@/components/ui/selection-tile.js";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import type { CostumeRowView } from "./costume-view.ts";
 
 export interface CostumeRowProps {
@@ -22,11 +23,10 @@ export interface CostumeRowProps {
 export function CostumeRow({ row, current, pending, onSelect, onCancel }: CostumeRowProps) {
   if (pending) {
     return (
-      <div className="flex w-full items-center justify-between gap-2 rounded-lg bg-surface-sunken px-3 py-2 text-left text-xs text-text-body">
+      <div aria-busy="true" className="flex w-full items-center justify-between gap-2 rounded-lg bg-surface-sunken px-3 py-2 text-left text-xs text-text-body">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="inline-block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-border-strong border-t-text-secondary" />
+          <PendingIndicator active label="正在切换服装" />
           <span className="truncate font-medium">{row.id}</span>
-          <span className="shrink-0 text-text-secondary">切换中…</span>
         </span>
         <ActionButton onClick={onCancel}>取消</ActionButton>
       </div>
@@ -42,7 +42,10 @@ export function CostumeRow({ row, current, pending, onSelect, onCancel }: Costum
       onSelect={onSelect}
       className="justify-between gap-2 text-xs"
     >
-      <span className="truncate font-medium">{row.id}</span>
+      <span className="flex min-w-0 items-center gap-2">
+        <PendingIndicator active={false} label="正在切换服装" />
+        <span className="truncate font-medium">{row.id}</span>
+      </span>
       {row.badge && <Badge tone="warn">{row.badge}</Badge>}
     </SelectionTile>
   );

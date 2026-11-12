@@ -12,10 +12,11 @@
   "app": {
     "windows": [
       {
-        "label": "main",
+        "label": "home",
+        "url": "home.html",
         "title": "TakiAgent",
-        "width": 480,
-        "height": 640,
+        "width": 1120,
+        "height": 760,
         "resizable": true
       },
       {
@@ -37,12 +38,12 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": ["$HOME/.takiagent/workspace/characters/**/*"]
+        "scope": []
       },
       "csp": {
         "default-src": "'self'",
-        "connect-src": "'self' ipc: http://ipc.localhost asset: http://asset.localhost ws://127.0.0.1:8974 ws://localhost:8974",
-        "img-src": "'self' asset: http://asset.localhost blob: data:",
+        "connect-src": "'self' ipc: http://ipc.localhost asset: http://asset.localhost ws://127.0.0.1:* ws://localhost:* ws://[::1]:*",
+        "img-src": "'self' asset: http://asset.localhost blob: data: https://models.dev",
         "script-src": "'self' 'wasm-unsafe-eval'",
         "style-src": "'self' 'unsafe-inline'"
       }

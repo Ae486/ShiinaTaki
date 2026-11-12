@@ -1,0 +1,11 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent-worktrees\t4
+> eslint .
+
+
+H:\TakiAgent-worktrees\t4\packages\core\src\agents\chat-agent.ts
+  523:1  error  File has too many lines (363). Maximum allowed is 360  max-lines
+
+✖ 1 problem (1 error, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

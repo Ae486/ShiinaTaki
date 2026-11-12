@@ -82,4 +82,28 @@ describe("createTimingPolicySync", () => {
     expect(store.current()).toEqual(TIMING_POLICY_DEVELOPMENT_DEFAULTS);
     expect(diagnostics.join(" ")).toContain("keeping last-good timing policy");
   });
+
+  it("reconciles missed timing values once after same-client membership recovery without a push", async () => {
+    const store = createTimingPolicyStore();
+    let recovered: () => void = () => undefined;
+    const list = vi.fn().mockResolvedValueOnce({ entries: entries(TIMING_POLICY_DEVELOPMENT_DEFAULTS) })
+      .mockResolvedValueOnce({ entries: entries({ ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, interactiveRpcMs: 19_000 }) });
+    const sync = createTimingPolicySync({
+      store, list, subscribe: vi.fn(async () => { throw new Error("setup lost"); }),
+      onConfigChanged: () => () => undefined,
+      onSubscriptionRecovered: (handler) => { recovered = handler; return () => { recovered = () => undefined; }; },
+      onDiagnostic: vi.fn(),
+    });
+    sync.start();
+    await flush();
+    expect(list).toHaveBeenCalledTimes(1);
+    recovered();
+    await flush();
+    expect(list).toHaveBeenCalledTimes(2);
+    expect(store.current().interactiveRpcMs).toBe(19_000);
+    sync.dispose();
+    recovered();
+    await flush();
+    expect(list).toHaveBeenCalledTimes(2);
+  });
 });

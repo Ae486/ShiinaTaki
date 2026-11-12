@@ -1,0 +1,140 @@
+{
+  "batches": [
+    {
+      "batch": "real-llm-2026-09-28",
+      "scenarios": 1,
+      "passed": 1,
+      "observedRequests": null,
+      "usageRows": 14,
+      "quality": {
+        "reported": 14
+      },
+      "reportedSums": {
+        "input_tokens": 218990,
+        "output_tokens": 4103,
+        "total_tokens": 223093,
+        "cache_read_tokens": 197376,
+        "reasoning_tokens": 1710
+      },
+      "unknownFields": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cache_read_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "observedRequestUsageCountDifference": null
+    },
+    {
+      "batch": "real-llm-round1-2026-09-28",
+      "scenarios": 7,
+      "passed": 4,
+      "observedRequests": null,
+      "usageRows": 13,
+      "quality": {
+        "reported": 11,
+        "unknown": 2
+      },
+      "reportedSums": {
+        "input_tokens": 154141,
+        "output_tokens": 7867,
+        "total_tokens": 162008,
+        "cache_read_tokens": 103424,
+        "reasoning_tokens": 6129
+      },
+      "unknownFields": {
+        "input_tokens": 2,
+        "output_tokens": 2,
+        "total_tokens": 2,
+        "cache_read_tokens": 2,
+        "reasoning_tokens": 2
+      },
+      "observedRequestUsageCountDifference": null
+    },
+    {
+      "batch": "real-llm-provider-diagnosis-2026-09-28",
+      "scenarios": 1,
+      "passed": 0,
+      "observedRequests": 1,
+      "usageRows": 1,
+      "quality": {
+        "unknown": 1
+      },
+      "reportedSums": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "cache_read_tokens": null,
+        "reasoning_tokens": null
+      },
+      "unknownFields": {
+        "input_tokens": 1,
+        "output_tokens": 1,
+        "total_tokens": 1,
+        "cache_read_tokens": 1,
+        "reasoning_tokens": 1
+      },
+      "observedRequestUsageCountDifference": 0
+    },
+    {
+      "batch": "real-llm-round2-2026-09-28",
+      "scenarios": 8,
+      "passed": 8,
+      "observedRequests": 41,
+      "usageRows": 39,
+      "quality": {
+        "reported": 39
+      },
+      "reportedSums": {
+        "input_tokens": 591081,
+        "output_tokens": 12326,
+        "total_tokens": 603407,
+        "cache_read_tokens": 502528,
+        "reasoning_tokens": 5971
+      },
+      "unknownFields": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cache_read_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "observedRequestUsageCountDifference": 2
+    },
+    {
+      "batch": "real-llm-final-2026-09-28",
+      "scenarios": 8,
+      "passed": 8,
+      "observedRequests": 45,
+      "usageRows": 43,
+      "quality": {
+        "reported": 43
+      },
+      "reportedSums": {
+        "input_tokens": 642260,
+        "output_tokens": 12798,
+        "total_tokens": 655058,
+        "cache_read_tokens": 558464,
+        "reasoning_tokens": 6190
+      },
+      "unknownFields": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cache_read_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "observedRequestUsageCountDifference": 2
+    }
+  ],
+  "totals": {
+    "input_tokens": 1606472,
+    "output_tokens": 37094,
+    "total_tokens": 1643566,
+    "cache_read_tokens": 1361792,
+    "reasoning_tokens": 20000
+  },
+  "totalUsageRows": 110,
+  "unknownRows": 3,
+  "note": "Known canonical run_usage subtotals only, not a provider billing total. Null means unobserved or wholly unknown. Four more HTTP requests than usage rows were observed across round2/final; their tokens are not included. Input includes cache reads; reasoning is within output. No currency estimate."
+}

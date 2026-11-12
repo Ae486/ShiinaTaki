@@ -5,6 +5,7 @@
  */
 import { z } from "zod";
 import { MemoryReplicaBankSchema, type MemoryReplicaBank } from "@taki/shared";
+import { captureUtilitySlot } from "../utility-slot.ts";
 import type { HindsightApplicationWorkCursor } from "../../db/hindsight-application-replica-contract.ts";
 import { policyWorkClaim } from "../../db/hindsight-policy-work-repo.ts";
 import type { HindsightPolicyWorkRecord } from "../../db/hindsight-policy-work-contract.ts";
@@ -34,15 +35,18 @@ export function createHindsightPolicyCurator(deps: HindsightPolicyCuratorDeps): 
     if (controller.signal.aborted) return Promise.reject(new Error("MEMORY_OPERATION_CANCELLED"));
     const key = bank ? `bank:${bank.bankId}` : `character:${characterId}`;
     const owner = signal ? AbortSignal.any([controller.signal, signal]) : controller.signal;
+    const configured = deps.config();
+    const policy = { memory: { ...configured.memory }, policy: { ...configured.policy } };
+    const captured = { ...deps, slot: captureUtilitySlot(deps.slot), config: () => policy };
     const task = (chains.get(key) ?? Promise.resolve()).catch(() => undefined)
-      .then(() => execute({ deps, characterId, bank, epochId: epoch.epochId, lineage: epoch.providerLineageId, owner }));
+      .then(() => execute({ deps: captured, characterId, bank, epochId: epoch.epochId, lineage: epoch.providerLineageId, owner }));
     active.add(task); chains.set(key, task);
     const release = () => { active.delete(task); if (chains.get(key) === task) chains.delete(key); };
     void task.then(release, release); return task;
   };
   const runNow = (characterId: string) => enqueue(z.string().min(1).max(256).parse(characterId));
   return { runNow, runBank: (bank, signal) => enqueue(bank.characterId, MemoryReplicaBankSchema.parse(bank), signal),
-    maybeRun: async (characterId) => { await runNow(characterId); }, settle,
+    maybeRun: async (characterId) => { if (deps.slot.available?.() !== false) await runNow(characterId); }, settle,
     stop: () => { controller.abort(); return settle(); } };
 }
 

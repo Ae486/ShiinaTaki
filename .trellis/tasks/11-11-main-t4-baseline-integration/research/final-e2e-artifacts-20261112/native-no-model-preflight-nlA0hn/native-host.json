@@ -1,0 +1,72 @@
+{
+  "kind": "native-exec-only-host",
+  "binary": "G:\\TakiAgent-integration\\apps\\desktop\\src-tauri\\target\\debug\\taki-node.exe",
+  "dataDir": "G:\\taki-codex-work\\integration-final-e2e-d813c8abe6ee48db86a8b9fdaba5c36f\\Temp\\taki-agent-interface-node-P666MM",
+  "deviceName": "Agent interface native f47dc30e-272d-438b-8520-f20f23c50dd3",
+  "accepted": {
+    "observedAt": "2026-11-12T11:24:59.218Z",
+    "coreHostId": "4f6d2aac-9931-43b0-8f5d-6cd00000a547",
+    "hosts": [
+      {
+        "hostId": "e4d25b2f-9bbc-4a08-bb69-347030dcaf1d",
+        "available": true,
+        "connectionGeneration": 1,
+        "catalogGeneration": 1,
+        "extensionCount": 1
+      }
+    ],
+    "entries": [
+      {
+        "identity": {
+          "extensionId": "ext:87086b16ab811bd18d75d1a010a772fce3dd2d0c",
+          "kind": "capability",
+          "ownerHostId": "e4d25b2f-9bbc-4a08-bb69-347030dcaf1d",
+          "subjectId": "exec",
+          "subjectRevision": "descriptor.33395ee9967dcfbad2b7605059f7fac89ccb6237c66861ed54e1dda64e3a7016",
+          "connectionGeneration": 1,
+          "catalogGeneration": 1
+        },
+        "displayName": "exec",
+        "summary": "Host capability (effect; non-cooperative cancellation)",
+        "callMode": "capability",
+        "modelKey": "ext_capability_98a54c0e91da_2706c619fe73f0cf1124",
+        "available": true
+      }
+    ],
+    "collisions": []
+  },
+  "policy": {
+    "mode": "allowlist",
+    "allowlist": [
+      "hostname"
+    ],
+    "cwd": "G:\\taki-codex-work\\integration-final-e2e-d813c8abe6ee48db86a8b9fdaba5c36f\\Temp\\taki-agent-interface-node-P666MM"
+  },
+  "autoApprove": "exec=deny",
+  "preflightResult": {
+    "ok": true,
+    "exitCode": 0,
+    "stdout": "tianxuanji\r\n",
+    "stderr": "",
+    "truncated": false,
+    "timedOut": false,
+    "durationMs": 100
+  },
+  "pid": 29752,
+  "exitCode": 1,
+  "signalCode": null,
+  "exited": true,
+  "closed": true,
+  "startupFailed": false,
+  "cleanupFailed": false,
+  "nodeDataRemoved": true,
+  "audit": [
+    {
+      "ts": "2026-11-12T11:24:59.271Z",
+      "requestId": "75ca7bfa-eeb3-4448-8abf-a6ceb62b435a",
+      "capability": "exec",
+      "decision": "auto-allowed",
+      "command": "hostname"
+    }
+  ]
+}

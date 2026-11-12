@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { hindsightApplicationWireJson } from "@taki/shared";
 import { memoryWriteFixture, writeTestBank, writeTestMetadata, writeTestRetain, WRITE_TEST_MEMORY,
   type MemoryWriteFixture } from "../memory/hindsight/hindsight-memory-write-fixtures.ts";
 import { readHindsightMemoryWriteTarget } from "../memory/hindsight/hindsight-memory-write-context.ts";
 
 const fixtures: MemoryWriteFixture[] = []; const directories: string[] = [];
-const ownedRuntime = resolve("H:/TakiAgent/.trellis/.runtime/b6-continuation-20260911");
+const ownedRuntime = resolve(tmpdir());
 afterEach(async () => {
   for (const fixture of fixtures.splice(0)) await fixture.close();
   for (const directory of directories.splice(0)) {

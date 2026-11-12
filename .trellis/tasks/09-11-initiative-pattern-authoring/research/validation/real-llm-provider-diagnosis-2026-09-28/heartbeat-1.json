@@ -1,0 +1,97 @@
+{
+  "name": "heartbeat-1",
+  "startedAt": "2026-09-28T10:49:56.069Z",
+  "passed": false,
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": null,
+          "rootKeys": [
+            "$schema",
+            "oneOf"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "status": 400,
+      "error": "{\"error\":{\"message\":\"Invalid schema for function 'heartbeat_respond': schema must be a JSON Schema of 'type: \\\"object\\\"', got 'type: null'. (request_id: 47d5cca0-25be-4e00-984a-157f1b291979)\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}"
+    }
+  ],
+  "finishedAt": "2026-09-28T10:50:01.439Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "failed",
+      "outcome": "failed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "total_tokens": null,
+      "cache_read_tokens": null,
+      "reasoning_tokens": null
+    }
+  ],
+  "deliveries": [],
+  "patterns": [
+    {
+      "state": "active",
+      "version": 2
+    }
+  ],
+  "schedules": [],
+  "authoringTrace": [],
+  "tools": []
+}

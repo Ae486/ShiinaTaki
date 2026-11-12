@@ -1,7 +1,7 @@
 /**
  * INPUT:  process env (TAKI_ATTACHMENT_TTL_DAYS)
  * OUTPUT: loadAttachmentConfig(env) -> { ttlDays, ttlMs }; default 14 days; garbage/zero/negative = fatal at boot
- * POS:    core/config — the user-editable image-retention TTL (D11-style); only raw bytes are GC'd, the description-memory never
+ * POS:    core/config — the user-editable original-image TTL; expired evidence is unavailable, with no automatic description substitute
  */
 import { z } from "zod";
 

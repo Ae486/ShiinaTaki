@@ -40,11 +40,11 @@ describe("editorFor", () => {
     expect([intEditor.min, intEditor.max]).toEqual([1, 50]);
   });
 
-  it("disables an env-locked knob and names the reason", () => {
+  it("keeps ordinary environment-supplied settings editable", () => {
     const editor = editorFor(entry({ envLocked: true }));
 
-    expect(editor.disabled).toBe(true);
-    expect(editor.disabledReason).toContain("环境变量");
+    expect(editor.disabled).toBe(false);
+    expect(editor.disabledReason).toBeNull();
   });
 
   it("disables an env-only bootstrap knob", () => {

@@ -1,0 +1,16 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent-worktrees\t4
+> eslint .
+
+
+H:\TakiAgent-worktrees\t4\apps\desktop\test\qqmm-home-native-smoke.mjs
+  181:98   error  Unnecessary escape character: \"  no-useless-escape
+  181:104  error  Unnecessary escape character: \"  no-useless-escape
+  183:73   error  Unnecessary escape character: \"  no-useless-escape
+  183:79   error  Unnecessary escape character: \"  no-useless-escape
+  198:75   error  Unnecessary escape character: \"  no-useless-escape
+  198:81   error  Unnecessary escape character: \"  no-useless-escape
+
+✖ 6 problems (6 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

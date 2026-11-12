@@ -1,0 +1,74 @@
+[
+  {
+    "label": "desktop-build-before-final-edits",
+    "sourceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+    "sourceLine": 434,
+    "completedAt": "2026-09-28T02:25:05.643Z",
+    "executionId": "exec-13a5ac43-9251-4761-bcc1-08cc92015e65",
+    "command": "pnpm --filter @taki/desktop build",
+    "cwd": "file:///H:/TakiAgent-worktrees/t4",
+    "exitCode": 0,
+    "stdout": "\n> @taki/desktop@0.0.0 build H:\\TakiAgent-worktrees\\t4\\apps\\desktop\n> vite build\n\nvite v8.1.3 building client environment for production...\n\u001b[2K\rtransforming...✓ 1528 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                                   0.56 kB │ gzip:   0.31 kB\ndist/home.html                                    0.98 kB │ gzip:   0.48 kB\ndist/pet.html                                     1.99 kB │ gzip:   0.81 kB\ndist/assets/home-C1jbtpQm.css                    22.66 kB │ gzip:   4.60 kB\ndist/assets/styles-DwtsHbug.css                  41.53 kB │ gzip:   8.71 kB\ndist/assets/webworkerAll-bS7jfFVx.js              0.05 kB │ gzip:   0.06 kB\ndist/assets/init-DOvbostX.js                      0.11 kB │ gzip:   0.10 kB\ndist/assets/browserAll-CUQlys6g.js                0.22 kB │ gzip:   0.16 kB\ndist/assets/rolldown-runtime-QTnfLwEv.js          0.69 kB │ gzip:   0.42 kB\ndist/assets/use-committed-exposure-CDeWUCdh.js    1.17 kB │ gzip:   0.70 kB\ndist/assets/main-CGQccVS2.js                      1.55 kB │ gzip:   0.82 kB\ndist/assets/canvasUtils-NYDebSyR.js               6.01 kB │ gzip:   2.02 kB\ndist/assets/GpuStencilModesToPixi-dwvgL6gZ.js    10.55 kB │ gzip:   2.80 kB\ndist/assets/lib-BNoccIiT.js                      26.64 kB │ gzip:   7.09 kB\ndist/assets/GCManagedHash-Bhl_KYCc.js            26.70 kB │ gzip:   9.33 kB\ndist/assets/Filter-Bl0i_YIN.js                   38.74 kB │ gzip:  11.02 kB\ndist/assets/RenderTargetSystem-DvK9k3uK.js       51.75 kB │ gzip:  14.54 kB\ndist/assets/Shader-CjXiywt1.js                   62.51 kB │ gzip:  20.78 kB\ndist/assets/markdown-view-DvDljHHR.js           154.94 kB │ gzip:  46.25 kB\ndist/assets/styles-E5jomcqq.js                  193.56 kB │ gzip:  61.11 kB\ndist/assets/use-surface-presence-BRylu7ne.js    337.21 kB │ gzip:  93.92 kB\ndist/assets/home-DwpsTosy.js                    348.76 kB │ gzip: 104.21 kB\ndist/assets/pet-B8qq2Uq-.js                     636.72 kB │ gzip: 173.80 kB\n\n✓ built in 2.08s\n[plugin builtin:vite-reporter] \n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n",
+    "stderr": ""
+  },
+  {
+    "label": "native-fixture-build",
+    "sourceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+    "sourceLine": 528,
+    "completedAt": "2026-09-28T02:31:41.081Z",
+    "executionId": "exec-8879b729-07f0-483a-ba64-586736a6495b",
+    "command": "cargo build --manifest-path apps/desktop/src-tauri/Cargo.toml --example c2-presence-fixture --locked",
+    "cwd": "file:///H:/TakiAgent-worktrees/t4",
+    "exitCode": 0,
+    "stdout": "   Compiling taki-desktop v0.0.0 (H:\\TakiAgent-worktrees\\t4\\apps\\desktop\\src-tauri)\nwarning: linker stdout: 正在创建库 H:\\TakiAgent-worktrees\\t4\\apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib.dll.lib 和对象 H:\\TakiAgent-worktrees\\t4\\apps\\desktop\\src-tauri\\target\\debug\\deps\\taki_desktop_lib.dll.exp\n  |\n  = note: `#[warn(linker_messages)]` on by default\n\nwarning: `taki-desktop` (lib) generated 1 warning\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 26.08s\n",
+    "stderr": ""
+  },
+  {
+    "label": "native-smoke",
+    "sourceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+    "sourceLine": 570,
+    "completedAt": "2026-09-28T02:36:39.312Z",
+    "executionId": "exec-45b1670d-09ea-4912-99fa-de0696b565e7",
+    "command": "node apps/desktop/test/c2-presence-native-smoke.mjs",
+    "cwd": "file:///H:/TakiAgent-worktrees/t4",
+    "exitCode": 0,
+    "stdout": "[plugin builtin:vite-reporter] \n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\nPASS actual development StrictMode and independent Home/Chat/Pet sources; opening/focus is not input\nPASS lazy Skeleton and closed Pet do not expose committed messages or open the bubble\nPASS real rendered Chat and Pet text qualify after two seconds; programmatic opening remains input-free\nPASS actual StrictMode and same-client render remount keep one live source identity\nPASS visible unfocused text remains eligible\nPASS native minimize ends both Home/Chat visibility; restore requires actual exposure again\nPASS hidden retained Chat stays ineligible; Home settings use the designated source and real device zone\nPASS synthetic DOM input rejected; trusted browser input accepted; renewal preserves original age\nPASS Home reconnect replaces only Home source and carries no old input\nPASS closing the bubble and hiding its native window withdraw exposure\nPASS offscreen new content gives no exposure and preserves the reader scroll/selection anchor\nC2 evidence: H:\\TakiAgent-worktrees\\t4\\apps\\desktop\\src-tauri\\target\\c2-native-evidence\\2026-09-28T02-35-50-358Z\n",
+    "stderr": ""
+  },
+  {
+    "label": "desktop-scoped-eslint",
+    "sourceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+    "sourceLine": 579,
+    "completedAt": "2026-09-28T02:38:04.333Z",
+    "executionId": "exec-19b5aed4-62c0-418a-aff9-aefc2f45cad8",
+    "command": "pnpm exec eslint apps/desktop/src apps/desktop/test/c2-*",
+    "cwd": "file:///H:/TakiAgent-worktrees/t4",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "label": "desktop-full-tests",
+    "sourceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+    "sourceLine": 580,
+    "completedAt": "2026-09-28T02:38:17.507Z",
+    "executionId": "exec-f318003d-1179-4f9c-b226-1fddbf6e7b64",
+    "command": "pnpm --filter @taki/desktop test",
+    "cwd": "file:///H:/TakiAgent-worktrees/t4",
+    "exitCode": 0,
+    "stdout": "\n> @taki/desktop@0.0.0 test H:\\TakiAgent-worktrees\\t4\\apps\\desktop\n> vitest run --passWithNoTests\n\n\n RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop\n\n\n Test Files  186 passed (186)\n      Tests  1104 passed (1104)\n   Start at  10:37:52\n   Duration  24.64s (transform 127.75s, setup 0ms, import 307.05s, tests 11.42s, environment 37ms)\n\n",
+    "stderr": ""
+  },
+  {
+    "label": "desktop-typecheck",
+    "sourceSession": "01a0e5c0-8b2b-74f3-adf0-204cbf616a7e",
+    "sourceLine": 588,
+    "completedAt": "2026-09-28T02:39:57.846Z",
+    "executionId": "exec-c95ccada-e043-4a54-af33-9b21e2f96f31",
+    "command": "pnpm --filter @taki/desktop typecheck",
+    "cwd": "file:///H:/TakiAgent-worktrees/t4",
+    "exitCode": 0,
+    "stdout": "\n> @taki/desktop@0.0.0 typecheck H:\\TakiAgent-worktrees\\t4\\apps\\desktop\n> tsc --noEmit\n\n",
+    "stderr": ""
+  }
+]

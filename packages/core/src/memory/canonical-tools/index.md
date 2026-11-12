@@ -2,6 +2,8 @@
 - canonical-memory-tools.ts — provider-neutral canonical tools with immutable capabilities, routes and original Run/Attempt/Effect queue provenance
 - memory-effect-tool.ts — immutable authority/capability Effect sidecars and deterministic per-Bank request identities
 - retain-tool.ts — strict foreground retain definition with shared writing rules and source-grounded content/context cues
+- memory-record-model-view.ts — semantic record/Pending-source views retaining attribution, policy, time, deep metadata and exact mutation selectors
+- memory-tool-model-output.ts — operation-specific SDK model views preserving raw envelopes, D77 serialization and untrusted fencing
 - recall-tool.ts — bounded scoped recall definition
 - reflect-tool.ts — capability-gated reflection with an explicit completion budget that may include provider reasoning
 - update-memory-tool.ts — revisioned edit definition

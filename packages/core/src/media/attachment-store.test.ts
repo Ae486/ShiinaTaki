@@ -79,6 +79,18 @@ describe("createAttachmentStore read confinement (T4 — the security surface)",
 });
 
 describe("createAttachmentStore lifecycle (T4)", () => {
+  it("reports EXPIRED before the periodic sweep without removing data or refreshing its lifetime", () => {
+    const { dir } = fresh();
+    const store = createAttachmentStore({ attachmentsDir: dir, ttlMs: () => 1000 });
+    const saved = store.save(HELLO, "image/png");
+    const path = join(dir, saved.ref.slice("attachments/".length));
+    const old = new Date(Date.now() - 2000); utimesSync(path, old, old);
+    const mtime = statSync(path).mtimeMs;
+    expect(store.read(saved.ref)).toEqual({ ok: false, code: "EXPIRED" });
+    expect(existsSync(path)).toBe(true);
+    expect(statSync(path).mtimeMs).toBe(mtime);
+  });
+
   it("sweepExpired deletes only files older than the ttl", () => {
     const { store, dir } = fresh();
     const stale = store.save(Buffer.from("old").toString("base64"), "image/png");

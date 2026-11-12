@@ -1,10 +1,7 @@
 /**
- * INPUT: page-local MCP draft, validation error, save/cancel callbacks and the save-in-flight flag
- * OUTPUT: stdio/http desired-config form whose stored secrets remain empty write-only placeholders
- * POS: Home MCP presentation editor; state validates and the controller owns transport/authority. Batch-2:
- *      every field rides the shared Field (visible focus ring, explicit labels — including the env/header
- *      pair), KindPicker rides SelectionTile (aria-pressed), the error rides FeedbackLine, and saving shows
- *      a pending state (A6).
+ * INPUT:  retained MCP draft, validation feedback, explicit save/cancel actions and current readiness.
+ * OUTPUT: stable stdio/http form with write-only credential fields and truthful pending/disabled controls.
+ * POS:    Home MCP presentation — preserves draft/base revision; the controller owns validation and writes.
  */
 
 import { Badge } from "../../badge.tsx";
@@ -24,6 +21,7 @@ export function McpServerEditor(input: {
   error: string | null;
   editing: boolean;
   saving: boolean;
+  disabled?: boolean;
 }) {
   const { draft } = input;
   const patch = (next: Partial<McpServerDraft>): void => input.onChange({ ...draft, ...next });
@@ -46,8 +44,8 @@ export function McpServerEditor(input: {
         {input.error && <FeedbackLine tone="danger">{input.error}</FeedbackLine>}
         <div className="flex justify-end gap-2">
           <ActionButton onClick={input.onCancel}>取消</ActionButton>
-          <ActionButton tone="primary" busy={input.saving} disabled={input.saving} onClick={input.onSave}>
-            {input.saving ? "保存中…" : "保存"}
+          <ActionButton tone="primary" busy={input.saving} disabled={input.saving || input.disabled} onClick={input.onSave}>
+            保存
           </ActionButton>
         </div>
       </div>

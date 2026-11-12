@@ -1,0 +1,1572 @@
+{
+  "contract": "bilinote.bridge-wire.v1",
+  "schemas": {
+    "instance": {
+      "properties": {
+        "schema_version": {
+          "const": "bilinote.service.v1",
+          "default": "bilinote.service.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "service_instance_id": {
+          "title": "Service Instance Id",
+          "type": "string"
+        },
+        "request_contract": {
+          "const": "bilinote.request.v1",
+          "default": "bilinote.request.v1",
+          "title": "Request Contract",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service_instance_id"
+      ],
+      "title": "NativeInstanceMetadata",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "receipt": {
+      "properties": {
+        "schema_version": {
+          "const": "bilinote.request-receipt.v1",
+          "default": "bilinote.request-receipt.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "identity": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Identity",
+          "type": "object"
+        },
+        "request_digest": {
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "request_digest_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Request Digest Version",
+          "type": "integer"
+        },
+        "disposition": {
+          "enum": [
+            "reserved",
+            "running",
+            "succeeded",
+            "failed",
+            "interrupted"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "reused": {
+          "title": "Reused",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "task_id",
+        "identity",
+        "request_digest",
+        "disposition",
+        "reused"
+      ],
+      "title": "NativeRequestReceipt",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "status": {
+      "$defs": {
+        "CompleteNoteArtifact": {
+          "additionalProperties": false,
+          "properties": {
+            "read_path": {
+              "title": "Read Path",
+              "type": "string"
+            },
+            "sha256": {
+              "title": "Sha256",
+              "type": "string"
+            },
+            "byte_length": {
+              "title": "Byte Length",
+              "type": "integer"
+            },
+            "artifact_id": {
+              "const": "complete_result",
+              "default": "complete_result",
+              "title": "Artifact Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": "bilinote.media-result.v1",
+              "default": "bilinote.media-result.v1",
+              "title": "Schema Version",
+              "type": "string"
+            },
+            "media_type": {
+              "const": "application/json",
+              "default": "application/json",
+              "title": "Media Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "read_path",
+            "sha256",
+            "byte_length"
+          ],
+          "title": "CompleteNoteArtifact",
+          "type": "object"
+        },
+        "NativeIdentity": {
+          "additionalProperties": false,
+          "properties": {
+            "job_id": {
+              "title": "Job Id",
+              "type": "string"
+            },
+            "service_instance_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Service Instance Id"
+            },
+            "request_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Request Id"
+            }
+          },
+          "required": [
+            "job_id"
+          ],
+          "title": "NativeIdentity",
+          "type": "object"
+        },
+        "NativeReadError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "title": "Code",
+              "type": "string"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "NativeReadError",
+          "type": "object"
+        },
+        "NativeResultAvailability": {
+          "additionalProperties": false,
+          "properties": {
+            "availability": {
+              "enum": [
+                "not_ready",
+                "available",
+                "missing",
+                "corrupt",
+                "none",
+                "unknown"
+              ],
+              "title": "Availability",
+              "type": "string"
+            },
+            "artifact": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/CompleteNoteArtifact"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            }
+          },
+          "required": [
+            "availability"
+          ],
+          "title": "NativeResultAvailability",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "identity": {
+          "$ref": "#/$defs/NativeIdentity"
+        },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "not_found",
+            "unknown"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/$defs/NativeResultAvailability"
+        },
+        "schema_version": {
+          "const": "bilinote.job-status.v1",
+          "default": "bilinote.job-status.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "enum": [
+                "parsing",
+                "downloading",
+                "transcribing",
+                "summarizing",
+                "formatting",
+                "saving"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stage"
+        },
+        "completed_at_utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completed At Utc"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NativeReadError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "identity",
+        "state",
+        "result"
+      ],
+      "title": "NoteStatusV1",
+      "type": "object"
+    },
+    "result": {
+      "$defs": {
+        "AcquiredDuration": {
+          "additionalProperties": false,
+          "properties": {
+            "seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Seconds"
+            },
+            "basis": {
+              "enum": [
+                "downloaded_media",
+                "platform_metadata",
+                "unknown"
+              ],
+              "title": "Basis",
+              "type": "string"
+            },
+            "platform_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Platform Seconds"
+            }
+          },
+          "required": [
+            "seconds",
+            "basis",
+            "platform_seconds"
+          ],
+          "title": "AcquiredDuration",
+          "type": "object"
+        },
+        "AcquiredSource": {
+          "additionalProperties": false,
+          "properties": {
+            "reported_media_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reported Media Id"
+            },
+            "requested_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Requested Url"
+            },
+            "binding": {
+              "enum": [
+                "exact",
+                "unverified"
+              ],
+              "title": "Binding",
+              "type": "string"
+            },
+            "resolved": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/BilibiliPart"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "acquisitions": {
+              "items": {
+                "$ref": "#/$defs/AcquisitionEvidence"
+              },
+              "title": "Acquisitions",
+              "type": "array"
+            }
+          },
+          "required": [
+            "reported_media_id",
+            "requested_url",
+            "binding",
+            "resolved",
+            "acquisitions"
+          ],
+          "title": "AcquiredSource",
+          "type": "object"
+        },
+        "AcquisitionEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "requested_url": {
+              "title": "Requested Url",
+              "type": "string"
+            },
+            "resolved": {
+              "$ref": "#/$defs/BilibiliPart"
+            },
+            "method": {
+              "enum": [
+                "platform_metadata",
+                "platform_subtitle",
+                "audio_download",
+                "video_download"
+              ],
+              "title": "Method",
+              "type": "string"
+            },
+            "cache": {
+              "default": "none",
+              "enum": [
+                "none",
+                "part_cache",
+                "job_cache",
+                "legacy_cache",
+                "unknown"
+              ],
+              "title": "Cache",
+              "type": "string"
+            },
+            "content_sha256": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Content Sha256"
+            },
+            "platform_duration_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Platform Duration Seconds"
+            },
+            "media_duration_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Media Duration Seconds"
+            }
+          },
+          "required": [
+            "requested_url",
+            "resolved",
+            "method"
+          ],
+          "title": "AcquisitionEvidence",
+          "type": "object"
+        },
+        "BilibiliPart": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "bilibili",
+              "default": "bilibili",
+              "title": "Kind",
+              "type": "string"
+            },
+            "bvid": {
+              "pattern": "^BV[A-Za-z0-9]+$",
+              "title": "Bvid",
+              "type": "string"
+            },
+            "cid": {
+              "pattern": "^[1-9][0-9]*$",
+              "title": "Cid",
+              "type": "string"
+            },
+            "page": {
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bvid",
+            "cid",
+            "page"
+          ],
+          "title": "BilibiliPart",
+          "type": "object"
+        },
+        "ExtractionOmission": {
+          "additionalProperties": false,
+          "properties": {
+            "at_seconds": {
+              "minimum": 0,
+              "title": "At Seconds",
+              "type": "number"
+            },
+            "reason": {
+              "enum": [
+                "extraction_failed",
+                "deduplicated"
+              ],
+              "title": "Reason",
+              "type": "string"
+            }
+          },
+          "required": [
+            "at_seconds",
+            "reason"
+          ],
+          "title": "ExtractionOmission",
+          "type": "object"
+        },
+        "FrameEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "evidence_id": {
+              "title": "Evidence Id",
+              "type": "string"
+            },
+            "at_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Seconds"
+            },
+            "grid_id": {
+              "title": "Grid Id",
+              "type": "string"
+            },
+            "cell_index": {
+              "minimum": 0,
+              "title": "Cell Index",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "evidence_id",
+            "at_seconds",
+            "grid_id",
+            "cell_index"
+          ],
+          "title": "FrameEvidence",
+          "type": "object"
+        },
+        "GenerationEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "receipts": {
+              "items": {
+                "$ref": "#/$defs/RequestReceipt"
+              },
+              "title": "Receipts",
+              "type": "array"
+            },
+            "unknown_text_refs": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Unknown Text Refs",
+              "type": "array"
+            },
+            "unknown_frame_refs": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Unknown Frame Refs",
+              "type": "array"
+            },
+            "text_only_fallback": {
+              "default": false,
+              "title": "Text Only Fallback",
+              "type": "boolean"
+            },
+            "legacy_checkpoint_reused": {
+              "default": false,
+              "title": "Legacy Checkpoint Reused",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "receipts"
+          ],
+          "title": "GenerationEvidence",
+          "type": "object"
+        },
+        "LegacyAnalysis": {
+          "additionalProperties": false,
+          "properties": {
+            "markdown": {
+              "title": "Markdown",
+              "type": "string"
+            },
+            "format": {
+              "const": "legacy_markdown",
+              "default": "legacy_markdown",
+              "title": "Format",
+              "type": "string"
+            },
+            "moments": {
+              "default": null,
+              "title": "Moments",
+              "type": "null"
+            }
+          },
+          "required": [
+            "markdown"
+          ],
+          "title": "LegacyAnalysis",
+          "type": "object"
+        },
+        "LegacySource": {
+          "additionalProperties": false,
+          "properties": {
+            "reported_media_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reported Media Id"
+            },
+            "requested_url": {
+              "default": null,
+              "title": "Requested Url",
+              "type": "null"
+            },
+            "binding": {
+              "const": "unverified",
+              "default": "unverified",
+              "title": "Binding",
+              "type": "string"
+            },
+            "resolved": {
+              "default": null,
+              "title": "Resolved",
+              "type": "null"
+            }
+          },
+          "required": [
+            "reported_media_id"
+          ],
+          "title": "LegacySource",
+          "type": "object"
+        },
+        "LegacyTextEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "language": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Language"
+            },
+            "full_text": {
+              "title": "Full Text",
+              "type": "string"
+            },
+            "segments": {
+              "items": {
+                "$ref": "#/$defs/TextSegment"
+              },
+              "title": "Segments",
+              "type": "array"
+            },
+            "origin": {
+              "const": "unknown",
+              "default": "unknown",
+              "title": "Origin",
+              "type": "string"
+            },
+            "provided_to_model": {
+              "default": null,
+              "title": "Provided To Model",
+              "type": "null"
+            }
+          },
+          "required": [
+            "language",
+            "full_text",
+            "segments"
+          ],
+          "title": "LegacyTextEvidence",
+          "type": "object"
+        },
+        "LegacyVisualEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "requested": {
+              "default": null,
+              "title": "Requested",
+              "type": "null"
+            },
+            "provided_to_model": {
+              "default": null,
+              "title": "Provided To Model",
+              "type": "null"
+            },
+            "frames": {
+              "default": null,
+              "title": "Frames",
+              "type": "null"
+            },
+            "omitted_frames": {
+              "default": null,
+              "title": "Omitted Frames",
+              "type": "null"
+            }
+          },
+          "title": "LegacyVisualEvidence",
+          "type": "object"
+        },
+        "MediaDuration": {
+          "additionalProperties": false,
+          "properties": {
+            "seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Seconds"
+            },
+            "basis": {
+              "const": "unknown",
+              "default": "unknown",
+              "title": "Basis",
+              "type": "string"
+            }
+          },
+          "required": [
+            "seconds"
+          ],
+          "title": "MediaDuration",
+          "type": "object"
+        },
+        "NativeIdentity": {
+          "additionalProperties": false,
+          "properties": {
+            "job_id": {
+              "title": "Job Id",
+              "type": "string"
+            },
+            "service_instance_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Service Instance Id"
+            },
+            "request_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Request Id"
+            }
+          },
+          "required": [
+            "job_id"
+          ],
+          "title": "NativeIdentity",
+          "type": "object"
+        },
+        "OmittedFrame": {
+          "additionalProperties": false,
+          "properties": {
+            "evidence_id": {
+              "title": "Evidence Id",
+              "type": "string"
+            },
+            "at_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Seconds"
+            },
+            "reason": {
+              "enum": [
+                "request_budget_text_fallback",
+                "not_submitted",
+                "legacy_checkpoint_unknown"
+              ],
+              "title": "Reason",
+              "type": "string"
+            }
+          },
+          "required": [
+            "evidence_id",
+            "at_seconds",
+            "reason"
+          ],
+          "title": "OmittedFrame",
+          "type": "object"
+        },
+        "ProducedAnalysis": {
+          "additionalProperties": false,
+          "properties": {
+            "markdown": {
+              "title": "Markdown",
+              "type": "string"
+            },
+            "format": {
+              "enum": [
+                "legacy_markdown",
+                "media_v1"
+              ],
+              "title": "Format",
+              "type": "string"
+            },
+            "moments": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/$defs/ViewingMoment"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Moments"
+            },
+            "generation": {
+              "$ref": "#/$defs/GenerationEvidence"
+            }
+          },
+          "required": [
+            "markdown",
+            "format",
+            "moments",
+            "generation"
+          ],
+          "title": "ProducedAnalysis",
+          "type": "object"
+        },
+        "ProducedTextEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "language": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Language"
+            },
+            "full_text": {
+              "title": "Full Text",
+              "type": "string"
+            },
+            "segments": {
+              "items": {
+                "$ref": "#/$defs/TextSegment"
+              },
+              "title": "Segments",
+              "type": "array"
+            },
+            "origin": {
+              "enum": [
+                "asr",
+                "platform_subtitle",
+                "browser_prefetched",
+                "unknown"
+              ],
+              "title": "Origin",
+              "type": "string"
+            },
+            "provided_to_model": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provided To Model"
+            },
+            "provided_segment_refs": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Provided Segment Refs",
+              "type": "array"
+            },
+            "unknown_segment_refs": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Unknown Segment Refs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "language",
+            "full_text",
+            "segments",
+            "origin",
+            "provided_to_model",
+            "provided_segment_refs",
+            "unknown_segment_refs"
+          ],
+          "title": "ProducedTextEvidence",
+          "type": "object"
+        },
+        "ProducedVisualEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "requested": {
+              "title": "Requested",
+              "type": "boolean"
+            },
+            "provided_to_model": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provided To Model"
+            },
+            "frames": {
+              "items": {
+                "$ref": "#/$defs/FrameEvidence"
+              },
+              "title": "Frames",
+              "type": "array"
+            },
+            "omitted_frames": {
+              "items": {
+                "$ref": "#/$defs/OmittedFrame"
+              },
+              "title": "Omitted Frames",
+              "type": "array"
+            },
+            "extraction_omissions": {
+              "items": {
+                "$ref": "#/$defs/ExtractionOmission"
+              },
+              "title": "Extraction Omissions",
+              "type": "array"
+            }
+          },
+          "required": [
+            "requested",
+            "provided_to_model",
+            "frames",
+            "omitted_frames",
+            "extraction_omissions"
+          ],
+          "title": "ProducedVisualEvidence",
+          "type": "object"
+        },
+        "RequestReceipt": {
+          "additionalProperties": false,
+          "properties": {
+            "request_id": {
+              "title": "Request Id",
+              "type": "string"
+            },
+            "phase": {
+              "enum": [
+                "summarize",
+                "merge"
+              ],
+              "title": "Phase",
+              "type": "string"
+            },
+            "payload_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Payload Sha256",
+              "type": "string"
+            },
+            "response_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Response Sha256",
+              "type": "string"
+            },
+            "text_inputs": {
+              "items": {
+                "$ref": "#/$defs/TextInput"
+              },
+              "title": "Text Inputs",
+              "type": "array"
+            },
+            "frame_refs": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Frame Refs",
+              "type": "array"
+            },
+            "image_count": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Image Count",
+              "type": "integer"
+            },
+            "parent_request_ids": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Parent Request Ids",
+              "type": "array"
+            },
+            "checkpoint_reused": {
+              "default": false,
+              "title": "Checkpoint Reused",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "request_id",
+            "phase",
+            "payload_sha256",
+            "response_sha256",
+            "text_inputs",
+            "frame_refs",
+            "parent_request_ids"
+          ],
+          "title": "RequestReceipt",
+          "type": "object"
+        },
+        "TextInput": {
+          "additionalProperties": false,
+          "properties": {
+            "evidence_id": {
+              "title": "Evidence Id",
+              "type": "string"
+            },
+            "start_char": {
+              "minimum": 0,
+              "title": "Start Char",
+              "type": "integer"
+            },
+            "end_char": {
+              "minimum": 0,
+              "title": "End Char",
+              "type": "integer"
+            },
+            "sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            }
+          },
+          "required": [
+            "evidence_id",
+            "start_char",
+            "end_char",
+            "sha256"
+          ],
+          "title": "TextInput",
+          "type": "object"
+        },
+        "TextSegment": {
+          "additionalProperties": false,
+          "properties": {
+            "evidence_id": {
+              "title": "Evidence Id",
+              "type": "string"
+            },
+            "start_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Seconds"
+            },
+            "end_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Seconds"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            }
+          },
+          "required": [
+            "evidence_id",
+            "start_seconds",
+            "end_seconds",
+            "text"
+          ],
+          "title": "TextSegment",
+          "type": "object"
+        },
+        "ViewingMoment": {
+          "additionalProperties": false,
+          "properties": {
+            "moment_id": {
+              "minLength": 1,
+              "title": "Moment Id",
+              "type": "string"
+            },
+            "at_seconds": {
+              "minimum": 0,
+              "title": "At Seconds",
+              "type": "number"
+            },
+            "end_seconds": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Seconds"
+            },
+            "content": {
+              "minLength": 1,
+              "title": "Content",
+              "type": "string"
+            },
+            "evidence_refs": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "title": "Evidence Refs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "moment_id",
+            "at_seconds",
+            "end_seconds",
+            "content",
+            "evidence_refs"
+          ],
+          "title": "ViewingMoment",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "identity": {
+          "$ref": "#/$defs/NativeIdentity"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LegacySource"
+            },
+            {
+              "$ref": "#/$defs/AcquiredSource"
+            }
+          ],
+          "title": "Source"
+        },
+        "duration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MediaDuration"
+            },
+            {
+              "$ref": "#/$defs/AcquiredDuration"
+            }
+          ],
+          "title": "Duration"
+        },
+        "text_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LegacyTextEvidence"
+            },
+            {
+              "$ref": "#/$defs/ProducedTextEvidence"
+            }
+          ],
+          "title": "Text Evidence"
+        },
+        "analysis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LegacyAnalysis"
+            },
+            {
+              "$ref": "#/$defs/ProducedAnalysis"
+            }
+          ],
+          "title": "Analysis"
+        },
+        "schema_version": {
+          "const": "bilinote.media-result.v1",
+          "default": "bilinote.media-result.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "visual_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LegacyVisualEvidence"
+            },
+            {
+              "$ref": "#/$defs/ProducedVisualEvidence"
+            }
+          ],
+          "title": "Visual Evidence"
+        }
+      },
+      "required": [
+        "identity",
+        "source",
+        "duration",
+        "text_evidence",
+        "analysis"
+      ],
+      "title": "NoteResultV1",
+      "type": "object"
+    },
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "video_url": {
+          "title": "Video Url",
+          "type": "string"
+        },
+        "platform": {
+          "const": "bilibili",
+          "title": "Platform",
+          "type": "string"
+        },
+        "quality": {
+          "enum": [
+            "fast",
+            "medium",
+            "slow"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "model_name": {
+          "minLength": 1,
+          "title": "Model Name",
+          "type": "string"
+        },
+        "provider_id": {
+          "minLength": 1,
+          "title": "Provider Id",
+          "type": "string"
+        },
+        "screenshot": {
+          "default": false,
+          "title": "Screenshot",
+          "type": "boolean"
+        },
+        "link": {
+          "default": false,
+          "title": "Link",
+          "type": "boolean"
+        },
+        "format": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Format",
+          "type": "array"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Style"
+        },
+        "extras": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extras"
+        },
+        "video_understanding": {
+          "default": false,
+          "title": "Video Understanding",
+          "type": "boolean"
+        },
+        "video_interval": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Video Interval",
+          "type": "integer"
+        },
+        "grid_size": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Grid Size",
+          "type": "array"
+        },
+        "output_format": {
+          "default": "markdown",
+          "enum": [
+            "markdown",
+            "media_v1"
+          ],
+          "title": "Output Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "video_url",
+        "platform",
+        "quality",
+        "model_name",
+        "provider_id"
+      ],
+      "title": "NativeGenerationInput",
+      "type": "object"
+    },
+    "probe": {
+      "$defs": {
+        "MediaAccessSource": {
+          "additionalProperties": false,
+          "properties": {
+            "platform": {
+              "const": "bilibili",
+              "title": "Platform",
+              "type": "string"
+            },
+            "bvid": {
+              "pattern": "^BV[A-Za-z0-9]+$",
+              "title": "Bvid",
+              "type": "string"
+            },
+            "cid": {
+              "pattern": "^[1-9][0-9]*$",
+              "title": "Cid",
+              "type": "string"
+            },
+            "page": {
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            },
+            "canonical_url": {
+              "title": "Canonical Url",
+              "type": "string"
+            }
+          },
+          "required": [
+            "platform",
+            "bvid",
+            "cid",
+            "page",
+            "canonical_url"
+          ],
+          "title": "MediaAccessSource",
+          "type": "object"
+        },
+        "MediaRangeAccess": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "video_range",
+              "title": "Kind",
+              "type": "string"
+            },
+            "byte_length": {
+              "maximum": 1024,
+              "minimum": 1,
+              "title": "Byte Length",
+              "type": "integer"
+            },
+            "checked_at": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "title": "Checked At",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "byte_length",
+            "checked_at"
+          ],
+          "title": "MediaRangeAccess",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "bilinote.media-access.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "service_instance_id": {
+          "title": "Service Instance Id",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/MediaAccessSource"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "duration_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duration Seconds"
+        },
+        "access": {
+          "$ref": "#/$defs/MediaRangeAccess"
+        }
+      },
+      "required": [
+        "schema_version",
+        "service_instance_id",
+        "source",
+        "title",
+        "duration_seconds",
+        "access"
+      ],
+      "title": "MediaAccessResult",
+      "type": "object"
+    }
+  },
+  "safe_error_codes": [
+    "invalid_media_part",
+    "invalid_media_target",
+    "invalid_media_timing",
+    "invalid_model_checkpoint",
+    "invalid_native_request",
+    "invalid_structured_result",
+    "job_failed",
+    "job_not_found",
+    "media_access_cancelled",
+    "media_access_invalid",
+    "media_access_timeout",
+    "media_access_unauthorized",
+    "media_access_unavailable",
+    "media_identity_mismatch",
+    "media_identity_unavailable",
+    "model_request_budget_exceeded",
+    "native_artifact_conflict",
+    "native_artifact_invalid",
+    "native_enqueue_failed",
+    "native_execution_unknown",
+    "native_generation_failed",
+    "native_identity_unverified",
+    "native_interrupted_before_start",
+    "native_job_not_found",
+    "native_not_ready",
+    "native_owner_unavailable",
+    "native_result_unavailable",
+    "native_schema_invalid",
+    "native_schema_required",
+    "native_storage_unsupported",
+    "native_store_unavailable",
+    "request_bound_job",
+    "request_conflict",
+    "request_not_found",
+    "result_invalid",
+    "result_missing",
+    "result_unavailable",
+    "service_instance_mismatch",
+    "status_unavailable",
+    "structured_provider_unsupported",
+    "unsupported_output_format",
+    "unsupported_request_input",
+    "unverified_media_evidence"
+  ]
+}

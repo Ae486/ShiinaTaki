@@ -15,7 +15,7 @@ import {
 import { authenticateOperator, recoverOperatorAuth } from "@/lib/operator-auth.js";
 import { createTimingPolicyStore } from "@/lib/timing-policy.js";
 import { createWsClient, type WsClient } from "@/lib/ws-client.js";
-import { createBrowserTransport } from "@/lib/ws-transport.js";
+import { createLocalOperatorTransport, nativeLocalAuth } from "@/lib/native-local-auth.js";
 
 const WS_URL = `ws://${DEFAULT_WS_HOST}:${DEFAULT_WS_PORT}`;
 
@@ -46,7 +46,7 @@ export function useOperatorConnection(options: OperatorConnectionOptions): Opera
     }
     const controller = createConnectionGenerationController<WsClient>({
       timingPolicy,
-      transportFactory: () => createBrowserTransport(WS_URL),
+      transportFactory: () => createLocalOperatorTransport(WS_URL),
       clientFactory: ({ transport }) =>
         createWsClient({
           transport,
@@ -54,7 +54,7 @@ export function useOperatorConnection(options: OperatorConnectionOptions): Opera
           onTimingPolicyDiagnostic: (message) => console.warn(`[${options.deviceName}] ${message}`),
         }),
       authenticate: (client) => authenticateOperator({ client, deviceName: options.deviceName, storage: localStorage }),
-      recoverAuthFailure: () => recoverOperatorAuth(localStorage),
+      recoverAuthFailure: () => nativeLocalAuth() ? false : recoverOperatorAuth(localStorage),
       restore: (client, context) => restoreRef.current?.(client, context) ?? Promise.resolve(),
     });
     const unsubscribe = controller.subscribe(setConnection);

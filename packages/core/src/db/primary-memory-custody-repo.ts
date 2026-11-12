@@ -11,6 +11,7 @@ import { canonicalMemoryAtomic } from "./canonical-memory-maintenance-storage.ts
 import { createHindsightIngestionSourceRepo } from "./hindsight-ingestion-source-repo.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
 import type { TimelineRepo } from "./timeline-repo.ts";
+import { readTimelineSourceContext } from "./primary-source-row.ts";
 
 export type PrimaryTimelineWriter = Pick<TimelineRepo, "append" | "deleteEntry">;
 export interface PrimaryPersistenceSession {
@@ -135,7 +136,8 @@ export function exactMembers(db: Database, group: SqlRow): TimelineEntry[] {
     .all({ id: String(group.group_id) });
   return rows.map((row) => {
     const parsed = TimelineEntrySchema.safeParse({ seq: row.seq, id: row.id, characterId: row.character_id, role: row.role,
-      content: row.content, createdAt: row.created_at, parts: row.parts == null ? undefined : JSON.parse(String(row.parts)) });
+      content: row.content, createdAt: row.created_at, parts: row.parts == null ? undefined : JSON.parse(String(row.parts)),
+      sourceContext: readTimelineSourceContext(row) });
     if (!parsed.success || parsed.data.characterId !== group.character_id || parsed.data.id !== row.member_id
       || primaryEntryDigest(parsed.data) !== row.entry_digest) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");
     return parsed.data;

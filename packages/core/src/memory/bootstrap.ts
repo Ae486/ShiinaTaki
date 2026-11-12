@@ -20,7 +20,7 @@ import { createBlockStore } from "./block-store.ts";
 import { createEpisodicWriter, type MemoryWriteOp } from "./episodic-writer.ts";
 import { createFlushWriter } from "./flush-writer.ts";
 import { createLegacyMemoryFlushPort, type MemoryFlushPort } from "./memory-flush-port.ts";
-import { createMemoryEngine, type MemoryEngine } from "./memory-engine.ts";
+import { createMemoryEngine, type MemoryEngine, type SearchPolicyBinding } from "./memory-engine.ts";
 import { createPersonaProvider } from "./persona-provider.ts";
 import { startRetentionSweeper } from "./retention-sweeper.ts";
 import { createTidyPass, type TidyPass } from "./tidy-pass.ts";
@@ -29,11 +29,18 @@ import { fenceMemoryEngine } from "./legacy-migration/fenced-memory-engine.ts";
 import type { MemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 
 export interface MemorySubsystemDeps {
+  config?: ReturnType<typeof loadMemoryConfig>;
+  captureConfig?: () => ReturnType<typeof loadMemoryConfig>;
+  captureAssemblyConfig?: () => ReturnType<typeof loadMemoryConfig>;
+  captureRetentionDays?: () => number;
+  retentionEnabled?: () => boolean;
+  searchPolicy?: SearchPolicyBinding;
+  currentPromptDir?: () => string;
   db: Database;
   dataDir: string;
   promptDir: string;
   /** The MAIN chat model — the utility slot's fallback when no separate background slot is configured. */
-  model: LanguageModel;
+  model?: LanguageModel;
   /** Core composition injects the one process-wide Utility Slot; tests may omit it and use the legacy factory. */
   utility?: UtilitySlot;
   timeline: TimelineRepo;
@@ -44,6 +51,8 @@ export interface MemorySubsystemDeps {
   authorityFence?: MemoryAuthorityFence;
   /** Runtime authority state used to retire the legacy retention arm after canonical activation. */
   isCanonical?: () => boolean;
+  /** Automatic tidy keeps its trigger but admits work through the same durable operation owner. */
+  requestTidyRun?: (characterId: string) => Promise<void>;
 }
 
 export interface MemorySubsystem {
@@ -60,12 +69,13 @@ export interface MemorySubsystem {
   memoryRoot: string;
   /** The bound write op the image-description bridge reuses (#17 decision 6). */
   writeMemory(input: Parameters<MemoryWriteOp>[0]): { id: string };
-  stop?(): void;
+  stop?(): void | Promise<void>;
+  resumeRetention?(): void;
 }
 
 export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsystem {
   const { db, logger, timeline } = deps;
-  const config = loadMemoryConfig(deps.env);
+  const config = deps.config ?? loadMemoryConfig(deps.env);
   // Every background pass takes this model, so moving background work onto a cheaper provider is ONE env change.
   const utility = deps.utility ?? createUtilitySlot({ mainModel: deps.model, config: loadUtilityConfig(deps.env), logger });
   const rawEngine = buildEngine(deps, config);
@@ -81,7 +91,12 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
     events,
     slot: utility,
     config,
+    captureConfig: () => {
+      if (engine.searchStatus?.().ready === false) throw new Error("MEMORY_SEARCH_INDEX_UNAVAILABLE");
+      return deps.captureConfig?.() ?? config;
+    },
     logger: logger.child({ mod: "memory-tidy" }),
+    requestRun: deps.requestTidyRun,
   });
 
   // Automatic memory writes (#7): episodic summaries + pre-compaction flush, fired detached after each chat turn.
@@ -90,12 +105,12 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   const writeMemory: MemorySubsystem["writeMemory"] = ({ layer, ...rest }) => engine.writeEntry({ ...rest, type: layer });
   // ONE flush writer instance: auto-memory's leaving-the-window trigger and the compactor's flush-before-retire
   // step must share the watermark-guarded path, or the same span could be judged twice (batch 7 §3.2).
-  const flush = createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id), slot: utility });
+  const flush = createFlushWriter({ model: () => utility.model, createTools: (id) => engine.createBackgroundTools(id), slot: utility });
   const rawMaintenance = createAutoMemoryMaintenance({
     timeline,
     autoState,
     events,
-    episodic: createEpisodicWriter({ model: utility.model, writeMemory }),
+    episodic: createEpisodicWriter({ model: () => utility.model, writeMemory }),
     flush,
     utility,
     tidy,
@@ -115,14 +130,18 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   });
 
   // T5-R8: the layer registry's `retention` field finally gets its consumer — boot sweep + 6h, counts-only log.
-  const retention = startRetentionSweeper({
-    ops: engine.retention,
-    intentionsDefaultDays: config.intentionsDefaultDays,
-    logger,
-    enabled: () => !(deps.isCanonical?.() ?? false),
-  });
+  const retention = startLegacyRetention({ deps, engine, config });
 
-  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory, stop: retention.stop };
+  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory,
+    resumeRetention: retention.runNow,
+    stop: async () => { retention.stop(); await tidy.stop(); } };
+}
+
+function startLegacyRetention(input: { deps: MemorySubsystemDeps; engine: MemoryEngine; config: ReturnType<typeof loadMemoryConfig> }) {
+  const { deps, engine, config } = input;
+  return startRetentionSweeper({ ops: engine.retention, intentionsDefaultDays: deps.captureRetentionDays ?? config.intentionsDefaultDays,
+    logger: deps.logger,
+    enabled: () => !(deps.isCanonical?.() ?? false) && (deps.retentionEnabled?.() ?? true) && engine.searchStatus?.().ready !== false });
 }
 
 // The Workspace's memory tree: markdown files under the app data root (beside the db, NOT in it — invariant 1).
@@ -134,7 +153,7 @@ function buildEngine(deps: MemorySubsystemDeps, config: ReturnType<typeof loadMe
   const memoryLog = deps.logger.child({ mod: "memory" });
   // Persona cards (#16): the global assistant layer + per-character persona, read from prompt/ at boot and injected
   // FIRST in the assembled turn context (prompt/README.md order). A missing card degrades to a built-in fallback.
-  const persona = createPersonaProvider({ promptDir: deps.promptDir, logger: deps.logger });
+  const persona = createPersonaProvider({ promptDir: deps.currentPromptDir ?? deps.promptDir, logger: deps.logger });
   // Memory Blocks (T5 Q7): the always-visible tier — pure markdown BESIDE the entry tree, so the FTS index can never
   // ingest one; `blocks/global/user-card.md` is the user's hand-edited identity card, re-read on every turn.
   const blocks = createBlockStore({ root: join(deps.dataDir, "workspace", "blocks") });
@@ -144,12 +163,17 @@ function buildEngine(deps: MemorySubsystemDeps, config: ReturnType<typeof loadMe
     persona,
     blocks,
     config,
+    captureConfig: deps.captureConfig,
+    captureAssemblyConfig: deps.captureAssemblyConfig,
+    searchPolicy: deps.searchPolicy,
     timeline: deps.timeline,
   });
   // Startup reconciliation rebuilds the derived index from those files (files are truth).
-  const reconciled = engine.reconcile();
-  memoryLog.info(reconciled, "memory index reconciled from workspace");
-  if (reconciled.invalid.length > 0)
-    memoryLog.warn({ invalid: reconciled.invalid }, "invalid memory files skipped (fix or remove them)");
+  if (engine.searchStatus?.().ready !== false) {
+    const reconciled = engine.reconcile();
+    memoryLog.info(reconciled, "memory index reconciled from workspace");
+    if (reconciled.invalid.length > 0)
+      memoryLog.warn({ invalid: reconciled.invalid }, "invalid memory files skipped (fix or remove them)");
+  }
   return engine;
 }

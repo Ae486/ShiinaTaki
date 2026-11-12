@@ -1,6 +1,6 @@
 //! INPUT:  Host ask evidence, the sealed capability request, and inbound capability.resume frames
-//! OUTPUT: sealed challenge frames, redacted presentations, and exact one-shot authorization validation
-//! POS:    shell/ws_challenge — pure Host ask helpers shared by ws_client; raw input never enters a frame or log
+//! OUTPUT: sealed challenge frames, complete exec disclosure, and exact one-shot authorization validation
+//! POS:    shell/ws_challenge — pure Host preflight adapter; display is never execution input or log content
 
 use serde_json::Value;
 
@@ -12,15 +12,22 @@ use crate::protocol::{
     HostChallengePresentationField, HostChallengePresentationSection, HostGovernanceEvidence,
 };
 use crate::host_session::PendingChallengeRecord;
+use crate::exec_command_disclosure::{project_exec_command, CommandDisclosureError};
 
-/// Seals the Host ask into one challenge frame: immutable control digests, the canonical remembered
-/// decision scope, trusted classification evidence, and a redacted presentation with no raw input.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ChallengeBuildError {
+    MissingDescriptor,
+    InvalidBinding,
+    Disclosure(CommandDisclosureError),
+}
+
+/// Seals the trusted preflight and permitted display while retaining original input only for execution.
 pub(crate) fn build_challenge(
     host_id: &str,
-    evidence: HostGovernanceEvidence,
+    evidence: &HostGovernanceEvidence,
     request: &CapabilityRequest,
     descriptor: &crate::protocol::HostCapabilityDescriptor,
-) -> Result<CapabilityChallenge, String> {
+) -> Result<CapabilityChallenge, ChallengeBuildError> {
     let control = &request.control;
     let scope_digest = approval_decision_scope_digest(
         &control.capability_id,
@@ -34,40 +41,54 @@ pub(crate) fn build_challenge(
         request_id: request.request_id.clone(),
         control: control.clone(),
         challenge_id: uuid::Uuid::new_v4().to_string(),
-        control_digest: control_digest(control)?,
+        control_digest: control_digest(control).map_err(|_| ChallengeBuildError::InvalidBinding)?,
         challenge_digest: String::new(),
         decision_scope_digest: scope_digest,
-        governance: evidence,
-        presentation: challenge_presentation(&control.capability_id),
+        governance: evidence.clone(),
+        presentation: if control.capability_id == "exec"
+            && evidence.effective_posture == crate::protocol::HostGovernancePosture::Ask {
+            project_exec_command(crate::capabilities_impl::exec::command_of(&request.input))
+                .map_err(ChallengeBuildError::Disclosure)?
+        } else { challenge_presentation(&control.capability_id) },
     };
-    let digest = challenge_digest(&challenge)?;
+    let digest = challenge_digest(&challenge).map_err(|_| ChallengeBuildError::InvalidBinding)?;
     Ok(CapabilityChallenge { challenge_digest: digest, ..challenge })
 }
 
-/// Bounded, redacted, classification-only presentation. The exact raw input never enters the frame.
+/// Ordinary Host prompts keep the existing bounded shape and disclose no raw non-exec target.
 pub(crate) fn challenge_presentation(capability: &str) -> HostChallengePresentation {
-    let risk = match capability {
-        "exec" => "The Host classified this shell command as requiring operator approval; the command itself is not included.",
-        "shell-open" => "The Host classified this open-target as requiring operator approval; the target itself is not included.",
-        _ => "The Host classified this request as requiring operator approval.",
+    // Keep the fixed Host vocabulary aligned with shared/governance-presentation.ts. Unknown IDs
+    // receive a generic label; display copy never substitutes for capability identity or policy.
+    let (label, risk) = match capability {
+        "exec" => ("执行命令", "将在设备上执行命令，执行仍受当前权限设置约束。"),
+        "shell-open" => ("打开外部目标", "将使用设备上的应用打开外部目标。"),
+        "screenshot" => ("屏幕截图", "将读取当前屏幕画面，画面可能包含个人信息。"),
+        "screenshot-ambient" => ("屏幕采样", "将读取屏幕画面，用于后台采样。"),
+        "process-list" => ("查看进程", "将读取设备上当前运行的进程信息。"),
+        "clipboard-read" => ("读取剪贴板", "将读取剪贴板中的文字，可能包含个人信息。"),
+        "clipboard-write" => ("写入剪贴板", "将替换设备剪贴板中的文字内容。"),
+        "foreground-window" => ("读取前台窗口", "将读取当前前台窗口的标题和所属进程。"),
+        _ => ("设备操作", "将在设备上执行此操作，执行仍受当前权限设置约束。"),
     };
     HostChallengePresentation {
         revision: 1,
-        title: "Allow Host capability".into(),
-        capability_label: capability.into(),
+        title: format!("允许{label}？"),
+        capability_label: label.into(),
         subject_label: None,
         risk_summary: risk.into(),
         sections: vec![HostChallengePresentationSection {
-            title: "Classification".into(),
+            title: "操作说明".into(),
             fields: vec![HostChallengePresentationField {
-                label: "Decided by".into(),
-                value: "Execution Host classification plus Core governance policy".into(),
+                label: "操作".into(),
+                value: label.into(),
             }],
         }],
+        command_disclosure: None,
     }
 }
 
-/// Exact single-use authorization validation against the stored challenge. Any mismatch voids the slot.
+/// Exact single-use validation. The caller retires invalid authority only for the matching sealed
+/// request/control/challenge tuple; a foreign tuple must not void a reused request's pending slot.
 pub(crate) fn matches_pending_authorization(
     pending: &PendingChallengeRecord,
     resume: &crate::protocol::CapabilityResume,
@@ -158,7 +179,7 @@ mod tests {
         let evidence = challenge.governance.clone();
         let built = build_challenge(
             "11111111-1111-4111-8111-111111111111",
-            evidence,
+            &evidence,
             &request,
             &descriptor_for("screenshot"),
         )
@@ -225,5 +246,72 @@ mod tests {
         let mut expired = valid.clone();
         expired.authorization.expires_at = issued;
         assert!(matches_pending_authorization(&pending, &expired).is_err());
+    }
+
+    #[test]
+    fn same_masked_command_never_shares_raw_input_or_authorization_identity() {
+        use sha2::{Digest, Sha256};
+        let template = crate::protocol::parse_capability_challenge(
+            fixture("capability-challenge.exec-disclosure.valid.json"),
+        ).unwrap();
+        let build = |secret: &str| {
+            let input = json!({"command": format!("tool --token={secret} --file=C:\\workspace\\ordinary.txt tail")});
+            let mut request = CapabilityRequest { request_id: template.request_id.clone(), control: template.control.clone(), input };
+            let canonical = json!({"capabilityId": "exec", "input": request.input}).to_string();
+            request.control.input_digest = format!("{:x}", Sha256::digest(canonical.as_bytes()));
+            let mut challenge = build_challenge(&request.control.target_host_id, &template.governance, &request, &descriptor_for("exec")).unwrap();
+            // Pin every unrelated variable. Only the secret and its correctly recomputed input digest differ.
+            challenge.challenge_id = template.challenge_id.clone();
+            challenge.challenge_digest = challenge_digest(&challenge).unwrap();
+            (challenge, request)
+        };
+        let (first, first_request) = build("SYNTHETIC_ALPHA");
+        let (second, second_request) = build("SYNTHETIC_BRAVO");
+        assert_eq!(first.presentation, second.presentation);
+        let text: String = first.presentation.sections.iter().flat_map(|s| s.fields.iter().map(|f| f.value.as_str())).collect();
+        assert_eq!(text, r"tool --token=[凭证已隐藏] --file=C:\\workspace\\ordinary.txt tail");
+        assert_ne!(first.control.input_digest, second.control.input_digest);
+        assert_ne!(first.control_digest, second.control_digest);
+        assert_ne!(first.challenge_digest, second.challenge_digest);
+        let now = time::OffsetDateTime::now_utc();
+        let resume = crate::protocol::CapabilityResume {
+            request_id: first.request_id.clone(), control: first.control.clone(), challenge_id: first.challenge_id.clone(),
+            authorization: crate::protocol::CapabilityAuthorization {
+                authorization_id: "88888888-8888-4888-8888-888888888888".into(),
+                approval_generation: first.control.approval_generation, decision_scope: crate::protocol::CapabilityDecisionScope::Once,
+                control_digest: first.control_digest.clone(), challenge_digest: first.challenge_digest.clone(), decision_scope_digest: first.decision_scope_digest.clone(),
+                issued_at: now.format(&Rfc3339).unwrap(), expires_at: (now + time::Duration::seconds(60)).format(&Rfc3339).unwrap(),
+            },
+        };
+        assert!(matches_pending_authorization(&pending_challenge_record(first, first_request.input), &resume).is_ok());
+        assert!(matches_pending_authorization(&pending_challenge_record(second, second_request.input), &resume).is_err());
+    }
+
+    #[test]
+    fn only_effective_ask_exec_uses_the_disclosure_capacity_gate() {
+        let template = crate::protocol::parse_capability_challenge(fixture("capability-challenge.exec-disclosure.valid.json")).unwrap();
+        let request = CapabilityRequest { request_id: template.request_id, control: template.control,
+            input: json!({"command": "x".repeat(48_001)}) };
+        assert_eq!(build_challenge(&request.control.target_host_id, &template.governance, &request, &descriptor_for("exec")),
+            Err(ChallengeBuildError::Disclosure(CommandDisclosureError::PresentationTooLarge)));
+        let mut auto = template.governance;
+        auto.effective_posture = crate::protocol::HostGovernancePosture::Auto;
+        let built = build_challenge(&request.control.target_host_id, &auto, &request, &descriptor_for("exec")).unwrap();
+        assert!(built.presentation.command_disclosure.is_none());
+    }
+
+    #[test]
+    fn ordinary_host_prompts_have_bounded_chinese_copy_without_changing_legacy_shape() {
+        for (capability, label) in [("exec", "执行命令"), ("shell-open", "打开外部目标"),
+            ("screenshot", "屏幕截图"), ("screenshot-ambient", "屏幕采样"), ("process-list", "查看进程"),
+            ("clipboard-read", "读取剪贴板"), ("clipboard-write", "写入剪贴板"), ("foreground-window", "读取前台窗口"),
+            ("unknown-private-capability", "设备操作")] {
+            let presentation = challenge_presentation(capability);
+            assert_eq!(presentation.capability_label, label);
+            assert_eq!(presentation.title, format!("允许{label}？"));
+            assert_eq!(presentation.sections[0].fields[0].value, label);
+            assert!(presentation.command_disclosure.is_none());
+            crate::protocol::validate_presentation(&presentation).unwrap();
+        }
     }
 }

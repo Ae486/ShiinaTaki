@@ -3,6 +3,7 @@ import {
   APPROVAL_BINDING_REVISION,
   APPROVAL_DISCLOSURE_REVISION,
   CANONICAL_GOVERNANCE_REGISTRY,
+  resolveHistoricalGovernanceRegistry,
   canonicalApprovalDecisionScope,
   canonicalStoredApprovalDurableDecisionBinding,
   type ApprovalDurableDecisionBinding,
@@ -60,6 +61,27 @@ function registry(revision: number, descriptorRevision: number): GovernanceRegis
 }
 
 describe("Approval decision service", () => {
+  it.each([1, 3])("resolves evidenced revision %s history without rewriting valid decisions", (revision) => {
+    const historical = resolveHistoricalGovernanceRegistry(revision);
+    expect(historical).toBeDefined();
+    const { repo, service } = openService(historical);
+    service.grantAlways({ binding: binding(), expectedApprovalGeneration: service.snapshot().approvalGeneration });
+    const before = repo.read();
+    const upgraded = createApprovalDecisionService(repo);
+    expect(upgraded.snapshot().governanceRegistryRevision).toBe(CANONICAL_GOVERNANCE_REGISTRY.registryRevision);
+    expect(upgraded.snapshot().decisions).toEqual(before.decisions);
+    expect(upgraded.snapshot().approvalGeneration).toBe(before.approvalGeneration);
+    expect(upgraded.list()[0]?.usability).toEqual({ usable: true });
+  });
+
+  it("refuses nonempty unevidenced revision 2 history through the production resolver", () => {
+    const { repo, service } = openService(registry(2, 1));
+    service.grantAlways({ binding: binding(), expectedApprovalGeneration: service.snapshot().approvalGeneration });
+    const before = repo.read();
+    expect(() => createApprovalDecisionService(repo)).toThrow("historical governance registry 2 is unavailable");
+    expect(repo.read()).toEqual(before);
+  });
+
   it("grants only a current canonical always binding and makes duplicate grants no-ops", () => {
     const { service } = openService();
     expect(service.grantAlways({ binding: binding(), expectedApprovalGeneration: 1 }).approvalGeneration).toBe(2);

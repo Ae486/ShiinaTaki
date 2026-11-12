@@ -1,0 +1,8 @@
+{
+  "coreTypecheck": { "command": "pnpm --filter @taki/core typecheck", "exitCode": 0, "log": "typecheck-final.log" },
+  "sharedTypecheck": { "command": "pnpm --filter @taki/shared typecheck", "exitCode": 0, "log": "shared-typecheck-final.log" },
+  "sourceLint": { "command": "pnpm exec eslint <all .ts paths in changed-files.json>", "exitCode": 0, "log": "lint-final.log" },
+  "sourceDiffCheck": { "command": "git diff --check -- <all paths in changed-files.json>", "exitCode": 0, "log": "diff-check-final.log" },
+  "liveSourceSemanticAcceptance": { "status": "not_started", "logicalGenerations": 0, "physicalProviderRequests": 0, "inputTokens": 0, "outputTokens": 0, "usageReason": "No A1-A3 provider request was initiated; paused at owner instruction after current deterministic checks." },
+  "scope": "Source-owned scoped checks only. No whole-tree quality, native Hindsight extraction/reflection, actual playback or human acceptance is claimed."
+}

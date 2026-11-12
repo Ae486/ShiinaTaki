@@ -14,7 +14,7 @@ export function authorityAwareAutoMemory(legacy: AutoMemory, isCanonical: () => 
 export function authorityAwareTidy(legacy: TidyPass, isCanonical: () => boolean): TidyPass {
   return {
     maybeRun: async (characterId) => { if (!isCanonical()) await legacy.maybeRun(characterId); },
-    runNow: (characterId): Promise<TidyRunOutcome> => isCanonical() ? Promise.resolve(cleanTidyOutcome()) : legacy.runNow(characterId),
+    runNow: (characterId, options): Promise<TidyRunOutcome> => isCanonical() ? Promise.resolve(cleanTidyOutcome()) : legacy.runNow(characterId, options),
   };
 }
 

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "lint"
+  ],
+  "startedAt": "2026-09-26T11:28:36.613058+00:00",
+  "seconds": 57.093,
+  "exitCode": 1,
+  "log": "lint-final-2026-09-26.log"
+}

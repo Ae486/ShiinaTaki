@@ -1,0 +1,29 @@
+{
+  "diffCheck": {
+    "log": "diff-check-final-delivery.log",
+    "exitCode": 0
+  },
+  "liveUsage": "live-usage-summary.json",
+  "coreTypecheckAfterPrompt": {
+    "log": "typecheck-a3-repair.log",
+    "exitCode": 0
+  },
+  "acceptanceChangedPaths": 11,
+  "deterministicTests": {
+    "report": "tests-final-delivery.json",
+    "liveSkipped": 3,
+    "failed": 0,
+    "passed": 65,
+    "files": 11
+  },
+  "scopedLint": {
+    "exitCode": 0,
+    "tsPaths": 9,
+    "log": "lint-final-delivery.log"
+  },
+  "sourceCodePaths": 53,
+  "audit": "source-audit.json",
+  "liveProcesses": "none",
+  "finalHelperTypecheck": "Coordinator whole-worktree typecheck passed; whole-suite result remains coordinator-owned",
+  "humanAcceptance": "pending"
+}

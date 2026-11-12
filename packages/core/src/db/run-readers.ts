@@ -1,6 +1,18 @@
-import { RunStatusResultSchema, type Attempt, type Run, type RunStatusResult } from "@taki/shared";
+/**
+ * INPUT: canonical Run identities and Core-owned SQLite state
+ * OUTPUT: validated Run/Attempt/Receipt reads and the original immutable admission snapshot
+ * POS: core/db — read helpers only; source authority is retained by RunService
+ */
+import { RunSnapshotSchema, RunStatusResultSchema, type Attempt, type Run, type RunSnapshot, type RunStatusResult } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
 import { readAttemptRow, readReceiptRow, readRunRow } from "./run-row-mappers.ts";
+
+export function readRunSnapshot(db: Database, runId: string): RunSnapshot {
+  const row = db.prepare(`SELECT s.manifest_json FROM runs r JOIN run_snapshots s
+    ON s.snapshot_id=r.snapshot_id WHERE r.run_id=:id`).get({ id: runId });
+  if (!row) throw new Error("RUN_NOT_FOUND");
+  return RunSnapshotSchema.parse(JSON.parse(String(row.manifest_json)));
+}
 
 export function readStatus(db: Database, runId: string): RunStatusResult {
   const run = readRunById(db, runId);

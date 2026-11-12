@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "-r",
+    "--workspace-concurrency=1",
+    "test",
+    "--maxWorkers=4"
+  ],
+  "startedAt": "2026-09-26T11:28:36.634810+00:00",
+  "seconds": 301.797,
+  "exitCode": 0,
+  "log": "workspace-tests-final-2026-09-26.log"
+}

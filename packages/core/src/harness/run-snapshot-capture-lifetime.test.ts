@@ -31,7 +31,7 @@ function fixture(seed = false) {
   const client = createHindsightClient({ endpoint: "http://127.0.0.1:18481", resolveApiKey: () => "capture-fixture-key", transport });
   vi.spyOn(f.remote.client, "health").mockImplementation(client.health);
   const runtime = f.compose(); const repo = createRunRepo(f.db); const admit = vi.spyOn(repo, "admit");
-  const extensions = { runContext: vi.fn((_interactive?: TurnInteractive, runId = "capture-run") => ({ tools: {}, instructions: "",
+  const extensions = { runContext: vi.fn((_interactive?: TurnInteractive, runId = "capture-run") => ({ tools: {}, toolDisclosure: { deferredToolNames: [], describedTools: {}, skills: {} }, instructions: "",
     snapshot: { runId, primaryHostId: "core-host", hosts: [], entries: [], collisions: [],
       budget: { maxEntries: 1, maxDescriptionChars: 1, maxSearchResults: 1, maxCalls: 1 } } })) };
   const snapshot = createRunSnapshotCapture({ memory: runtime, extensions,

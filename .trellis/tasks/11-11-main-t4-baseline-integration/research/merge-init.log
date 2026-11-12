@@ -1,0 +1,579 @@
+Auto-merging .gitignore
+CONFLICT (content): Merge conflict in .gitignore
+Auto-merging .trellis/spec/backend/canonical-local-memory-runtime.md
+CONFLICT (add/add): Merge conflict in .trellis/spec/backend/canonical-local-memory-runtime.md
+Auto-merging .trellis/spec/backend/database-guidelines.md
+Auto-merging .trellis/spec/backend/error-handling.md
+Auto-merging .trellis/spec/backend/hindsight-application-runtime.md
+CONFLICT (add/add): Merge conflict in .trellis/spec/backend/hindsight-application-runtime.md
+Auto-merging .trellis/spec/backend/index.md
+CONFLICT (content): Merge conflict in .trellis/spec/backend/index.md
+Auto-merging .trellis/spec/backend/memory-current-state-cutover.md
+CONFLICT (add/add): Merge conflict in .trellis/spec/backend/memory-current-state-cutover.md
+Auto-merging .trellis/spec/backend/memory-operations.md
+CONFLICT (add/add): Merge conflict in .trellis/spec/backend/memory-operations.md
+Auto-merging .trellis/spec/backend/memory-replica-sync.md
+CONFLICT (content): Merge conflict in .trellis/spec/backend/memory-replica-sync.md
+Auto-merging .trellis/spec/backend/quality-guidelines.md
+CONFLICT (content): Merge conflict in .trellis/spec/backend/quality-guidelines.md
+Auto-merging .trellis/spec/backend/server-push-and-connection-auth.md
+Auto-merging .trellis/spec/backend/sqlite-migration-lineage.md
+CONFLICT (add/add): Merge conflict in .trellis/spec/backend/sqlite-migration-lineage.md
+Auto-merging .trellis/spec/backend/sqlite-transaction-isolation.md
+CONFLICT (add/add): Merge conflict in .trellis/spec/backend/sqlite-transaction-isolation.md
+Auto-merging .trellis/spec/frontend/home-window.md
+CONFLICT (content): Merge conflict in .trellis/spec/frontend/home-window.md
+Auto-merging .trellis/spec/frontend/index.md
+CONFLICT (content): Merge conflict in .trellis/spec/frontend/index.md
+Auto-merging .trellis/spec/frontend/reactive-read-models.md
+Auto-merging .trellis/tasks/08-09-memory-operations-ui/check.jsonl
+CONFLICT (content): Merge conflict in .trellis/tasks/08-09-memory-operations-ui/check.jsonl
+Auto-merging .trellis/tasks/08-09-memory-operations-ui/design.md
+CONFLICT (add/add): Merge conflict in .trellis/tasks/08-09-memory-operations-ui/design.md
+Auto-merging .trellis/tasks/08-09-memory-operations-ui/grill.md
+CONFLICT (add/add): Merge conflict in .trellis/tasks/08-09-memory-operations-ui/grill.md
+Auto-merging .trellis/tasks/08-09-memory-operations-ui/implement.jsonl
+CONFLICT (content): Merge conflict in .trellis/tasks/08-09-memory-operations-ui/implement.jsonl
+Auto-merging .trellis/tasks/08-09-memory-operations-ui/implement.md
+CONFLICT (add/add): Merge conflict in .trellis/tasks/08-09-memory-operations-ui/implement.md
+Auto-merging .trellis/tasks/08-09-memory-operations-ui/prd.md
+CONFLICT (content): Merge conflict in .trellis/tasks/08-09-memory-operations-ui/prd.md
+Auto-merging .trellis/tasks/09-14-hindsight-integration-completeness-audit/research/README.md
+CONFLICT (add/add): Merge conflict in .trellis/tasks/09-14-hindsight-integration-completeness-audit/research/README.md
+Auto-merging .trellis/workspace/pleia/index.md
+CONFLICT (content): Merge conflict in .trellis/workspace/pleia/index.md
+Auto-merging .trellis/workspace/pleia/journal-1.md
+Auto-merging CLAUDE.md
+CONFLICT (content): Merge conflict in CLAUDE.md
+Auto-merging CONTEXT.md
+Auto-merging apps/desktop/src-tauri/Cargo.toml
+Auto-merging apps/desktop/src-tauri/src/host_approval_protocol.rs
+Auto-merging apps/desktop/src-tauri/src/host_session.rs
+CONFLICT (content): Merge conflict in apps/desktop/src-tauri/src/host_session.rs
+Auto-merging apps/desktop/src-tauri/src/index.md
+CONFLICT (content): Merge conflict in apps/desktop/src-tauri/src/index.md
+Auto-merging apps/desktop/src-tauri/src/lib.rs
+Auto-merging apps/desktop/src-tauri/src/node.rs
+Auto-merging apps/desktop/src-tauri/src/protocol.rs
+Auto-merging apps/desktop/src-tauri/src/secrets.rs
+Auto-merging apps/desktop/src-tauri/src/ws_challenge.rs
+Auto-merging apps/desktop/src-tauri/src/ws_client.rs
+CONFLICT (content): Merge conflict in apps/desktop/src-tauri/src/ws_client.rs
+Auto-merging apps/desktop/src/lib/index.md
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/index.md
+Auto-merging apps/desktop/src/lib/rpc-deadline.test.ts
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/rpc-deadline.test.ts
+Auto-merging apps/desktop/src/lib/rpc-deadline.ts
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/rpc-deadline.ts
+Auto-merging apps/desktop/src/lib/ws-client-memory-operations.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/lib/ws-client-memory-operations.ts
+Auto-merging apps/desktop/src/lib/ws-client-methods.ts
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/ws-client-methods.ts
+Auto-merging apps/desktop/src/lib/ws-client-routes.ts
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/ws-client-routes.ts
+Auto-merging apps/desktop/src/lib/ws-client.test.ts
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/ws-client.test.ts
+Auto-merging apps/desktop/src/lib/ws-client.ts
+CONFLICT (content): Merge conflict in apps/desktop/src/lib/ws-client.ts
+Auto-merging apps/desktop/src/windows/home/pages/operations/index.md
+CONFLICT (content): Merge conflict in apps/desktop/src/windows/home/pages/operations/index.md
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-authority-card.test.tsx
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-authority-card.test.tsx
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-authority-card.tsx
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-authority-card.tsx
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-authority-fixtures.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-authority-fixtures.ts
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-authority-state.test.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-authority-state.test.ts
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-operations-controller.test.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-operations-controller.test.ts
+Auto-merging apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts
+Auto-merging apps/desktop/src/windows/home/pages/operations/operations-page.tsx
+CONFLICT (content): Merge conflict in apps/desktop/src/windows/home/pages/operations/operations-page.tsx
+Auto-merging apps/desktop/src/windows/home/pages/operations/use-memory-operations.ts
+CONFLICT (add/add): Merge conflict in apps/desktop/src/windows/home/pages/operations/use-memory-operations.ts
+Auto-merging apps/desktop/src/windows/home/pages/settings/config-groups.test.ts
+Auto-merging apps/desktop/src/windows/home/pages/settings/config-groups.ts
+Auto-merging apps/desktop/src/windows/home/pages/settings/index.md
+CONFLICT (content): Merge conflict in apps/desktop/src/windows/home/pages/settings/index.md
+Auto-merging apps/desktop/src/windows/home/pages/settings/knob-field.test.tsx
+CONFLICT (content): Merge conflict in apps/desktop/src/windows/home/pages/settings/knob-field.test.tsx
+Auto-merging apps/desktop/src/windows/home/pages/settings/settings-page.tsx
+CONFLICT (content): Merge conflict in apps/desktop/src/windows/home/pages/settings/settings-page.tsx
+Auto-merging apps/desktop/tsconfig.json
+CONFLICT (content): Merge conflict in apps/desktop/tsconfig.json
+Auto-merging docs/HANDOFF.md
+CONFLICT (content): Merge conflict in docs/HANDOFF.md
+Auto-merging docs/deferred-decisions.md
+CONFLICT (content): Merge conflict in docs/deferred-decisions.md
+Auto-merging docs/index.md
+CONFLICT (content): Merge conflict in docs/index.md
+Auto-merging eslint.config.js
+CONFLICT (content): Merge conflict in eslint.config.js
+Auto-merging package.json
+CONFLICT (content): Merge conflict in package.json
+Auto-merging packages/core/package.json
+CONFLICT (content): Merge conflict in packages/core/package.json
+Auto-merging packages/core/src/agents/base-prompt.ts
+CONFLICT (content): Merge conflict in packages/core/src/agents/base-prompt.ts
+Auto-merging packages/core/src/agents/chat-agent-canonical-memory.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/agents/chat-agent-canonical-memory.test.ts
+Auto-merging packages/core/src/agents/chat-agent.ts
+CONFLICT (content): Merge conflict in packages/core/src/agents/chat-agent.ts
+Auto-merging packages/core/src/agents/compaction-coordinator.ts
+Auto-merging packages/core/src/agents/conversation-store.ts
+CONFLICT (content): Merge conflict in packages/core/src/agents/conversation-store.ts
+Auto-merging packages/core/src/agents/index.md
+CONFLICT (content): Merge conflict in packages/core/src/agents/index.md
+Auto-merging packages/core/src/agents/turn-registry.ts
+CONFLICT (content): Merge conflict in packages/core/src/agents/turn-registry.ts
+Auto-merging packages/core/src/boot/hindsight-setup-boot.ts
+CONFLICT (content): Merge conflict in packages/core/src/boot/hindsight-setup-boot.ts
+Auto-merging packages/core/src/boot/index.md
+CONFLICT (content): Merge conflict in packages/core/src/boot/index.md
+Auto-merging packages/core/src/capabilities/capability-broker-state.ts
+Auto-merging packages/core/src/capabilities/capability-broker.ts
+CONFLICT (content): Merge conflict in packages/core/src/capabilities/capability-broker.ts
+Auto-merging packages/core/src/capabilities/capability-challenge.test.ts
+Auto-merging packages/core/src/capabilities/capability-challenge.ts
+Auto-merging packages/core/src/capabilities/index.md
+Auto-merging packages/core/src/capabilities/route-capability.test.ts
+Auto-merging packages/core/src/capabilities/route-capability.ts
+CONFLICT (content): Merge conflict in packages/core/src/capabilities/route-capability.ts
+Auto-merging packages/core/src/config/hindsight-policy-config.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/config/hindsight-policy-config.ts
+Auto-merging packages/core/src/config/index.md
+CONFLICT (content): Merge conflict in packages/core/src/config/index.md
+Auto-merging packages/core/src/config/knob-registry.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/config/knob-registry.test.ts
+Auto-merging packages/core/src/config/knob-registry.ts
+CONFLICT (content): Merge conflict in packages/core/src/config/knob-registry.ts
+Auto-merging packages/core/src/db/canonical-ingestion-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-ingestion-repo.test.ts
+Auto-merging packages/core/src/db/canonical-ingestion-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-ingestion-repo.ts
+Auto-merging packages/core/src/db/canonical-ingestion-source-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-ingestion-source-repo.ts
+Auto-merging packages/core/src/db/canonical-memory-maintenance-copy.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-memory-maintenance-copy.ts
+Auto-merging packages/core/src/db/canonical-memory-maintenance-evidence.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-memory-maintenance-evidence.ts
+Auto-merging packages/core/src/db/canonical-memory-maintenance-mutations.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-memory-maintenance-mutations.ts
+Auto-merging packages/core/src/db/canonical-memory-maintenance-records.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-memory-maintenance-records.ts
+Auto-merging packages/core/src/db/canonical-memory-maintenance-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-memory-maintenance-repo.test.ts
+Auto-merging packages/core/src/db/canonical-memory-maintenance-retention.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/canonical-memory-maintenance-retention.ts
+Auto-merging packages/core/src/db/canonical-memory-repo.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/canonical-memory-repo.ts
+Auto-merging packages/core/src/db/hindsight-application-command-contract.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-command-contract.ts
+Auto-merging packages/core/src/db/hindsight-application-command-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-command-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-application-command-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-command-repo.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-cache.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-cache.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-checkpoint.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-checkpoint.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-contract.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-contract.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-evidence.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-evidence.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-heads.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-heads.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-publication.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-publication.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-query.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-query.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-application-replica-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-application-replica-repo.ts
+Auto-merging packages/core/src/db/hindsight-authority-repo.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/hindsight-authority-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-authority-repo.ts
+Auto-merging packages/core/src/db/hindsight-current-capture-json.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-current-capture-json.ts
+Auto-merging packages/core/src/db/hindsight-current-capture-reader.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-current-capture-reader.ts
+Auto-merging packages/core/src/db/hindsight-current-fixtures.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-current-fixtures.ts
+Auto-merging packages/core/src/db/hindsight-cutover-run-repo.ts
+Auto-merging packages/core/src/db/hindsight-ingestion-durability.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-ingestion-durability.ts
+Auto-merging packages/core/src/db/hindsight-ingestion-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-ingestion-repo.ts
+Auto-merging packages/core/src/db/hindsight-ingestion-source-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-ingestion-source-repo.ts
+Auto-merging packages/core/src/db/hindsight-local-coverage-reader.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-local-coverage-reader.ts
+Auto-merging packages/core/src/db/hindsight-local-coverage-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-local-coverage-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-memory-write-contract.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-memory-write-contract.ts
+Auto-merging packages/core/src/db/hindsight-memory-write-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-memory-write-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-policy-work-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-policy-work-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-policy-work-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-policy-work-repo.ts
+Auto-merging packages/core/src/db/hindsight-replica-scheduler-repo.test.ts
+Auto-merging packages/core/src/db/hindsight-replica-scheduler-repo.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/hindsight-replica-scheduler-repo.ts
+Auto-merging packages/core/src/db/hindsight-runtime-memory-view.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/hindsight-runtime-memory-view.ts
+Auto-merging packages/core/src/db/index.md
+CONFLICT (content): Merge conflict in packages/core/src/db/index.md
+Auto-merging packages/core/src/db/memory-operation-repo.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/memory-operation-repo.ts
+Auto-merging packages/core/src/db/migration-runner.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/migration-runner.ts
+Auto-merging packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
+Auto-merging packages/core/src/db/migrations/048-memory-operations.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/migrations/048-memory-operations.test.ts
+Auto-merging packages/core/src/db/migrations/index-list.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/migrations/index-list.test.ts
+Auto-merging packages/core/src/db/migrations/index-list.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/migrations/index-list.ts
+Auto-merging packages/core/src/db/migrations/index.md
+CONFLICT (content): Merge conflict in packages/core/src/db/migrations/index.md
+Auto-merging packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
+Auto-merging packages/core/src/db/pending-memory-repo.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/pending-memory-repo.test.ts
+Auto-merging packages/core/src/db/pending-memory-transition.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/db/pending-memory-transition.ts
+Auto-merging packages/core/src/db/run-repo.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/run-repo.ts
+Auto-merging packages/core/src/db/scheduled-task-repo.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/scheduled-task-repo.test.ts
+Auto-merging packages/core/src/db/sqlite.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/sqlite.test.ts
+Auto-merging packages/core/src/db/sqlite.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/sqlite.ts
+Auto-merging packages/core/src/db/structured-memory-block-repo.test.ts
+Auto-merging packages/core/src/db/structured-memory-block-repo.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/structured-memory-block-repo.ts
+Auto-merging packages/core/src/db/timeline-repo.ts
+CONFLICT (content): Merge conflict in packages/core/src/db/timeline-repo.ts
+Auto-merging packages/core/src/governance/governance-policy-service.test.ts
+Auto-merging packages/core/src/harness/index.md
+CONFLICT (content): Merge conflict in packages/core/src/harness/index.md
+Auto-merging packages/core/src/harness/run-service.ts
+CONFLICT (content): Merge conflict in packages/core/src/harness/run-service.ts
+Auto-merging packages/core/src/harness/run-snapshot-capture-lifetime.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/harness/run-snapshot-capture-lifetime.test.ts
+Auto-merging packages/core/src/harness/run-snapshot-capture.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/harness/run-snapshot-capture.test.ts
+Auto-merging packages/core/src/harness/run-snapshot-capture.ts
+CONFLICT (content): Merge conflict in packages/core/src/harness/run-snapshot-capture.ts
+Auto-merging packages/core/src/index.md
+CONFLICT (content): Merge conflict in packages/core/src/index.md
+Auto-merging packages/core/src/main.ts
+CONFLICT (content): Merge conflict in packages/core/src/main.ts
+Auto-merging packages/core/src/memory/assembler.ts
+Auto-merging packages/core/src/memory/auto-memory-shutdown.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/auto-memory-shutdown.test.ts
+Auto-merging packages/core/src/memory/auto-memory.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/auto-memory.ts
+Auto-merging packages/core/src/memory/bootstrap.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/bootstrap.ts
+Auto-merging packages/core/src/memory/canonical-ingestion-plan.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-ingestion-plan.ts
+Auto-merging packages/core/src/memory/canonical-ingestion-source.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-ingestion-source.ts
+Auto-merging packages/core/src/memory/canonical-local-banks.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-banks.ts
+Auto-merging packages/core/src/memory/canonical-local-ingestion.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-ingestion.test.ts
+Auto-merging packages/core/src/memory/canonical-local-ingestion.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-ingestion.ts
+Auto-merging packages/core/src/memory/canonical-local-maintenance.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-maintenance.test.ts
+Auto-merging packages/core/src/memory/canonical-local-retention.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-retention.ts
+Auto-merging packages/core/src/memory/canonical-local-runtime.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/canonical-local-runtime.ts
+Auto-merging packages/core/src/memory/canonical-local-subsystem.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-subsystem.ts
+Auto-merging packages/core/src/memory/canonical-local-tidy.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-local-tidy.ts
+Auto-merging packages/core/src/memory/canonical-memory-assembly.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-memory-assembly.test.ts
+Auto-merging packages/core/src/memory/canonical-memory-assembly.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-memory-assembly.ts
+Auto-merging packages/core/src/memory/canonical-memory-run.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-memory-run.test.ts
+Auto-merging packages/core/src/memory/canonical-memory-run.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-memory-run.ts
+Auto-merging packages/core/src/memory/canonical-observed-write.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/canonical-observed-write.ts
+Auto-merging packages/core/src/memory/canonical-tools/canonical-memory-tools.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/canonical-tools/canonical-memory-tools.ts
+Auto-merging packages/core/src/memory/canonical-tools/index.md
+CONFLICT (content): Merge conflict in packages/core/src/memory/canonical-tools/index.md
+Auto-merging packages/core/src/memory/canonical-tools/retain-tool.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/canonical-tools/retain-tool.ts
+Auto-merging packages/core/src/memory/episodic-writer.ts
+Auto-merging packages/core/src/memory/hindsight-memory-consumer.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight-memory-consumer.test.ts
+Auto-merging packages/core/src/memory/hindsight-runtime-composition.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight-runtime-composition.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-binding-context.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-binding-context.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-body-transfer.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-body-transfer.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-bundle-loader.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-bundle-loader.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-bundle.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-bundle.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-capability.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-capability.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-client.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-client.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-policy.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-policy.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-projection.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-projection.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-sync-runner.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-sync-runner.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-sync-runner.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-sync-runner.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-application-writer.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-application-writer.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-client.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-client.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-compatibility-service.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-compatibility-service.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-compatibility-service.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-contracts.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-contracts.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-current-local-source.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-current-local-source.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-current-maintenance-stream.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-current-maintenance-stream.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-current-verification-identity.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-current-verification-identity.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-errors.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-errors.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-incremental-sync.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-incremental-sync.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-ingestion-contract.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-ingestion-contract.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-ingestion-lifetime.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-ingestion-lifetime.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-ingestion.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-ingestion.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-ingestion.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-ingestion.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-provider-context.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-provider-context.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-provider.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-provider.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-read-projection.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-read-projection.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-recall.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-recall.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-reflect-deadline.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-reflect-deadline.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-reflect.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-reflect.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-runtime.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-runtime.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-write-context.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-write-context.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-write-retain.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-write-retain.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-writes.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-writes.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-memory-writes.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-memory-writes.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-pending-recovery-runner.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-pending-recovery-runner.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-pending-recovery.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-pending-recovery.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-context.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-context.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-execution.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-execution.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-fixtures.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-fixtures.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-prompt.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-prompt.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-publication.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-publication.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-targets.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-targets.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator-tools.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator-tools.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-policy-curator.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-policy-curator.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-replica-sync-runner.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-replica-sync-runner.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-replica-sync-runner.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-runtime-connection.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-runtime-connection.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-runtime-consumers.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-runtime-consumers.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-runtime-state.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-runtime-state.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-runtime-view.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/hindsight/hindsight-runtime-view.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-setup-service.test.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-setup-service.ts
+Auto-merging packages/core/src/memory/hindsight/hindsight-snapshot-validator.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/hindsight-snapshot-validator.ts
+Auto-merging packages/core/src/memory/hindsight/index.md
+CONFLICT (content): Merge conflict in packages/core/src/memory/hindsight/index.md
+Auto-merging packages/core/src/memory/index.md
+CONFLICT (content): Merge conflict in packages/core/src/memory/index.md
+Auto-merging packages/core/src/memory/legacy-migration/fenced-memory-engine.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/legacy-migration/fenced-memory-engine.test.ts
+Auto-merging packages/core/src/memory/legacy-migration/fenced-memory-engine.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/legacy-migration/fenced-memory-engine.ts
+Auto-merging packages/core/src/memory/legacy-migration/index.md
+CONFLICT (content): Merge conflict in packages/core/src/memory/legacy-migration/index.md
+Auto-merging packages/core/src/memory/legacy-migration/legacy-migration-runner.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/legacy-migration/legacy-migration-runner.ts
+Auto-merging packages/core/src/memory/local-memory-provider.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/local-memory-provider.ts
+Auto-merging packages/core/src/memory/memory-capability-snapshot.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/memory-capability-snapshot.ts
+Auto-merging packages/core/src/memory/memory-coordinator.test.ts
+Auto-merging packages/core/src/memory/memory-coordinator.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/memory-coordinator.ts
+Auto-merging packages/core/src/memory/memory-engine.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/memory-engine.ts
+Auto-merging packages/core/src/memory/memory-flush-port.test.ts
+Auto-merging packages/core/src/memory/memory-flush-port.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/memory-flush-port.ts
+Auto-merging packages/core/src/memory/memory-recall-selection.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/memory-recall-selection.ts
+Auto-merging packages/core/src/memory/operations/index.md
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/index.md
+Auto-merging packages/core/src/memory/operations/memory-authority-status.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-authority-status.test.ts
+Auto-merging packages/core/src/memory/operations/memory-authority-status.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-authority-status.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-contract.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-contract.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-fixtures.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-fixtures.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-kind-replica.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-kind-replica.test.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-kind-replica.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-kind-replica.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-kind-setup.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-kind-setup.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-kinds.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-kinds.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-service.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-service.test.ts
+Auto-merging packages/core/src/memory/operations/memory-operation-service.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/operations/memory-operation-service.ts
+Auto-merging packages/core/src/memory/retention-sweeper.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/retention-sweeper.ts
+Auto-merging packages/core/src/memory/runtime-activation-failure.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/memory/runtime-activation-failure.test.ts
+Auto-merging packages/core/src/memory/runtime-composition.test.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/runtime-composition.test.ts
+Auto-merging packages/core/src/memory/runtime-composition.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/runtime-composition.ts
+Auto-merging packages/core/src/memory/runtime-selector.test.ts
+Auto-merging packages/core/src/memory/runtime-selector.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/runtime-selector.ts
+Auto-merging packages/core/src/memory/tidy-pass.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/tidy-pass.ts
+Auto-merging packages/core/src/memory/utility-slot.ts
+CONFLICT (content): Merge conflict in packages/core/src/memory/utility-slot.ts
+Auto-merging packages/core/src/memory/write-convention.ts
+Auto-merging packages/core/src/scheduler/index.md
+Auto-merging packages/core/src/scheduler/sweep-runner.ts
+CONFLICT (content): Merge conflict in packages/core/src/scheduler/sweep-runner.ts
+Auto-merging packages/core/src/secrets/index.md
+Auto-merging packages/core/src/secrets/secret-catalog-service.test.ts
+Auto-merging packages/core/src/secrets/secret-catalog-service.ts
+Auto-merging packages/core/src/server/index.md
+CONFLICT (content): Merge conflict in packages/core/src/server/index.md
+Auto-merging packages/core/src/server/memory-operation-subscriptions.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/server/memory-operation-subscriptions.ts
+Auto-merging packages/core/src/server/methods/index.md
+CONFLICT (content): Merge conflict in packages/core/src/server/methods/index.md
+Auto-merging packages/core/src/server/methods/memory-authority-status.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/server/methods/memory-authority-status.test.ts
+Auto-merging packages/core/src/server/methods/memory-operation-methods.test.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/server/methods/memory-operation-methods.test.ts
+Auto-merging packages/core/src/server/methods/memory-operation-methods.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/server/methods/memory-operation-methods.ts
+Auto-merging packages/core/src/server/ws-server.ts
+Auto-merging packages/core/src/testing/hindsight-application-runtime-fixtures.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/testing/hindsight-application-runtime-fixtures.ts
+Auto-merging packages/core/src/testing/hindsight-runtime-composition-fixtures.ts
+CONFLICT (add/add): Merge conflict in packages/core/src/testing/hindsight-runtime-composition-fixtures.ts
+Auto-merging packages/core/src/testing/index.md
+CONFLICT (content): Merge conflict in packages/core/src/testing/index.md
+Auto-merging packages/core/src/testing/run-service-stub.ts
+CONFLICT (content): Merge conflict in packages/core/src/testing/run-service-stub.ts
+Auto-merging packages/shared/src/error-code-schema.test.ts
+Auto-merging packages/shared/src/error-code-schema.ts
+Auto-merging packages/shared/src/governance-registry.test.ts
+CONFLICT (content): Merge conflict in packages/shared/src/governance-registry.test.ts
+Auto-merging packages/shared/src/governance-registry.ts
+Auto-merging packages/shared/src/hindsight-application-artifact-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-application-artifact-schema.ts
+Auto-merging packages/shared/src/hindsight-application-content-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-application-content-schema.ts
+Auto-merging packages/shared/src/hindsight-application-encoding.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-application-encoding.ts
+Auto-merging packages/shared/src/hindsight-application-native-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-application-native-schema.ts
+Auto-merging packages/shared/src/hindsight-application-primitives-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-application-primitives-schema.ts
+Auto-merging packages/shared/src/hindsight-connection-schema.ts
+CONFLICT (content): Merge conflict in packages/shared/src/hindsight-connection-schema.ts
+Auto-merging packages/shared/src/hindsight-current-state-encoding.test.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-current-state-encoding.test.ts
+Auto-merging packages/shared/src/hindsight-current-state-encoding.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-current-state-encoding.ts
+Auto-merging packages/shared/src/hindsight-json-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/hindsight-json-schema.ts
+Auto-merging packages/shared/src/index.md
+CONFLICT (content): Merge conflict in packages/shared/src/index.md
+Auto-merging packages/shared/src/index.ts
+CONFLICT (content): Merge conflict in packages/shared/src/index.ts
+Auto-merging packages/shared/src/memory-authority-status-schema.test.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/memory-authority-status-schema.test.ts
+Auto-merging packages/shared/src/memory-authority-status-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/memory-authority-status-schema.ts
+Auto-merging packages/shared/src/memory-operation-schema.test.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/memory-operation-schema.test.ts
+Auto-merging packages/shared/src/memory-operation-schema.ts
+CONFLICT (add/add): Merge conflict in packages/shared/src/memory-operation-schema.ts
+Auto-merging packages/shared/src/memory-replica-schedule-schema.ts
+CONFLICT (content): Merge conflict in packages/shared/src/memory-replica-schedule-schema.ts
+Auto-merging pnpm-lock.yaml
+CONFLICT (content): Merge conflict in pnpm-lock.yaml
+Automatic merge failed; fix conflicts and then commit the result.

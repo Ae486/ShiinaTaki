@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/server/methods/chat-send-sdk-transport.test.ts",
+    "--maxWorkers=4"
+  ],
+  "exitCode": 1
+}

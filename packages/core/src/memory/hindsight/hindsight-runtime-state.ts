@@ -36,6 +36,8 @@ import { sameApplicationValue } from "./hindsight-application-integrity.ts";
 import { transitionQueuedProvider } from "../transitions/transition-queued-provider.ts";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import { readSelectedTemplateLabelGroup } from "./template-lifecycle/template-runtime-selection.ts";
+import { createRecallEvidenceRegistry } from "../memory-recall-evidence.ts";
+import { createHindsightRecallEvidence } from "./hindsight-recall-evidence.ts";
 
 interface Input { db: Database; runtime: HindsightRuntimeConnection; config: MemoryConfig; now?: () => string; workFence?: CanonicalLocalWriteFence;
   onReplicaApplied?: (bankId: string) => void }
@@ -65,10 +67,13 @@ export function createHindsightRuntimeState(input: Input) {
     writer, client: runtime.client, bank: runtime.bank, assertActive, recover: service.recover,
     requestTimeoutMs: runtime.connection.requestTimeoutMs, intentionsDefaultDays: config.intentionsDefaultDays, now: input.now });
   advance = writes.advanceBank;
+  const recallEvidence = createRecallEvidenceRegistry(createHindsightRecallEvidence({ replica, assertCurrent: runtime.assertConnection,
+    now: input.now ? () => Date.parse(input.now!()) : undefined }));
   const provider = createHindsightMemoryProvider({ ...runtime, epochId: runtime.epoch.epochId, replica, admission, pending, writes,
-    synchronize: service.synchronize, readAdmission: admitted.read, now: input.now, workFence: input.workFence });
+    synchronize: service.synchronize, readAdmission: admitted.read, now: input.now, workFence: input.workFence,
+    observeRecallEvidence: recallEvidence.observe });
   const coordinator = createMemoryCoordinator({ authority: runtime.authority, providers: new Map([["hindsight", transitionQueuedProvider(db, provider, runtime.assertConnection)]]) });
-  return { ...input, ...stores, sync, recovery, service, writes, provider, coordinator };
+  return { ...input, ...stores, sync, recovery, service, writes, provider, coordinator, recallEvidence };
 }
 
 function createRuntimeAdmission(input: Input, repo: HindsightRuntimeAdmissionRepo) {

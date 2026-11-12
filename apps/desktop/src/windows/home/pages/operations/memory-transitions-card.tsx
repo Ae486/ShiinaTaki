@@ -23,7 +23,7 @@ export function MemoryTransitionsCard({ view }: Props) {
     </div>
     {!view.connectionReady && <FeedbackLine tone="warn">连接恢复后读取原操作；不会自动重新提交。</FeedbackLine>}
     {view.error && <FeedbackLine tone="danger">{view.error}</FeedbackLine>}
-    {!view.status && view.loading && <Skeleton lines={4} />}
+    {view.connectionReady && !view.status && view.loading && <Skeleton lines={4} />}
     {view.status && <div className="flex flex-col gap-2">{view.status.actions.map((action) => <div key={action.kind}>
       <ActionButton tone={action.kind === "transition.emergency-local" ? "danger-soft" : "secondary"}
         disabled={locked || !action.allowed} onClick={() => void view.openPreview(action.kind)}>

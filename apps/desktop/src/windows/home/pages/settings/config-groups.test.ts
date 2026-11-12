@@ -4,6 +4,7 @@ import {
   CONFIG_GROUPS,
   configGroupOf,
   configLabelOf,
+  configHintOf,
   filterConfigEntries,
   groupConfigEntries,
 } from "./config-groups.ts";
@@ -22,6 +23,14 @@ const KEYS = [
 ] as const;
 
 describe("config groups", () => {
+  it("exposes both check-in knobs with Chinese labels and next-interval application semantics", () => {
+    for (const key of ["TAKI_SUBAGENT_CHECKIN_STEPS", "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS"]) {
+      expect(configGroupOf(key).id).toBe("model-context"); expect(configLabelOf(key)).toContain("子代理");
+      expect(configHintOf(key)).toContain("下一个进度检查间隔");
+      expect(filterConfigEntries([entry(key)], "子代理")).toHaveLength(1);
+    }
+    expect(configHintOf("TAKI_MAX_STEPS")).toBeNull();
+  });
   it("resolves exact keys to their group and Chinese label", () => {
     expect(configLabelOf("TAKI_PROVIDER_MODEL")).toBe("主模型 ID");
     expect(configGroupOf("TAKI_PROVIDER_MODEL").id).toBe("model-context");
@@ -39,11 +48,11 @@ describe("config groups", () => {
   });
 
   it("groups in fixed order while preserving the server's within-group order", () => {
-    const entries = [...KEYS, "TAKI_VLM_MODEL", "TAKI_PROVIDER_MODEL"].map((key) => entry(key));
+    const entries = [...KEYS, "TAKI_UTILITY_MODEL", "TAKI_PROVIDER_MODEL"].map((key) => entry(key));
     const views = groupConfigEntries(entries);
     expect(views.map((view) => view.group.id)).toEqual(["permissions", "model-context", "perception-privacy", "storage-cache", "advanced"]);
     const model = views.find((view) => view.group.id === "model-context")!;
-    expect(model.entries.map((row) => row.key)).toEqual(["TAKI_PROVIDER_MODEL", "TAKI_VLM_MODEL", "TAKI_PROVIDER_MODEL"]);
+    expect(model.entries.map((row) => row.key)).toEqual(["TAKI_PROVIDER_MODEL", "TAKI_UTILITY_MODEL", "TAKI_PROVIDER_MODEL"]);
     // every knob survives grouping (nothing removed or hidden)
     expect(views.flatMap((view) => view.entries)).toHaveLength(entries.length);
   });

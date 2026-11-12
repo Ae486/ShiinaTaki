@@ -18,12 +18,17 @@ import {
 } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
 import { digestRunValue, readRunRow } from "./run-row-mappers.ts";
-import { readAttemptById, readRunById, readRunByIdempotency, readStatus } from "./run-readers.ts";
+import { readAttemptById, readRunById, readRunByIdempotency, readRunSnapshot, readStatus } from "./run-readers.ts";
 import { createRunEventRepo, type RunEventRepo } from "./run-event-repo.ts";
 import type { RunEvent } from "@taki/shared";
 import type { RunEventLiveBus } from "./run-event-live.ts";
-import { activeAttempt, boundNonEmptyText, boundText, legalAttemptTerminal, legalTerminalTransition, lifecycleEvent } from "./run-event-factory.ts";
+import type { RunLinkedAdmission, RunLinkedState, RunTerminalFact } from "./run-linked-state.ts";
+import { settleRun, updateAttempt } from "./run-terminal-transition.ts";
+import { activeAttempt, boundNonEmptyText, boundText, lifecycleEvent } from "./run-event-factory.ts";
 import { classifyRecovery, listQueue, listRecoverableRuns } from "./run-recovery-repo.ts";
+import { transitionRunDelivery } from "./run-delivery-transition.ts";
+import { transitionRunWork } from "./run-work-transition.ts";
+import type { RunWorkHold, RunWorkTransition, RunWorkResult } from "@taki/shared";
 
 type SnapshotDraft = Omit<RunSnapshot, "snapshotId" | "runId" | "capturedAt" | "manifestDigest">;
 
@@ -34,6 +39,7 @@ export interface RunAdmissionInput {
   provider: string;
   modelId: string;
   now?: string;
+  linked?: RunLinkedAdmission;
 }
 
 export interface RunAdmissionResult {
@@ -52,8 +58,15 @@ export interface RunCancelResult {
 
 export interface RunRepo {
   findByIdempotency(key: string): Run | undefined;
+  afterCommit(callback: () => void): void;
+  onTerminalCommit(listener: (fact: RunTerminalFact) => void): () => void;
+  holdWork(input: RunWorkHold): RunWorkResult;
+  resumeWork(input: RunWorkTransition): RunWorkResult;
+  holdDelivery(runId: string, attemptId: string, deliveryVersion: number): boolean;
+  resumeDelivery(runId: string, attemptId: string, deliveryVersion: number): boolean;
   admit(input: RunAdmissionInput): RunAdmissionResult;
   status(runId: string): RunStatusResult;
+  snapshot(runId: string): RunSnapshot;
   start(runId: string, attemptId: string): { started: boolean; status: RunStatusResult };
   retry(runId: string, attemptId: string, reason: string): RunStatusResult;
   settle(input: {
@@ -74,22 +87,33 @@ export interface RunRepo {
 const TERMINAL = new Set<Run["state"]>([
   "completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown",
 ]);
-const ATTEMPT_TERMINAL = new Set<Attempt["state"]>([
-  "completed", "failed", "cancelled", "deadline_exceeded", "outcome_unknown",
-]);
 
 // eslint-disable-next-line max-lines-per-function
-export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunEventRepo(db), liveBus?: RunEventLiveBus): RunRepo {
+export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunEventRepo(db), options?: RunEventLiveBus | { liveBus?: RunEventLiveBus; linkedState?: RunLinkedState }): RunRepo {
+  const liveBus = options && "publish" in options ? options : options?.liveBus;
+  const linkedState = options && "publish" in options ? undefined : options?.linkedState;
+  const terminalListeners = new Set<(fact: RunTerminalFact) => void>();
   const now = () => new Date().toISOString();
   return {
     findByIdempotency(key) {
       const row = readRunByIdempotency(db, key);
       return row ? readRunRow(row) : undefined;
     },
+    afterCommit: (callback) => db.afterCommit(callback),
+    onTerminalCommit(listener) { terminalListeners.add(listener); return () => { terminalListeners.delete(listener); }; },
+    holdWork: (input) => transitionRunWork({ db, events: eventRepo, live: liveBus }, input, false),
+    resumeWork: (input) => transitionRunWork({ db, events: eventRepo, live: liveBus }, input, true),
+    holdDelivery: (runId, attemptId, deliveryVersion) => transitionRunDelivery({ db, events: eventRepo, live: liveBus }, { runId, attemptId, deliveryVersion, resume: false }),
+    resumeDelivery: (runId, attemptId, deliveryVersion) => transitionRunDelivery({ db, events: eventRepo, live: liveBus }, { runId, attemptId, deliveryVersion, resume: true }),
     admit(input) {
       const requestHash = digestRunValue(input.request);
       const existing = readRunByIdempotency(db, input.request.idempotencyKey);
-      if (existing) return reuseAdmission({ db, eventRepo, row: existing, requestHash });
+      if (input.linked && !linkedState) throw new Error("RUN_LINKED_STATE_REQUIRED");
+      if (existing) {
+        const reused = reuseAdmission({ db, eventRepo, row: existing, requestHash });
+        db.transaction(() => linkedState?.onAdmitTx({ ...reused, request: input.request, link: input.linked }));
+        return reused;
+      }
       const admittedAt = input.now ?? now();
       const snapshotId = randomUUID();
       const attemptId = randomUUID();
@@ -98,31 +122,34 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
       let committed: RunEvent[] = [];
       db.transaction(() => {
         insertAdmission(db, { ...input, requestHash, snapshotId, attemptId, admittedAt, manifest });
+        linkedState?.onAdmitTx({ request: input.request, run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId),
+          snapshot: manifest, reused: false, link: input.linked });
         committed = eventRepo.appendMany([
           lifecycleEvent({ runId: input.runId, kind: "run.admitted", occurredAt: admittedAt, payload: { kind: "run.admitted", state: "queued", initiator: input.request.initiator, deliveryClass: input.request.deliveryClass, attemptOrdinal: 1 }, request: input.request }),
           lifecycleEvent({ runId: input.runId, attemptId, kind: "attempt.prepared", occurredAt: admittedAt, payload: { kind: "attempt.prepared", state: "prepared", attemptOrdinal: 1 }, request: input.request }),
           lifecycleEvent({ runId: input.runId, attemptId, kind: "context.snapshot", category: "context", source: "core.context-observer", occurredAt: admittedAt, payload: { kind: "context.snapshot", state: "captured", sourceCategories: manifest.contextDecision.sourceCategories, accountingQuality: manifest.contextDecision.tokenAccounting === "provider_reported" ? "reported" : manifest.contextDecision.tokenAccounting === "estimated" ? "estimated" : "unknown" } }),
         ]);
       });
-      liveBus?.publish(committed);
+      db.afterCommit(() => liveBus?.publish(committed));
       return { run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId), snapshot: manifest, eventTail: eventRepo.tail(input.runId), reused: false };
     },
     status: (runId) => readStatus(db, runId),
+    snapshot: (runId) => readRunSnapshot(db, runId),
     start(runId, attemptId) {
       const status = readStatus(db, runId);
       if (TERMINAL.has(status.run.state) || status.run.activeAttemptId !== attemptId) return { started: false, status };
       if (status.run.state === "cancel_requested") {
-        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
+        return { started: false, status: settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, {
           runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before start", at: now(),
         }) };
       }
       if (status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.now()) {
-        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
+        return { started: false, status: settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, {
           runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before dispatch", errorCode: "deadline_exceeded", at: now(),
         }) };
       }
       if (status.run.budgetLimit !== undefined && status.run.budgetUsed >= status.run.budgetLimit) {
-        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
+        return { started: false, status: settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, {
           runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before dispatch", errorCode: "budget_exceeded", at: now(),
         }) };
       }
@@ -139,7 +166,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
           lifecycleEvent({ runId, attemptId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal } }),
         ]);
       });
-      liveBus?.publish(committed);
+      db.afterCommit(() => liveBus?.publish(committed));
       return { started: true, status: readStatus(db, runId) };
     },
     retry(runId, attemptId, reason) {
@@ -174,7 +201,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
           lifecycleEvent({ runId, attemptId: nextId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal + 1 } }),
         ]);
       });
-      liveBus?.publish(committed);
+      db.afterCommit(() => liveBus?.publish(committed));
       return readStatus(db, runId);
     },
     settle(input) {
@@ -183,7 +210,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
       const at = now();
       const deadlineExpired = status.run.state !== "cancel_requested" && input.outcome === "completed"
         && status.run.deadlineAt !== undefined && Date.parse(status.run.deadlineAt) <= Date.parse(at);
-      return settle({ db, eventRepo, liveBus }, status, { ...input,
+      return settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { ...input,
         outcome: deadlineExpired ? "deadline_exceeded" : input.outcome,
         summary: boundText(deadlineExpired ? "captured deadline elapsed before settlement" : input.summary, 1000),
         errorCode: boundNonEmptyText(deadlineExpired ? "deadline_exceeded" : input.errorCode, 100), at });
@@ -205,7 +232,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
         changed = result.changes;
         if (changed === 1) committed = [eventRepo.append(lifecycleEvent({ runId, kind: "run.cancel_requested", occurredAt: at, payload: { kind: "run.cancel_requested", state: "cancel_requested", reason: boundText(reason, 1000) ?? "cancel requested" } }))];
       });
-      liveBus?.publish(committed);
+      db.afterCommit(() => liveBus?.publish(committed));
       return { run: readRunById(db, runId), changed: changed === 1 };
     },
     queue: (input) => listQueue(db, input),
@@ -215,15 +242,15 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
       const status = readStatus(db, runId);
       if (status.run.activeAttemptId !== attemptId || TERMINAL.has(status.run.state)) return false;
       if (status.run.state === "cancel_requested") {
-        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before effect dispatch", errorCode: "cancel_requested", at: now() });
+        settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before effect dispatch", errorCode: "cancel_requested", at: now() });
         return false;
       }
       if (status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.now()) {
-        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before effect dispatch", errorCode: "deadline_exceeded", at: now() });
+        settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before effect dispatch", errorCode: "deadline_exceeded", at: now() });
         return false;
       }
       if (status.run.budgetLimit !== undefined && status.run.budgetUsed >= status.run.budgetLimit) {
-        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before effect dispatch", errorCode: "budget_exceeded", at: now() });
+        settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before effect dispatch", errorCode: "budget_exceeded", at: now() });
         return false;
       }
       return status.run.state === "running";
@@ -272,62 +299,6 @@ function reuseAdmission(input: { db: Database; eventRepo: RunEventRepo; row: Rec
   return { run, attempt: readAttemptById(db, run.activeAttemptId), snapshot, eventTail: eventRepo.tail(run.runId), reused: true };
 }
 
-function settle(deps: { db: Database; eventRepo: RunEventRepo; liveBus?: RunEventLiveBus }, status: RunStatusResult, input: {
-  runId: string;
-  attemptId: string;
-  outcome: RunOutcome;
-  retryability: Retryability;
-  summary?: string;
-  errorCode?: string;
-  at?: string;
-}): RunStatusResult {
-  const at = input.at ?? new Date().toISOString();
-  const { db, eventRepo, liveBus } = deps;
-  const target = status.run.state === "cancel_requested" && input.outcome !== "outcome_unknown"
-    ? "cancelled"
-    : input.outcome;
-  if (!legalTerminalTransition(status.run.state, target)) throw new Error("RUN_INVALID_TRANSITION");
-  const attempt = activeAttempt(status);
-  if (attempt.attemptId !== input.attemptId) return status;
-  const attemptTarget = target === "skipped" ? "failed" : target;
-  const receiptId = randomUUID();
-  let committed: RunEvent[] = [];
-  db.transaction(() => {
-    if (!ATTEMPT_TERMINAL.has(attempt.state)) {
-      if (!legalAttemptTerminal(attempt.state, attemptTarget)) throw new Error("ATTEMPT_INVALID_TRANSITION");
-      updateAttempt(db, attempt, { state: attemptTarget, outcome: target, retryability: input.retryability,
-        summary: input.summary, errorCode: input.errorCode, at });
-    }
-    const changed = db.prepare(`UPDATE runs SET state=:state,state_version=state_version+1,
-      operation_phase='terminal',outcome=:outcome,retryability=:retryability,terminal_at=:at,
-      receipt_id=:receiptId,updated_at=:at WHERE run_id=:runId AND state_version=:version AND state NOT IN
-      ('completed','failed','cancelled','skipped','deadline_exceeded','outcome_unknown')`)
-      .run({ state: target, outcome: target, retryability: input.retryability, at, receiptId,
-        runId: input.runId, version: status.run.stateVersion });
-    if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
-    db.prepare(`INSERT INTO run_receipts
-      (receipt_id,run_id,state,outcome,retryability,reason,action,attempt_count,snapshot_id,summary,created_at,updated_at)
-      VALUES (:receiptId,:runId,:state,:outcome,:retryability,:reason,NULL,:attemptCount,:snapshotId,:summary,:at,:at)`)
-      .run({ receiptId, runId: input.runId, state: target, outcome: target,
-        retryability: input.retryability, reason: input.summary ?? null, attemptCount: status.attempts.length,
-      snapshotId: status.run.snapshot.snapshotId, summary: input.summary ?? null, at });
-    const boundaryEvent = lifecycleBoundaryEvent(input, status, at);
-    committed = eventRepo.appendMany([
-      lifecycleEvent({ runId: input.runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: attemptTarget, outcome: target, attemptOrdinal: attempt.ordinal, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
-      ...(boundaryEvent ? [boundaryEvent] : []),
-      lifecycleEvent({ runId: input.runId, kind: "run.settled", occurredAt: at, payload: { kind: "run.settled", state: target, outcome: target, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
-    ]);
-  });
-  liveBus?.publish(committed);
-  return readStatus(db, input.runId);
-}
-
-function lifecycleBoundaryEvent(input: { runId: string; errorCode?: string; summary?: string }, status: RunStatusResult, at: string): Omit<RunEvent, "eventId" | "seq"> | undefined {
-  if (input.errorCode === "deadline_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.deadline_exceeded", occurredAt: at, payload: { kind: "run.deadline_exceeded", state: "deadline_exceeded", reason: input.summary ?? "captured deadline elapsed" } });
-  if (input.errorCode === "budget_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.budget_exceeded", occurredAt: at, payload: { kind: "run.budget_exceeded", state: "failed", reason: input.summary ?? "captured budget exhausted", used: status.run.budgetUsed, ...(status.run.budgetLimit === undefined ? {} : { limit: status.run.budgetLimit }) } });
-  return undefined;
-}
-
 function updateRun(db: Database, run: Run, input: {
   state: Run["state"];
   operationPhase: Run["operationPhase"];
@@ -339,24 +310,4 @@ function updateRun(db: Database, run: Run, input: {
     WHERE run_id=:runId AND state_version=:version`)
     .run({ ...input, runId: run.runId, version: run.stateVersion });
   if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
-}
-
-function updateAttempt(db: Database, attempt: Attempt, input: {
-  state: Attempt["state"];
-  outcome?: RunOutcome;
-  retryability?: Retryability;
-  summary?: string;
-  errorCode?: string;
-  at: string;
-}): void {
-  const changed = db.prepare(`UPDATE run_attempts SET state=:state,state_version=state_version+1,
-    outcome=:outcome,retryability=:retryability,result_summary=:summary,error_code=:errorCode,
-    started_at=CASE WHEN :state='effect_running' AND started_at IS NULL THEN :at ELSE started_at END,
-    settled_at=CASE WHEN :terminal=1 THEN :at ELSE settled_at END
-    WHERE attempt_id=:attemptId AND run_id=:runId AND state_version=:version`)
-    .run({ state: input.state, outcome: input.outcome ?? null, retryability: input.retryability ?? null,
-      summary: input.summary ?? null, errorCode: input.errorCode ?? null, at: input.at,
-      terminal: ATTEMPT_TERMINAL.has(input.state) ? 1 : 0, attemptId: attempt.attemptId,
-      runId: attempt.runId, version: attempt.stateVersion });
-  if (changed.changes !== 1) throw new Error("ATTEMPT_STALE_VERSION");
 }

@@ -7,6 +7,7 @@ import { memoryWriteFixture, readWriteSourceCommand, writeTestBank, writeTestCal
   writeTestRetain, WRITE_TEST_MEMORY, type MemoryWriteFixture } from "./hindsight-memory-write-fixtures.ts";
 import { curatorTestRemotePolicy } from "./hindsight-policy-curator-fixtures.ts";
 import { publishWriteNativeDeletion, publishWriteNativeMemory } from "./hindsight-memory-write-native-fixtures.ts";
+import { resolveHindsightPrimaryReceipt } from "../primary-memory-source-state.ts";
 
 const fixtures: MemoryWriteFixture[] = []; const directories: string[] = [];
 const ownedRuntime = resolve(tmpdir());
@@ -219,6 +220,43 @@ describe("D77 whole-write gateway and recovery", () => {
     expect(await f.writes.retain(f.call(), request)).toEqual(result);
     expect(f.native.calls.filter((call) => call.startsWith("dispatch:"))).toHaveLength(1);
   }, 30_000);
+
+  it("freezes source/native/policy evidence at actual retain completion and preserves it after later edits", async () => {
+    const f = fixture(); f.control.replayNative = true;
+    const request = writeTestRetain(); const result = await f.writes.retain(f.call(), request);
+    expect(result.status).toBe("completed");
+    const completed = parent(f).terminal;
+    if (completed?.kind !== "retain") throw new Error("fixture retain did not complete");
+    expect(completed.sourceLifetime?.sourceBinding.version?.object_revision).toBe(result.sourceRevision);
+    expect(completed.sourceLifetime?.memoryBindings).toHaveLength(1);
+    const memoryId = result.memories[0]!.memoryId;
+    curatorTestRemotePolicy(f.bank, memoryId, (body) => ({ ...body, policy: { ...body.policy, importance: 6, policyVersion: 2 } }));
+    await f.refresh();
+    expect(parent(f).terminal).toEqual(completed);
+    expect(await f.writes.retain(f.call(), request)).toEqual(result);
+    expect(f.native.calls.filter((call) => call.startsWith("dispatch:"))).toHaveLength(1);
+  });
+
+  it("resolves a formerly Pending primary receipt through its original recovered write, never latest policy", async () => {
+    const f = fixture(); const request = writeTestRetain();
+    await f.writes.retain(f.call(), request);
+    const pending = child(f); const batch = { bank: f.route, providerLineageId: f.bank.scope.namespace.provider_lineage,
+      bankGeneration: f.bank.scope.namespace.bank_generation, baseCursor: 2, requestId: "write-a", request };
+    const state = { epochId: "epoch", receipts: [{ bankId: f.route.bankId, requestId: "write-a", status: "pending" as const,
+      evidence: { kind: "outbox" as const, operationId: pending.intent.operationId, intentHash: pending.intentHash } }] };
+    const ports = { db: f.base.db, pending: f.pending };
+    expect(resolveHindsightPrimaryReceipt(ports, { state, batch })).toBe("unavailable");
+    f.control.replayNative = true; const completed = await f.writes.retain(f.call(), request);
+    const original = parent(f).terminal;
+    if (original?.kind !== "retain") throw new Error("fixture completion missing");
+    const memoryId = completed.memories[0]!.memoryId;
+    curatorTestRemotePolicy(f.bank, memoryId, (body) => ({ ...body, policy: { ...body.policy, importance: 6, policyVersion: 2 } }));
+    await f.refresh();
+    const resolved = resolveHindsightPrimaryReceipt(ports, { state, batch });
+    expect(resolved).toMatchObject({ status: "confirmed", memoryBindings: original.sourceLifetime!.memoryBindings });
+    expect(typeof resolved !== "string" && resolved.memoryBindings?.[0]?.policy.policyVersion).toBe(1);
+    expect(f.base.replica.record({ ...f.bank.scope, memoryId })?.policy.policyVersion).toBe(2);
+  });
 
   it("settles a cancelled owned continuation before stop returns, with no late journal reads or writes", async () => {
     const f = fixture(); const entered = deferred(); const blocked = deferred();

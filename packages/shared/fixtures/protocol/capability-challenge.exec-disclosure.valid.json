@@ -1,0 +1,93 @@
+{
+  "requestId": "22222222-2222-4222-8222-222222222222",
+  "control": {
+    "runId": "33333333-3333-4333-8333-333333333333",
+    "operationId": "44444444-4444-4444-8444-444444444444",
+    "attemptId": "55555555-5555-4555-8555-555555555555",
+    "targetHostId": "11111111-1111-4111-8111-111111111111",
+    "connectionGeneration": 1,
+    "catalogGeneration": 1,
+    "policyGeneration": 1,
+    "governanceProjection": {
+      "registryRevision": 1,
+      "descriptorRevision": 1,
+      "classifierRevision": 1,
+      "cells": [
+        {
+          "key": "exec:allowlist-miss",
+          "posture": "ask"
+        },
+        {
+          "key": "exec:blocked",
+          "posture": "deny"
+        },
+        {
+          "key": "exec:compound",
+          "posture": "ask"
+        },
+        {
+          "key": "exec:shell-reentry",
+          "posture": "ask"
+        },
+        {
+          "key": "exec:simple-allowlisted",
+          "posture": "auto"
+        }
+      ],
+      "digest": "34dda5735ea5ae5b5b3bc83b2f9792fdd88b14236df71cd587adf85dec7d5918"
+    },
+    "approvalGeneration": 7,
+    "capabilityId": "exec",
+    "inputDigest": "c1900f6930ef75477c9a5be1ef990211664b41e28b888cde1881d17291381d4b",
+    "idempotencyKey": "66666666-6666-4666-8666-666666666666",
+    "dispatchedAt": "2026-08-12T00:00:00.000Z",
+    "deadlineAt": "2026-08-12T00:01:00.000Z"
+  },
+  "challengeId": "77777777-7777-4777-8777-777777777777",
+  "controlDigest": "069b39b45514eec068fa71a4ea390e9ceba0d834beb9a1330af9f0483dd126c1",
+  "challengeDigest": "e84382212f3ad083eacbc2d9a967e4e196109b83411e1a1361a862927debf209",
+  "decisionScopeDigest": "771f82491f8f02eb39a3771334fd6853e474eed8ed3a12fa7f316b59cdb1d7af",
+  "governance": {
+    "descriptorRevision": 1,
+    "classifierRevision": 1,
+    "cellKey": "exec:allowlist-miss",
+    "effectivePosture": "ask",
+    "constraint": "none"
+  },
+  "presentation": {
+    "revision": 1,
+    "title": "允许执行此命令？",
+    "capabilityLabel": "执行命令",
+    "riskSummary": "已隐藏识别到的凭证；控制字符以转义显示。",
+    "sections": [
+      {
+        "title": "完整命令",
+        "fields": [
+          {
+            "label": "命令",
+            "value": "curl -H \""
+          },
+          {
+            "label": "命令",
+            "value": "Authorization: Bearer [凭证已隐藏]"
+          }
+        ]
+      },
+      {
+        "title": "完整命令",
+        "fields": [
+          {
+            "label": "命令",
+            "value": "\" https://example.test/api"
+          }
+        ]
+      }
+    ],
+    "commandDisclosure": {
+      "revision": 1,
+      "complete": true,
+      "encoding": "visible-escapes",
+      "reconstruction": "section-field-concat"
+    }
+  }
+}

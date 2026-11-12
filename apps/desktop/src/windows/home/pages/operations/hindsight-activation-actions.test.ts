@@ -25,6 +25,8 @@ function client(status = activationStatus()) {
     memoryReplicaConfigure: vi.fn<MemoryOperationsClient["memoryReplicaConfigure"]>(async (bankId) => bankStatus(bankId)),
     memoryOperationSubmit: vi.fn<MemoryOperationsClient["memoryOperationSubmit"]>(async () => activationOperation()),
     memoryOperationCancel: vi.fn<MemoryOperationsClient["memoryOperationCancel"]>(async () => activationOperation({ state: "cancelled", reason: "cancelled_before_claim", terminalAt: ACTIVATION_AT })),
+    memoryOperationList: vi.fn<MemoryOperationsClient["memoryOperationList"]>(async () => { throw new Error("Unexpected Tidy operation list read"); }),
+    memoryOperationStatus: vi.fn<MemoryOperationsClient["memoryOperationStatus"]>(async () => { throw new Error("Unexpected Tidy operation status read"); }),
     subscribeMemoryOperations: vi.fn<MemoryOperationsClient["subscribeMemoryOperations"]>(async () => undefined),
     onMemoryOperationChanged: (handler: (operation: MemoryOperation) => void) => { handlers.add(handler); return () => { handlers.delete(handler); }; },
     onMemoryReplicaChanged: vi.fn<MemoryOperationsClient["onMemoryReplicaChanged"]>(() => () => undefined),
@@ -249,11 +251,12 @@ describe("Hindsight activation dispatch through the generic controller", () => {
     expect(target.memoryOperationSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it("reports a failed subscription, still reads, and retries the subscription on the next read", async () => {
+  it("refuses unacknowledged reads and retries a failed subscription on explicit refresh", async () => {
     const target = client();
     target.subscribeMemoryOperations.mockRejectedValueOnce(new Error("subscription refused"));
     const { controller, snapshot } = await mounted(target);
-    expect(snapshot()).toMatchObject({ status: activationStatus(), feedback: { tone: "danger", message: "subscription refused" } });
+    expect(snapshot()).toMatchObject({ status: null, error: "subscription refused", loading: false });
+    expect(target.memoryActivationStatus).not.toHaveBeenCalled();
     await controller.refresh();
     expect(target.subscribeMemoryOperations).toHaveBeenCalledTimes(2);
     await controller.refresh();

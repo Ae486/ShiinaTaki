@@ -1,0 +1,596 @@
+{
+  "timestamp": "2026-10-25T04:41:35.385Z",
+  "node": "v24.18.0",
+  "sdkVersion": "7.0.148",
+  "scope": "Installed SDK only; deterministic MockLanguageModelV4, no provider requests or production database.",
+  "standard": {
+    "requests": 20,
+    "executed": 20,
+    "completedSteps": 20,
+    "fullResponseMessages": 40,
+    "retainedEarliestResult": true,
+    "maxPreparedMessageCount": 39,
+    "compactedAt": [],
+    "preparation": [
+      {
+        "stepNumber": 0,
+        "messageCount": 1,
+        "rawResponseCount": 0,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": false
+      },
+      {
+        "stepNumber": 1,
+        "messageCount": 3,
+        "rawResponseCount": 2,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 2,
+        "messageCount": 5,
+        "rawResponseCount": 4,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 3,
+        "messageCount": 7,
+        "rawResponseCount": 6,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 4,
+        "messageCount": 9,
+        "rawResponseCount": 8,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 5,
+        "messageCount": 11,
+        "rawResponseCount": 10,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 6,
+        "messageCount": 13,
+        "rawResponseCount": 12,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 7,
+        "messageCount": 15,
+        "rawResponseCount": 14,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 8,
+        "messageCount": 17,
+        "rawResponseCount": 16,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 9,
+        "messageCount": 19,
+        "rawResponseCount": 18,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 10,
+        "messageCount": 21,
+        "rawResponseCount": 20,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 11,
+        "messageCount": 23,
+        "rawResponseCount": 22,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 12,
+        "messageCount": 25,
+        "rawResponseCount": 24,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 13,
+        "messageCount": 27,
+        "rawResponseCount": 26,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 14,
+        "messageCount": 29,
+        "rawResponseCount": 28,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 15,
+        "messageCount": 31,
+        "rawResponseCount": 30,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 16,
+        "messageCount": 33,
+        "rawResponseCount": 32,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 17,
+        "messageCount": 35,
+        "rawResponseCount": 34,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 18,
+        "messageCount": 37,
+        "rawResponseCount": 36,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 19,
+        "messageCount": 39,
+        "rawResponseCount": 38,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      }
+    ],
+    "completion": [
+      {
+        "stepNumber": 0,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 1,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 2,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 3,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 4,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 5,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 6,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 7,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 8,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 9,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 10,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 11,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 12,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 13,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 14,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 15,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 16,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 17,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 18,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 19,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      }
+    ]
+  },
+  "unlimited": {
+    "requests": 23,
+    "executed": 22,
+    "completedSteps": 23,
+    "fullResponseMessages": 45,
+    "retainedEarliestResult": true,
+    "maxPreparedMessageCount": 15,
+    "compactedAt": [
+      5,
+      10,
+      15,
+      20
+    ],
+    "preparation": [
+      {
+        "stepNumber": 0,
+        "messageCount": 1,
+        "rawResponseCount": 0,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": false
+      },
+      {
+        "stepNumber": 1,
+        "messageCount": 3,
+        "rawResponseCount": 2,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 2,
+        "messageCount": 5,
+        "rawResponseCount": 4,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 3,
+        "messageCount": 7,
+        "rawResponseCount": 6,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 4,
+        "messageCount": 9,
+        "rawResponseCount": 8,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 5,
+        "messageCount": 11,
+        "rawResponseCount": 10,
+        "hasSummary": false,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 6,
+        "messageCount": 7,
+        "rawResponseCount": 12,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 7,
+        "messageCount": 9,
+        "rawResponseCount": 14,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 8,
+        "messageCount": 11,
+        "rawResponseCount": 16,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 9,
+        "messageCount": 13,
+        "rawResponseCount": 18,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 10,
+        "messageCount": 15,
+        "rawResponseCount": 20,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 11,
+        "messageCount": 7,
+        "rawResponseCount": 22,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 12,
+        "messageCount": 9,
+        "rawResponseCount": 24,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 13,
+        "messageCount": 11,
+        "rawResponseCount": 26,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 14,
+        "messageCount": 13,
+        "rawResponseCount": 28,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 15,
+        "messageCount": 15,
+        "rawResponseCount": 30,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 16,
+        "messageCount": 7,
+        "rawResponseCount": 32,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 17,
+        "messageCount": 9,
+        "rawResponseCount": 34,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 18,
+        "messageCount": 11,
+        "rawResponseCount": 36,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 19,
+        "messageCount": 13,
+        "rawResponseCount": 38,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 20,
+        "messageCount": 15,
+        "rawResponseCount": 40,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 21,
+        "messageCount": 7,
+        "rawResponseCount": 42,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      },
+      {
+        "stepNumber": 22,
+        "messageCount": 9,
+        "rawResponseCount": 44,
+        "hasSummary": true,
+        "hasEarliestResultInRaw": true
+      }
+    ],
+    "completion": [
+      {
+        "stepNumber": 0,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 1,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 2,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 3,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 4,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 5,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 6,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 7,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 8,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 9,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 10,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 11,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 12,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 13,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 14,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 15,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 16,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 17,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 18,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 19,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 20,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 21,
+        "messageCount": 2,
+        "fullToolReceiptAvailable": true,
+        "receiptAbsentFromModelResponse": true
+      },
+      {
+        "stepNumber": 22,
+        "messageCount": 1,
+        "fullToolReceiptAvailable": false,
+        "receiptAbsentFromModelResponse": true
+      }
+    ]
+  }
+}

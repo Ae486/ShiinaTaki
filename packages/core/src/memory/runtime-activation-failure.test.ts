@@ -9,6 +9,7 @@ import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { createPrimaryMemoryCustody } from "../db/primary-memory-custody-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
+import { createSearchProjectionPolicyRepo } from "../db/search-projection-policy-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { scriptedGenerateModel } from "../testing/mock-language-model.ts";
@@ -31,6 +32,8 @@ function setup() {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-activation-failure-"));
   const dbPath = join(dataDir, "state.db");
   const db = openDatabase({ path: dbPath, migrations: MIGRATIONS });
+  // This fixture starts with an empty derived index under the explicit default tokenizer.
+  createSearchProjectionPolicyRepo(db).write({ table: "memory_fts", epochId: null }, true);
   opened.push({ db, dataDir });
   const timeline = createTimelineRepo(db);
   const model = scriptedGenerateModel([]);
@@ -137,6 +140,7 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
       binding: { kind: "unavailable", epochId }, flush: "failing" });
     expect(() => fixture.runtime.recoverLocalBinding("another-epoch")).toThrow("MEMORY_AUTHORITY_MISMATCH");
     expect(fixture.runtime.recoverLocalBinding(epochId)).toEqual({ binding: "published", reconciledGroups: 0 });
+    await fixture.runtime.captureRun("taki");
     expect(fixture.runtime.bindingSnapshot()).toMatchObject({ binding: { kind: "published", epochId }, flush: "available" });
     expect(Object.keys(fixture.runtime.memory.createTools("taki"))).not.toHaveLength(0);
     // A healthy binding still reconciles dead custody on explicit recovery, without reconstructing or re-activating.
@@ -232,6 +236,7 @@ describe("durable activation binds a usable Local runtime", () => {
     const runner = await fixture.runtime.migrationRunner();
     const activate = await prepared(fixture, runner, "run-usable");
     await expect(activate()).resolves.toMatchObject({ activated: true, mode: "canonical-local" });
+    await fixture.runtime.captureRun("taki");
     expect(fixture.runtime.bindingSnapshot()).toMatchObject({ selection: "canonical-local", binding: { kind: "published" }, flush: "available" });
     await fixture.runtime.writeMemory({ characterId: "taki", layer: "profile", content: "Retained after cutover", importance: 6, origin: "observed" });
     expect((await recalled(fixture.runtime, "Synthetic source")).some((text) => text.includes("Synthetic source before cutover"))).toBe(true);

@@ -1,0 +1,9 @@
+{"file":".trellis/spec/frontend/state-management.md","reason":"Core authority, guarded snapshot retention, privacy cache limits and local draft ownership."}
+{"file":".trellis/spec/frontend/reactive-read-models.md","reason":"Producer-driven reads, visibility gaps and generation recovery; apply the task-documented source corrections."}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"Typed hook/controller boundaries, subscription lifecycle and explicit async outcomes."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Stable composition, accessible controls and existing presentation boundaries."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"No UI polling, narrow selectors, size/responsibility rules, headers and indexes."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Opt-in operator fanout, connection cleanup, idempotent restore and operator-only schema boundaries."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Backend producer callback, type, error and test quality requirements."}
+{"file":".trellis/tasks/09-08-uiux-triggered-refresh/research/home-refresh-inventory.md","reason":"Current page/section source inventory and acceptance alignment; implement.md requires full topic-specific reads before each batch."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Isolated actual-Core/WS tests; distinguish producer proof from native frontend fixtures. Load all changed-domain context rows in implement.md."}

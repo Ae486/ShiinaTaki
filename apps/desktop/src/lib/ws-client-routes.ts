@@ -1,7 +1,7 @@
 /**
- * INPUT:  Core notification frames (chat, avatar, timeline, config, Approval, monitor and memory invalidations) and the
- *         transport's open/message/close events.
- * OUTPUT: Routes state (in-flight turn + push slots), installRoutes(), parseFrame(), abortTurn(), bindTransport().
+ * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream and typed operator pushes) and the
+ *         captured connection-scoped push slots.
+ * OUTPUT: Routes state (in-flight turn + push slots), installRoutes() and compatibility re-exports of connection binding helpers.
  * POS:    ui/lib — the inbound half of ws-client: THE zod boundary (past it, data is trusted typed data). No
  *         React/Tauri imports; node-testable through the injected transport.
  */
@@ -14,61 +14,77 @@ import {
   CanonicalApprovalRequestSchema,
   AvatarCommandSchema,
   CHAT_METHODS,
+  INTERACTION_PATTERN_METHODS, INITIATIVE_SETUP_METHODS, INITIATIVE_WAKE_METHODS,
+  InteractionPatternChangedSchema,
+  INITIATIVE_BACKOFF_METHODS, InitiativeBackoffChangedSchema,
+  CO_WATCHING_METHODS, CoWatchingChangedSchema, type CoWatchingChanged,
   CONFIG_METHODS,
   MEMORY_OPERATION_METHODS,
   MEMORY_REPLICA_METHODS, MemoryReplicaChangedSchema, type MemoryReplicaChanged,
   MEMORY_ONBOARDING_METHODS,
   MemoryOperationChangedSchema,
   MemoryOnboardingChangedSchema,
+  MODEL_PROFILE_METHODS, ModelProfilesChangedSchema, type ModelProfilesChanged,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
+  ChatActivitySchema,
   ConfigChangedSchema,
+  EXTENSION_METHODS,
+  ExtensionChangedSchema,
+  PERCEPTION_METHODS,
+  PerceptionChangedSchema,
   OBSERVABILITY_METHODS,
+  CACHE_USAGE_METHODS, CacheUsageUpdateSchema, type CacheUsageUpdate,
+  MAINTENANCE_MONITOR_METHODS, MaintenanceMonitorUpdateSchema, type MaintenanceMonitorUpdate,
   RunMonitorEventSchema,
-  JsonRpcClientFrameSchema,
   TIMELINE_METHODS,
   TimelineAppendedSchema,
   TimelineRemovedSchema,
+  TimelineCommittedSchema,
+  type ChatActivity,
+  type InteractionPatternChanged,
+  type InitiativeBackoffChanged,
   type AvatarCommand,
   type ApprovalClosed,
   type CanonicalApprovalRequest,
   type ConfigChanged,
   type MemoryOperation,
   type MemoryOnboardingChanged,
+  type ExtensionChanged,
+  type PerceptionChanged,
   type RunMonitorEvent,
-  type ErrorCode,
-  type JsonRpcClientFrame,
   type TimelineEntry,
   type TimelineRemoved,
+  type TimelineCommitted,
 } from "@taki/shared";
-import type { WsTransport } from "./ws-transport.ts";
-
-/** Streamed-turn callbacks: deltas append into the bubble, complete/error settle it (mirrors the CLI's ChatHandlers). */
-export interface ChatHandlers {
-  // messageId keys the in-flight assistant row (the chat page drops it when its persisted entry arrives, #17).
-  onDelta: (delta: string, messageId: string) => void;
-  onComplete?: () => void;
-  // retracted=true means the turn was cancelled before any reply: the user row is already gone (timeline.removed),
-  // so the caller restores the draft instead of surfacing the message as an error toast (cancel-retract).
-  onError?: (code: ErrorCode, message: string, retracted?: boolean) => void;
-}
-
-interface Turn {
-  handlers: ChatHandlers;
-  finish: () => void;
-}
+import { SUBAGENT_METHODS, SubagentChangedSchema, SubagentActivitySchema, type SubagentChanged, type SubagentActivity } from "@taki/shared";
+import { routeChatNotification, type PendingChatTurn } from "./ws-chat-turn.ts";
 
 interface PushSlots {
+  modelProfiles: Set<(change: ModelProfilesChanged) => void>;
+  cacheUsage: Set<(update: CacheUsageUpdate) => void>;
+  maintenanceMonitor: Set<(update: MaintenanceMonitorUpdate) => void>;
+  subagentActivity: Set<(event: SubagentActivity) => void>;
+  subagents: Set<(change: SubagentChanged) => void>;
+  coWatching: Set<(change: CoWatchingChanged) => void>;
+  initiativePatterns: Set<(change: InteractionPatternChanged) => void>;
+  initiativeSetup: Set<(change: InteractionPatternChanged) => void>;
+  initiativePolicy: Set<(change: InteractionPatternChanged) => void>;
+  initiativeBackoff: Set<(change: InitiativeBackoffChanged) => void>;
   avatar: ((command: AvatarCommand) => void) | null;
   timeline: ((entry: TimelineEntry) => void) | null;
   timelineRemoved: ((ref: TimelineRemoved) => void) | null;
   config: Set<(changed: ConfigChanged) => void>;
+  perception: Set<(changed: PerceptionChanged) => void>;
+  extension: Set<(changed: ExtensionChanged) => void>;
   approval: Set<(event: ApprovalPushEvent) => void>;
   monitor: Set<(event: RunMonitorEvent) => void>;
   memoryOperation: Set<(operation: MemoryOperation) => void>;
   memoryReplica: Set<(changed: MemoryReplicaChanged) => void>;
   memoryOnboarding: Set<(changed: MemoryOnboardingChanged) => void>;
+  activity: Set<(event: ChatActivity) => void>;
+  committed: Set<(batch: TimelineCommitted) => void>;
 }
 
 export type ApprovalPushEvent =
@@ -76,17 +92,62 @@ export type ApprovalPushEvent =
   | { type: "closed"; closed: ApprovalClosed };
 
 export interface Routes {
-  current: Turn | null;
+  current: PendingChatTurn | null;
   push: PushSlots;
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set(), memoryOperation: new Set(), memoryReplica: new Set(), memoryOnboarding: new Set() } };
+  return { current: null, push: { modelProfiles: new Set(), maintenanceMonitor: new Set(), cacheUsage: new Set(), subagentActivity: new Set(), subagents: new Set(), coWatching: new Set(), avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
+    initiativePatterns: new Set(), initiativeSetup: new Set(), initiativePolicy: new Set(), initiativeBackoff: new Set(),
+    approval: new Set(), monitor: new Set(), memoryOperation: new Set(), memoryReplica: new Set(), memoryOnboarding: new Set(),
+    activity: new Set(), committed: new Set(), perception: new Set(), extension: new Set() } };
+}
+
+export function addInitiativeChangedHandler(state: Routes,
+  kind: "initiativePatterns" | "initiativeSetup" | "initiativePolicy" | "initiativeBackoff",
+  handler: (change: InteractionPatternChanged) => void): () => void {
+  state.push[kind].add(handler);
+  return () => state.push[kind].delete(handler);
+}
+
+export function addChatActivityHandler(state: Routes, handler: (event: ChatActivity) => void): () => void {
+  state.push.activity.add(handler);
+  return () => state.push.activity.delete(handler);
+}
+
+export function addTimelineCommittedHandler(state: Routes, handler: (batch: TimelineCommitted) => void): () => void {
+  state.push.committed.add(handler);
+  return () => state.push.committed.delete(handler);
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
   state.push.config.add(handler);
   return () => state.push.config.delete(handler);
+}
+
+export function addCoWatchingChangedHandler(state: Routes, handler: (changed: CoWatchingChanged) => void): () => void {
+  state.push.coWatching.add(handler);
+  return () => state.push.coWatching.delete(handler);
+}
+
+export function addSubagentChangedHandler(state: Routes, handler: (changed: SubagentChanged) => void): () => void {
+  state.push.subagents.add(handler);
+  return () => state.push.subagents.delete(handler);
+}
+
+export function addSubagentActivityHandler(state: Routes, handler: (event: SubagentActivity) => void): () => void {
+  state.push.subagentActivity.add(handler);
+  return () => state.push.subagentActivity.delete(handler);
+}
+
+export function addPerceptionChangedHandler(state: Routes, handler: (changed: PerceptionChanged) => void): () => void {
+  state.push.perception.add(handler);
+  return () => state.push.perception.delete(handler);
+}
+
+export function addExtensionChangedHandler(state: Routes, handler: (changed: ExtensionChanged) => void): () => void {
+  state.push.extension.add(handler);
+  return () => state.push.extension.delete(handler);
 }
 
 export function addApprovalHandler(state: Routes, handler: (event: ApprovalPushEvent) => void): () => void {
@@ -109,49 +170,22 @@ export function addMemoryOnboardingHandler(state: Routes, handler: (changed: Mem
   return () => state.push.memoryOnboarding.delete(handler);
 }
 
-function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
-  for (const handler of [...state.push.monitor]) {
-    try { handler(event); } catch { console.warn("[ws-client] monitor handler failed"); }
-  }
-}
-
-/** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
-function clearPushHandlers(state: Routes): void {
-  state.push.avatar = null;
-  state.push.timeline = null;
-  state.push.timelineRemoved = null;
-  state.push.config.clear();
-  state.push.approval.clear();
-  state.push.monitor.clear();
-  state.push.memoryOperation.clear();
-  state.push.memoryReplica.clear();
-  state.push.memoryOnboarding.clear();
-}
-
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
 export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
-  const endTurn = (act: (turn: Turn) => void): void => {
-    const turn = state.current;
-    state.current = null;
-    if (turn) act(turn);
-  };
   rpc.addMethod(CHAT_METHODS.delta, (params: unknown) => {
-    const { delta, messageId } = ChatDeltaSchema.parse(params);
-    state.current?.handlers.onDelta(delta, messageId);
+    routeChatNotification(state, { kind: "delta", value: ChatDeltaSchema.parse(params) });
   });
   rpc.addMethod(CHAT_METHODS.complete, (params: unknown) => {
-    ChatCompleteSchema.parse(params);
-    endTurn((turn) => {
-      turn.handlers.onComplete?.();
-      turn.finish();
-    });
+    routeChatNotification(state, { kind: "complete", value: ChatCompleteSchema.parse(params) });
   });
   rpc.addMethod(CHAT_METHODS.error, (params: unknown) => {
-    const { code, message, retracted } = ChatErrorSchema.parse(params);
-    endTurn((turn) => {
-      turn.handlers.onError?.(code, message, retracted);
-      turn.finish();
-    });
+    routeChatNotification(state, { kind: "error", value: ChatErrorSchema.parse(params) });
+  });
+  rpc.addMethod(CHAT_METHODS.activity, (params: unknown) => {
+    publishHandlers(state.push.activity, ChatActivitySchema.parse(params));
+  });
+  rpc.addMethod(TIMELINE_METHODS.committed, (params: unknown) => {
+    publishHandlers(state.push.committed, TimelineCommittedSchema.parse(params));
   });
   // Fire-and-forget pushes: a missing handler is harmless (closing a client window must not break a turn, invariant 4).
   rpc.addMethod(AVATAR_METHODS.command, (params: unknown) => {
@@ -165,40 +199,71 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
   });
   installFanOutRoutes(rpc, state);
   installApprovalRoutes(rpc, state);
+  installInitiativeRoutes(rpc, state);
+}
+
+function installInitiativeRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
+  rpc.addMethod(INITIATIVE_BACKOFF_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.initiativeBackoff, InitiativeBackoffChangedSchema.parse(params));
+  });
+  for (const [method, kind] of [
+    [INTERACTION_PATTERN_METHODS.changed, "initiativePatterns"],
+    [INITIATIVE_SETUP_METHODS.changed, "initiativeSetup"],
+    [INITIATIVE_WAKE_METHODS.changed, "initiativePolicy"],
+  ] as const) {
+    rpc.addMethod(method, (params: unknown) => {
+      publishHandlers(state.push[kind], InteractionPatternChangedSchema.parse(params));
+    });
+  }
+}
+
+function publishHandlers<T>(handlers: Set<(value: T) => void>, value: T): void {
+  for (const handler of [...handlers]) {
+    try { handler(value); } catch { console.warn("[ws-client] push handler failed"); }
+  }
 }
 
 /** Multi-handler pushes: one throwing handler never starves its siblings. */
 function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
+  rpc.addMethod(MODEL_PROFILE_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.modelProfiles, ModelProfilesChangedSchema.parse(params));
+  });
+  rpc.addMethod(CACHE_USAGE_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.cacheUsage, CacheUsageUpdateSchema.parse(params));
+  });
+  rpc.addMethod(MAINTENANCE_MONITOR_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.maintenanceMonitor, MaintenanceMonitorUpdateSchema.parse(params));
+  });
+  rpc.addMethod(SUBAGENT_METHODS.activity, (params: unknown) => {
+    publishHandlers(state.push.subagentActivity, SubagentActivitySchema.parse(params));
+  });
+  rpc.addMethod(SUBAGENT_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.subagents, SubagentChangedSchema.parse(params));
+  });
+  rpc.addMethod(CO_WATCHING_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.coWatching, CoWatchingChangedSchema.parse(params));
+  });
   rpc.addMethod(CONFIG_METHODS.changed, (params: unknown) => {
-    const changed = ConfigChangedSchema.parse(params);
-    for (const handler of [...state.push.config]) {
-      try {
-        handler(changed);
-      } catch (cause) {
-        console.warn("[ws-client] config.changed handler failed", cause);
-      }
-    }
+    publishHandlers(state.push.config, ConfigChangedSchema.parse(params));
   });
   rpc.addMethod(OBSERVABILITY_METHODS.event, (params: unknown) => {
-    notifyMonitorHandlers(state, RunMonitorEventSchema.parse(params));
+    publishHandlers(state.push.monitor, RunMonitorEventSchema.parse(params));
+  });
+  rpc.addMethod(PERCEPTION_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.perception, PerceptionChangedSchema.parse(params));
+  });
+  rpc.addMethod(EXTENSION_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.extension, ExtensionChangedSchema.parse(params));
   });
   rpc.addMethod(MEMORY_OPERATION_METHODS.changed, (params: unknown) => {
     const { operation } = MemoryOperationChangedSchema.parse(params);
-    for (const handler of [...state.push.memoryOperation]) {
-      try { handler(operation); } catch { console.warn("[ws-client] memory.operations.changed handler failed"); }
-    }
+    publishHandlers(state.push.memoryOperation, operation);
   });
   rpc.addMethod(MEMORY_ONBOARDING_METHODS.changed, (params: unknown) => {
-    const changed = MemoryOnboardingChangedSchema.parse(params);
-    for (const handler of [...state.push.memoryOnboarding]) {
-      try { handler(changed); } catch { console.warn("[ws-client] memory.onboarding.changed handler failed"); }
-    }
+    publishHandlers(state.push.memoryOnboarding, MemoryOnboardingChangedSchema.parse(params));
   });
   rpc.addMethod(MEMORY_REPLICA_METHODS.changed, (params: unknown) => {
-    const changed = MemoryReplicaChangedSchema.parse(params);
-    for (const handler of [...state.push.memoryReplica]) {
-      try { handler(changed); } catch { console.warn("[ws-client] memory.replica.changed handler failed"); }
-    }
+    publishHandlers(state.push.memoryReplica, MemoryReplicaChangedSchema.parse(params));
   });
 }
 
@@ -214,124 +279,7 @@ function installApprovalRoutes(rpc: JSONRPCServerAndClient, state: Routes): void
 }
 
 function notifyApprovalHandlers(state: Routes, event: ApprovalPushEvent): void {
-  for (const handler of [...state.push.approval]) {
-    try {
-      handler(event);
-    } catch {
-      console.warn("[ws-client] Approval handler failed");
-    }
-  }
+  publishHandlers(state.push.approval, event);
 }
 
-/** The message a mid-turn disconnect settles the in-flight turn with (D29): callers see a real error, never a hang. */
-export const CONNECTION_LOST_MESSAGE = "连接已断开，本轮回复中断";
-
-/**
- * D29: the socket died mid-turn, so chat.complete/error can never arrive. Settle the turn through its error path so
- * the caller's await resolves and its isSending clears — a silently pending turn wedges the composer until reload.
- */
-export function abortTurn(state: Routes, message: string): void {
-  const turn = state.current;
-  state.current = null;
-  if (!turn) return;
-  turn.handlers.onError?.("INTERNAL_ERROR", message);
-  turn.finish();
-}
-
-/** null = not a valid client frame; the caller drops it (never a silent swallow that corrupts routing). */
-export function parseFrame(text: string): JsonRpcClientFrame | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  const frame = JsonRpcClientFrameSchema.safeParse(parsed);
-  return frame.success ? frame.data : null;
-}
-
-export interface TransportBinding {
-  /** Resolves once the socket is open (requests must not be sent before the handshake can travel). */
-  whenOpen: (timeoutMs: number) => Promise<void>;
-  /** True once the socket died: a new turn on a dead socket is rejected instead of left pending (D29). */
-  isClosed: () => boolean;
-  /** Synchronously retires connection-scoped work before an asynchronous browser close event can arrive. */
-  retire: () => void;
-}
-
-export class WsOpenDeadlineExceededError extends Error {
-  readonly timeoutMs: number;
-
-  constructor(timeoutMs: number) {
-    super(`WebSocket did not open within ${timeoutMs}ms`);
-    this.name = "WsOpenDeadlineExceededError";
-    this.timeoutMs = timeoutMs;
-  }
-}
-
-interface OpenWaiter {
-  resolve: () => void;
-  reject: (cause: Error) => void;
-  timer: ReturnType<typeof setTimeout>;
-}
-
-function settleOpenWaiters(waiters: OpenWaiter[], cause?: Error): void {
-  for (const waiter of waiters.splice(0)) {
-    clearTimeout(waiter.timer);
-    if (cause) waiter.reject(cause);
-    else waiter.resolve();
-  }
-}
-
-function waitForOpen(transport: WsTransport, waiters: OpenWaiter[], timeoutMs: number): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const waiter: OpenWaiter = {
-      resolve,
-      reject,
-      timer: setTimeout(() => {
-        const index = waiters.indexOf(waiter);
-        if (index >= 0) waiters.splice(index, 1);
-        transport.close();
-        reject(new WsOpenDeadlineExceededError(timeoutMs));
-      }, timeoutMs),
-    };
-    waiters.push(waiter);
-  });
-}
-
-/** Wires a transport's open/message/close events into the routes + rpc pair, including the D29 close settlement. */
-export function bindTransport(transport: WsTransport, rpc: JSONRPCServerAndClient, state: Routes): TransportBinding {
-  let opened = false;
-  let closed = false;
-  const openWaiters: OpenWaiter[] = [];
-  const retire = (): void => {
-    if (closed) return;
-    closed = true;
-    const error = new Error(CONNECTION_LOST_MESSAGE);
-    settleOpenWaiters(openWaiters, error);
-    clearPushHandlers(state);
-    rpc.rejectAllPendingRequests("connection closed");
-    abortTurn(state, CONNECTION_LOST_MESSAGE);
-  };
-  transport.onOpen(() => {
-    if (closed || opened) return;
-    opened = true;
-    settleOpenWaiters(openWaiters);
-  });
-  transport.onMessage((data) => {
-    if (closed) return;
-    const frame = parseFrame(data);
-    if (frame) void rpc.receiveAndSend(frame);
-  });
-  transport.onClose(retire);
-  return {
-    whenOpen: (timeoutMs) =>
-      opened
-        ? Promise.resolve()
-        : closed
-          ? Promise.reject(new Error(CONNECTION_LOST_MESSAGE))
-          : waitForOpen(transport, openWaiters, timeoutMs),
-    isClosed: () => closed,
-    retire,
-  };
-}
+export { bindTransport, parseFrame, abortTurn, WsOpenDeadlineExceededError, CONNECTION_LOST_MESSAGE, type TransportBinding } from "./ws-client-binding.ts";

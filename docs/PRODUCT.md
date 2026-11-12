@@ -18,7 +18,7 @@ This is a **direction, not a v1 deliverable**. Capability grows incrementally, a
 - **Capable hands, gated**: bring your own OpenAI-compatible API; can view the screen, list processes, open URLs/files/apps, use the clipboard, run commands — every action crosses the Permission Gate (allowlist / approval dialog / blocklist / audit trail). Extensible via MCP servers and skill packs.
 - **Always alive**: closing the pet window doesn't stop the agent — memory, schedules, and reminders keep running headless.
 - **Voice (reserved)**: VPS-hosted TTS with lip-sync, contract fixed, ships later.
-- **Phone (later)**: Android node — same companion, chat, notifications, real-time sync of desktop activity.
+- **Phone (later)**: Android presentation/operator frontend connected to the same Core, including a VPS-hosted Core — same companion, chat, notifications and subscribed desktop-activity summaries. Cross-device User Presence is distinct from a live connection; a phone frontend does not implicitly provide OS capabilities or run another Core.
 
 ## v1 scope decisions (grill session 2026-07-07, Q8-Q11)
 
@@ -51,4 +51,4 @@ Preview note: the settings window reuses the web renderer component for an embed
 | --- | --- |
 | v1 | Full desktop companion (all-local): avatar + interaction, chat (bubble + window), layered memory, capabilities + Permission Gate, reason-gated proactivity, settings panel above |
 | v1.5 | Nightly diary (readable panel), intention surfacing polish, memory consolidation, memory/activity album; **VPS-hosted core deployment mode** (taki persistently online; desktop and phone become frontends) |
-| v2 | Paraphrase-association memory (hybrid vector RAG), TTS + lip-sync live, Android node |
+| v2 | Paraphrase-association memory (hybrid vector RAG), TTS + lip-sync live, Android frontend |

@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/e2e
+
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  19:09:47
+   Duration  70.85s (transform 947ms, setup 0ms, import 1.46s, tests 69.05s, environment 0ms)
+

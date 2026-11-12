@@ -1,0 +1,14 @@
+{
+  "label": "desktop-build",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/desktop",
+    "build"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-19T11:51:30.196159+00:00",
+  "seconds": 7.891,
+  "exitCode": 0,
+  "log": "logs/desktop-build.log"
+}

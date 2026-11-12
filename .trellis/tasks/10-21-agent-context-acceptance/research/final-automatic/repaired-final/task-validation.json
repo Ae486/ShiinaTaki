@@ -1,0 +1,22 @@
+[
+  {
+    "task": ".trellis/tasks/10-21-agent-delegation-source-context",
+    "exitCode": 0
+  },
+  {
+    "task": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline",
+    "exitCode": 0
+  },
+  {
+    "task": ".trellis/tasks/10-21-agent-delegation-runtime",
+    "exitCode": 0
+  },
+  {
+    "task": ".trellis/tasks/10-21-agent-source-context",
+    "exitCode": 0
+  },
+  {
+    "task": ".trellis/tasks/10-21-agent-context-acceptance",
+    "exitCode": 0
+  }
+]

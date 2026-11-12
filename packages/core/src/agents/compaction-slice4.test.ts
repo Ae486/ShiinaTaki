@@ -36,7 +36,7 @@ function fixture(projectedInputTokens: number) {
     return createCompactionPass({
       view: { estimatedTokens: () => 90, budget: () => 100, effectiveWindowTokens: () => 100,
         measureRequest: () => measurement(projectedInputTokens) },
-      timeline, summaries, operations, flush: { prepareRetirement: async () => ({ status: "not_required", reason: "canonical_local_records_are_authoritative" }) },
+      timeline, summaries, operations,
       slot, config: { triggerRatio: 0.8, keepMessages: 3, ...config }, logger, now: () => new Date(clock),
     });
   };

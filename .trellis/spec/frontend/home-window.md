@@ -7,15 +7,20 @@
 | label | entry | declared | capability | role |
 |-------|-------|----------|-----------|------|
 | `pet` | `pet.html` | `tauri.conf.json` (transparent, undecorated, always-on-top, hidden until first paint) | `pet.json` | the overlay: Live2D scene, chat bubble, operation wheel |
-| `home` | `home.html?page=<id>` | **runtime** (`lib/open-home-window.ts`) | `home.json` | every page: chat / settings / operations / perception / costume |
-| `main` | `index.html` | `tauri.conf.json` | `default.json` (broadest) | LEGACY pairing panel, unrelated to the home surface — do not extend it; whether it is consolidated into home or retired is still an open decision (#26 close) |
+| `home` | `home.html?page=<id>` | initial `tauri.conf.json`; recreated by `lib/open-home-window.ts` after closing | `home.json` + `local-auth.json` | useful entry and every page: chat / settings / operations / perception / costume |
+| `main` | `index.html` | only when explicit remote Node endpoint needs pairing | retained compatibility permissions | LEGACY remote pairing panel; ordinary same-user entry uses native local admission |
 | `spike` | `spike.html` | Vite input only | — | the #13 renderer spike, dev-only |
 
 Window-state persistence is configured POSITION-only with `main` on the denylist (`src-tauri/src/lib.rs`): which labels persist is a plugin-side decision, not something a window's capability file grants (the `window-state:*` permissions only gate the JS save/restore calls).
 
 ## Runtime-created windows (NOT a tauri.conf.json entry)
 
-A secondary window is created at runtime, not declared in `tauri.conf.json`:
+Home opens before fallible execution Node initialization. Node identity failures retry independently; optional browser
+configuration failures remain scoped and retry until repaired. Missing models/avatars do not prevent Home navigation.
+Browser adapter setup replaces only its own listener and returns the actual `restartRequired` result; repaired/enabled
+listeners do not duplicate Node workers or connection owners. Unknown Core failures are not diagnosed from a timeout.
+
+A closed secondary Home may be recreated at runtime:
 
 - **Open-on-demand** via a `lib/open-<name>-window.ts` helper: `await WebviewWindow.getByLabel("<label>")` (async in `@tauri-apps/api` v2) → if it exists `unminimize()` + `show()` + push it to the right page + `setFocus()`; else `new WebviewWindow("<label>", { url: "<name>.html", ... })`. Fixed label, fixed url — never interpolate runtime data into either (the home page id rides a `?page=` query param, which is not the url). Single instance is BY CONSTRUCTION: the label is a constant and an existing window is reused, never re-created.
 - **Await the create race**: `tauri://created` resolves, `tauri://error` rejects, so a failed open reaches the caller. Packaged builds have no devtools and `window.alert` is a no-op — a rejected open MUST surface as a toast (`pushToast`), never console-only (D34; the dead opener defect).
@@ -32,13 +37,28 @@ A secondary window is created at runtime, not declared in `tauri.conf.json`:
 
 ## Own WS connection per window
 
-Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent same-device sockets are allowed by the Core's connection registry — verified). A window does NOT share JS memory or a socket with another window; cross-window liveness is the Core's `timeline.appended` / event fan-out, never shared memory (matches state-management.md). Loopback operators auto-trust (P3) — no pairing UI. Inside home there are exactly TWO sockets: `use-home-connection.ts` (shared with every settings-family page through `HomeClientContext`) and the chat page's own (`use-chat-connection.ts`) — the streaming turn state must not share a client with request/response pages.
+Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent same-device sockets are allowed by the Core's connection registry). A window does NOT share JS memory or a socket with another window; cross-window liveness is Core fan-out. Native same-user admission verifies server and client proofs on each socket without a pairing page. Inside Home there are exactly TWO sockets: `use-home-connection.ts` and the Chat page's own `use-chat-connection.ts`; streaming turn state does not share a client with request/response pages.
 
 Every owner replaces whole authenticated client generations after an observed close/failure; it never reuses a closed
 client, buffers offline commands, or replays mutations. Connected status is published only after that owner's required
 restoration. The complete lifecycle, deadline, timing-policy, timeline-reconciliation, and readiness contract lives in
 [`operator-connection-recovery.md`](./operator-connection-recovery.md); what each page updates from pushes, refetches per
 generation, and gates while hidden is codified in [`reactive-read-models.md`](./reactive-read-models.md).
+
+### Grouped model configuration
+
+Settings begins with Main and Utility cards using existing Field/Badge/ActionButton components. These replace the six
+legacy connection-field editors; context/limit controls remain in the scalar settings list. One ordinary Save persists
+incomplete drafts or applies complete profiles. A separate explicit test discloses possible cost and accepts unsaved
+input. Catalog metadata is optional guidance and never an activation prerequisite.
+
+Current active model/source, saved draft/application failure and actual test outcomes stay distinct. Authentication
+choices include keyless services and write-only key replacement/removal. Utility explicitly inherits Main, configures
+its own profile, or disables future dependent work; reset deliberately restores environment/default ownership.
+
+Chat reads Main availability on its own socket. Missing/disabled Main exposes a Settings action and disables new sends
+while history and other Home pages remain available. No avatar/resource prerequisite is added to text configuration.
+The concurrency, visibility, secret-input and unknown-acknowledgement rules live in `reactive-read-models.md`.
 
 ### Settings permission governance
 
@@ -50,9 +70,10 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   `localStorage` write. Home is a disposable operator view, not a policy replica.
 - Only one permission mutation may be active. Late reads/mutations from a retired client are ignored; a conflict
   refetches; timeout/reconnect never replays a write.
-- The UI renders Core facts only: factory/override/effective posture, override mode, generation, reset, second-confirm,
+- The UI renders Core facts only: factory/override/effective posture, override mode, reset, second-confirm,
   immutable, loading/reconnecting/read/validation/saved/conflict states. It may disclose that Hosts can tighten, but it
-  must not invent a per-row Host constraint not present in the Core response.
+  must not invent a per-row Host constraint not present in the Core response. Policy/registry generations remain
+  internal concurrency inputs and are not displayed, including expanded or accessible content.
 
 ### Secure MCP management
 
@@ -65,7 +86,9 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - Mutations are serialized. Revision conflict refetches Core truth. A desired edit committed before secret rotation or
   reconnect failure keeps the editor open, preserves the draft, and advances its retry revision to the committed row.
 - Test result truth is preserved: a failed diagnostic never renders as success, and `test` never publishes tools.
-- Disabled servers cannot reconnect. Cancel, New, and successful Save clear stale editor revision and validation state.
+- Disabled servers cannot reconnect. Cancel and New start a fresh editor session. A successful Save clears only its
+  current unchanged submitted draft; newer edits stay open. Only a matching current-client commit may advance the
+  same server/session's retry revision, never a background refresh or a retired completion.
 - Full backend/runtime/secret and verification requirements live in
   [`mcp-lifecycle.md`](../backend/mcp-lifecycle.md).
 
@@ -214,6 +237,62 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   distinctly, and outcomes are never derived locally.
 - Contract: [`memory-hindsight-activation.md`](../backend/memory-hindsight-activation.md).
 
+### Private Subagent Conversation
+
+- Home's sidebar mounts lightweight `subagent.attention` observation independently of the selected page. Install the
+  existing child-change listener before subscription acknowledgement, then read at most 20 entries per explicit page.
+  Actual producer hints and reconnect invalidate; document hide retires disposable reads and preserves the gap.
+  `needs_user_input`, `reconciliation_needed`, user-required check-ins and exhausted pre-intent retry retain an explanation and exact
+  child/work navigation. Generic once-per-recent-attention Toasts contain no private report body and never replace the
+  persistent entry. Existing recovery controls retain the exact consumer and stable operation key; no automatic replay.
+  Render the actual `needs_user_input.reason` decision note as escaped persistent text; a generic request to decide is
+  insufficient. Map reconciliation reason codes through the shared recovery vocabulary without displaying internal codes.
+  A child send/Continue warning remains unknown until a canonical input with its exact Character/child/work/operation
+  identity is read. Clear only that warning when acceptance is confirmed; preserve newer action feedback and independent
+  read errors. Receipt reconciliation may clear the submitted draft, but never a newer local edit or another operation.
+  `inbox_retry_exhausted` offers explicit `subagent.inbox.retry` without inventing a consumer: it schedules only a fresh
+  pre-intent opportunity. Unknown outcomes require a fresh status read and deliberate action, never reconnect replay.
+- Child headers/list show Core cumulative token evidence, including no calls yet, reported zero, unknown totals,
+  incomplete known subtotal, in-flight calls and missing usage. Do not derive total usage from step count, last Run or
+  local counters. Progress displays the captured current interval and actual unattended approval count; legacy
+  `post_upgrade` tracking explicitly leaves earlier step counts unknown.
+- An open `check_in` wait uses one exact `Continue` RPC with `replyToEventId`, including an empty direction. A draft
+  provides explicit redirect-and-continue. User-required checks say the main Agent cannot release them. User Stop
+  remains independent and user-only; ordinary main chat does not reset the unattended work count.
+- Conversation check-ins render as System factual snapshots, selected only by the trusted `needs_input` event's Core-minted
+  `producerKey=checkin:<interval>`, never by body text. Show recorded steps, pending-input count, captured required actor and
+  clearly attributed recent worker text/older summary; remaining work stays unconfirmed. Do not expose internal reference
+  fields as ordinary prose. Decode at most 64,000 body characters; incomplete/unsupported bodies retain a labelled original
+  fallback and the existing exact read-more control. Formatting never mutates the canonical body or changes row identity.
+- Both N/K knobs use existing Settings registry editors and Chinese labels. Explain that newly stored values are
+  captured at new work or the next check-in interval; they do not move an active threshold or downgrade an existing
+  user-required check-in. UI owns no second configurable state.
+- Home registers `subagents` once in `pages.ts`. `features/subagents/` owns a disposable query/controller view;
+  retained private content never enters the Character Timeline, presence exposure reports, or persisted UI caches.
+  Reuse Chat text/tool presentation without manufacturing canonical Timeline identities.
+- Install the parsed `subagent.changed` handler, await `subagent.subscribe`, then read bounded list/history pages.
+  Input, message and execution cursors remain independent. Hide retires read authority and retains the gap; it
+  does not cancel a submitted command. Each authenticated replacement repeats read restoration only.
+- Keep the committed child/title/payload/work coherent while another child loads. Actions require a fresh
+  displayed target: `subagentId`, exact `workInputId`, `expectedControlVersion`, and `expectedRunId` including
+  explicit `null` for an idle child. Stale displayed callbacks cannot retarget a different child or work.
+- Serialize controls. Stop addresses only the chosen child. An authenticated explicit Continue clears the
+  user-stop latch through Core; sending a message or opening the page does not. Co-Watching `paused_child`
+  links its exact child/work into this same page through `openSubagentConversation`.
+- An accepted input with no `consumed` receipt displays as waiting for inclusion. A receipt means included in
+  model request intent, not provider receipt or model understanding. Child outcome, completion disposition,
+  parent synthesis/decision, publication and canonical delivery state remain separate visible facts.
+  Execution pages use a Run-ID cursor, not a chronological sequence; do not label their array positions as
+  first/second executions. Display the retained execution state without inventing an ordinal.
+- Timeout/disconnect preserves the draft and unknown-outcome diagnostic across client replacement; never
+  resend automatically. Conflict and subsequent read failure remain separate. Only fresh reads restore action
+  readiness. Known absent/forbidden selected detail removes that projection; ordinary refresh failure retains
+  permitted last-good content with retry. Do not substitute an empty/success response for a failed read.
+- Verify exact targeting, subscription-before-read, stale read/action retirement, hidden mutation settlement,
+  receipt distinctions and no reconnect replay. Actual WebView2/browser evidence must separately cover rendered
+  navigation, retained editor/message nodes and deliberate controls; scripted RPC evidence is not Runtime/model
+  or owner acceptance.
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:
@@ -247,7 +326,7 @@ publishCostumeResult(result: CostumeResultPayload): Promise<void>;
 ```
 
 The event names are `pet:costume-switch` (home -> pet), `pet:costume-cancel` (home -> pet), and
-`pet:costume-result` (pet -> home). The home reducer accepts `request`, `undeliverable`, `result`, `cancel`, and
+`pet:costume-result` (pet -> home). The home reducer accepts `request`, `undeliverable`, `result`, `observed`, `cancel`, and
 `timeout` actions. Each pending row captures `currentTimingPolicy().homeResultMs` once; a Home client replacement must
 not restart that timer. The validated relationship is `rendererLoadMs < petCostumeTotalMs < homeResultMs` (development
 profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-operation-lifecycle.md).
@@ -259,14 +338,17 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 - The executor reports every accepted lifecycle: `started` followed by exactly one of `succeeded`, `failed(reason)`,
   or `cancelled`. A guard rejection reports `failed` with a closed reason (`busy`, `no-scene`, `unknown-costume`, or
   `not-renderable`) instead of returning silently.
-- The initiating page marks only the commanded row pending. Selection follows `succeeded`, never the click. Failure,
+- The initiating page marks only the commanded row pending. Selection follows a correlated live Pet snapshot, never
+  the click, default or remembered costume. `succeeded` requests a new snapshot and retires prior responses. Failure,
   cancellation, undeliverable emit, and deadline all release pending so another command can be attempted.
 - Renderer attachment is the executor's success boundary. A later `avatar.report` failure is synchronization debt,
   not permission to report the visibly committed costume as failed.
 - Cancel releases the initiating UI before emitting the cancel command. A missing/dead executor therefore cannot wedge
   the page. The executor cancels only when `costumeId` matches its active switch.
-- A late `succeeded` result is still authoritative presentation truth: follow the costume the pet now wears and clear a
-  stale deadline error. Durable costume identity remains Core/pet-owned, not home-page-owned.
+- A late `succeeded` clears a stale deadline error and re-reads actual Pet presentation; it cannot directly assert a
+  costume after a scene replacement. `costume-scene-event.ts` owns finite request/snapshot and data-free changed events;
+  `costume-operation-lifecycle.md` defines ordering, retirement and native Pet-destroy observation. Core connectivity
+  does not gate this local presentation read. Durable costume identity remains Core/Pet-owned.
 
 ### 4. Validation & Error Matrix
 
@@ -279,12 +361,12 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 | Renderer attaches, then `avatar.report` fails or times out | Keep/publish `succeeded`; mark report recovery-needed and re-report the live snapshot on reconnect |
 | Operator cancels | Clear home pending immediately; executor reports `cancelled` when its hook settles |
 | Executor never answers | Home's captured `homeResultMs` deadline clears pending and shows a retryable error |
-| Result belongs to another costume | Ignore non-success endings; an observed `succeeded` follows the pet's actual state |
+| Result belongs to another costume | Ignore non-success endings; `succeeded` requests the pet's current scene |
 | Cancel id does not match active switch | Warn and do not cancel another command |
 
 ### 5. Good/Base/Bad Cases
 
-- Good: click -> pending row -> `started` -> `succeeded`; only then does the highlight move.
+- Good: click -> pending row -> `started` -> `succeeded` -> live scene observation; only actual attachment is highlighted.
 - Base: a refusal, renderer failure, Cancel, or deadline clears pending, leaves the old highlight, and permits retry.
 - Bad: fire-and-forget command + optimistic highlight + unbounded spinner. Delivery is not completion and the UI will
   lie or wedge when the other window is absent or half-alive.
@@ -295,7 +377,8 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 - `lib/costume-switch-attempt.test.ts` + `lib/costume-report-sync.test.ts`: total budget, stage cancellation, attachment
   commit, report recovery, exact-boundary races, and stale report tickets.
 - `windows/pet/costume-report.test.ts`: started/succeeded ordering, failed reason, cancelled settle, every guard refusal.
-- `windows/home/pages/costume/costume-select-state.test.ts`: selection moves only on success; failure, Cancel, deadline,
+- `windows/home/pages/costume/costume-select-state.test.ts` and scene-observer tests: selection moves only on a current
+  scene observation; failure, Cancel, deadline,
   and undeliverable emit release pending; stale/foreign results cannot corrupt the active row.
 - Component/manual: one row alone renders pending + Cancel, other rows remain clickable, and manual checks #74/#75 pass
   against the real pet renderer and Tauri event bridge.
@@ -307,7 +390,7 @@ profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-oper
 setSelected(costumeId);
 await emitTo("pet", "pet:costume-switch", { costumeId });
 
-// Correct: the request creates pending state; only the executor's result moves selection.
+// Correct: the request creates pending state; success prompts a correlated live scene observation.
 dispatch({ kind: "request", costumeId });
 await requestCostumeSwitch(costumeId);
 // Later: dispatch({ kind: "result", result }); with a local deadline running.
@@ -326,25 +409,112 @@ await requestCostumeSwitch(costumeId);
 
 - A monitor or trajectory page is a presentation projection over Core facts, not a direct ledger/database viewer. Ordinary
   rows lead with readable event labels, phase/category, status, outcome, duration, counts, and bounded error summaries.
-- Opaque protocol fields such as `runId`, `attemptId`, `serverId`, hashes/digests, generations, revisions,
-  `ownerHostId`, and catalog/config identifiers are internal join or diagnostic fields. Keep them out of ordinary rows;
-  expose them only in an explicitly opened developer inspector with clear labels and copy-diagnostic affordances.
+- **Owner clarification, 2026-09-05 (G4):** remove meaningless internal information from user-facing surfaces,
+  including expanded details and the Monitor Inspector. Moving it into a second disclosure or adding a copy control
+  is not an acceptable fallback. This supersedes the earlier general developer-inspector allowance.
+- Internal `runId`/`attemptId`/effect/call/correlation IDs, hashes/digests, config/catalog/policy generations and
+  revisions, schema bookkeeping and opaque Host IDs are not presentation content. Keep the values needed for keys,
+  joins, authorization, CAS, requests and generation guards internally; remove their user-visible rows, titles,
+  tooltips, copy affordances and accessible-name fallbacks. `FULL_LOCAL` does not waive this rule.
+- Curate fields that explain an operation, input/result/error, useful state/timing/usage or an action the user can take.
+  Actual commands, file paths/diffs, tool results, user-edited MCP namespaces and actionable config keys can be useful.
+  Do not strip arbitrary result text because it contains a hash or version: a requested checksum is a valid result,
+  and a real package version can inform compatibility. Internal config revisions are not package versions.
+- Do not dump `Object.entries(metadata)` or `inspector.technical` into a generic details section. Keep only meaningful
+  fields and remove a disclosure if nothing useful remains. Do not replace removed UI with a new raw-metadata panel.
 - Adapt DSH's `current`/`shadowed`/`log-only` classification so superseded or internal evidence remains queryable without
   producing duplicate or meaningless user-facing rows. Category/severity/Run/Attempt/tool/trigger/delivery filters are
   preferred over exposing raw event JSON.
-- The current MCP and Skills pages have known presentation debt where technical identifiers and generation/revision/hash
-  fields are shown in primary cards. Record their cleanup as a separate UI task; do not expand Slice 2's backend ledger
-  implementation to modify those pages.
+- MCP/Skills details, shared extension status, permission settings, Monitor and import feedback have concrete G4 cleanup
+  targets. See [the reference study and field inventory](../../tasks/08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
+  The first pure-frontend cleanup has automated evidence in the frontend task; cross-layer labels and Monitor remain
+  separate work. A target contract or static test does not certify actual-window visual acceptance.
+- Availability copy follows the actual lifecycle state, not the existence of an internal identifier. MCP can expose a
+  draining runtime generation while not connected; continued-service wording requires a connected snapshot with a
+  runtime. A disconnected/idle extension snapshot must be identified as previous data, never current availability.
 
-## Streaming timeline: the in-flight assistant row lifecycle
+Field-selection example (illustrative; retain the original snapshot for actions):
 
-The persisted timeline and the live stream are two sources merged in one store (`pages/chat/chat-timeline-store.ts`), keyed by `seq`:
+```typescript
+const snapshot = { name: "GitHub", configRevision: 7, contentHash: "internal-digest" };
+// Wrong: serialize every available field into user-visible rows.
+const dumpedRows = Object.entries(snapshot);
+// Correct: choose information needed for this view; the revision still exists for concurrency checks.
+const visibleRows = [{ label: "名称", value: snapshot.name }];
+```
 
-- Persisted entries: initial `timeline.history` page (newest-first → reverse for display) + live `timeline.appended`, both **Map-keyed by `seq`** (dedup + ascending sort; loadOlder prepends without duplicating; a subscribe-before-history race dedups by seq).
-- The streaming assistant reply is a SEPARATE **in-flight row keyed by `chat.send`'s `messageId`** (which is NOT the persisted entry's uuid — do not try to id-match them). `chat.delta` grows it; the assistant's `timeline.appended` (the persisted version) **drops the in-flight row and inserts the entry in ONE atomic `set()`** — this ordering (Core sends `persistTurn` fan-out just before `chat.complete`) is what prevents a duplicate flash. `chat.complete` → `clearInflight` is the safety net, not the primary path.
-- Only an **assistant**-role `appended` drops the in-flight row; user/tool appended rows must not. `chat.error` mid-stream clears the in-flight row and pushes an inline notice atomically. A new `messageId` replaces a stale in-flight row.
-- The in-flight bubble uses identical assistant-row styling for a seamless swap.
-- Scroll discipline (bottom-pinning, pause-on-scroll-up, the load-older hold, and the truthful paused-follow affordance rule) is codified in [`reactive-read-models.md`](./reactive-read-models.md) §(f).
+Verification: open every affected disclosure/Inspector and assert absence of internal bookkeeping from visible and
+accessible content. Assert that meaningful names, configuration, results, errors and actions remain. Preserve CAS/
+generation behavior and selection through updates. Existing tests that require hashes/IDs/counters in details must
+change with the implementation; an old presentation assertion does not override the owner requirement.
+
+### Monitor product baseline (G5, owner 2026-09-05)
+
+The pre-D68 Monitor prototype did not establish product UI acceptance. Monitor has its own acceptance,
+separate from the other pages' visual direction. Port/rebuild Monitor primarily from
+`references/deepseek-harness-master/packages/client/ui-trajectory`: its Toolbar/Overview/Table/Inspector
+composition, styles, density, grouped information and interaction. Use the
+[D68 source-to-target plan](../../tasks/08-28-dsh-observability-expansion/design.md).
+
+Adapt the view to TakiAgent's real Core projections, React/window integration, Chinese system labels,
+G4 useful-field selection and privacy. Preserve the single execution authority. Complete UI localization
+includes status/filter/tab/tooltip/loading/error/empty/accessibility copy; actual tool/model names,
+commands, paths and content retain their identity. Retain MIT source attribution for substantial copies.
+
+Acceptance compares representative default, selected/expanded, live-tail, older-history and narrow
+states against DSH and exercises the actual WebView2 UI. A working trace, a nominal three-region grid,
+or old screenshot/test acceptance does not establish G5 completion. D68-B's implementation must pass
+that actual-window gate; automated source/component checks alone are insufficient.
+
+Use the reference's compact Toolbar (32px), fixed three-lane Overview (50px) and ordinary rows (30px),
+with a full-height Run browser, measured ledger, temporary resizable Inspector and closable narrow
+drawer. Range/search/grouping use loaded real records; durable full-Run totals remain distinguished.
+Missing timing is a start marker. Keep history anchors, current selection and reduced-motion cleanup.
+
+HomeShell must preserve the last confirmed Monitor availability through a transient null connection;
+otherwise unmounting discards the controller before its reconnect logic can restore selection. Initial
+unknown must not expose the page or discard its requested route; confirmed DISABLED retains the normal
+hide/navigation behavior. Follow [the availability contract](reactive-read-models.md).
+
+## Streaming timeline: ordered activity and complete batch handoff
+
+Tool names follow [Operation Presentation](../backend/operation-presentation.md): valid captured
+`displayName` -> known fixed-tool Chinese name -> generic Chinese tool text. Never expose an unknown
+canonical key or reconstruct an MCP name from it. The optional Timeline field is captured with the
+Run's actual tools, survives persistence, and does not change model replay or call/result identity.
+Live delivery follows [Foreground Chat Feedback](foreground-chat-feedback.md) and the
+[Core activity/batch contract](../backend/foreground-chat-activity.md):
+
+- Canonical history remains keyed by Timeline `seq`; pages are newest-first on the wire and deduplicated
+  into display order. Read views never write another transcript authority.
+- `chat.activity` carries stable language/tool `itemId` and accepted-message identity. `chat.send`'s
+  acknowledgement `messageId` is distinct from a persisted row UUID. Keep exact acknowledgement,
+  Character and physical client generation when settling requests or restoring drafts.
+- One compact invocation entry interleaves with language, updates truthful phase/outcome in place, and
+  remains in Chat history. Captured names survive handoff; old unlabeled rows retain conservative fallback.
+- Buffer partial appends with presentation metadata. A complete `timeline.committed` batch or complete
+  paged-history recovery atomically covers only that accepted message, preserving keys, focus and text
+  selection. Never clear all activity when the first assistant row arrives or legacy completion fires.
+- `chat.delta` remains a compatibility fallback when authoritative activity is absent. Receiving both
+  channels cannot duplicate text; late callbacks from a retired message/client cannot erase current state.
+- Reconnect restores subscriptions and bounded snapshots through reads. Stale/unavailable state remains
+  truthful, does not replay mutations, and does not automatically open Pet.
+- Scroll discipline (bottom-pinning, pause-on-scroll-up, the load-older hold and truthful paused-follow
+  affordance) remains in [`reactive-read-models.md`](reactive-read-models.md) §(f). Pet additionally follows
+  the segmented transcript and occupied-space motion rules in the foreground-feedback contract.
+
+## Memory tidy result feedback
+
+Operations uses `MemoryTidyFailureDetailsSchema` from Shared to recognize typed INTERNAL_ERROR data. Keep the canonical
+request result separate from optional read-model refresh errors: a failed refresh cannot replace a successful or partial
+mutation outcome. A new attempt clears its prior result, locks duplicate clicks and ignores retired-client settlement.
+Known partial/failed outcomes refresh the affected read models and show actual saved edits plus Chinese reasons and
+closed tool-error labels. The issue count describes unresolved tool operations, not every possible failure. Unknown
+transport/deadline errors remain unknown; never replay tidy automatically or label a timeout as no changes.
+
+Validate the controller's client replacement, duplicate-click and refresh-failure boundaries, component result/error
+states, and a rendered production WS path carrying clean/ran and typed partial/failed outcomes. Scripted models prove
+wiring; real-model behavior and owner UI acceptance are separate evidence.
 
 ## Rendering server-owned binary refs (images)
 

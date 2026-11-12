@@ -7,6 +7,8 @@
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useCommittedExposure } from "@/features/presence/use-committed-exposure.js";
+import type { CommittedTextTarget } from "@/features/presence/surface-presence.js";
 
 // Scoped descendant utilities stand in for a typography plugin (not installed): headings, lists, code, tables, links.
 const PROSE = [
@@ -26,9 +28,10 @@ const PROSE = [
   "[&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1",
 ].join(" ");
 
-export function MarkdownView({ text }: { text: string }) {
+export function MarkdownView({ text, committed = [] }: { text: string; committed?: CommittedTextTarget[] }) {
+  const ref = useCommittedExposure(committed, text);
   return (
-    <div className={PROSE}>
+    <div ref={ref} className={PROSE}>
       <Markdown remarkPlugins={[remarkGfm]}>{text}</Markdown>
     </div>
   );

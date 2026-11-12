@@ -1,30 +1,37 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
- * OUTPUT: handshake() plus typed request methods including governance, lifecycle, and extension convergence
+ * OUTPUT: echo-verified handshake() plus schema-verified operator read, write and subscription methods
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
 
 import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient } from "json-rpc-2.0";
+import { initiativeMethods } from "./ws-client-initiative.ts";
+import { cacheUsageMethods } from "./ws-client-cache-usage.ts";
+import { maintenanceMonitorMethods } from "./ws-client-maintenance-monitor.ts";
+import { modelProfileMethods } from "./ws-client-model-profiles.ts";
+import { coWatchingMethods } from "./ws-client-co-watching.ts";
+import { subagentMethods } from "./ws-client-subagents.ts";
 import {
   AVATAR_METHODS,
+  BROWSER_PLAYBACK_METHODS,
+  BrowserPlaybackReadResultSchema,
   APPROVAL_METHODS,
   ApprovalListResultSchema,
   ApprovalRevokeResultSchema,
+  AvatarOutcomeResultSchema,
   CanonicalApprovalRespondResultSchema,
   CHARACTER_METHODS,
   CHAT_METHODS,
-  CONFIG_METHODS,
   CONNECT_METHOD,
   CharacterCostumeResolutionResultSchema,
   CharacterCostumesResultSchema,
   CharacterImportResultSchema,
   CharacterListResultSchema,
   ChatCancelResultSchema,
-  ConfigListResultSchema,
-  ConfigSetResultSchema,
-  ConfigSubscribeResultSchema,
+  ChatActivityReadResultSchema,
   ConnectResultSchema,
+  LocalAuthChallengeSchema,
   ErrorCodeSchema,
   EXTENSION_METHODS,
   ExtensionConvergenceResultSchema,
@@ -67,12 +74,14 @@ import {
   RunMonitorUnsubscribeResultSchema,
   TrajectoryInspectorSchema,
   TrajectoryResultSchema,
+  type AvatarOutcomeParams,
   type AvatarReportParams,
   type ApprovalRevokeParams,
   type CanonicalApprovalRespondParams,
   type CharacterImportParams,
-  type ConfigSetParams,
   type ConnectParams,
+  type ConnectResult,
+  type LocalAuthChallenge,
   type ErrorCode,
   type McpAddParams,
   type McpEditParams,
@@ -97,9 +106,14 @@ import { memoryOperationMethods } from "./ws-client-memory-operations.ts";
 import { memoryOnboardingMethods } from "./ws-client-memory-onboarding.ts";
 import { hindsightConfigurationMethods } from "./ws-client-hindsight-configuration.ts";
 import { hindsightTemplateMethods } from "./ws-client-hindsight-templates.ts";
+import { configMethods } from "./ws-config-methods.ts";
+import { readSubscriptionMethods } from "./ws-read-subscriptions.ts";
+import { userTimezoneMethods } from "./ws-client-user-timezone.ts";
+import { presenceMethods } from "./ws-client-presence.ts";
 
 function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
+    browserPlaybackRead: async () => BrowserPlaybackReadResultSchema.parse(await request(BROWSER_PLAYBACK_METHODS.read, {})),
     permissionLevelGet: async () =>
       PermissionLevelStateSchema.parse(await request(PERMISSION_METHODS.levelGet, {})),
     permissionLevelSet: async (params: PermissionLevelSetParams) =>
@@ -161,7 +175,9 @@ function skillMethods(request: <T>(method: string, params: JSONRPCParams) => Pro
 }
 
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
-export type ConnectOutcome = { ok: true; token?: string } | { ok: false; code: ErrorCode | null; message: string };
+export type ConnectOutcome =
+  | ({ ok: true } & Pick<ConnectResult, "token" | "approvalCommandDisclosureRevision">)
+  | { ok: false; code: ErrorCode | null; message: string; challenge?: LocalAuthChallenge };
 
 function appErrorCode(data: unknown): ErrorCode | null {
   if (typeof data !== "object" || data === null || !("code" in data)) return null;
@@ -176,10 +192,17 @@ export async function handshake(
 ): Promise<ConnectOutcome> {
   try {
     const result = ConnectResultSchema.parse(await requestWithDeadline({ rpc, timing, method: CONNECT_METHOD, params }));
-    return { ok: true, token: result.token };
+    if (params.approvalCommandDisclosureRevision !== undefined
+      && result.approvalCommandDisclosureRevision !== params.approvalCommandDisclosureRevision) {
+      return { ok: false, code: null, message: "Core 版本不支持完整命令审批，请更新 Core 后重试。" };
+    }
+    return { ok: true, token: result.token, approvalCommandDisclosureRevision: result.approvalCommandDisclosureRevision };
   } catch (error) {
     if (error instanceof JSONRPCErrorException) {
-      return { ok: false, code: appErrorCode(error.data), message: error.message };
+      const code = appErrorCode(error.data);
+      const challenge = code === "LOCAL_AUTH_REQUIRED" && typeof error.data === "object" && error.data !== null
+        && "challenge" in error.data ? LocalAuthChallengeSchema.parse(error.data.challenge) : undefined;
+      return { ok: false, code, message: error.message, ...(challenge ? { challenge } : {}) };
     }
     throw error;
   }
@@ -193,21 +216,13 @@ function avatarMethods(request: <T>(method: string, params: JSONRPCParams) => Pr
       console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
       await request(AVATAR_METHODS.report, params);
     },
+    reportAvatarOutcome: async (params: AvatarOutcomeParams) =>
+      void AvatarOutcomeResultSchema.parse(await request(AVATAR_METHODS.outcome, params)),
   };
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
-  const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
-  let configSubscription: Promise<void> | null = null;
+function characterMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
-    ...avatarMethods(request),
-    chatCancel: async (characterId: string) =>
-      ChatCancelResultSchema.parse(await request(CHAT_METHODS.cancel, { characterId })).cancelled,
-    timelineHistory: async (params: TimelineHistoryParams) =>
-      TimelineHistoryResultSchema.parse(await request(TIMELINE_METHODS.history, params)),
-    subscribeTimeline: async (characterId: string) => void (await request(TIMELINE_METHODS.subscribe, { characterId })),
-    mediaGet: async (ref: string) => MediaGetResultSchema.parse(await request(MEDIA_METHODS.get, { ref })),
     importCharacter: async (params: CharacterImportParams) =>
       CharacterImportResultSchema.parse(await request(CHARACTER_METHODS.import, params)),
     listCharacters: async () => CharacterListResultSchema.parse(await request(CHARACTER_METHODS.list, {})),
@@ -217,15 +232,25 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
       CharacterCostumeResolutionResultSchema.parse(
         await request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
       ),
-    configList: async () => ConfigListResultSchema.parse(await request(CONFIG_METHODS.list, {})),
-    configSet: async (params: ConfigSetParams) =>
-      ConfigSetResultSchema.parse(await request(CONFIG_METHODS.set, params)),
-    subscribeConfig: () => {
-      configSubscription ??= request<unknown>(CONFIG_METHODS.subscribe, {}).then((result) => {
-        ConfigSubscribeResultSchema.parse(result);
-      });
-      return configSubscription;
-    },
+  };
+}
+
+export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
+  const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
+  return {
+    ...avatarMethods(request),
+    chatCancel: async (characterId: string, runId?: string) =>
+      ChatCancelResultSchema.parse(await request(CHAT_METHODS.cancel, { characterId, ...(runId ? { runId } : {}) })).cancelled,
+    chatActivityRead: async (characterId: string) =>
+      ChatActivityReadResultSchema.parse(await request(CHAT_METHODS.activityRead, { characterId })),
+    timelineHistory: async (params: TimelineHistoryParams) =>
+      TimelineHistoryResultSchema.parse(await request(TIMELINE_METHODS.history, params)),
+    subscribeTimeline: async (characterId: string) => void (await request(TIMELINE_METHODS.subscribe, { characterId })),
+    mediaGet: async (ref: string) => MediaGetResultSchema.parse(await request(MEDIA_METHODS.get, { ref })),
+    ...characterMethods(request),
+    ...configMethods(request),
+    ...modelProfileMethods(request),
+    ...readSubscriptionMethods(request),
     memoryTidy: async (characterId: string) =>
       MemoryTidyResultSchema.parse(await request(MEMORY_METHODS.tidy, { characterId })),
     memoryStatus: async (characterId: string) =>
@@ -237,6 +262,25 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionPauseSet: async (params: PerceptionPauseSetParams) =>
       PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseSet, params)),
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
+    ...monitorMethods(request),
+    ...cacheUsageMethods(request),
+    ...maintenanceMonitorMethods(request),
+    ...permissionMethods(request),
+    ...approvalMethods(request),
+    ...extensionMethods(request),
+    ...mcpMethods(request),
+    ...skillMethods(request),
+    ...memoryOperationMethods(request),
+    ...userTimezoneMethods(request),
+    ...presenceMethods(request),
+    ...initiativeMethods(request),
+    ...coWatchingMethods(request),
+    ...subagentMethods(request),
+  };
+}
+
+function monitorMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
     monitorState: async () => MonitorStateResultSchema.parse(await request(OBSERVABILITY_METHODS.state, {})),
     monitorList: async (params: RunMonitorListParams) => RunMonitorListResultSchema.parse(await request(OBSERVABILITY_METHODS.list, params)),
     monitorTrajectory: async (params: TrajectoryParams) => TrajectoryResultSchema.parse(await request(OBSERVABILITY_METHODS.trajectory, params)),

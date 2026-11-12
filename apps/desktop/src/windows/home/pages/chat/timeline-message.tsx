@@ -1,52 +1,69 @@
 /**
- * INPUT:  one committed TimelineEntry (role + parts, or a legacy text-only row via `content`).
- * OUTPUT: <TimelineMessage> — one role-styled row; dispatches each part (text→markdown, tool→card, image→thumbnail).
- * POS:    ui/windows/home/pages/chat — the row renderer, wrapped in React.memo so only the in-flight row re-parses markdown per
- *         delta (research r2); settled rows keep a stable entry reference from the store and skip re-render.
- *         MarkdownView is lazy-loaded (P1f): react-markdown + remark-gfm ride an async chunk, keeping them out of
- *         the home entry chunk; the row shows the shared Skeleton until the chunk lands.
+ * INPUT:  one item from the shared canonical/live Chat transcript projection
+ * OUTPUT: stable language bubbles, grouped user attachments and compact invocation cards
+ * POS:    ui/chat — default-safe lazy Markdown; unchanged text props skip reparsing across stream/commit updates
  */
-
-import { Suspense, lazy, memo } from "react";
-import type { TimelineEntry, TimelinePart } from "@taki/shared";
+import { Suspense, lazy, memo, useMemo } from "react";
+import type { TimelineEntry } from "@taki/shared";
 import { ImageAttachment } from "./image-attachment.tsx";
-import { ToolCard, outputState } from "./tool-card.tsx";
+import { ToolCard } from "./tool-card.tsx";
 import { Skeleton } from "@/components/ui/skeleton.js";
+import type { ChatTranscriptItem } from "./chat-transcript.ts";
+import { toolOutputDetails } from "./tool-result-display.ts";
+import type { CommittedTextTarget } from "@/features/presence/surface-presence.js";
+import { ActionButton } from "../../action-button.tsx";
+import { isSubagentTool, subagentOutputNavigation } from "@/features/subagents/subagent-tool-display.js";
+import { openSubagentConversation } from "@/features/subagents/subagent-navigation.js";
 
-// P1f: the markdown stack is the only heavy chat dependency — dynamic-import it from the render seam.
 const MarkdownView = lazy(() => import("./markdown-view.tsx").then((m) => ({ default: m.MarkdownView })));
 
-function PartView({ part }: { part: TimelinePart }) {
-  switch (part.type) {
-    case "text":
-      return part.text.length > 0 ? (
-        <Suspense fallback={<Skeleton lines={2} />}>
-          <MarkdownView text={part.text} />
-        </Suspense>
-      ) : null;
-    case "image":
-      return <ImageAttachment imageRef={part.ref} />;
-    case "tool-call":
-      return <ToolCard name={part.toolName} state="call" />;
-    case "tool-result":
-      return <ToolCard name={part.toolName} state={outputState(part.output)} />;
-  }
-}
+const TextContent = memo(function TextContent({ text, committed }: { text: string; committed?: CommittedTextTarget[] }) {
+  return <Suspense fallback={<Skeleton lines={2} />}><MarkdownView text={text} committed={committed} /></Suspense>;
+});
 
-function Row({ entry }: { entry: TimelineEntry }) {
-  // Legacy text-only rows carry no parts; render their `content` as a single text part (parts is the display source).
-  const parts: TimelinePart[] = entry.parts ?? [{ type: "text" as const, text: entry.content }];
-  const rendered = parts.map((part, index) => <PartView key={index} part={part} />);
-
-  // Tool-result rows render bare (the card is its own subtle surface); user/assistant rows sit in a chat bubble.
-  if (entry.role === "tool") return <div className="px-1">{rendered}</div>;
-  const align = entry.role === "user" ? "items-end" : "items-start";
-  const tone = entry.role === "user" ? "bg-accent-muted" : "bg-surface ring-1 ring-black/5";
+function UserMessage({ entry }: { entry: TimelineEntry }) {
+  const parts = entry.parts?.length ? entry.parts : [{ type: "text" as const, text: entry.content }];
   return (
-    <div className={`flex flex-col ${align}`}>
-      <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-text-strong shadow-card ${tone}`}>{rendered}</div>
+    <div className="flex flex-col items-end">
+      <div className="max-w-[85%] rounded-2xl bg-accent-muted px-3.5 py-2 text-text-strong shadow-card">
+        {parts.map((part, index) => part.type === "text" ? <TextContent key={index} text={part.text} />
+          : part.type === "image" ? <ImageAttachment key={index} imageRef={part.ref} /> : null)}
+      </div>
     </div>
   );
 }
 
-export const TimelineMessage = memo(Row);
+function ToolMessage({ item }: { item: Extract<ChatTranscriptItem, { kind: "tool" }> }) {
+  const details = useMemo(() => toolOutputDetails(item.output, item.toolName), [item.output, item.toolName]);
+  const target = useMemo(() => isSubagentTool(item.toolName) ? subagentOutputNavigation(item.output) : undefined, [item.output, item.toolName]);
+  return <><ToolCard name={item.toolName} displayName={item.displayName} status={item.status} stale={item.stale} details={details} />
+    {target && <ActionButton tone="ghost" onClick={() => openSubagentConversation(target)}>打开子代理会话</ActionButton>}</>;
+}
+
+function MessageContent({ item }: { item: ChatTranscriptItem }) {
+  if (item.kind === "user") return <UserMessage entry={item.entry} />;
+  if (item.kind === "notice") return <div role="status" className="px-1 text-xs leading-relaxed text-text-secondary">{item.text}</div>;
+  if (item.kind === "tool") return <ToolMessage item={item} />;
+  return (
+    <div className={`flex flex-col ${item.role === "user" ? "items-end" : "items-start"}`}>
+      <div className="max-w-[85%] rounded-2xl bg-surface px-3.5 py-2 text-text-strong shadow-card ring-1 ring-black/5">
+        {item.kind === "text" ? <TextContent text={item.text} committed={item.committed} /> : <ImageAttachment imageRef={item.imageRef} />}
+      </div>
+    </div>
+  );
+}
+
+export function TimelineMessage({ item }: { item: ChatTranscriptItem }) {
+  if (!item.sender && !item.detail && !item.workLabel && !item.readMore) return <MessageContent item={item} />;
+  const fromUser = item.kind === "user" || (item.kind === "text" && item.role === "user");
+  return <div className="space-y-1">
+    <div className={`flex flex-wrap gap-x-2 text-xs text-text-secondary ${fromUser ? "justify-end" : ""}`}>
+      <span>{item.sender}</span>{item.workLabel && <span>{item.workLabel}</span>}{item.detail && <span>{item.detail}</span>}
+    </div>
+    <MessageContent item={item} />
+    {item.readMore && <div className="text-xs text-text-secondary">
+      <ActionButton tone="ghost" busy={item.readMore.pending} disabled={item.readMore.pending} onClick={item.readMore.run}>读取完整正文</ActionButton>
+      {item.readMore.error && <span role="status">{item.readMore.error}</span>}
+    </div>}
+  </div>;
+}

@@ -1,5 +1,5 @@
 //! INPUT:  Host challenge/resume JSON plus immutable HostOperationControl and trusted governance evidence
-//! OUTPUT: validated protocol-v3 Approval DTOs, canonical control/challenge bytes, and SHA-256 helpers
+//! OUTPUT: protocol-v3 Approval DTOs with optional command disclosure, canonical bytes and SHA-256 helpers
 //! POS:    shell/protocol — nested Core authorization contract; raw capability input is deliberately absent
 
 use serde::{Deserialize, Serialize};
@@ -26,6 +26,15 @@ pub struct HostChallengePresentationSection {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
+pub struct HostCommandDisclosure {
+    pub revision: u64,
+    pub complete: bool,
+    pub encoding: String,
+    pub reconstruction: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct HostChallengePresentation {
     pub revision: u64,
     pub title: String,
@@ -36,6 +45,16 @@ pub struct HostChallengePresentation {
     #[serde(rename = "riskSummary")]
     pub risk_summary: String,
     pub sections: Vec<HostChallengePresentationSection>,
+    #[serde(rename = "commandDisclosure", default, skip_serializing_if = "Option::is_none",
+        deserialize_with = "deserialize_command_disclosure")]
+    pub command_disclosure: Option<HostCommandDisclosure>,
+}
+
+fn deserialize_command_disclosure<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<HostCommandDisclosure>, D::Error> {
+    // Missing is legacy-compatible; explicit null is not the Shared optional-object contract.
+    HostCommandDisclosure::deserialize(deserializer).map(Some)
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -314,7 +333,12 @@ pub(crate) fn validate_control(control: &HostOperationControl) -> Result<(), Str
     Ok(())
 }
 
-fn validate_presentation(value: &HostChallengePresentation) -> Result<(), String> {
+pub(crate) fn validate_presentation(value: &HostChallengePresentation) -> Result<(), String> {
+    if value.command_disclosure.as_ref().is_some_and(|marker| marker.revision != 1
+        || !marker.complete || marker.encoding != "visible-escapes"
+        || marker.reconstruction != "section-field-concat") {
+        return Err("Host command disclosure is invalid".into());
+    }
     if value.revision != 1 || value.title.is_empty() || value.title.len() > 120
         || value.capability_label.is_empty() || value.capability_label.len() > 120
         || value.risk_summary.is_empty() || value.risk_summary.len() > 500
@@ -331,7 +355,8 @@ fn validate_presentation(value: &HostChallengePresentation) -> Result<(), String
         }
         for field in &section.fields {
             if field.label.is_empty() || field.label.len() > 80
-                || field.value.is_empty() || field.value.len() > 500 {
+                || field.value.is_empty() || field.value.len() > 500
+                || (value.command_disclosure.is_some() && field.value.encode_utf16().count() > 500) {
                 return Err("Host Approval presentation field is invalid".into());
             }
         }
@@ -370,6 +395,7 @@ pub fn parse_timestamp(value: &str) -> Result<OffsetDateTime, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
     use std::fs;
     use std::path::PathBuf;
 
@@ -387,6 +413,32 @@ mod tests {
             .expect("validated challenge");
         assert_eq!(control_digest(&challenge.control).unwrap(), "c07a2ba3eb72bc8b068c2c388bfee0dc7c9d9a07d1c26ab52ac5573420ffe0e1");
         assert_eq!(challenge_digest(&challenge).unwrap(), "2ae3935fdee2150a2701f5c3730931753012e7dd833c8e2d3d903196d7dde97e");
+        assert!(!canonical_challenge(&challenge).unwrap().contains("commandDisclosure"));
+    }
+
+    #[test]
+    fn command_fixture_pins_marker_order_and_legacy_omission() {
+        let value = fixture("capability-challenge.exec-disclosure.valid.json");
+        let challenge = parse_capability_challenge(value.clone()).unwrap();
+        assert_eq!(control_digest(&challenge.control).unwrap(), "069b39b45514eec068fa71a4ea390e9ceba0d834beb9a1330af9f0483dd126c1");
+        assert_eq!(challenge_digest(&challenge).unwrap(), "e84382212f3ad083eacbc2d9a967e4e196109b83411e1a1361a862927debf209");
+        let text: String = challenge.presentation.sections.iter()
+            .flat_map(|s| s.fields.iter().map(|f| f.value.as_str())).collect();
+        assert_eq!(text, "curl -H \"Authorization: Bearer [凭证已隐藏]\" https://example.test/api");
+        let mut tampered = challenge.clone();
+        tampered.presentation.sections.reverse();
+        assert_ne!(challenge_digest(&tampered).unwrap(), challenge.challenge_digest);
+        tampered = challenge.clone();
+        tampered.presentation.sections[0].fields.reverse();
+        assert_ne!(challenge_digest(&tampered).unwrap(), challenge.challenge_digest);
+        tampered = challenge.clone();
+        tampered.presentation.command_disclosure = None;
+        assert_ne!(challenge_digest(&tampered).unwrap(), challenge.challenge_digest);
+        for invalid in [Value::Null, json!({"revision": 2, "complete": true, "encoding": "visible-escapes", "reconstruction": "section-field-concat"})] {
+            let mut malformed = value.clone();
+            malformed["presentation"]["commandDisclosure"] = invalid;
+            assert!(parse_capability_challenge(malformed).is_err());
+        }
     }
 
     #[test]

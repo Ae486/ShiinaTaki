@@ -1,0 +1,10 @@
+[
+  {
+    "sha256": "ddf561408c3f5647f98d3c06d2226cb275b6ec4dea6301287bcce6b7af7baa62",
+    "path": "packages/core/src/testing/prepared-publication-fixture.ts"
+  },
+  {
+    "sha256": "8a4a98db37575a8a36688e1a4fce705f35de11a3060eb018965293795c484d94",
+    "path": "packages/core/src/testing/co-watching-fixture.ts"
+  }
+]

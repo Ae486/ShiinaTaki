@@ -1,0 +1,12 @@
+{
+  "requestedModel": "deepseek-v4-flash",
+  "physicalRequestsLimit": 8,
+  "sourceUnchanged": true,
+  "deadlineExceeded": false,
+  "observationFailures": [],
+  "completed": true,
+  "maxModelSteps": 6,
+  "nativeAnalysisAndPlayback": "isolated synthetic producers",
+  "modelSkillFileTools": "real",
+  "semanticReview": "Review candidate wording separately; transport acceptance is not owner acceptance."
+}

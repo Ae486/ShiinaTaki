@@ -1,9 +1,7 @@
 /**
- * INPUT:  one Core MCP server view (status phase + desired config + last candidate outcome)
- * OUTPUT: the human-facing MCP vocabulary (phase badge, failure reasons, stdio/http transport lines) and the
- *         dismiss-key derivation for the bounded diagnostics banner
- * POS:    ui/windows/home/pages/mcp — U2 presentation labels; opaque ids/revisions/generations/owners never pass
- *         through here as titles or badges, and secret values never render.
+ * INPUT:  Core MCP phase, desired transport, bounded failure reason, and latest outcome
+ * OUTPUT: Chinese phase/failure labels, public transport lines, and the per-outcome diagnostics dismiss key
+ * POS:    Home MCP presentation vocabulary; opaque state stays internal and secret values never render
  */
 import type { McpServerView } from "@taki/shared";
 
@@ -20,7 +18,7 @@ export const FAILURE_REASON_LABEL: Record<string, string> = {
   "connect-failed": "连接失败",
   "secret-unresolvable": "密钥无法解析（目录锁定或缺失）",
   "tools-list-failed": "工具列举失败",
-  "deadline-exceeded": "候选超时",
+  "deadline-exceeded": "操作超时",
   "tool-key-collision": "工具名冲突",
 };
 

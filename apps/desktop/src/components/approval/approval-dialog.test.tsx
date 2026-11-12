@@ -29,6 +29,27 @@ const request: CanonicalApprovalRequest = {
 };
 
 describe("ApprovalDialog", () => {
+  it("renders all marked command chunks as one escaped selectable literal with a reachable tail", () => {
+    const parts = ['  tool "a b" ', '<script>alert("x")</script>', "x".repeat(500), "\\n", " 最后😀"];
+    const marked: CanonicalApprovalRequest = { ...request, presentation: { ...request.presentation,
+      commandDisclosure: { revision: 1, complete: true, encoding: "visible-escapes", reconstruction: "section-field-concat" },
+      sections: [
+        { title: "CHUNK_TITLE_NOT_VISIBLE", fields: parts.slice(0, 2).map((value) => ({ label: "CHUNK_LABEL_NOT_VISIBLE", value })) },
+        { title: "CHUNK_TAIL_NOT_VISIBLE", fields: parts.slice(2).map((value) => ({ label: "CHUNK_LABEL_NOT_VISIBLE", value })) },
+      ],
+    } };
+    const html = renderToStaticMarkup(<ApprovalDialog request={marked} queued={0} status={{ kind: "ready" }}
+      disclosureAcknowledged={false} onDisclosureAcknowledged={() => undefined} onChoose={() => undefined} onDismiss={() => undefined} />);
+    expect(html).toContain(renderToStaticMarkup(<code>{parts.join("")}</code>));
+    expect(html).toContain('role="region"');
+    expect(html).toContain('tabindex="0"');
+    expect(html).toContain("overflow-auto");
+    expect(html).toContain("select-text");
+    expect(html).toContain("whitespace-pre-wrap");
+    for (const hidden of ["CHUNK_", "commandDisclosure", "visible-escapes", "section-field-concat", "<script>", "line-clamp", "text-ellipsis"])
+      expect(html).not.toContain(hidden);
+    expect(html.match(/<button\b/g)).toHaveLength(request.allowedChoices.length);
+  });
   it("renders safe presentation, queue count, error feedback, and the Pet hit-test marker", () => {
     const html = renderToStaticMarkup(
       <ApprovalDialog
@@ -46,7 +67,35 @@ describe("ApprovalDialog", () => {
     expect(html).toContain('role="alert"');
     expect(html).toContain("data-keep-interactive");
     expect(html).toContain("我明确同意此长期允许也适用于未来后台运行");
+    expect(html).not.toContain("披露版本");
+    expect(html).not.toContain(request.approvalId);
+    expect(html).not.toContain(request.binding.decisionScopeDigest);
+    expect(html).toContain(request.presentation.title);
+    expect(html).toContain(request.presentation.riskSummary);
     expect(html).toContain("disabled=\"\"");
+  });
+
+  it("keeps future-background-use consent as a separate requirement for the unchanged always choice", () => {
+    for (const accepted of [false, true]) {
+      const html = renderToStaticMarkup(
+        <ApprovalDialog
+          request={request}
+          queued={0}
+          status={{ kind: "ready" }}
+          disclosureAcknowledged={accepted}
+          onDisclosureAcknowledged={() => undefined}
+          onChoose={() => undefined}
+          onDismiss={() => undefined}
+        />,
+      );
+      const always = html.match(/<button[^>]*>始终允许（含未来后台运行）<\/button>/)?.[0];
+      expect(always).toBeDefined();
+      expect(always?.includes('disabled=""')).toBe(!accepted);
+      expect(html).toContain('type="checkbox"');
+      expect(html).toContain("我明确同意此长期允许也适用于未来后台运行。");
+      expect(html).not.toContain("披露版本");
+      expect(html.match(/<button\b/g)).toHaveLength(request.allowedChoices.length);
+    }
   });
 
   it("disables every choice while a response is in flight", () => {

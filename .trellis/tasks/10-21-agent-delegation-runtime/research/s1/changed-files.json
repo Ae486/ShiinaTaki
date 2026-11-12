@@ -1,0 +1,200 @@
+[
+  {
+    "path": "packages/shared/src/context-source-schema.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "0217b70cd96b1f3b39cb9581d3adcaa31a1d872ce094bd0ca2aaf8e9159ed603"
+  },
+  {
+    "path": "packages/shared/src/subagent-schema.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "40baeed070be72b61501a083a2358494f994c839a77d4a1c9dce10f75035d456"
+  },
+  {
+    "path": "packages/shared/src/subagent-result-schema.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "3f63c1901cfd5af9adc6d813ee634c6c5421687c321dc1f74581085dfb8b9e84"
+  },
+  {
+    "path": "packages/shared/src/run-message-schema.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "fa09526d0333a31a46b7666c282e45fb52fd2ed3f20b611537b90183a111a037"
+  },
+  {
+    "path": "packages/shared/src/timeline-schema.ts",
+    "status": "modified",
+    "beforeSha256": "1dd51c3aafaaf8f8532e3c121a0739919eef3ec5041c53639c96505a1cfb9b0f",
+    "afterSha256": "8fc8f39c4e646ece77f624071ed42749fc5eade1412f23f7cef247e8a5c03106"
+  },
+  {
+    "path": "packages/shared/src/index.ts",
+    "status": "modified",
+    "beforeSha256": "5312b669a006740dd8f633a1b64f83b41871fb63078f3f43de844eb64993a0e6",
+    "afterSha256": "dee8e11fa7c623288cac8a036698e4d8e8be2f3afad769ee8a59ccb3fc0ec86f"
+  },
+  {
+    "path": "packages/shared/src/index.md",
+    "status": "modified",
+    "beforeSha256": "3c239725a733559d9a5a28bdc8e630e3ec56186ac5cd173f7634410eeb6f1be2",
+    "afterSha256": "75f847736502049f89860c2462918e8d419fdf28c68197166d3ebbd5fd0e726f"
+  },
+  {
+    "path": "packages/core/src/db/subagent-repo.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "79d01863fc8d8f55b5e0fa168fe005d59fbd9f03fdc6d388af3e1885190196e0"
+  },
+  {
+    "path": "packages/core/src/db/subagent-input-repo.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "103aab019d1283e0a208d899692d42bb7d247cad0ab22ba416e32b9577e01425"
+  },
+  {
+    "path": "packages/core/src/db/subagent-execution-repo.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "15ea5769997f408b4fc9437d4e485a7fb19585b73f835176b08332c0d284bfcf"
+  },
+  {
+    "path": "packages/core/src/db/subagent-terminal.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "c0b1d4d37359fffcb8426df4f41d3621a903acd7ae933cb5a7c6d6beb21c94f5"
+  },
+  {
+    "path": "packages/core/src/db/subagent-readers.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "9983f061d5fe580e46f0857a255b86c1162b22cd0a981c89a8194cf8e23da491"
+  },
+  {
+    "path": "packages/core/src/db/run-message-repo.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "827c69dba55184beb77ca5299d506eab877b3ab4e938c1984a47dd7101ad8543"
+  },
+  {
+    "path": "packages/core/src/db/run-linked-state.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "961f91909c4c826075a87f58ee1b6a6495bb9634a9a568d3cbc3c13aeb9a08b7"
+  },
+  {
+    "path": "packages/core/src/db/run-repo.ts",
+    "status": "modified",
+    "beforeSha256": "c6330d5208262596f068ccf0bea49aff76f60f6e3638ae23a0983d1977aa8b1e",
+    "afterSha256": "2e6a8e66c399c0100585bf18235c7a7ab39caa9fdf0fd1c19fb099d310cc79c3"
+  },
+  {
+    "path": "packages/core/src/db/effect-repo.ts",
+    "status": "modified",
+    "beforeSha256": "a69e89803439180db03f4a441b9233f9ea4106ee4ff6cf261c043fb70530845c",
+    "afterSha256": "dd84f3709481789cf2a30d137d1e046b12c0ca0d4d3aaf0cde9029d12112c29e"
+  },
+  {
+    "path": "packages/core/src/db/sqlite.ts",
+    "status": "modified",
+    "beforeSha256": "c09b947abb063bd66efbbbb2981662b96a7f3ede9cb2feb278b0dd1dca5bfe05",
+    "afterSha256": "ba274943e84ed4ce1aa88cfb79679526e15d2b4495196dfdcf3ca10509868510"
+  },
+  {
+    "path": "packages/core/src/db/sqlite.test.ts",
+    "status": "modified",
+    "beforeSha256": "92ab02baf1579dd05f76ece9f3af69c200a93b4608de8add058f9b4a4921272b",
+    "afterSha256": "97ed3f80546e465b84c77b4ee85536f8949e780c2e569006a2b90b73db2cb581"
+  },
+  {
+    "path": "packages/core/src/db/index.md",
+    "status": "modified",
+    "beforeSha256": "73650cb20b37b70b6044b516a178211ef7a5161eb70940ae8c0277d5fd043612",
+    "afterSha256": "71380255d1dc777119b733a8be44451066ffbcd24e0ed3833ad8f5649301b976"
+  },
+  {
+    "path": "packages/core/src/db/migrations/056-subagent-conversations.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "c647b1c9e08690ddc921c7c989d6db70a68fc0306be99acc98f343fa382fe588"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.ts",
+    "status": "modified",
+    "beforeSha256": "b9e0a90eadb591224c062f5462ded0dec8a8085ec14cbab90194c5c796cebaaf",
+    "afterSha256": "a9211b7250427018ca7fd8f76f5b513ab56539330cf8f97c438152c0320b7d06"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index.md",
+    "status": "modified",
+    "beforeSha256": "a78d24f8ced42510a636b9214c0d15d5f2cba0c5a40477d9872a28c072054d0b",
+    "afterSha256": "a7a7553e226083d937da6c956585005f73297db06fcf41fe08b11b41c19b4520"
+  },
+  {
+    "path": "packages/core/src/harness/run-service.ts",
+    "status": "modified",
+    "beforeSha256": "7a3e4e09a221946a93ad65ef9f1bfe14bab2c7db90f29fa88367ae3dee0e03b9",
+    "afterSha256": "891bf7cd2181db1441829795ebd374891ee08e2264f3124db968868e0082f847"
+  },
+  {
+    "path": "packages/core/src/harness/index.md",
+    "status": "modified",
+    "beforeSha256": "dee99295c3c2d4ac1b567759288d69518731dec5360f8409f4233e44b8045bba",
+    "afterSha256": "502b17f5c4aa9a5eb2b357faaa98894ef29e55d59ce0d37f177b19f2cdd52f43"
+  },
+  {
+    "path": "packages/core/src/boot/core-bootstrap.ts",
+    "status": "modified",
+    "beforeSha256": "970803e2e7af85c4afd06ec05347dc889f655131f530e65f4ad5d328d2b7a21c",
+    "afterSha256": "f0e31ed90d8618aea44e44a6e985d0178b23dc6d9a6ef4bdec9ff34bdada1ff0"
+  },
+  {
+    "path": "packages/core/src/boot/core-bootstrap.test.ts",
+    "status": "modified",
+    "beforeSha256": "c35c3f463564193839646ec60409f6835f8af0d140817a4ba15f197e957ae89f",
+    "afterSha256": "6ac552a71397742720c91ac30cc5f9c93849e8bae010069d0751b26ae9675b19"
+  },
+  {
+    "path": "packages/core/src/boot/index.md",
+    "status": "modified",
+    "beforeSha256": "3f182162ee1e292118d1924da36f481ad0dc98ede906b1a60b54dd9ba30c80cc",
+    "afterSha256": "2027b9d903c73b6e729a713f497b09cb4c45896a45d43880bd2c595810dc9171"
+  },
+  {
+    "path": "packages/core/src/db/run-terminal-transition.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "e631bdc304a82e0a618b6b60c6dc0bb073669578624015ab28e715db2d972677"
+  },
+  {
+    "path": "packages/core/src/testing/run-service-stub.ts",
+    "status": "modified",
+    "beforeSha256": "088638aa94bf6313b60d1bb54059a27164964ccef951e2a9959913657beb0bbf",
+    "afterSha256": "0139113260a1f87d85dd9dbfe301c592fd357568445034a6b11c370806fc5026"
+  },
+  {
+    "path": "packages/core/src/testing/index.md",
+    "status": "modified",
+    "beforeSha256": "380aad50efad8d53e7138be2db7d150a26c4e232de8fb7df9a8843b25ebb26f8",
+    "afterSha256": "879a6ea07638e76d358def2eebe8179e714345df348b4c72541e945612454103"
+  },
+  {
+    "path": "packages/shared/src/subagent-schema.test.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "02de95ed08aadc3d1e3c5163b3e30383428e7456f57d55e5b1592eef77fc28ce"
+  },
+  {
+    "path": "packages/core/src/db/subagent-repo.test.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "5c2bf652ffb612ed368580919d453320410f19818542649a58d6fbdc151ecb3b"
+  },
+  {
+    "path": "packages/core/src/db/migrations/056-subagent-conversations.test.ts",
+    "status": "added",
+    "beforeSha256": null,
+    "afterSha256": "d7c7552a6147962ca219a38a88772fbe62162fe025f4fbdb21b7bdf7b499949c"
+  }
+]

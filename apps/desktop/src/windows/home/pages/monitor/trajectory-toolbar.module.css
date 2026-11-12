@@ -1,0 +1,178 @@
+/* DSH TrajectoryToolbar.module.css adaptation; DeepSeek MIT, see third-party-notices.md. */
+.root {
+  position: relative;
+  z-index: 8;
+  flex: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  border-bottom: 1px solid var(--trajectory-border);
+  background: var(--trajectory-bg);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  min-height: 31px;
+  padding: 0 6px;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.action {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 20px;
+  padding: 0 5px;
+  gap: 4px;
+  border: 0;
+  border-radius: 3px;
+  color: var(--trajectory-caption);
+  background: transparent;
+  font: 12px/1 var(--font-sans);
+}
+
+.action:hover, .action[aria-pressed='true'], .action[aria-expanded='true'] {
+  color: var(--trajectory-text);
+  background: var(--trajectory-hover);
+}
+
+.action:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.totals {
+  min-width: 0;
+  color: var(--trajectory-caption);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.search {
+  display: flex;
+  flex: 0 1 164px;
+  align-items: center;
+  min-width: 84px;
+  height: 22px;
+  margin-left: auto;
+  padding: 0 6px;
+  gap: 4px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 4px;
+  color: var(--trajectory-caption);
+  background: var(--trajectory-muted);
+}
+
+.search:hover {
+  border-color: var(--trajectory-caption);
+}
+
+.search:focus-within {
+  border-color: var(--trajectory-accent);
+  background: var(--trajectory-bg);
+}
+
+.search input {
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--trajectory-text);
+  background: transparent;
+  font: 12px/1 var(--font-sans);
+}
+
+.search input::placeholder {
+  color: var(--trajectory-caption);
+}
+
+.search input:focus-visible {
+  outline: none;
+}
+
+.popover {
+  position: absolute;
+  z-index: 9;
+  top: 31px;
+  right: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: min(330px, calc(100% - 12px));
+  padding: 10px;
+  max-height: min(420px, 65vh);
+  overflow: auto;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 4px;
+  background: var(--trajectory-bg);
+  box-shadow: var(--shadow-overlay);
+}
+
+.popover label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--trajectory-caption);
+}
+
+.popover select {
+  width: 100%;
+  min-width: 0;
+  height: 25px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 3px;
+  padding: 0 4px;
+  color: var(--trajectory-text);
+  background: var(--trajectory-bg);
+}
+
+.popover .checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.rangeLabel {
+  color: var(--trajectory-accent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+@container monitor-workspace (max-width: 930px) {
+  .totals {
+    display: none;
+  }
+}
+
+@container monitor-workspace (max-width: 580px) {
+  .inner {
+    flex-wrap: wrap;
+    padding-block: 5px;
+    gap: 5px;
+  }
+  .search {
+    flex: 1 1 150px;
+  }
+}

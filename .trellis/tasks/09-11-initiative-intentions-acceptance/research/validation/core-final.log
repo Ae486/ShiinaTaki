@@ -1,0 +1,72 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/db/pending-memory-repo.test.ts (23 tests | 1 failed) 2063ms
+     × applies the current migration tail after a populated version-34 database and reopens without changes 171ms
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts (10 tests | 1 failed) 964ms
+     × upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration 195ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/pending-memory-repo.test.ts > Pending Memory repository > applies the current migration tail after a populated version-34 database and reopens without changes
+AssertionError: expected [ 35, 36, 37, 38, 39, 40, 41, …(14) ] to deeply equal [ 35, 36, 37, 38, 39, 40, 41, …(12) ]
+
+- Expected
++ Received
+
+@@ -16,6 +16,8 @@
+    49,
+    50,
+    51,
+    52,
+    53,
++   54,
++   55,
+  ]
+
+ ❯ src/db/pending-memory-repo.test.ts:172:49
+    170|     const f = fixture(true, 34); const records = f.db.prepare("SELECT …
+    171|     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_…
+    172|     const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 3…
+       |                                                 ^
+    173|     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([…
+    174|     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+@@ -11,7 +11,9 @@
+      49,
+      50,
+      51,
+      52,
+      53,
++     54,
++     55,
+    ],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+     92|     const before = { history: historyBytes(old), current: currentRows(…
+     93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+     94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, …
+       |                     ^
+     95|     expect(historyBytes(upgraded)).toEqual(before.history);
+     96|     expect(currentRows(upgraded)).toEqual(before.current);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 452 passed (454)
+      Tests  2 failed | 3732 passed | 1 skipped (3735)
+   Start at  22:39:37
+   Duration  665.36s (transform 14.93s, setup 0ms, import 211.61s, tests 306.57s, environment 62ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run --maxWorkers=1

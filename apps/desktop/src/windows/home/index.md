@@ -1,22 +1,30 @@
 # windows/home/
 The home window: one instance, left menu / right page content. Pages are registry-driven — adding a page is one row
-in pages.ts. Holds no state of record (invariant 4); every page talks to the Core over the window's own operator WS.
+in pages.ts. Holds no state of record (invariant 4); Core pages use the window's operator WS, while QQ history uses its own local native QQMM attachment.
 - main.tsx — React root mounting <HomeShell> into home.html #root, on the page named by the `?page=` boot param
-- home-shell.tsx — two-pane shell + lazy visited-page keep-alive host, shared Home-client provider, and that socket's single Approval modal owner; <main> anchors the shared connection-status overlay banner (U6); publishes the shown page to the visibility store (P1e) so hidden keep-alive pages stop working; Chat keeps a separate socket/modal
-- pages.ts — THE page registry (id/label/icon/component rows) + the derived PageId union + isPageId
-- pages/monitor/ — conditionally visible read-only Run monitor: three-zone DSH scaffold (Run browser / grouped ledger / closable drag-adjustable inspector) with semantic filters, durable/live cursor recovery and inspector-only technical metadata
+- home-shell.tsx — two-pane shell, retained pages with pre-paint route publication, shared client/Approval owner, persistent child attention in the scrollable sidebar, and connection feedback; Monitor survives transient client retirement, initial unresolved routes stay pending, and confirmed disable removes its surface
+- pages.ts — THE page registry, including initiative management and private child conversations (id/label/icon/component rows), derived PageId and runtime gate
+- pages/qqmm/ — local QQ history, native-only transport and effective visibility disposal; exempt from the Core connection banner
+- pages/monitor/ — full-height DSH Run browser/Toolbar/Overview/measured-ledger/temporary-Inspector port with semantic filters, independent history/live recovery, and no user-facing internal metadata
 - default-page-id.ts — dependency-leaf default page id shared by navigation consumers without loading page components
 - visited-page-ids.ts — dependency-leaf visited-page sequence used by the Home keep-alive host
-- page-visibility-store.ts — zustand gate signal (P1e): the shell writes the shown page; hidden keep-alive pages stop subscriptions/fetches/re-publishes and reactivate on show (the chat page deliberately stays live)
+- page-visibility-store.ts — shell-owned route and document visibility; effective disposable-read gates preserve existing Chat/Monitor contracts
+- home-document-visibility.ts — owned visibilitychange observation; focus/blur never masquerades as hidden
 - home-store.ts — zustand nav store: currentPage + navigate(id)
 - boot-page.ts — pure `?page=` parse with a fallback to the default page
 - use-home-navigate-event.ts — listens for the home:navigate Tauri event (openHome on an already-open window)
-- use-home-connection.ts — the shared settings-family connection owner using fresh authenticated generations plus one stable last-good timing accessor; independent from Pet and Chat
+- use-home-connection.ts — independent settings-family connection, source-bound Home presence and designated User Timezone reporter, plus the last-good timing accessor
+- use-monitor-availability.ts — generation-safe typed Monitor availability, retained across transient null clients; config changes supersede stale reads and only confirmed disable redirects a requested Monitor route
 - home-client-context.ts — React context exposing the client, status, and window-owned timing accessor to settings pages (chat keeps its own socket)
-- page-chrome.tsx — shared page frame: <PageHeader> (title, hint, background-refresh marker) + <PageBody> (scrolling, keyboard-scrollable, width-capped column) + <PageAlert> (delegates to the ui/ FeedbackLine in the danger tone, with an optional retry action)
-- page-card.tsx — shared page chrome: <PageCard> (title + optional header control) + <LabeledRows> (the label/value list the settings-family pages render)
+- model-profiles-controller.ts — presence-only retained model snapshots with handler-before-subscribe reads, bounded invalidation, freshness and physical-client retirement
+- use-model-profiles.ts — shared Chat/Settings React adapter; page visibility gates disposable profile reads without persisting credentials or authority
+- page-chrome.tsx — shared page frame: stable title/hint with delayed non-displacing pending indication, keyboard-scrollable content and persistent actionable errors
+- page-card.tsx — shared card/label-value chrome with optional internal row identity independent of changing display labels
 - badge.tsx — the one status-chip look, in four tones (warn / ok / neutral / muted)
-- action-button.tsx — the one button look, in tones (primary / secondary / ghost / link / accent / danger-soft / danger) plus shape="pill" and a busy marker; 32px base hit target
-- extension-convergence-controller.ts / extension-convergence.tsx — current-client-only extension owner/generation read and compact shared status band
-- pages/ — one directory per page (see each page's own index.md)
+- action-button.tsx — the shared button tones/shape and 32px hit target; busy controls keep a fixed label/indicator slot with immediate aria-busy and delayed visual feedback; disclosure controls preserve aria-expanded
+- extension-convergence-controller.ts — subscribed, targeted extension-status reads with covered-snapshot reuse and separate binding, visibility and invalidation
+- extension-convergence-resource.ts — one ephemeral extension-status owner per physical client, effect-bound only while consumers exist and shared by visible copies
+- extension-convergence.tsx — visibility-aware resource adapter, retained availability/count band and stable pending slot; list-key invalidation is restricted to recognized older-Core support
+- read-observation-notice.tsx — explicit older-Core manual-refresh feedback over existing domain refresh actions
+- pages/ — one directory per page; Operations recovers durable tidy results independently of its memory/storage counters (see each page's own index.md)
 - Skills is registered in pages.ts and uses the same disposable Home-client state boundary as MCP.

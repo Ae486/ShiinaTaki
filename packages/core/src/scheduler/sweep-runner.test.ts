@@ -8,6 +8,21 @@ describe("startSweeper", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
+  it("rechecks recovered authority on explicit demand and cannot restart a stopped sweeper", () => {
+    const { logger } = createCaptureLogger();
+    let enabled = false;
+    const sweep = vi.fn(() => undefined);
+    const control = startSweeper({ name: "test", message: "swept", logger, enabled: () => enabled, sweep });
+    expect(sweep).not.toHaveBeenCalled();
+    enabled = true;
+    control.runNow();
+    expect(sweep).toHaveBeenCalledOnce();
+    control.stop();
+    control.runNow();
+    vi.advanceTimersByTime(SWEEP_INTERVAL_MS);
+    expect(sweep).toHaveBeenCalledOnce();
+  });
+
   it("contains a failed authority gate and retries without running an unapproved sweep", () => {
     const { logger, records } = createCaptureLogger();
     let gateBroken = true;

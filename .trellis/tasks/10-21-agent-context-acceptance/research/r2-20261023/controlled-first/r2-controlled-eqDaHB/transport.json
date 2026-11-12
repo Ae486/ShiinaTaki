@@ -1,0 +1,56 @@
+{
+  "kind": "transparent-request-hold-relay",
+  "requests": [
+    {
+      "requestNumber": 1,
+      "bodySha256": "ad5bde90c8c7113ab6c7545380df461901e49c4d66d9e70e0899e451918385e7",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T02:45:16.448Z",
+      "finishedAt": "2026-10-23T02:45:16.461Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 2,
+      "bodySha256": "6f33e8da0bb6587aec8b5775704c3c2e858b9ad8a624d05bd859c099ca057d68",
+      "gate": "child-a",
+      "heldAt": "2026-10-23T02:45:16.718Z",
+      "releasedAt": null,
+      "forwardedAt": null,
+      "finishedAt": "2026-10-23T02:46:46.754Z",
+      "status": null,
+      "aborted": "relay-closed",
+      "failure": null
+    },
+    {
+      "requestNumber": 3,
+      "bodySha256": "06cea19c5cc7acb9353e6bf725149e4f1c816b705c7ac47ce13d07da67ee602e",
+      "gate": "child-b",
+      "heldAt": "2026-10-23T02:45:16.720Z",
+      "releasedAt": null,
+      "forwardedAt": null,
+      "finishedAt": "2026-10-23T02:46:46.755Z",
+      "status": null,
+      "aborted": "relay-closed",
+      "failure": null
+    },
+    {
+      "requestNumber": 4,
+      "bodySha256": "4d5d3e9aff9dd2e7c971227ce73b13fc420a701be041861dfc5e577b0d2335b6",
+      "gate": null,
+      "heldAt": null,
+      "releasedAt": null,
+      "forwardedAt": "2026-10-23T02:45:16.724Z",
+      "finishedAt": "2026-10-23T02:45:16.743Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    }
+  ],
+  "physicalUpstreamAttempts": 2,
+  "active": 0,
+  "closed": true
+}

@@ -2,7 +2,7 @@
 
 ## 1. Scope / Trigger
 
-Use this contract when an operator-initiated memory operation must outlive its Home reply: Hindsight setup
+Use this contract when a manual/automatic memory operation must outlive its Home reply: Local tidy/index rebuild, Hindsight setup
 validation/application, manual replica synchronization, and every later long-running memory operation (first
 activation, Bank provisioning and connection revalidation, transitions, backup, upgrade). One Core-owned owner in `core/memory/operations/` admits, executes,
 observes and settles operations over the existing producers (B3 setup service, B5 scheduler, D77 writes). It never
@@ -17,16 +17,17 @@ MEMORY_OPERATION_METHODS = { submit: "memory.operations.submit", status: "memory
   list: "memory.operations.list", cancel: "memory.operations.cancel", subscribe: "memory.operations.subscribe",
   changed: "memory.operations.changed" };
 MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
-MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate"
+MemoryOperationKind = "tidy" | "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate"
   | "hindsight.activate" | "bank.provision" | "connection.revalidate" | "backup.capture" | "backup.admit" | "backup.verify"
-  | "transition.return-local" | "transition.reenter-hindsight" | "transition.emergency-local";
+  | "transition.return-local" | "transition.reenter-hindsight" | "transition.emergency-local"
+  | "template.apply" | "template.recover" | "index.rebuild" | "candidate.prepare" | "candidate.inspect" | "candidate.resume";
 MemoryOperationState = "admitted" | "running" | "waiting" | "completed" | "failed" | "cancelled" | "outcome_unknown";
 MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable"
   | "producer_incomplete" | "commitment_unknown";
 MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN"
   | "MEMORY_OPERATION_REQUIRED";
 MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode | MemoryHindsightActivationErrorCode
-  | MemoryHindsightLifecycleErrorCode | MemoryBackupErrorCode | MemoryTransitionErrorCode;   // arms agree on kind
+  | MemoryHindsightLifecycleErrorCode | MemoryBackupErrorCode | MemoryTransitionErrorCode | MemoryTemplateErrorCode | HindsightCandidateErrorCode;   // arms agree on kind
 ```
 
 Producer and result arms are tied to the kind by the explicit, non-exported `PRODUCER_KIND` table in
@@ -36,23 +37,29 @@ Producer and result arms are tied to the kind by the explicit, non-exported `PRO
 | --- | --- | --- |
 | `setup.validate`, `setup.apply` | `setup` | `setup` |
 | `replica.sync` | `replica` | `replica:<bankId>` |
+| `tidy` | `tidy` | `tidy` (Global single-flight, Character-bound request) |
+| `index.rebuild` | `index` | `index` |
 | `local.onboard.prepare`, `local.onboard.activate` | `local` | `local-onboarding` |
 | `hindsight.activate` | `hindsight` | `hindsight-activation` |
 | `bank.provision` | `bank` | `hindsight-lifecycle` |
 | `connection.revalidate` | `connection` | `hindsight-lifecycle` |
 | `backup.capture`, `backup.admit`, `backup.verify` | `backup` | `hindsight-backup` |
 | `transition.return-local`, `transition.reenter-hindsight`, `transition.emergency-local` | `transition` | `memory-transition` |
+| `template.apply`, `template.recover` | `template` | `hindsight-template` |
+| `candidate.prepare`, `candidate.inspect`, `candidate.resume` | `candidate` | `hindsight-candidate` |
 
 Transition storage and explicit recovery follow [Memory Transition Durable Protocol](./memory-transitions.md).
-The optional transition driver is not composed by W1: the registered kinds refuse without it, and Home exposes no
-transition action. A producer return value alone cannot settle a transition; the adapter reads durable evidence.
+W1 originally left the optional transition driver uncomposed. Healthy and emergency drivers now follow their
+registered producer contracts; an unavailable driver still refuses. A producer return value alone cannot settle a
+transition; the adapter reads durable evidence.
 
-Core: `createMemoryOperationService({ db, live, setup, local?, hindsight?, lifecycle?, backup?, bootId, onChanged, logger })` ->
-`{ submit(request, admission?), status, list, recent, latest(family), cancel, stop }`; kind handlers implement
-`{ family(request), admit(request, ctx, { origin }) -> producerRef, execute({ request, producer, ctx, running, tryClaim, checkpoint })
+Core: `createMemoryOperationService({ db, live, setup, local?, hindsight?, lifecycle?, backup?, templates?, candidates?,
+transition?, tidy?, searchIndex?, bootId, onChanged, logger })` ->
+`{ submit(request, admission?), status, list, recent, latest(family), cancel, wait, stop }`; kind handlers implement
+`{ family(request), admit(request, ctx, { origin }) -> producerRef, execute({ request, producer, ctx, running, tryClaim, checkpoint, updateProducer })
 -> settlement | null, observe?(operation, ctx), observeBoot?(operation, ctx), cancel?(operation, ctx) }` and are
 registered once in `memory-operation-kinds.ts`. `running()` is a notification; `tryClaim(): boolean` is the repo CAS
-admitted -> running and the only claim proof. `checkpoint(progress)` persists producer progress independently of `result`.
+admitted -> running and the only claim proof. `checkpoint(producer)` / `updateProducer(producer)` persist producer checkpoints independently of `result`.
 `composeMemoryRuntime(...).operations()` is the live accessor to the selected Hindsight subsystem
 (`MemoryOperationsRuntime`: `epochId`, `configFingerprint`, `deploymentMode`, `scheduler` (including `started`/`start`/`stop`),
 `writeFence` (`quiesce`/`release`, used only by backup capture), `banks()`, `assertConnection()`, `driftReason()`,
@@ -98,7 +105,12 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 
 ## 3. Contracts
 
-- One operation family may have one non-terminal row: `setup` for both setup kinds, `replica:<bankId>` per Bank. A
+- A Local tidy operation remains running across its admitted backlog's batches. The producer owns per-batch limits
+  and Utility queue yielding; the operation owner only persists progress and final truth. Completing a batch is not
+  a terminal transition. Later arrivals can remain pending when the finite admitted backlog completes.
+
+- One operation family may have one non-terminal row: `setup` for both setup kinds, `replica:<bankId>` per Bank, and
+  global `tidy` because Characters share Global memory/Blocks. A
   conflicting `submit` is refused `MEMORY_OPERATION_BUSY` with the active `operationId`; nothing is queued silently.
 - Identity and producer references are Core-minted at admission (`operationId`, `authorityEpochId`, `admittedAt`,
   setup `attemptId`/`revisionBefore`). Clients never supply state; a lost reply, closed window or replacement client
@@ -131,6 +143,19 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Every persisted transition is a repo CAS followed by exactly one `onChanged` publication; the server fan-out is
   connection-scoped and removed on close. The composite status is a read (no producer of its own); Home refetches it on
   every `memory.operations.changed` push, on reconnect and on remount — never by polling.
+- `tidy` requests carry a Character. Its producer reference holds the admitted authority and content-free progress
+  `{ edits, steps, reviewed, remaining: number | null }`; its result holds the complete validated tidy outcome.
+  Nonterminal result remains null. Publish progress via `Database.afterCommit` so a nested mutation rollback also
+  discards the notification. Restart retains known progress and classifies the operation outcome_unknown.
+- `composeMemoryRuntime().installTidySubmit()` binds automatic Local requests after owner construction, before serving
+  work. The kind calls raw runNow; raw execution never recurses through submission. Compatibility memory.tidy submits
+  or joins only the same Character and authority and awaits `wait(operationId)` without another execution.
+- `list({ kind?, characterId?, includeTerminal, limit })` filters in SQL before limiting. Home reads the latest matching
+  tidy even after unrelated operation history exceeds the global recent limit. Busy replies may identify another
+  Character's shared flight; they do not make that result belong to the requesting Character.
+- The operation owner's lifecycle is reused for Legacy/Hindsight manual tidy without changing their producer semantics.
+  Those producers may not provide intermediate progress; admitted does not prove execution has not started. Display
+  known counts as confirmations, and do not imply zero work from an absent/initial report.
 - `MemoryAuthorityStatus` separates authority (marker), runtime availability (closed reason), setup snapshot,
   per-Bank replica sync status, per-Bank Pending summary plus the count of unfinished D77 parent writes, and
   operations. `replica`/`pending` are `null` unless Hindsight is the authority and the runtime is available; the
@@ -176,6 +201,21 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Pre-051 schedule/operation rows remain readable, without invented request IDs or retroactive attribution. Legacy
   internal manual requests keep their existing coalescing behavior; tracked operation requests refuse conflicting
   pending requests and cannot be overwritten or cancelled by an unqualified legacy call.
+
+### T4 retained-page integration
+
+The Home card installs its handler, awaits subscription acknowledgement, then reads Core status.
+Pushes, explicit refresh and hide/show during pending setup cannot bypass that acknowledgement; they coalesce
+into the subsequent baseline. Failed, invalid or timed-out setup clears only that subscription attempt and
+reports a read failure, without settling an in-flight mutation. Explicit demand may retry on the same socket;
+accepted membership remains shared and no polling or automatic subscription retry loop is introduced.
+Actual page visibility gates disposable status reads; hidden pushes retain one dirty obligation,
+and pre-hide reads cannot publish after visibility retirement. Returning reconciles Core truth.
+Hiding keeps the operation controller, mutation lock and one terminal outcome; it never replays a mutation.
+The card retains readable prior data during refresh or connection loss. Authority epochs, opaque Bank IDs
+and operation IDs remain internal request/correlation fields and never become labels, feedback or tooltips.
+These UI rules do not change producer attribution, authority or the historical compatibility rules below.
+
 - An operation left unclaimed with no supervisor error (for example the scheduler stopped after admission) stays open
   until the next `status`/`list` read re-classifies it, or becomes `outcome_unknown` at the next boot.
 - Result-schema parse failures in the method guards rethrow the ZodError as `INTERNAL_ERROR` text, matching the
@@ -201,6 +241,12 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 | production `memory.migration.stage/resume/verify/exclude/activate` | `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_REQUIRED`; only dryRun/status/exceptions reads remain |
 | Core restart with a non-terminal `local.onboard.*` row | `observeBoot` classifies from the receipt; otherwise `outcome_unknown` / `commitment_unknown` or `producer_incomplete` |
 | submit any setup / Local / activation / lifecycle / backup kind while another of the five families is open | `MEMORY_OPERATION_BUSY` + that row's `activeOperationId` |
+| subscription is rejected, has an invalid ACK, or reaches its request deadline | Read/setup failure; discard only the failed attempt; explicit demand can retry on the same connection; never settle or replay a mutation |
+| push, explicit refresh or hide/show occurs while subscription ACK is pending | Zero status reads before accepted membership; one covering baseline afterward; hidden pages retain only a dirty obligation |
+| an expired subscription attempt receives a late ACK after retry began | Native RPC identity discards the old reply; current subscription promise, status read ownership and mutation state remain unchanged |
+| tidy UI loses its submit response or is recreated | Query the existing operation; never resubmit automatically |
+| a known partial tidy result is returned | Outer failed retains the full partial outcome, committed counts and next action |
+| Local edit progress cannot persist or the operation is already terminal | Roll back the affected edit and publish nothing from that transaction |
 
 ## 5. Good / Base / Bad Cases
 
@@ -237,6 +283,13 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Backup kinds: family registration, settlement with the mismatch in the result, restart and pre-claim cancel
   (`memory-operation-kind-backup.test.ts`); capture and admit journeys including busy with the other four families
   (`memory-operation-kind-backup-capture.test.ts`, `-admit.test.ts`).
+- Desktop setup recovery: rejected and invalid ACKs and actual native RPC deadlines permit same-connection explicit
+  retry; concurrent demand shares pending/accepted membership; a late expired ACK cannot replace the new attempt.
+- Desktop ordering: pending ACK plus pushes, manual refresh and hide/show produces no early read and one later
+  baseline; hidden/pre-hide reads cannot publish; setup failure neither loops nor settles a concurrent mutation.
+- Tidy: real Local runtime plus owner/RPC/subscriptions, automatic and compatibility joins, fresh queued view,
+  transaction/notification rollback, restart after a committed edit, filtered latest result, and rendered recovery
+  after page recreation. Scripted models establish mechanics; real-model judgment and human acceptance are separate.
 
 ## 7. Wrong vs Correct
 

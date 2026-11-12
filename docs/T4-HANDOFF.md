@@ -4,8 +4,123 @@
 >
 > Scope: post-Skills/MCP T4 - Autonomous Runs, Run Receipts, Scheduled Tasks, Heartbeat, delivery, reliability, and later Experience Review.
 >
-> Snapshot date: 2026-08-27. Recheck every Git hash, task pointer, dependency state,
-> and runtime claim before use.
+> Latest checkpoint: 2026-09-08. Older sections retain their historical dates. Recheck every Git hash,
+> task pointer, dependency state, and runtime claim before use.
+
+## Current visual continuity checkpoint - 2026-09-08
+
+After manual inspection of the refresh work, the owner approved the
+[Home visual continuity follow-up](../.trellis/tasks/09-08-uiux-visual-continuity/prd.md).
+Engineering work and owner visual acceptance completed on 2026-09-08, based on `82e0a4a`.
+The owner then authorized local closeout; all 95 reviewed implementation files are committed as
+`d6ddf2e`. Acceptance documentation and the owned D78 registry entry form the documentation closeout.
+Run/Inspector replacement, shared pending slots, Perception layout, action-owned floating feedback
+and attachment draft retirement are implemented. Independent source review is complete for all 95
+changed source/test/index/spec files; Desktop 952 tests, all five workspace typechecks, root lint
+and the production Desktop build pass. The final build preserves all 375 recorded build inputs.
+
+Final frozen-build WebView2 passed **14/14** cases with zero page/fixture errors. The corrected
+build verifies stable header/card geometry, painted Run/Inspector transitions, Toast expiry/reading
+and late image-pick retirement. Hidden mode downgrade/reveal exposes old local detail in 0/61 frames.
+All 21 frozen Home resources and 95 reviewed files match; all eight owned QA PIDs were cleaned up.
+The
+[implementation evidence](../.trellis/tasks/09-08-uiux-visual-continuity/implementation-evidence-2026-09-08.md)
+records the exact boundary and manual checklist. After Desktop relaunch the owner reported no issues.
+The following permission-blocked sampling observation was attributed to the switch to standard
+permissions; the owner stopped investigation and deferred permission-system improvements as
+[D78](deferred-decisions.md). This is a separate follow-up, not an outstanding visual-continuity defect.
+No push, archive or change to the owner's running Core is part of this local commit closeout.
+Preserve concurrent Lab/OpenBiliClaw/config/parent metadata and the existing session export.
+
+The agreed pre-Heartbeat UI/UX workstream now includes the completed G1-G5 program, triggered
+refresh/disclosure work and this accepted visual-continuity follow-up. Historical whole-frontend
+closure remains narrower than claiming every UI/UX aspiration is delivered: long-CJK Markdown
+profiling and dedicated OS IME verification remain separate; theme/font and Live2D configuration
+entries were excluded. D77 error fidelity and D78 permission UX remain owner-deferred, with D69
+tool repair behavior and D75/D76 compaction measurement/quality in their own workstreams. The
+architecture and historical frontend parents stay open. The owner approved entering T4 Heartbeat
+planning after closeout; the root session now points to `.trellis/tasks/09-08-t4-heartbeat` in
+`planning`. The initial PRD preserves the frozen direction; no Heartbeat production implementation
+is activated by this entry.
+
+## Current refresh completion checkpoint - 2026-09-08
+
+[Page state and event-triggered refresh](../.trellis/tasks/09-08-uiux-triggered-refresh/prd.md) is
+**engineering complete**, code commit `7d89191dba88c1a143be1de86eac4d86dcc20aa7`. This closes D67's
+remaining Perception/cross-Home refresh and disclosure audit within the recorded scope. Home now has
+explicit entry/demand/producer/write/recovery policies, truthful resource states, stable reading and
+editing, and opt-in Perception/extension invalidation. No polling, new dependency, migration, capture
+policy, persistent authority/cache category or production Rust change was introduced.
+
+The [final evidence](../.trellis/tasks/09-08-uiux-triggered-refresh/implementation-evidence-2026-09-08.md)
+records one complete independent review of 171 paths and fixes for late MCP save outcomes, newer
+drafts/actual-commit retry versions, obsolete shared config reads and trailing-read busy state.
+Core passed 2,139 tests plus one existing skip, Shared 453 and Desktop 877. All five workspace types
+passed; root lint has zero errors and one existing warning in unchanged `db/run-repo.ts`.
+Actual Core two-operator/shutdown scenarios passed four tests. Final frozen WebView2 passed **20/20**
+with zero runtime/fixture errors; 366 build inputs, 24 assets, 25 QA program inputs and the exact
+reviewed source match. Production CSP remains enforced. All eight owned QA PIDs and listeners were cleaned.
+
+The owner delegated implementation, engineering window acceptance and checked local commits. The
+refresh task is completed; the architecture and historical frontend parents remain open. Real system
+IME and personal normal-window editing/hide/restore inspection remain manual checks. Long-CJK Markdown
+profiling, D77, Avatar Lab/OpenBiliClaw, D69/D75/D76 and true T4 initiative/Heartbeat/cross-device remain
+separate. Current Lab/config inputs are included in the build hash record, but Home evidence does not
+certify their product behavior. Preserve all concurrent files and staged boundaries.
+
+At this earlier closeout, root session `codex_01a074f6-ff11-71b3-832a-e35578901417` remained bound to the completed refresh task. It subsequently moved through visual continuity to the Heartbeat planning task recorded above.
+Inspect `task.py current --source` before any next work. Keep the stale global Compaction pointer
+untouched; no task archive, push or automatic follow-up activation was performed.
+
+## Current UI/UX checkpoint - 2026-09-07
+
+The approved G1-G5 UI/UX program is **complete** in `H:/TakiAgent-worktrees/t4`, branch
+`task/t4-skills-mcp-productization`. The latest code commit is `8433093`. The
+[program delivery record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-delivery-2026-09-07.md)
+is the current integration truth; older sections below retain their historical dates.
+
+| Delivered stage | Local commit | Evidence |
+| --- | --- | --- |
+| G4 cleanup and A1/A2 readable operation/approval names | `a771496` | [G4](../.trellis/tasks/08-30-frontend-uiux-optimization/implementation-evidence-g4-2026-09-05.md), [A1/A2](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-a1-a2-2026-09-06.md) |
+| D64 bound, safely disclosed approval commands | `a5d1b66` | [D64](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-d64-2026-09-06.md) |
+| D68 DSH Monitor port | `1f76ce9` | [D68-B](../.trellis/tasks/08-28-dsh-observability-expansion/implementation-evidence-d68-b-2026-09-07.md) |
+| Checked Memory integration before live feedback | `258b35b` | [Merge proof](../.trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-evidence-2026-09-07.md) |
+| Ordered Chat/Pet feedback and continuous Pet bubbles | `8433093` | [Final live-feedback proof](../.trellis/tasks/09-05-uiux-live-tool-feedback/implementation-evidence-2026-09-07.md) |
+
+Final full gates passed: Shared 446, Core 2,064 plus one existing skip, Desktop 751, all five workspace
+typechecks, root lint and Desktop build. The final independent review froze 127 source/test/index
+files and 24 build files. Actual Core ordered/reused-ID/failure/cancel, queued admission and natural
+shutdown variants passed. Startup/storage/reopen retains migrations 001-035 and all three Monitor modes.
+
+Final real WebView2 acceptance passed 15/15 groups, covering order/outcomes, selected tool-heading DOM,
+atomic history handoff, missing batches/paging/reconnect, Pet segmented text/transient tools/error,
+scrolling/selection, intermediate CSS geometry, interruptions/reduced/zero motion and real visibility.
+Both pages' served resources and production CSP match; 320 frontend/Shared/config sources, 127 reviewed
+files, 24 assets, 22 QA inputs and 78 existing read-only model files are verified. All owned QA processes
+and listeners are stopped. Synthetic UI/provider data and actual Core/SDK/SQLite evidence are separate.
+
+The owner [delegated completion, engineering window acceptance and checked local commits](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md).
+No repeated owner confirmation was required; personal owner visual inspection is not claimed.
+The readable-operations, D68 and live-feedback children are completed but remain in their task
+directories. No finish/archive/push was performed. The root native session was subsequently bound
+to the owner-approved planning follow-up above on 2026-09-08.
+Always inspect `task.py current --source`; never reactivate the stale global Compaction pointer.
+
+D64/D65/D68 are resolved within recorded engineering acceptance. D67's remaining Perception and
+cross-Home refresh/disclosure work was subsequently completed in the 2026-09-08 checkpoint above. The architecture parent
+and historical pure-frontend task remain open; D69/D75/D76/D77 and actual T4 initiative, Heartbeat and
+cross-device work are separate. Do not infer a new task activation from this delivery.
+
+Preserve concurrent Avatar Lab, OpenBiliClaw, Desktop tsconfig/vite, Avatar documentation/index,
+unrelated task metadata and the session export. Lab work continued independently during and after
+acceptance; preserve its current files and do not treat the earlier test totals as certification of
+those later edits. D71-D74 remain working-copy additions excluded by partial staging. Main stays at the checked Memory checkpoint
+`c3f8bc4`; Hindsight is untouched. Migration035 is now present; future migrations append after it.
+
+Implementation agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, without recursive
+delegation. Semantic discovery uses jbcontext, never YCE. Simple changes may join a related review;
+protocol/authorization/streaming consistency retains independent review. Resume interrupted work
+from concrete checkpoints and do not repeat unchanged successful full gates.
 
 ## 0. Compaction checkpoint - 2026-09-05
 

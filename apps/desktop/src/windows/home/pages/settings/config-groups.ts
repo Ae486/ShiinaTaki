@@ -4,7 +4,7 @@
  *         and the client-side search filter
  * POS:    ui/windows/home/pages/settings — client-side presentation map only (U7); Core stays the only authority and
  *         the server order inside a group is never re-sorted. Unknown keys fall back to the 高级 group; their label
- *         falls back to the raw key (KnobField renders the key primary again). No knob is removed or hidden.
+ *         falls back to the raw key. Settings presents the six model connection keys through grouped profile cards.
  */
 import type { ConfigEntry } from "@taki/shared";
 
@@ -34,23 +34,24 @@ const EXACT_LABELS: Record<string, { group: ConfigGroupId; label: string }> = {
   TAKI_PROVIDER_BASE_URL: { group: "model-context", label: "主模型 Base URL" },
   TAKI_PROVIDER_API_KEY: { group: "model-context", label: "主模型 API Key" },
   TAKI_PROVIDER_MODEL: { group: "model-context", label: "主模型 ID" },
-  TAKI_VLM_BASE_URL: { group: "model-context", label: "视觉模型 Base URL" },
-  TAKI_VLM_API_KEY: { group: "model-context", label: "视觉模型 API Key" },
-  TAKI_VLM_MODEL: { group: "model-context", label: "视觉模型 ID" },
   TAKI_UTILITY_BASE_URL: { group: "model-context", label: "后台模型 Base URL" },
   TAKI_UTILITY_API_KEY: { group: "model-context", label: "后台模型 API Key" },
   TAKI_UTILITY_MODEL: { group: "model-context", label: "后台模型 ID" },
   TAKI_PROVIDER_CONTEXT_TOKENS: { group: "model-context", label: "主模型上下文窗口" },
-  TAKI_VLM_CONTEXT_TOKENS: { group: "model-context", label: "视觉模型上下文窗口" },
   TAKI_UTILITY_CONTEXT_TOKENS: { group: "model-context", label: "后台模型上下文窗口" },
   TAKI_CONTEXT_HISTORY_RATIO: { group: "model-context", label: "历史回放比例" },
   TAKI_PROVIDER_INCLUDE_USAGE: { group: "model-context", label: "请求用量统计" },
   TAKI_COMPACT_TRIGGER_RATIO: { group: "model-context", label: "压缩触发阈值" },
   TAKI_COMPACT_KEEP_MESSAGES: { group: "model-context", label: "压缩保留条数" },
   TAKI_MAX_STEPS: { group: "model-context", label: "工具循环步数上限" },
+  TAKI_SUBAGENT_CHECKIN_STEPS: { group: "model-context", label: "子代理进度检查间隔（模型步骤）" },
+  TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS: { group: "model-context", label: "子代理主助手连续放行次数" },
   TAKI_PROMPT_DIR: { group: "model-context", label: "提示卡目录" },
   TAKI_AMBIENT_SCREENSHOT: { group: "perception-privacy", label: "环境截屏采样" },
   TAKI_AMBIENT_SCREENSHOT_RETENTION: { group: "perception-privacy", label: "环境截屏保留" },
+  TAKI_INITIATIVE_VIEWING_EFFECTIVE_MS: { group: "perception-privacy", label: "共看邀请前的有效观看时长（毫秒）" },
+  TAKI_INITIATIVE_VIEWING_REMAINING_SECONDS: { group: "perception-privacy", label: "共看邀请所需剩余时长（秒）" },
+  TAKI_INITIATIVE_VIEWING_INVITATION_TTL_MS: { group: "perception-privacy", label: "共看邀请有效期（毫秒）" },
   TAKI_WS_HOST: { group: "advanced", label: "WS 绑定地址" },
   TAKI_WS_PORT: { group: "advanced", label: "WS 端口" },
   TAKI_LOG_LEVEL: { group: "advanced", label: "日志级别" },
@@ -89,6 +90,13 @@ export function configGroupOf(key: string): ConfigGroupMeta {
 /** The Chinese primary label for a knob; null = unknown key (the row keeps the raw key as its primary text). */
 export function configLabelOf(key: string): string | null {
   return EXACT_LABELS[key]?.label ?? null;
+}
+
+export function configHintOf(key: string): string | null {
+  if (key === "TAKI_SUBAGENT_CHECKIN_STEPS" || key === "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS") {
+    return "保存后在新工作或下一个进度检查间隔采用；不会改变当前间隔，也不会降低已经要求由你决定的检查点权限。";
+  }
+  return null;
 }
 
 function groupMeta(id: ConfigGroupId): ConfigGroupMeta {

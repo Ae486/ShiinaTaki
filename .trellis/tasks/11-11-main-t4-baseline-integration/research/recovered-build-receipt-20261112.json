@@ -1,0 +1,28 @@
+{
+  "kind": "recovered-build-evidence",
+  "sourceSession": "01a1ce3d-2104-7d50-b8ab-a549357c9619",
+  "sourceJsonlLine": 860,
+  "sourceOutputBlock": 4,
+  "command": "node apps/desktop/scripts/build-installed-host.ts --debug --no-bundle",
+  "environment": {
+    "CARGO_BUILD_JOBS": "1"
+  },
+  "cwd": "G:/TakiAgent-integration",
+  "exitCode": 0,
+  "log": "recovered-desktop-build-20261112.log",
+  "buildMode": "production Vite assets plus debug Tauri application, no installer bundle",
+  "artifact": {
+    "path": "G:\\takiagent-dev-cache\\integration\\cargo\\debug\\taki-desktop.exe",
+    "bytes": 24184320,
+    "sha256": "c52f40ccb4671cd6c6f798eff4450734867513e5cc7511454ff2549097993a9e"
+  },
+  "cliSharedBuildScripts": {
+    "cli": null,
+    "shared": null
+  },
+  "limits": [
+    "Recovered prior-run receipt, not a new build",
+    "No installed distribution or owner-manual acceptance",
+    "No separate CLI/Shared build script exists; typecheck/tests are their declared checks"
+  ]
+}

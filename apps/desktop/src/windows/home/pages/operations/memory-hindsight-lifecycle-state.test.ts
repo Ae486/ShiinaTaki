@@ -72,6 +72,8 @@ describe("Hindsight lifecycle view model", () => {
     const client: MemoryOperationsClient = {
       memoryAuthorityStatus: async () => unreviewed, memoryActivationStatus: async () => { throw new Error("unused"); },
       memoryOperationSubmit: submitted, memoryOperationCancel: async () => operation(),
+      memoryOperationList: async () => { throw new Error("Unexpected Tidy operation list read"); },
+      memoryOperationStatus: async () => { throw new Error("Unexpected Tidy operation status read"); },
       subscribeMemoryOperations: async () => undefined, onMemoryOperationChanged: () => () => undefined,
       memoryReplicaConfigure: async () => { throw new Error("unused"); }, onMemoryReplicaChanged: () => () => undefined,
     };

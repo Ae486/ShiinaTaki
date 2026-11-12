@@ -1,17 +1,30 @@
 /**
- * INPUT:  a ChatTimeline view-model (date-grouped entries + in-flight row + paging) from the hook.
- * OUTPUT: <TimelineView> — the scrollable conversation: date dividers, role-styled rows, and the streaming in-flight
- *         bubble. Auto-sticks to bottom; loads older pages on top-reach; shows the P1b "加载更早消息" jump control
- *         while the mounted window has trimmed rows. Errors are toasts (D34), not in-stream rows.
- * POS:    ui/windows/home/pages/chat — the scroll container (one continuous timeline, NO session list). Presentational.
+ * INPUT:  ordered date-grouped transcript items, guarded paging and legacy streaming fallback
+ * OUTPUT: stable flat row keys, preserved reading/selection anchors and explicit tail-follow controls
+ * POS:    ui/chat — one continuous conversation scroll container; commit handoff never remounts an item by row seq
  */
 
-import { Suspense, lazy } from "react";
-import type { ChatTimeline } from "./use-chat-timeline.ts";
+import { Suspense, lazy, type ReactNode } from "react";
 import { TimelineMessage } from "./timeline-message.tsx";
 import { EmptyState } from "@/components/ui/empty-state.js";
 import { ActionButton } from "../../action-button.tsx";
-import { useTimelineScroll } from "./use-timeline-scroll.ts";
+import { useTimelineScroll, type TimelineScrollInput } from "./use-timeline-scroll.ts";
+import type { DateGroup } from "./date-group.ts";
+import type { ChatTranscriptItem } from "./chat-transcript.ts";
+
+export interface ConversationTimeline {
+  items: ChatTranscriptItem[];
+  groups: DateGroup<ChatTranscriptItem>[];
+  loaded: boolean;
+  hasMore: boolean;
+  loadOlder(): void;
+  historyError: string | null;
+  inflight?: { text: string } | null;
+  truncated?: boolean;
+  restoring?: boolean;
+  restoreOlder?(): void;
+  reading?: TimelineScrollInput["reading"];
+}
 
 // P1f: same lazy markdown seam as the settled rows — one shared async chunk, typing dots while it loads.
 const MarkdownView = lazy(() => import("./markdown-view.tsx").then((m) => ({ default: m.MarkdownView })));
@@ -55,8 +68,8 @@ function InflightBubble({ text }: { text: string }) {
 
 // P1b: the mounted window trimmed older rows — the explicit jump restores a larger window on demand
 // (top-reach auto-load keeps working alongside it; the passive hint yields to the actionable control).
-function RestoreOlderControl({ timeline }: { timeline: ChatTimeline }) {
-  if (!timeline.truncated) return null;
+function RestoreOlderControl({ timeline }: { timeline: ConversationTimeline }) {
+  if (!timeline.truncated || !timeline.restoreOlder) return null;
   return (
     <div className="py-1 text-center">
       <ActionButton tone="ghost" busy={timeline.restoring} disabled={timeline.restoring} onClick={timeline.restoreOlder}>
@@ -66,35 +79,53 @@ function RestoreOlderControl({ timeline }: { timeline: ChatTimeline }) {
   );
 }
 
-export function TimelineView({ timeline }: { timeline: ChatTimeline }) {
-  const { groups, inflight, loaded, hasMore, loadOlder } = timeline;
-  const entryCount = groups.reduce((total, group) => total + group.entries.length, 0);
+function transcriptRows(groups: DateGroup<ChatTranscriptItem>[]): ReactNode[] {
+  const rows: ReactNode[] = [];
+  for (const group of groups) {
+    const first = group.entries[0];
+    if (!first) continue;
+    rows.push(<DateDivider key={`date:${first.key}`} label={group.dateKey} />);
+    for (const item of group.entries) {
+      rows.push(<div key={item.key} data-transcript-key={item.key}><TimelineMessage item={item} /></div>);
+    }
+  }
+  return rows;
+}
+
+export function TimelineView({ timeline, adjunct }: { timeline: ConversationTimeline; adjunct?: ReactNode }) {
+  const { groups, items, inflight, loaded, hasMore, loadOlder } = timeline;
+  const entryCount = items.length;
   const oldest = groups[0]?.entries[0];
-  const { scrollRef, onScroll } = useTimelineScroll({
+  const textLength = items.reduce((total, item) => total + (item.kind === "text" ? item.text.length : 0), 0);
+  const { scrollRef, contentRef, onScroll, hasNewContent, followTail, requestOlder } = useTimelineScroll({
     entryCount,
     firstSeq: oldest ? oldest.seq : null,
-    inflightLen: inflight ? inflight.text.length : -1,
+    inflightLen: textLength + (inflight ? inflight.text.length : -1),
+    tailKey: `${items.at(-1)?.key ?? "empty"}:${textLength}:${inflight?.text.length ?? 0}`,
     hasMore,
     loadOlder,
+    reading: timeline.reading,
   });
 
   return (
-    // A8: tabIndex=0 keeps the timeline keyboard-scrollable; the global focus-visible rule shows the ring.
-    <div ref={scrollRef} onScroll={onScroll} tabIndex={0} aria-label="聊天记录" className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
-      <RestoreOlderControl timeline={timeline} />
-      {hasMore && !timeline.truncated && <div className="py-1 text-center text-xs text-text-secondary">滚动查看更早消息</div>}
-      {loaded && entryCount === 0 && !inflight && (
-        <EmptyState title="还没有对话" hint="说点什么开始吧。" />
-      )}
-      {groups.map((group) => (
-        <div key={group.dateKey} className="space-y-2">
-          <DateDivider label={group.dateKey} />
-          {group.entries.map((entry) => (
-            <TimelineMessage key={entry.seq} entry={entry} />
-          ))}
+    <div className="relative min-h-0 flex-1">
+      <div ref={scrollRef} onScroll={onScroll} tabIndex={0} aria-label="聊天记录" className="h-full overflow-y-auto px-4 py-3">
+        <div ref={contentRef} className="space-y-2">
+          <RestoreOlderControl timeline={timeline} />
+          {timeline.historyError && <div role="status" className="text-center text-xs text-text-secondary">
+            {timeline.historyError}<ActionButton tone="ghost" onClick={requestOlder}>重试</ActionButton>
+          </div>}
+          {hasMore && !timeline.truncated && <div className="py-1 text-center text-xs text-text-secondary">
+            <ActionButton tone="ghost" busy={timeline.restoring} disabled={timeline.restoring} onClick={requestOlder}>加载更早消息</ActionButton></div>}
+          {loaded && entryCount === 0 && !inflight && <EmptyState title="还没有对话" hint="说点什么开始吧。" />}
+          {transcriptRows(groups)}
+          {inflight && <InflightBubble text={inflight.text} />}
+          {adjunct}
         </div>
-      ))}
-      {inflight && <InflightBubble text={inflight.text} />}
+      </div>
+      {hasNewContent && <div className="absolute right-4 bottom-3">
+        <ActionButton tone="secondary" onClick={followTail}>查看新回复</ActionButton>
+      </div>}
     </div>
   );
 }

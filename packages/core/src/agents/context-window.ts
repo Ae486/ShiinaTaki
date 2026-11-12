@@ -8,9 +8,11 @@ import type { TimelineEntry } from "@taki/shared";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import { toModelMessage } from "./turn-mapping.ts";
 
-export interface WindowSelection {
+type ReplayEntry = Pick<TimelineEntry, "seq" | "role" | "content" | "parts">;
+
+export interface WindowSelection<T extends ReplayEntry = TimelineEntry> {
   /** The kept slice, ascending — what history() replays (after its ModelMessage projection). */
-  entries: TimelineEntry[];
+  entries: T[];
   /**
    * Seq of the oldest replayed entry; every row BELOW it has left the model's window (the flush boundary).
    * Empty input -> 1 (nothing exists, nothing has left); a fully-dropped window -> newest seq + 1 (everything left).
@@ -24,10 +26,11 @@ export interface WindowSelection {
  * Walk newest -> oldest by balanced tool-call/result units until the token budget. Source row bounding happens
  * earlier and emits its own explicit fact; this selector never silently applies another count boundary.
  */
-export function selectWindow(entries: TimelineEntry[], budgetTokens: number): WindowSelection {
+export function selectWindow<T extends ReplayEntry>(entries: T[], budgetTokens: number, costOf?: (entry: T) => number): WindowSelection<T> {
   const measured = Number.isFinite(budgetTokens);
   const costs = entries.map((entry) => {
     if (!measured) return 0;
+    if (costOf) return costOf(entry);
     const message = toModelMessage(entry);
     return message === null ? 0 : estimateMessageTokens(message);
   });
@@ -52,7 +55,7 @@ interface ReplayIndex {
 
 // Calls and all matching results are one atomic selection unit. A cut may drop the whole unit, never strand either
 // side. The helper is shared by replay selection and compaction retirement so the two boundaries cannot disagree.
-export function replayUnits(entries: TimelineEntry[], costs: number[]): ReplayUnit[] {
+export function replayUnits(entries: ReplayEntry[], costs: number[]): ReplayUnit[] {
   const replayIndex = createReplayIndex(entries);
   const spans = entries.flatMap((entry, start) => {
     const calls = entry.parts?.filter((part) => part.type === "tool-call") ?? [];
@@ -82,7 +85,7 @@ export function replayUnits(entries: TimelineEntry[], costs: number[]): ReplayUn
   return units;
 }
 
-function createReplayIndex(entries: TimelineEntry[]): ReplayIndex {
+function createReplayIndex(entries: ReplayEntry[]): ReplayIndex {
   const replayIndex: ReplayIndex = {
     resultIndexes: new Map(),
     callIndexes: new Map(),
@@ -109,14 +112,14 @@ function createReplayIndex(entries: TimelineEntry[]): ReplayIndex {
   return replayIndex;
 }
 
-function rangeIsReplayable(input: { entries: TimelineEntry[]; start: number; end: number; replayIndex: ReplayIndex }): boolean {
+function rangeIsReplayable(input: { entries: ReplayEntry[]; start: number; end: number; replayIndex: ReplayIndex }): boolean {
   for (let index = input.start; index <= input.end; index += 1) {
     if (!isReplayableEntry({ entries: input.entries, index, replayIndex: input.replayIndex })) return false;
   }
   return true;
 }
 
-function isReplayableEntry(input: { entries: TimelineEntry[]; index: number; replayIndex: ReplayIndex }): boolean {
+function isReplayableEntry(input: { entries: ReplayEntry[]; index: number; replayIndex: ReplayIndex }): boolean {
   const { entries, index, replayIndex } = input;
   const entry = entries[index];
   if (entry === undefined) return false;
@@ -167,7 +170,7 @@ function selectUnits(units: ReplayUnit[], budget: number): ReplayUnit[] {
   return selected;
 }
 
-function startSeqOf(kept: TimelineEntry[], entries: TimelineEntry[]): number {
+function startSeqOf(kept: ReplayEntry[], entries: ReplayEntry[]): number {
   if (kept.length > 0) return kept[0]!.seq;
   if (entries.length > 0) return entries[entries.length - 1]!.seq + 1;
   return 1;

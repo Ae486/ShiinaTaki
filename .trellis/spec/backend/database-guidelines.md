@@ -50,15 +50,17 @@ SQL-entry guards that prevent auto-commit escape after SQLite aborts an enclosin
 
 - Lifecycle state mutation, Attempt/Receipt mutation, and corresponding RunEvent append occur in one short synchronous
   `db.transaction` callback. Event validation or insert failure rolls back the state transition.
-- Publish only after commit. Live delivery is best effort; bounded asynchronous queues expose overflow/lag state and
+- Register publication with `db.afterCommit` so a surrounding transaction cannot leak events after a savepoint
+  RELEASE and before the outer COMMIT. Live delivery is best effort; bounded asynchronous queues expose overflow/lag state and
   consumers recover gaps from the durable cursor. Observer errors never change Run correctness.
 - Idempotent admission reuses the existing Run/Attempt and returns its unchanged event tail; it does not append a second
   admission fact.
 - The ledger is per-Run. Character-lineage aggregation needs a separate multi-Run cursor/order/authorization contract;
   do not merge independent Run sequence spaces as a shortcut.
 - Event rows are append-only at the database boundary: normal lifecycle code never updates/deletes them, and migration
-  triggers reject such mutations. Projection rows may hide opaque IDs, hashes, generations, and revisions from ordinary
-  presentation while retaining them for explicit developer inspection.
+  triggers reject such mutations. Opaque IDs, hashes, generations, and revisions remain internal correlation and query
+  inputs; no ordinary, expanded, Inspector, tooltip, copy, or accessibility surface displays them. Monitor's compatibility
+  `technical` array stays empty, and semantic Inspector sections follow the observability projection whitelist.
 
 ### 4. Validation & Error Matrix
 
@@ -84,7 +86,8 @@ SQL-entry guards that prevent auto-commit escape after SQLite aborts an enclosin
 - Transition atomicity and event-write rollback tests for admission/start/retry/cancel/settle.
 - Idempotent admission tail, sequence contiguity, cursor/backfill, observer isolation, bounded overflow, and restart
   replay tests.
-- Projection tests asserting readable ordinary summaries and inspector-only technical metadata.
+- Projection tests asserting readable summaries and semantic Inspector sections, empty technical metadata, and no
+  exposed opaque identities in user-facing details or accessibility content.
 
 ### 7. Wrong vs Correct
 
@@ -99,9 +102,29 @@ let committed: RunEvent[] = [];
 db.transaction(() => {
   updateRunState(db);
   committed = eventRepo.appendMany(events);
+  db.afterCommit(() => liveBus.publish(committed));
 });
-liveBus.publish(committed);
 ```
+
+### Linked private delegation records
+
+`subagent_conversations`, `subagent_inputs`, `run_messages` and `subagent_executions` hold private Runtime evidence,
+not relationship Timeline or semantic Memory. Install the configured `RunLinkedState` before linked admission and
+recovery. Its admission and canonical terminal participants are required synchronous writes; failure rolls back
+Run/Attempt/Receipt/events and linked result/pointer changes together. Start/dispatch refusal, explicit settlement
+and direct recovery settlement must all use the final cancellation/deadline-adjusted terminal outcome.
+
+Exact `workInputId`/`workSeq` controls input eligibility; child-global sequence is display order. Independent queued
+work cannot supersede another work's completion. Capture the work expiry once at input acceptance and preserve it
+through messages, continuation, retries and linked Run deadlines. First Effect receipts remain immutable, while
+every actual later model intent retains its own receipt and replay deduplicates the logical input.
+
+Persist child proposals against the exact active Attempt and work-token digest. A newer active identity may replace
+the proposal slot; same-identity edits and stale callbacks refuse. Canonical terminal results remain immutable.
+Discard stale proposal body/source instead of relabelling it as covering newer input. Missing current output still
+produces an explicit terminal status and does not suppress the captured completion policy. Real work-watermark
+supersession is separate from proposal availability. Private transcript/result writes never grant Memory or reply
+authority; the shared execution and publication owners enforce those contracts.
 
 ## Scenario: Run-Owned Effect Intent, Settlement, and Usage
 

@@ -1,0 +1,199 @@
+{
+  "name": "recall-2",
+  "startedAt": "2026-09-28T13:18:04.488Z",
+  "passed": true,
+  "turns": [],
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": false,
+      "primaryHistoryPresent": false,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "heartbeat_respond",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "selectedMemoryPresent": true,
+      "primaryHistoryPresent": false,
+      "status": 200
+    }
+  ],
+  "finishedAt": "2026-09-28T13:18:14.941Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "plans": [],
+  "runs": [
+    {
+      "initiator": "heartbeat",
+      "state": "completed",
+      "outcome": "completed",
+      "initiative_timezone": "UTC"
+    }
+  ],
+  "effects": [
+    {
+      "kind": "model",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    },
+    {
+      "kind": "memory",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    },
+    {
+      "kind": "model",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    },
+    {
+      "kind": "tool",
+      "state": "terminal",
+      "outcome": "completed",
+      "error_code": null
+    }
+  ],
+  "deliveries": [
+    {
+      "delivery_class": "class_b",
+      "state": "sent",
+      "decision_json": "{\"outcome\":\"speak\",\"selectedCandidateIds\":[\"554e0a97c9cc5f831c6f538e6be679d5a352ae804c43bb3308638caaec0e1794\"],\"text\":\"……面试的事。结果还没出来吧。\\n\\n现在什么感觉，说出来。\",\"presentation\":null,\"responseExpectation\":\"invitation\"}"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5230,
+      "output_tokens": 75,
+      "total_tokens": 5305,
+      "cache_read_tokens": 4864,
+      "reasoning_tokens": 37
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 5471,
+      "output_tokens": 759,
+      "total_tokens": 6230,
+      "cache_read_tokens": 5248,
+      "reasoning_tokens": 595
+    }
+  ],
+  "tools": [],
+  "planningTrace": []
+}

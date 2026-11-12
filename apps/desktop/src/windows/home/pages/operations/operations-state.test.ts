@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { MemoryStatusResult, MemoryTidyResult } from "@taki/shared";
-import { clearPhaseAfter, formatBytes, statusRows, tidyDefectRows } from "./operations-state.ts";
+import type { MemoryStatusResult, MemoryTidyFailureDetails, MemoryTidyResult } from "@taki/shared";
+import { clearPhaseAfter, formatBytes, statusRows, tidyDefectRows, tidyFailureView } from "./operations-state.ts";
 
 const TIDY: MemoryTidyResult = {
   status: "ran",
@@ -24,6 +24,25 @@ const STATUS: MemoryStatusResult = {
 };
 
 describe("operations view models", () => {
+  it.each([
+    ["tool-errors", "仍有整理操作未能完成"], ["execution-failed", "整理执行失败"],
+    ["review-stale", "整理依据已发生变化"], ["unfinished", "未完成最终确认"],
+  ] as const)("explains %s without rendering an internal reason code", (reason, message) => {
+    const failure: MemoryTidyFailureDetails = { ...TIDY, kind: "memory-tidy", status: "partial", reason, issues: [], issueCount: 0 };
+    const view = tidyFailureView(failure);
+    expect(view.reason).toContain(message);
+    expect(view.reason).not.toContain(reason);
+  });
+
+  it("shows a bounded issue list without presenting the listed count as the total", () => {
+    const failure: MemoryTidyFailureDetails = { ...TIDY, kind: "memory-tidy", status: "partial", reason: "tool-errors",
+      issues: Array.from({ length: 20 }, () => ({ toolName: "unknown", code: "MEMORY_INTERNAL_ERROR" })), issueCount: 23 };
+    const view = tidyFailureView(failure);
+    expect(view.issueSummary).toBe("未完成的整理操作：23 项（显示 20 项）");
+    expect(view.issues).toHaveLength(20);
+    expect(view.issues[0]).toMatchObject({ label: "整理操作", value: "内部处理失败" });
+  });
+
   it("renders one row per defect class with its count", () => {
     const rows = tidyDefectRows(TIDY);
 

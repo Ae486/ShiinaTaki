@@ -3,6 +3,17 @@ import { createRunEventLiveBus } from "./run-event-live.ts";
 import type { RunEvent } from "@taki/shared";
 const event = (seq: number): RunEvent => ({ eventId: `e${seq}`, runId: "r", seq, schemaVersion: "run-event.v1", category: "lifecycle", kind: "run.started", occurredAt: "2026-08-24T00:00:00.000Z", source: "core.run-repo", payload: { kind: "run.started", state: "running", operationPhase: "executing" } });
 const flush = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); };
+
+it("isolates the local committed observer while keeping durable backfill separate", async () => {
+  const seen: number[] = []; const local: number[] = [];
+  const bus = createRunEventLiveBus(() => [event(1)], (events) => {
+    local.push(...events.map((item) => item.seq)); throw new Error("local observer failed");
+  });
+  bus.subscribe("r", (item) => { seen.push(item.seq); });
+  await flush(); expect(local).toEqual([]);
+  expect(() => bus.publish([event(2)])).not.toThrow(); await flush();
+  expect(local).toEqual([2]); expect(seen).toEqual([1, 2]);
+});
 describe("RunEventLiveBus", () => { it("isolates observers and resumes after cursor", async () => { const bus = createRunEventLiveBus(); const seen: number[] = []; const bad = bus.subscribe("r", () => { throw new Error("observer"); }); const good = bus.subscribe("r", (e) => { seen.push(e.seq); }, { afterSeq: 1 }); bus.publish([event(1), event(2)]); await flush(); expect(seen).toEqual([2]); expect(good.cursor).toBe(2); expect(bad.overflowed).toBe(true); bad.close(); good.close(); }); });
 
 it("signals bounded overflow and exposes the last delivered cursor", async () => {

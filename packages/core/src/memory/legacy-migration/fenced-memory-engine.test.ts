@@ -21,6 +21,15 @@ function invoke(definition: Tool, input: unknown) {
 }
 
 describe("legacy engine tool invocation fence", () => {
+  it("fences an already captured initiative Block assembler when Legacy authority retires", () => {
+    const fence = createMemoryAuthorityFence(); const assemble = vi.fn(() => ({ text: "captured Persona", sources: [] }));
+    const engine = fenceMemoryEngine({ ...rawEngine({}), captureInitiative: () => assemble }, fence);
+    const captured = engine.captureInitiative!("taki");
+    expect(captured({ global: false, character: false }).text).toBe("captured Persona");
+    fence.retire();
+    expect(() => captured({ global: true, character: true })).toThrow("MEMORY_AUTHORITY_FENCED");
+    expect(assemble).toHaveBeenCalledTimes(1);
+  });
   it("preserves definitions while fencing all three previously captured tool suites", async () => {
     const execute = vi.fn(() => ({ ok: true }));
     const schema = z.object({ content: z.string() });

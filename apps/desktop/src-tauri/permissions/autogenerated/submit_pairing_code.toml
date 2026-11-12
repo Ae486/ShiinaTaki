@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-submit-pairing-code"
+description = "Enables the submit_pairing_code command without any pre-configured scope."
+commands.allow = ["submit_pairing_code"]
+
+[[permission]]
+identifier = "deny-submit-pairing-code"
+description = "Denies the submit_pairing_code command without any pre-configured scope."
+commands.deny = ["submit_pairing_code"]

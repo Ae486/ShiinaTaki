@@ -1,10 +1,7 @@
 /**
- * INPUT:  none (page root); reads Core permissions, encrypted Hindsight key presence and config through focused hooks.
- * OUTPUT: <SettingsPage> — permission governance and write-only Hindsight key entry, then generic knobs grouped (U7) into
- *         权限与审批/模型与上下文/感知与隐私/存储与缓存/高级 sections with a key/description search box.
- * POS:    ui/windows/home/pages/settings — the Settings composition root; grouping/filtering live in config-groups.ts
- *         (pure), Core order inside a group is preserved, and no knob is removed or hidden. Loading rides the shared
- *         Skeleton and the failed list read carries a retry (batch-2 U5).
+ * INPUT:  Core model profiles, permission/Approval projections and scalar config read/draft/save owners.
+ * OUTPUT: grouped searchable settings with distinct read phases, observation gaps and stable field identities.
+ * POS:    Home Settings composition — Core order and existing group/key identities preserve active editing.
  */
 
 import { useMemo, useState } from "react";
@@ -12,27 +9,38 @@ import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Field, FIELD_CONTROL } from "@/components/ui/field.js";
 import { EmptyState } from "@/components/ui/empty-state.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 import { PermissionSection } from "./permission-section.tsx";
 import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 import { HindsightKeySection } from "./hindsight-key-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
+import { UserTimezoneSection } from "./user-timezone-section.tsx";
+import { ModelProfilesSection } from "./model-profiles-section.tsx";
+
+const PROFILE_KEYS = new Set(["TAKI_PROVIDER_BASE_URL", "TAKI_PROVIDER_MODEL", "TAKI_PROVIDER_API_KEY",
+  "TAKI_UTILITY_BASE_URL", "TAKI_UTILITY_MODEL", "TAKI_UTILITY_API_KEY"]);
 
 export function SettingsPage() {
-  const { entries, connectionReady, error, refreshing, notices, save, refresh } = useConfig();
+  const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, save, refresh } = useConfig();
   const [query, setQuery] = useState("");
-  const groups = useMemo(() => groupConfigEntries(filterConfigEntries(entries, query)), [entries, query]);
+  const groups = useMemo(() => groupConfigEntries(filterConfigEntries(entries.filter((entry) => !PROFILE_KEYS.has(entry.key)), query)), [entries, query]);
 
   return (
     <>
-      <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" busy={refreshing} />
+      <PageHeader title="设置" hint="应用中保存的配置优先；未设置时使用环境配置，再使用默认值。" busy={refreshing} />
       <PageBody>
+        <ModelProfilesSection />
+        <UserTimezoneSection />
         <PermissionSection />
         <ApprovalDecisionsSection />
         <HindsightKeySection />
         {error && <PageAlert action={{ label: "重试", onClick: () => void refresh() }}>读取配置失败：{error}</PageAlert>}
-        {entries.length === 0 && !error && <Skeleton lines={6} />}
+        {observationGap && hasSnapshot && <FeedbackLine tone="warn">配置自动更新尚未确认，当前显示上次结果。</FeedbackLine>}
+        {loading && !hasSnapshot && <Skeleton lines={6} />}
+        {!hasSnapshot && !loading && !error && <p className="text-xs text-text-secondary">等待连接以读取配置。</p>}
+        {hasSnapshot && entries.length === 0 && <EmptyState title="暂无配置项" />}
         {entries.length > 0 && (
           <>
             <Field label="搜索配置项（按键名、中文名称或说明过滤）">
@@ -50,7 +58,6 @@ export function SettingsPage() {
                 hint={group.hint}
                 groupEntries={groupEntries}
                 connectionReady={connectionReady}
-                notices={notices}
                 onSave={save}
               />
             ))}
@@ -67,12 +74,11 @@ interface KnobGroupProps {
   hint: string;
   groupEntries: ReturnType<typeof groupConfigEntries>[number]["entries"];
   connectionReady: boolean;
-  notices: ReturnType<typeof useConfig>["notices"];
   onSave: ReturnType<typeof useConfig>["save"];
 }
 
 /** One group header (Chinese + one-line explanation) and its card of knob rows in server order. */
-function KnobGroup({ label, hint, groupEntries, connectionReady, notices, onSave }: KnobGroupProps) {
+function KnobGroup({ label, hint, groupEntries, connectionReady, onSave }: KnobGroupProps) {
   return (
     <section className="flex flex-col gap-2">
       <div>
@@ -86,7 +92,6 @@ function KnobGroup({ label, hint, groupEntries, connectionReady, notices, onSave
             entry={entry}
             chineseLabel={configLabelOf(entry.key) ?? undefined}
             connectionReady={connectionReady}
-            notice={notices[entry.key]}
             onSave={onSave}
           />
         ))}

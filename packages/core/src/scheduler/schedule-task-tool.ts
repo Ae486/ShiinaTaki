@@ -9,6 +9,7 @@ import { ScheduledTaskCreateParamsSchema, ScheduledTaskUpdateParamsSchema, Sched
 import { ScheduledTaskConflictError } from "../db/scheduled-task-repo.ts";
 import type { ScheduledTaskService } from "./scheduled-task-service.ts";
 import { ScheduledTaskValidationError } from "./scheduled-task-service.ts";
+import { scheduleTaskModelOutput } from "./schedule-task-model-output.ts";
 
 const AgentCreate = ScheduledTaskCreateParamsSchema.omit({ characterId: true });
 const AgentUpdate = ScheduledTaskUpdateParamsSchema.omit({ characterId: true });
@@ -23,9 +24,9 @@ const Input = z.discriminatedUnion("action", [
 // stronger action/payload relationship enforced by the canonical discriminated union.
 const ProviderInput = z.strictObject({
   action: z.enum(["list", "create", "update", "pause", "resume", "delete"])
-    .describe("Schedule operation to perform."),
+    .describe("List full current task records, create a durable task, update its definition, or pause/resume/delete an exact returned task."),
   value: z.union([AgentCreate, AgentUpdate, ScheduledTaskRevisionParamsSchema]).nullable()
-    .describe("Operation payload, or null for list."),
+    .describe("Null for list. Create supplies name/controlInput/pattern/timezone; update also requires returned taskId and expectedRevision. Pause/resume/delete require only that taskId and expectedRevision."),
 });
 type ScheduleTaskInput = z.infer<typeof Input>;
 
@@ -54,8 +55,12 @@ const ProviderPortableInput = jsonSchema<ScheduleTaskInput>(
 export function createScheduleTaskTool(service: ScheduledTaskService, characterId: string): ToolSet {
   const owns = (taskId: string) => service.list(characterId).some((task) => task.taskId === taskId);
   return { schedule_task: tool({
-    description: "List, create, edit, pause, resume, or delete this Character's durable Scheduled Tasks. Use canonical UTC instants, durations, or cron expressions; do not guess a timezone.",
+    description: "List, create, edit, pause, resume, or delete this Character's durable Scheduled Tasks. " +
+      "Use canonical UTC instants, durations, or cron expressions; do not guess a timezone. " +
+      "List returns complete records including timestamps and the last execution reference. Mutation receipts confirm the saved definition/state, not execution of the task. " +
+      "Use the exact returned taskId and revision for later changes. SCHEDULE_CONFLICT/currentRevision means reread before deciding; a refusal leaves the requested change unapplied.",
     inputSchema: ProviderPortableInput,
+    toModelOutput: scheduleTaskModelOutput,
     execute: (rawInput) => {
       try {
         const parsed = parseInput(rawInput);

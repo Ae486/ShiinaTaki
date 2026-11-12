@@ -1,0 +1,261 @@
+[
+  {
+    "mode": "baseline",
+    "stage": "prefill",
+    "maintenance": 0,
+    "primaryCommits": 0,
+    "retractions": 1,
+    "history": [],
+    "failure": null
+  },
+  {
+    "mode": "baseline",
+    "stage": "partial",
+    "maintenance": 0,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "partial"
+      }
+    ],
+    "failure": {
+      "isAbortReason": true,
+      "isApiCallError": false,
+      "statusCode": null,
+      "type": "string",
+      "name": null,
+      "message": "turn cancelled by operator"
+    }
+  },
+  {
+    "mode": "baseline",
+    "stage": "graceful-fake",
+    "maintenance": 1,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "partial"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "baseline",
+    "stage": "success",
+    "maintenance": 1,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "complete"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "baseline",
+    "stage": "provider-error",
+    "maintenance": 0,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      }
+    ],
+    "failure": {
+      "isAbortReason": false,
+      "isApiCallError": true,
+      "statusCode": 401,
+      "type": "object",
+      "name": "AI_APICallError",
+      "message": "Fixture provider refusal"
+    }
+  },
+  {
+    "mode": "target",
+    "stage": "prefill",
+    "maintenance": 0,
+    "primaryCommits": 0,
+    "retractions": 1,
+    "history": [],
+    "failure": null
+  },
+  {
+    "mode": "target",
+    "stage": "partial",
+    "maintenance": 1,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "partial"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "target",
+    "stage": "graceful-fake",
+    "maintenance": 1,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "partial"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "target",
+    "stage": "success",
+    "maintenance": 1,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "complete"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "target",
+    "stage": "provider-error",
+    "maintenance": 0,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      }
+    ],
+    "failure": {
+      "isAbortReason": false,
+      "isApiCallError": true,
+      "statusCode": 401,
+      "type": "object",
+      "name": "AI_APICallError",
+      "message": "Fixture provider refusal"
+    }
+  },
+  {
+    "mode": "candidate",
+    "stage": "prefill",
+    "maintenance": 0,
+    "primaryCommits": 0,
+    "retractions": 1,
+    "history": [],
+    "failure": null
+  },
+  {
+    "mode": "candidate",
+    "stage": "partial",
+    "maintenance": 0,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "partial"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "candidate",
+    "stage": "graceful-fake",
+    "maintenance": 0,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "partial"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "candidate",
+    "stage": "success",
+    "maintenance": 1,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      },
+      {
+        "role": "assistant",
+        "content": "complete"
+      }
+    ],
+    "failure": null
+  },
+  {
+    "mode": "candidate",
+    "stage": "provider-error",
+    "maintenance": 0,
+    "primaryCommits": 1,
+    "retractions": 0,
+    "history": [
+      {
+        "role": "user",
+        "content": "Fixture only"
+      }
+    ],
+    "failure": {
+      "isAbortReason": false,
+      "isApiCallError": true,
+      "statusCode": 401,
+      "type": "object",
+      "name": "AI_APICallError",
+      "message": "Fixture provider refusal"
+    }
+  }
+]

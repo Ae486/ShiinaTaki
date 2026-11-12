@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CanonicalMemoryViewRow } from "./canonical-memory-view.ts";
 import { captureCanonicalMemoryAssembly } from "./canonical-memory-assembly.ts";
 import { canonicalMemoryReference, parseCanonicalMemoryReference } from "./canonical-memory-view.ts";
+import { renderedContextText } from "../agents/context-attribution.ts";
 
 const at = "2026-09-10T00:00:00.000Z";
 const persona = { assistantLayer: () => "assistant", persona: () => "persona" };
@@ -15,6 +16,16 @@ function capture(rows: CanonicalMemoryViewRow[], pinnedBudget = 800) {
 }
 
 describe("canonical prompt projection", () => {
+  it("retains explicit persona, mood, Block and selected intention spans without changing the rendered prompt", () => {
+    const assemble = capture([row("selected intention", { layer: "intentions", visibility: "mood-gated", disclosure: "weekend" })]);
+    const text = assemble("weekend");
+    const attribution = renderedContextText(assemble, text);
+    expect(attribution?.text).toBe(text);
+    const sections = attribution?.spans.map((span) => ({ category: span.category, text: text.slice(span.start, span.end) }));
+    expect(sections).toEqual(expect.arrayContaining([{ category: "persona", text: "assistant" }, { category: "persona", text: "persona" },
+      { category: "runtime_context", text: "Current mood: neutral." }, { category: "injected_memory", text: "user card\nuser model\nmemory index" }]));
+    expect(sections?.some((section) => section.category === "injected_memory" && section.text.includes("selected intention"))).toBe(true);
+  });
   it("respects hidden, explicit pinned and mood-gated policies while retaining default profile promotion", () => {
     const assemble = capture([
       row("hidden-profile", { characterId: null, layer: "profile", importance: 9, visibility: "hidden" }),

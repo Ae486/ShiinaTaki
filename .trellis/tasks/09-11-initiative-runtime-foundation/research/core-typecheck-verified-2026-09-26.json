@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "typecheck"
+  ],
+  "startedAt": "2026-09-26T11:33:34.723645+00:00",
+  "seconds": 47.188,
+  "exitCode": 0,
+  "log": "core-typecheck-verified-2026-09-26.log"
+}

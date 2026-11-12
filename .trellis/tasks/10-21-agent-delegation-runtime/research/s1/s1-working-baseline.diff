@@ -1,0 +1,2584 @@
+--- working-preimage/packages/shared/src/context-source-schema.ts
++++ current/packages/shared/src/context-source-schema.ts
+@@ -0,0 +1,42 @@
++/**
++ * INPUT: optional program-supplied material descriptions and known generation identity
++ * OUTPUT: source sidecars and scoped material references without executable authority
++ * POS: shared/protocol — common retained source meaning for private work and publication readers
++ */
++import { z } from "zod";
++
++const Id = z.string().min(1).max(200);
++export const MaterialSourceSchema = z.strictObject({
++  label: z.string().min(1).max(1000).optional(),
++  reference: z.string().min(1).max(4000).optional(),
++  speaker: z.string().min(1).max(1000).optional(),
++  time: z.string().min(1).max(1000).optional(),
++});
++export type MaterialSource = z.infer<typeof MaterialSourceSchema>;
++const OptionalSource = MaterialSourceSchema.optional().transform((source) =>
++  source && Object.values(source).some((value) => value !== undefined) ? source : undefined);
++export const GenerationOriginSchema = z.strictObject({ runId: Id, attemptId: Id, subagentId: z.uuid().optional() });
++export type GenerationOrigin = z.infer<typeof GenerationOriginSchema>;
++export const SourceContextSchema = z.strictObject({
++  generatedBy: GenerationOriginSchema.optional(),
++  materials: z.array(MaterialSourceSchema).max(200).optional(),
++}).transform(({ generatedBy, materials }) => {
++  const known = materials?.filter((source) => Object.values(source).some((value) => value !== undefined));
++  return { ...(generatedBy ? { generatedBy } : {}), ...(known?.length ? { materials: known } : {}) };
++});
++export type SourceContext = z.infer<typeof SourceContextSchema>;
++// Preserve original accepted text; oversized input is refused, never silently shortened.
++export const ContextMaterialSchema = z.strictObject({
++  key: Id, text: z.string().max(1_000_000), source: OptionalSource,
++});
++export type ContextMaterial = z.infer<typeof ContextMaterialSchema>;
++export const ToolSourceMaterialSchema = z.strictObject({ key: Id, source: OptionalSource });
++export type ToolSourceMaterial = z.infer<typeof ToolSourceMaterialSchema>;
++export const MaterialRefSchema = z.discriminatedUnion("kind", [
++  z.strictObject({ kind: z.literal("input"), inputId: z.uuid(), key: Id }),
++  z.strictObject({ kind: z.literal("tool_result"), runId: Id, attemptId: Id,
++    stepNumber: z.int().nonnegative(), toolCallId: Id, key: Id }),
++  z.strictObject({ kind: z.literal("retained_result"), childRunId: Id,
++    resultDigest: z.string().regex(/^[a-f0-9]{64}$/), materialIndex: z.int().nonnegative() }),
++]);
++export type MaterialRef = z.infer<typeof MaterialRefSchema>;
+--- working-preimage/packages/shared/src/subagent-schema.ts
++++ current/packages/shared/src/subagent-schema.ts
+@@ -0,0 +1,79 @@
++/**
++ * INPUT: explicit delegated work, immutable selected context and exact addressed controls
++ * OUTPUT: work-scoped input, conversation and captured-token schemas
++ * POS: shared/protocol — durable addressing facts, never a second permission or Run authority
++ */
++import { z } from "zod";
++import { ContextMaterialSchema } from "./context-source-schema.ts";
++import { PrivateMessageSchema } from "./run-message-schema.ts";
++
++const Id = z.string().min(1).max(200);
++const Digest = z.string().regex(/^[a-f0-9]{64}$/);
++const Materials = z.array(ContextMaterialSchema).max(200).refine(
++  (items) => new Set(items.map((item) => item.key)).size === items.length, "material keys must be unique");
++export const SubagentToolSelectionSchema = z.discriminatedUnion("mode", [
++  z.strictObject({ mode: z.literal("allow"), names: z.array(Id).max(2000) }),
++  z.strictObject({ mode: z.literal("inherit"), excludeNames: z.array(Id).max(2000) }),
++]);
++export type SubagentToolSelection = z.infer<typeof SubagentToolSelectionSchema>;
++export const SubagentInitialContextSchema = z.discriminatedUnion("kind", [
++  z.strictObject({ kind: z.literal("fresh") }),
++  z.strictObject({ kind: z.literal("snapshot"), messages: z.array(PrivateMessageSchema).max(2000), materials: Materials }),
++]);
++export type SubagentInitialContext = z.infer<typeof SubagentInitialContextSchema>;
++export const SubagentTargetSchema = z.strictObject({
++  subagentId: z.uuid(), workInputId: z.uuid(), expectedRunId: Id.optional(), expectedControlVersion: z.int().nonnegative(),
++});
++export type SubagentTarget = z.infer<typeof SubagentTargetSchema>;
++export const SubagentWorkTokenSchema = z.strictObject({
++  subagentId: z.uuid(), workInputId: z.uuid(), throughWorkSeq: z.int().positive(), controlVersion: z.int().nonnegative(),
++  source: z.strictObject({ ownerRef: Id, revision: Id }).optional(),
++});
++export type SubagentWorkToken = z.infer<typeof SubagentWorkTokenSchema>;
++export const SubagentWorkScopeSchema = z.discriminatedUnion("kind", [
++  z.strictObject({ kind: z.literal("subagent"), subagentId: z.uuid(), workInputId: z.uuid() }),
++  z.strictObject({ kind: z.literal("parent-continuation"), completionId: Id }),
++]);
++export type SubagentWorkScope = z.infer<typeof SubagentWorkScopeSchema>;
++export const SubagentConversationSchema = z.strictObject({
++  subagentId: z.uuid(), characterId: Id, createdByRunId: Id, label: z.string().min(1).max(200),
++  createdAt: z.iso.datetime({ offset: true }), initialContext: SubagentInitialContextSchema, initialContextDigest: Digest,
++  stopOrigin: z.enum(["user", "parent"]).nullable(), controlVersion: z.int().nonnegative(),
++  nextInputSeq: z.int().positive(), activeRunId: Id.nullable(),
++});
++export type SubagentConversation = z.infer<typeof SubagentConversationSchema>;
++export const SubagentSenderSchema = z.discriminatedUnion("kind", [
++  z.strictObject({ kind: z.literal("user") }),
++  z.strictObject({ kind: z.literal("parent"), runId: Id }),
++  z.strictObject({ kind: z.literal("core"), ownerRef: Id }),
++]);
++export type SubagentSender = z.infer<typeof SubagentSenderSchema>;
++export const SubagentCompletionPolicySchema = z.enum(["record_only", "request_parent"]);
++export const SubagentInputRequestSchema = z.strictObject({
++  subagentId: z.uuid(), operationKey: Id, sender: SubagentSenderSchema,
++  direction: z.string().max(1_000_000), materials: Materials,
++  input: z.discriminatedUnion("kind", [
++    z.strictObject({ kind: z.literal("work"), completionPolicy: SubagentCompletionPolicySchema,
++      lifetimeMinutes: z.int().min(5).max(720), toolSelection: SubagentToolSelectionSchema.optional() }),
++    z.strictObject({ kind: z.literal("message"), workInputId: z.uuid(), expectedControlVersion: z.int().nonnegative(), expectedRunId: Id.optional() }),
++    z.strictObject({ kind: z.literal("continue"), workInputId: z.uuid(), expectedControlVersion: z.int().nonnegative() }),
++  ]),
++});
++export type SubagentInputRequest = z.infer<typeof SubagentInputRequestSchema>;
++export const SubagentReplyAcceptanceSchema = z.strictObject({
++  characterId: Id, workInputId: z.uuid(), primaryRunId: Id, primaryAttemptId: Id,
++  userEntryId: z.uuid(), userSeq: z.int().positive(), userContentDigest: Digest,
++  originalWording: z.string().max(1_000_000), purpose: z.string().min(1).max(1000),
++  acceptedAt: z.iso.datetime({ offset: true }), expiresAt: z.iso.datetime({ offset: true }), acceptedRootRunId: Id,
++});
++export type SubagentReplyAcceptance = z.infer<typeof SubagentReplyAcceptanceSchema>;
++export const SubagentInputSchema = z.strictObject({
++  inputId: z.uuid(), subagentId: z.uuid(), inputSeq: z.int().positive(), workInputId: z.uuid(), workSeq: z.int().positive(),
++  operationKey: Id, requestDigest: Digest, kind: z.enum(["work", "message", "continue"]), sender: SubagentSenderSchema,
++  direction: z.string().max(1_000_000), materials: Materials, toolSelection: SubagentToolSelectionSchema.nullable(),
++  createdAt: z.iso.datetime({ offset: true }), completionPolicy: SubagentCompletionPolicySchema,
++  workExpiresAt: z.iso.datetime({ offset: true }),
++  consumed: z.strictObject({ runId: Id, attemptId: Id, step: z.int().nonnegative(), effectId: Id }).nullable(),
++  replyAcceptance: SubagentReplyAcceptanceSchema.nullable(),
++});
++export type SubagentInput = z.infer<typeof SubagentInputSchema>;
+--- working-preimage/packages/shared/src/subagent-result-schema.ts
++++ current/packages/shared/src/subagent-result-schema.ts
+@@ -0,0 +1,71 @@
++/**
++ * INPUT: validated work proposals and canonical child/parent Run outcomes
++ * OUTPUT: inspectable terminal reports, completion disposition and parent synthesis
++ * POS: shared/protocol — no result or descriptive source grants publication authority
++ */
++import { z } from "zod";
++import { RunOutcomeSchema } from "./harness-schema.ts";
++import { SourceContextSchema } from "./context-source-schema.ts";
++import { SubagentCompletionPolicySchema, SubagentWorkTokenSchema } from "./subagent-schema.ts";
++
++const Id = z.string().min(1).max(200);
++const Digest = z.string().regex(/^[a-f0-9]{64}$/);
++const Body = z.string().max(1_000_000);
++export const SubagentProposalSchema = z.strictObject({
++  text: Body, sourceContext: SourceContextSchema.optional(),
++  artifact: z.strictObject({ reference: z.string().min(1).max(4000), revision: Id }).optional(),
++});
++export type SubagentProposal = z.infer<typeof SubagentProposalSchema>;
++export const ParentContinuationProposalSchema = z.discriminatedUnion("decision", [
++  z.strictObject({ decision: z.literal("internal_result"), text: Body, sourceContext: SourceContextSchema.optional() }),
++  z.strictObject({ decision: z.literal("no_action"), reason: z.string().min(1).max(1000),
++    text: Body.optional(), sourceContext: SourceContextSchema.optional() }),
++  z.strictObject({ decision: z.literal("reply"), text: Body, sourceContext: SourceContextSchema.optional() }),
++]);
++export type ParentContinuationProposal = z.infer<typeof ParentContinuationProposalSchema>;
++export const SubagentCompletionStateSchema = z.enum(["not_requested", "pending", "deferred", "admitted", "withheld"]);
++export const SubagentCompletionReasonSchema = z.enum([
++  "foreground_busy", "source_unavailable", "authority_unavailable", "superseded", "source_retired", "expired",
++]);
++export type SubagentCompletionReason = z.infer<typeof SubagentCompletionReasonSchema>;
++const TerminalReport = z.strictObject({
++  runId: Id, attemptId: Id, outcome: RunOutcomeSchema,
++  body: Body.nullable(), outputKind: z.enum(["validated", "unstructured", "partial", "none"]),
++  sourceContext: SourceContextSchema, receiptId: Id, settledAt: z.iso.datetime({ offset: true }),
++});
++export const SubagentResultSchema = TerminalReport.extend({
++  subagentId: z.uuid(), workInputId: z.uuid(), throughWorkSeq: z.int().positive(),
++  workExpiresAt: z.iso.datetime({ offset: true }),
++  currentness: z.enum(["current", "superseded"]),
++  artifact: SubagentProposalSchema.shape.artifact,
++});
++export type SubagentResult = z.infer<typeof SubagentResultSchema>;
++export const ParentContinuationResultSchema = TerminalReport.extend({
++  decision: z.enum(["internal_result", "no_action", "reply", "unstructured", "none"]),
++  reason: z.string().max(1000).optional(),
++});
++export type ParentContinuationResult = z.infer<typeof ParentContinuationResultSchema>;
++export const SubagentPublicationSchema = z.strictObject({
++  state: z.enum(["internal_only", "no_action", "pending", "deferred", "refused", "recorded"]),
++  reason: z.string().max(1000).optional(), runId: Id.optional(), deliveryId: Id.optional(),
++});
++export type SubagentPublication = z.infer<typeof SubagentPublicationSchema>;
++export const SubagentResultGroupSchema = z.strictObject({
++  completionId: Id, child: SubagentResultSchema, childDigest: Digest,
++  completionState: SubagentCompletionStateSchema, completionReason: SubagentCompletionReasonSchema.nullable(),
++  parentRunId: Id.nullable(), parent: ParentContinuationResultSchema.nullable(), parentDigest: Digest.nullable(),
++  publication: SubagentPublicationSchema.nullable(),
++});
++export type SubagentResultGroup = z.infer<typeof SubagentResultGroupSchema>;
++export const SubagentExecutionSchema = z.strictObject({
++  runId: Id, subagentId: z.uuid(), workInputId: z.uuid(), triggerInputId: z.uuid(),
++  completionPolicy: SubagentCompletionPolicySchema, throughWorkSeq: z.int().positive(), workToken: SubagentWorkTokenSchema,
++  proposal: SubagentProposalSchema.nullable(), proposalAttemptId: Id.nullable(), proposalDigest: Digest.nullable(),
++  proposalTokenDigest: Digest.nullable(),
++  result: SubagentResultSchema.nullable(), resultDigest: Digest.nullable(), settledAt: z.iso.datetime({ offset: true }).nullable(),
++  completionState: SubagentCompletionStateSchema, completionReason: SubagentCompletionReasonSchema.nullable(), parentRunId: Id.nullable(),
++  parentProposal: ParentContinuationProposalSchema.nullable(), parentProposalAttemptId: Id.nullable(), parentProposalDigest: Digest.nullable(),
++  parentResult: ParentContinuationResultSchema.nullable(), parentResultDigest: Digest.nullable(), parentSettledAt: z.iso.datetime({ offset: true }).nullable(),
++  publication: SubagentPublicationSchema.nullable(),
++});
++export type SubagentExecution = z.infer<typeof SubagentExecutionSchema>;
+--- working-preimage/packages/shared/src/run-message-schema.ts
++++ current/packages/shared/src/run-message-schema.ts
+@@ -0,0 +1,36 @@
++/**
++ * INPUT: visible private work messages and exact model-intent insertion coordinates
++ * OUTPUT: typed durable message/receipt rows, separate from the relationship Timeline
++ * POS: shared/protocol — native part fidelity and queryable private execution evidence
++ */
++import { z } from "zod";
++import { TimelinePartSchema, TimelineRoleSchema } from "./timeline-schema.ts";
++import { SourceContextSchema } from "./context-source-schema.ts";
++
++const Id = z.string().min(1).max(200);
++export const PrivateMessageSchema = z.strictObject({
++  role: TimelineRoleSchema, content: z.string().max(1_000_000),
++  parts: z.array(TimelinePartSchema).max(2000).optional(),
++  sourceContext: SourceContextSchema.optional(),
++});
++export type PrivateMessage = z.infer<typeof PrivateMessageSchema>;
++export const RunMessageBatchSchema = z.strictObject({
++  stepNumber: z.int().nonnegative(), entryKind: z.enum(["output", "partial"]),
++  messages: z.array(PrivateMessageSchema).max(2000),
++});
++export type RunMessageBatch = z.infer<typeof RunMessageBatchSchema>;
++export const RunMessageSchema = PrivateMessageSchema.extend({
++  seq: z.int().positive(), runId: Id, attemptId: Id, stepNumber: z.int().nonnegative(),
++  messageIndex: z.int().nonnegative(), entryKind: z.enum(["input", "output", "partial"]),
++  inputId: z.uuid().nullable(), modelEffectId: Id.nullable(),
++  modelInputDigest: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
++  createdAt: z.iso.datetime({ offset: true }),
++}).superRefine((row, ctx) => {
++  if ((row.entryKind === "input") !== (row.inputId !== null && row.modelEffectId !== null && row.modelInputDigest !== null)) {
++    ctx.addIssue({ code: "custom", message: "input receipt requires exact input and model Effect" });
++  }
++  if (row.entryKind === "partial" && (row.role !== "assistant" || row.parts)) {
++    ctx.addIssue({ code: "custom", message: "partial rows contain observed assistant text only" });
++  }
++});
++export type RunMessage = z.infer<typeof RunMessageSchema>;
+--- working-preimage/packages/shared/src/timeline-schema.ts
++++ current/packages/shared/src/timeline-schema.ts
+@@ -7,6 +7,7 @@
+ import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
+ import { getValidToolDisplayName } from "./tool-presentation.ts";
+ import { readTimelinePresentation, sanitizeTimelinePresentations } from "./timeline-presentation-schema.ts";
++import { ToolSourceMaterialSchema } from "./context-source-schema.ts";
+ 
+ export const TIMELINE_METHODS = {
+   history: "timeline.history",
+@@ -50,6 +51,8 @@
+     toolName: z.string().min(1),
+     displayName: OptionalToolDisplayNameSchema,
+     output: TimelineToolOutputSchema,
++    sourceMaterials: z.array(ToolSourceMaterialSchema).max(200).refine(
++      (items) => new Set(items.map((item) => item.key)).size === items.length, "material keys must be unique").optional(),
+   }),
+   // The image/file part (#17, advances D14): `ref` is a workspace-relative attachment path (attachments/<sha256>.<ext>),
+   // never bytes — the model replays the row's TEXT projection; the chat window fetches bytes lazily via media.get.
+--- working-preimage/packages/shared/src/index.ts
++++ current/packages/shared/src/index.ts
+@@ -476,3 +476,14 @@
+   BrowserAttachmentPairSchema, BrowserAttachmentSetupResultSchema, type BrowserAttachmentPair,
+   type BrowserMediaIdentity, type BrowserPlayerIdentity, type BrowserPlaybackSample, type BrowserPlaybackReport,
+   type BrowserPlaybackAck, type BrowserPlaybackView, type BrowserPlaybackReadResult } from "./browser-playback-schema.ts";
++export { MaterialSourceSchema, GenerationOriginSchema, SourceContextSchema, ContextMaterialSchema, ToolSourceMaterialSchema, MaterialRefSchema,
++  type MaterialSource, type GenerationOrigin, type SourceContext, type ContextMaterial, type ToolSourceMaterial, type MaterialRef } from "./context-source-schema.ts";
++export { PrivateMessageSchema, RunMessageSchema, RunMessageBatchSchema, type PrivateMessage, type RunMessage, type RunMessageBatch } from "./run-message-schema.ts";
++export { SubagentToolSelectionSchema, SubagentInitialContextSchema, SubagentTargetSchema, SubagentWorkTokenSchema, SubagentWorkScopeSchema,
++  SubagentConversationSchema, SubagentSenderSchema, SubagentCompletionPolicySchema, SubagentInputRequestSchema, SubagentInputSchema,
++  SubagentReplyAcceptanceSchema, type SubagentToolSelection, type SubagentInitialContext, type SubagentTarget, type SubagentWorkToken,
++  type SubagentWorkScope, type SubagentConversation, type SubagentSender, type SubagentInputRequest, type SubagentInput, type SubagentReplyAcceptance } from "./subagent-schema.ts";
++export { SubagentProposalSchema, ParentContinuationProposalSchema, SubagentCompletionStateSchema, SubagentCompletionReasonSchema,
++  SubagentResultSchema, ParentContinuationResultSchema, SubagentPublicationSchema, SubagentResultGroupSchema, SubagentExecutionSchema,
++  type SubagentProposal, type ParentContinuationProposal, type SubagentCompletionReason, type SubagentResult,
++  type ParentContinuationResult, type SubagentPublication, type SubagentResultGroup, type SubagentExecution } from "./subagent-result-schema.ts";
+--- working-preimage/packages/shared/src/index.md
++++ current/packages/shared/src/index.md
+@@ -102,3 +102,7 @@
+ - co-watching-invitation-schema.ts — committed invitation projections and exact operator accept/defer command/results; observation never grants consent
+ - media-access-schema.ts — exact native Bilibili part and bounded video-byte access evidence, without analysis or consent
+ - media-analysis-schema.ts — independent URL answers and bounded selected recommendation preparation/status/cancellation without playback consent
++- context-source-schema.ts — optional retained material descriptions, generation origins and exact material references
++- run-message-schema.ts — private visible native messages and exact model-intent receipt coordinates
++- subagent-schema.ts — immutable child context, work-scoped inputs, tool selection, trusted scope and control data
++- subagent-result-schema.ts — separate proposals, canonical child/parent terminal reports and completion/publication projections
+--- working-preimage/packages/core/src/db/subagent-repo.ts
++++ current/packages/core/src/db/subagent-repo.ts
+@@ -0,0 +1,66 @@
++/**
++ * INPUT: trusted creation/control requests against one exact private child
++ * OUTPUT: immutable selected context, addressable conversation reads and durable stop CAS
++ * POS: core/db — child continuity owner; cancellation dispatch belongs to the Run service
++ */
++import { randomUUID } from "node:crypto";
++import { SubagentConversationSchema, SubagentTargetSchema,
++  type SubagentInitialContext, type SubagentTarget } from "@taki/shared";
++import type { Database } from "./sqlite.ts";
++import { digestRunValue } from "./run-row-mappers.ts";
++import { readRunById } from "./run-readers.ts";
++import { readSubagent, readSubagentInput } from "./subagent-readers.ts";
++import { prepareRunMessageBatch } from "./run-message-repo.ts";
++
++export function createSubagentRepo(db: Database) {
++  return {
++    create(input: { characterId: string; createdByRunId: string; label: string; initialContext: SubagentInitialContext }) {
++      const value = SubagentConversationSchema.parse({ ...input, subagentId: randomUUID(), createdAt: new Date().toISOString(),
++        initialContextDigest: "0".repeat(64), stopOrigin: null, controlVersion: 0, nextInputSeq: 1, activeRunId: null });
++      if (value.initialContext.kind === "snapshot") value.initialContext.messages = prepareRunMessageBatch({
++        stepNumber: 0, entryKind: "output", messages: value.initialContext.messages }).messages;
++      value.initialContextDigest = digestRunValue(value.initialContext);
++      db.transaction(() => {
++        if (readRunById(db, value.createdByRunId).characterId !== value.characterId) throw new Error("SUBAGENT_CHARACTER_MISMATCH");
++        db.prepare(`INSERT INTO subagent_conversations
++          (subagent_id,character_id,created_by_run_id,label,initial_context_json,initial_context_digest,created_at)
++          VALUES (:id,:character,:parent,:label,:context,:digest,:at)`)
++          .run({ id: value.subagentId, character: value.characterId, parent: value.createdByRunId, label: value.label,
++            context: JSON.stringify(value.initialContext), digest: value.initialContextDigest, at: value.createdAt });
++      });
++      return value;
++    },
++    get: (subagentId: string) => readSubagent(db, subagentId),
++    list(input: { characterId: string; afterId?: string; limit?: number }) {
++      const rows = db.prepare(`SELECT subagent_id FROM subagent_conversations
++        WHERE character_id=:character AND (:after IS NULL OR subagent_id>:after) ORDER BY subagent_id LIMIT :limit`)
++        .all({ character: input.characterId, after: input.afterId ?? null, limit: Math.max(1, Math.min(input.limit ?? 50, 200)) });
++      return rows.map((row) => readSubagent(db, String(row.subagent_id)));
++    },
++    stop(input: { target: SubagentTarget; origin: "user" | "parent"; cancelRunTx?: (runId: string) => void }) {
++      const target = SubagentTargetSchema.parse(input.target);
++      let changed = false;
++      db.transaction(() => {
++        const child = readSubagent(db, target.subagentId);
++        const work = readSubagentInput(db, target.workInputId);
++        if (work.subagentId !== child.subagentId || work.kind !== "work") throw new Error("SUBAGENT_WORK_MISMATCH");
++        if (child.activeRunId && db.prepare("SELECT work_input_id FROM subagent_executions WHERE run_id=:run")
++          .get({ run: child.activeRunId })?.work_input_id !== work.inputId) throw new Error("SUBAGENT_WORK_MISMATCH");
++        assertControl(child, target);
++        if (child.stopOrigin === "user" || child.stopOrigin === input.origin) return;
++        if (child.activeRunId && !input.cancelRunTx) throw new Error("SUBAGENT_CANCEL_PARTICIPANT_REQUIRED");
++        db.prepare(`UPDATE subagent_conversations SET stop_origin=:origin,control_version=control_version+1
++          WHERE subagent_id=:id`).run({ origin: input.origin, id: child.subagentId });
++        if (child.activeRunId) input.cancelRunTx?.(child.activeRunId);
++        changed = true;
++      });
++      return { conversation: readSubagent(db, target.subagentId), changed };
++    },
++  };
++}
++
++function assertControl(child: { activeRunId: string | null; controlVersion: number }, target: SubagentTarget): void {
++  if (child.controlVersion !== target.expectedControlVersion
++    || (target.expectedRunId !== undefined && child.activeRunId !== target.expectedRunId)) throw new Error("SUBAGENT_CONTROL_CONFLICT");
++}
++export type SubagentRepo = ReturnType<typeof createSubagentRepo>;
+--- working-preimage/packages/core/src/db/subagent-input-repo.ts
++++ current/packages/core/src/db/subagent-input-repo.ts
+@@ -0,0 +1,102 @@
++/**
++ * INPUT: validated addressed work/messages or trusted explicit continuation
++ * OUTPUT: immutable idempotent inputs with separate child display order and exact work watermark
++ * POS: core/db — input acceptance and first-consumption ownership, without dispatch or Memory writes
++ */
++import { randomUUID } from "node:crypto";
++import { SubagentInputRequestSchema, SubagentReplyAcceptanceSchema, type SubagentInputRequest,
++  type SubagentReplyAcceptance, type SubagentInput } from "@taki/shared";
++import type { Database } from "./sqlite.ts";
++import { digestRunValue } from "./run-row-mappers.ts";
++import { readRunById } from "./run-readers.ts";
++import { latestWorkSeq, mapSubagentInput, readSubagent, readSubagentInput } from "./subagent-readers.ts";
++
++export function createSubagentInputRepo(db: Database) {
++  return {
++    accept(candidate: SubagentInputRequest): { input: SubagentInput; reused: boolean } {
++      const request = SubagentInputRequestSchema.parse(candidate);
++      const digest = digestRunValue(request);
++      let inputId: string = randomUUID();
++      let reused = false;
++      db.transaction(() => {
++        const previous = db.prepare("SELECT input_id,request_digest FROM subagent_inputs WHERE subagent_id=:id AND operation_key=:key")
++          .get({ id: request.subagentId, key: request.operationKey });
++        if (previous) {
++          if (previous.request_digest !== digest) throw new Error("SUBAGENT_INPUT_IDEMPOTENCY_CONFLICT");
++          inputId = String(previous.input_id); reused = true; return;
++        }
++        const child = readSubagent(db, request.subagentId);
++        if (request.input.kind === "message" && (request.input.expectedControlVersion !== child.controlVersion
++          || (request.input.expectedRunId !== undefined && request.input.expectedRunId !== child.activeRunId))) {
++          throw new Error("SUBAGENT_CONTROL_CONFLICT");
++        }
++        if (request.sender.kind === "parent" && readRunById(db, request.sender.runId).characterId !== child.characterId) {
++          throw new Error("SUBAGENT_CHARACTER_MISMATCH");
++        }
++        const root = request.input.kind === "work" ? null : readSubagentInput(db, request.input.workInputId);
++        if (root && (root.subagentId !== child.subagentId || root.kind !== "work")) throw new Error("SUBAGENT_WORK_MISMATCH");
++        if (request.input.kind === "continue") continueControl(db, request, child);
++        insertInput(db, { request, inputId, digest, inputSeq: child.nextInputSeq, root });
++        db.prepare("UPDATE subagent_conversations SET next_input_seq=next_input_seq+1 WHERE subagent_id=:id")
++          .run({ id: child.subagentId });
++      });
++      return { input: readSubagentInput(db, inputId), reused };
++    },
++    get: (inputId: string) => readSubagentInput(db, inputId),
++    latestWorkSeq: (workInputId: string) => latestWorkSeq(db, workInputId),
++    list(input: { subagentId: string; workInputId?: string; afterSeq?: number; limit?: number }) {
++      return db.prepare(`SELECT * FROM subagent_inputs WHERE subagent_id=:id AND input_seq>:after
++        AND (:work IS NULL OR work_input_id=:work) ORDER BY input_seq LIMIT :limit`)
++        .all({ id: input.subagentId, work: input.workInputId ?? null, after: input.afterSeq ?? 0,
++          limit: Math.max(1, Math.min(input.limit ?? 50, 200)) }).map(mapSubagentInput);
++    },
++    bindReplyAcceptance: (candidate: SubagentReplyAcceptance) => bindReplyAcceptance(db, candidate),
++  };
++}
++
++function continueControl(db: Database, request: SubagentInputRequest, child: ReturnType<typeof readSubagent>): void {
++  if (request.input.kind !== "continue") return;
++  if (child.controlVersion !== request.input.expectedControlVersion) throw new Error("SUBAGENT_CONTROL_CONFLICT");
++  if (child.activeRunId) throw new Error("SUBAGENT_EXECUTION_NOT_QUIESCENT");
++  if (child.stopOrigin === "user" && request.sender.kind !== "user") throw new Error("SUBAGENT_USER_CONTINUE_REQUIRED");
++  db.prepare("UPDATE subagent_conversations SET stop_origin=NULL,control_version=control_version+1 WHERE subagent_id=:id")
++    .run({ id: child.subagentId });
++}
++
++function insertInput(db: Database, input: { request: SubagentInputRequest; inputId: string; digest: string; inputSeq: number; root: SubagentInput | null }): void {
++  const { request, root } = input;
++  const work = request.input.kind === "work" ? request.input : null;
++  const workId = root?.inputId ?? input.inputId;
++  const policy = work?.completionPolicy ?? root?.completionPolicy;
++  if (!policy) throw new Error("SUBAGENT_WORK_MISMATCH");
++  const at = new Date();
++  const workExpiresAt = root?.workExpiresAt ?? new Date(at.getTime() + (work?.lifetimeMinutes ?? 0) * 60_000).toISOString();
++  db.prepare(`INSERT INTO subagent_inputs
++    (input_id,subagent_id,input_seq,work_input_id,work_seq,operation_key,request_digest,input_kind,sender_kind,
++     sender_run_id,sender_owner_ref,direction_text,materials_json,tool_selection_json,completion_policy,work_expires_at,created_at)
++    VALUES (:id,:subagent,:seq,:work,:workSeq,:key,:digest,:kind,:sender,:senderRun,:owner,:direction,:materials,:tools,:policy,:expires,:at)`)
++    .run({ id: input.inputId, subagent: request.subagentId, seq: input.inputSeq, work: workId,
++      workSeq: root ? latestWorkSeq(db, workId) + 1 : 1, key: request.operationKey, digest: input.digest,
++      kind: request.input.kind, sender: request.sender.kind, senderRun: request.sender.kind === "parent" ? request.sender.runId : null,
++      owner: request.sender.kind === "core" ? request.sender.ownerRef : null, direction: request.direction,
++      materials: JSON.stringify(request.materials), tools: work?.toolSelection ? JSON.stringify(work.toolSelection) : null,
++      policy, expires: workExpiresAt, at: at.toISOString() });
++}
++export type SubagentInputRepo = ReturnType<typeof createSubagentInputRepo>;
++
++function bindReplyAcceptance(db: Database, candidate: SubagentReplyAcceptance): void {
++  const value = SubagentReplyAcceptanceSchema.parse(candidate);
++  db.transaction(() => {
++    const root = readSubagentInput(db, value.workInputId);
++    const child = readSubagent(db, root.subagentId);
++    if (root.kind !== "work" || child.characterId !== value.characterId
++      || value.expiresAt !== root.workExpiresAt
++      || readRunById(db, value.acceptedRootRunId).characterId !== child.characterId) throw new Error("SUBAGENT_REPLY_BINDING_MISMATCH");
++    if (root.replyAcceptance) {
++      if (digestRunValue(root.replyAcceptance) !== digestRunValue(value)) throw new Error("SUBAGENT_REPLY_BINDING_CONFLICT");
++      return;
++    }
++    db.prepare("UPDATE subagent_inputs SET reply_acceptance_json=:json WHERE input_id=:id")
++      .run({ id: root.inputId, json: JSON.stringify(value) });
++  });
++}
+--- working-preimage/packages/core/src/db/subagent-execution-repo.ts
++++ current/packages/core/src/db/subagent-execution-repo.ts
+@@ -0,0 +1,190 @@
++/**
++ * INPUT: trusted linked admissions, validated exact-Attempt proposals and completion dispositions
++ * OUTPUT: durable child execution ownership and at most one parent continuation linkage
++ * POS: core/db — delegation Run participant; RunRepo remains the terminal outcome authority
++ */
++import { ParentContinuationProposalSchema, SubagentProposalSchema, SubagentWorkTokenSchema,
++  SubagentCompletionReasonSchema, SubagentPublicationSchema,
++  type SubagentProposal, type ParentContinuationProposal, type SubagentWorkToken,
++  type SubagentCompletionReason, type SubagentPublication, type SubagentWorkScope } from "@taki/shared";
++import type { Database } from "./sqlite.ts";
++import type { RunLinkedAdmission, RunLinkedState } from "./run-linked-state.ts";
++import { digestRunValue } from "./run-row-mappers.ts";
++import { readRunById } from "./run-readers.ts";
++import { latestWorkSeq, projectSubagentExecution, readSubagent, readSubagentExecution, readSubagentInput, readSubagentResult } from "./subagent-readers.ts";
++import { settleSubagentTerminal } from "./subagent-terminal.ts";
++
++export function createSubagentExecutionRepo(db: Database) {
++  const linkedState = createLinkedState(db);
++  return {
++    linkedState,
++    get: (runId: string) => projectSubagentExecution(readSubagentExecution(db, runId)),
++    list(input: { subagentId: string; workInputId?: string; afterRunId?: string; limit?: number }) {
++      return db.prepare(`SELECT * FROM subagent_executions WHERE subagent_id=:child AND (:work IS NULL OR work_input_id=:work)
++        AND (:after IS NULL OR run_id>:after) ORDER BY run_id LIMIT :limit`)
++        .all({ child: input.subagentId, work: input.workInputId ?? null, after: input.afterRunId ?? null,
++          limit: Math.max(1, Math.min(input.limit ?? 50, 200)) }).map(projectSubagentExecution);
++    },
++    result: (runId: string) => readSubagentResult(db, runId),
++    scope(runId: string): SubagentWorkScope | undefined {
++      const row = db.prepare("SELECT * FROM subagent_executions WHERE run_id=:id OR parent_run_id=:id").get({ id: runId });
++      if (!row) return undefined;
++      return row.run_id === runId ? { kind: "subagent", subagentId: String(row.subagent_id), workInputId: String(row.work_input_id) }
++        : { kind: "parent-continuation", completionId: String(row.run_id) };
++    },
++    token(runId: string): SubagentWorkToken {
++      return SubagentWorkTokenSchema.parse(JSON.parse(String(readSubagentExecution(db, runId).work_token_json)));
++    },
++    recordProposal(input: { runId: string; attemptId: string; workToken: SubagentWorkToken; proposal: SubagentProposal; digest: string }) {
++      recordChildProposal(db, input);
++    },
++    recordParentProposal(input: { runId: string; attemptId: string; proposal: ParentContinuationProposal; digest: string }) {
++      recordParentProposal(db, input);
++    },
++    setCompletion(input: { completionId: string; state: "deferred" | "withheld"; reason: SubagentCompletionReason }) {
++      const reason = SubagentCompletionReasonSchema.parse(input.reason);
++      if ((input.state === "withheld") !== ["superseded", "source_retired", "expired"].includes(reason)) throw new Error("SUBAGENT_COMPLETION_REASON_MISMATCH");
++      return db.prepare(`UPDATE subagent_executions SET completion_state=:state,completion_reason=:reason
++        WHERE run_id=:id AND settled_at IS NOT NULL AND parent_run_id IS NULL AND completion_state IN ('pending','deferred')`)
++        .run({ id: input.completionId, state: input.state, reason }).changes === 1;
++    },
++    pending(input: { afterId?: string; limit?: number } = {}) {
++      return db.prepare(`SELECT run_id FROM subagent_executions WHERE completion_state IN ('pending','deferred')
++        AND settled_at IS NOT NULL AND (:after IS NULL OR run_id>:after) ORDER BY run_id LIMIT :limit`)
++        .all({ after: input.afterId ?? null, limit: Math.max(1, Math.min(input.limit ?? 50, 200)) })
++        .map((row) => readSubagentResult(db, String(row.run_id)));
++    },
++    recordPublication(input: { completionId: string; parentResultDigest: string; publication: SubagentPublication }) {
++      recordPublication(db, input);
++    },
++  };
++}
++
++function recordChildProposal(db: Database, input: { runId: string; attemptId: string; workToken: SubagentWorkToken; proposal: SubagentProposal; digest: string }): void {
++  const token = SubagentWorkTokenSchema.parse(input.workToken);
++  const proposal = SubagentProposalSchema.parse(input.proposal);
++  if (digestRunValue(proposal) !== input.digest) throw new Error("SUBAGENT_PROPOSAL_DIGEST_MISMATCH");
++  db.transaction(() => {
++    const row = readSubagentExecution(db, input.runId);
++    assertActiveProposal(db, input);
++    if (digestRunValue(token) !== digestRunValue(JSON.parse(String(row.work_token_json)))) throw new Error("SUBAGENT_WORK_TOKEN_CONFLICT");
++    recordProposal(db, { ...input, proposal, tokenDigest: digestRunValue(token), prefix: "", completionId: input.runId });
++  });
++}
++
++function recordParentProposal(db: Database, input: { runId: string; attemptId: string; proposal: ParentContinuationProposal; digest: string }): void {
++  const proposal = ParentContinuationProposalSchema.parse(input.proposal);
++  if (digestRunValue(proposal) !== input.digest) throw new Error("SUBAGENT_PROPOSAL_DIGEST_MISMATCH");
++  db.transaction(() => {
++    assertActiveProposal(db, input);
++    const row = db.prepare("SELECT run_id FROM subagent_executions WHERE parent_run_id=:id").get({ id: input.runId });
++    if (!row) throw new Error("SUBAGENT_PARENT_LINK_MISSING");
++    recordProposal(db, { ...input, proposal, prefix: "parent_", completionId: String(row.run_id) });
++  });
++}
++
++function recordPublication(db: Database, input: { completionId: string; parentResultDigest: string; publication: SubagentPublication }): void {
++  const publication = SubagentPublicationSchema.parse(input.publication);
++  const row = projectSubagentExecution(readSubagentExecution(db, input.completionId));
++  if (row.parentResultDigest !== input.parentResultDigest || !row.parentResult) throw new Error("SUBAGENT_PARENT_RESULT_CONFLICT");
++  if (digestRunValue(row.publication) === digestRunValue(publication)) return;
++  if (row.parentResult.decision !== "reply" || row.parentResult.outcome !== "completed"
++    || row.publication?.state === "recorded" || row.publication?.state === "refused") throw new Error("SUBAGENT_PUBLICATION_CONFLICT");
++  db.prepare("UPDATE subagent_executions SET publication_json=:json WHERE run_id=:id")
++    .run({ id: input.completionId, json: JSON.stringify(publication) });
++}
++
++function admitChild(db: Database, input: Parameters<RunLinkedState["onAdmitTx"]>[0], link: Extract<RunLinkedAdmission, { kind: "subagent" }>): void {
++  const token = SubagentWorkTokenSchema.parse(link.token);
++  const digest = digestRunValue({ kind: link.kind, token, triggerInputId: link.triggerInputId });
++  if (input.reused) {
++    if (readSubagentExecution(db, input.run.runId).admission_digest !== digest) throw new Error("SUBAGENT_ADMISSION_CONFLICT");
++    return;
++  }
++  const child = readSubagent(db, token.subagentId);
++  const root = readSubagentInput(db, token.workInputId);
++  const trigger = readSubagentInput(db, link.triggerInputId);
++  if (child.characterId !== input.run.characterId || root.subagentId !== child.subagentId || root.kind !== "work"
++    || trigger.workInputId !== root.inputId || trigger.workSeq > token.throughWorkSeq) throw new Error("SUBAGENT_WORK_MISMATCH");
++  if (child.stopOrigin) throw new Error("SUBAGENT_STOPPED");
++  if (child.activeRunId || child.controlVersion !== token.controlVersion) throw new Error("SUBAGENT_CONTROL_CONFLICT");
++  if (token.throughWorkSeq !== latestWorkSeq(db, root.inputId)) throw new Error("SUBAGENT_WORK_TOKEN_CONFLICT");
++  validateWorkDeadline(root.workExpiresAt, input.run.deadlineAt);
++  link.validateTx();
++  const captured = { ...token, controlVersion: token.controlVersion + 1 };
++  db.prepare(`INSERT INTO subagent_executions (run_id,subagent_id,work_input_id,trigger_input_id,admission_digest,
++    completion_policy,through_work_seq,work_token_json,completion_state)
++    VALUES (:run,:child,:work,:trigger,:digest,:policy,:through,:token,'not_requested')`)
++    .run({ run: input.run.runId, child: child.subagentId, work: root.inputId, trigger: trigger.inputId,
++      digest, policy: root.completionPolicy, through: token.throughWorkSeq, token: JSON.stringify(captured) });
++  db.prepare("UPDATE subagent_conversations SET active_run_id=:run,control_version=control_version+1 WHERE subagent_id=:id")
++    .run({ id: child.subagentId, run: input.run.runId });
++}
++
++function admitParent(db: Database, input: Parameters<RunLinkedState["onAdmitTx"]>[0], link: Extract<RunLinkedAdmission, { kind: "parent-continuation" }>): void {
++  const row = readSubagentExecution(db, link.completionId);
++  const digest = digestRunValue({ kind: link.kind, completionId: link.completionId, resultDigest: link.resultDigest });
++  if (input.reused) {
++    if (row.parent_run_id !== input.run.runId || row.parent_admission_digest !== digest) throw new Error("SUBAGENT_ADMISSION_CONFLICT");
++    return;
++  }
++  if (input.request.idempotencyKey !== `subagent-completion:${link.completionId}`
++    || input.request.provenance.provider !== "core.subagent-completion" || input.request.payloadRef !== link.completionId
++    || input.run.characterId !== readSubagent(db, String(row.subagent_id)).characterId) throw new Error("SUBAGENT_INVALID_RUN_SCOPE");
++  if (row.parent_run_id !== null || !["pending", "deferred"].includes(String(row.completion_state))
++    || row.result_digest !== link.resultDigest || row.settled_at === null) throw new Error("SUBAGENT_COMPLETION_NOT_ADMISSIBLE");
++  if (Number(row.through_work_seq) !== latestWorkSeq(db, String(row.work_input_id))) throw new Error("SUBAGENT_WORK_SUPERSEDED");
++  validateWorkDeadline(readSubagentInput(db, String(row.work_input_id)).workExpiresAt, input.run.deadlineAt);
++  link.validateTx();
++  db.prepare(`UPDATE subagent_executions SET parent_run_id=:parent,parent_admission_digest=:digest,
++    completion_state='admitted',completion_reason=NULL WHERE run_id=:id`)
++    .run({ parent: input.run.runId, digest, id: link.completionId });
++}
++
++function validateWorkDeadline(workExpiresAt: string, deadlineAt?: string): void {
++  if (Date.parse(workExpiresAt) <= Date.now()) throw new Error("SUBAGENT_WORK_EXPIRED");
++  if (!deadlineAt || Date.parse(deadlineAt) > Date.parse(workExpiresAt)) throw new Error("SUBAGENT_WORK_DEADLINE_MISMATCH");
++}
++
++function assertActiveProposal(db: Database, input: { runId: string; attemptId: string }): void {
++  const run = readRunById(db, input.runId);
++  if (run.activeAttemptId !== input.attemptId || run.state !== "running") throw new Error("SUBAGENT_PROPOSAL_STALE");
++}
++
++function recordProposal(db: Database, input: { completionId: string; attemptId: string; prefix: "" | "parent_";
++  proposal: SubagentProposal | ParentContinuationProposal; digest: string; tokenDigest?: string }): void {
++  const row = readSubagentExecution(db, input.completionId);
++  const key = `${input.prefix}proposal_json`;
++  const sameIdentity = row[`${input.prefix}proposal_attempt_id`] === input.attemptId
++    && (input.prefix === "parent_" || row.proposal_token_digest === input.tokenDigest);
++  if (row[key] !== null && sameIdentity) {
++    if (row[`${input.prefix}proposal_digest`] !== input.digest) {
++      throw new Error("SUBAGENT_PROPOSAL_CONFLICT");
++    }
++    return;
++  }
++  // Only the already-validated active Attempt/current token reaches here. An older proposal is no longer authoritative.
++  const tokenAssignment = input.prefix === "" ? ",proposal_token_digest=:token" : "";
++  db.prepare(`UPDATE subagent_executions SET ${key}=:json,${input.prefix}proposal_digest=:digest,
++    ${input.prefix}proposal_attempt_id=:attempt ${tokenAssignment} WHERE run_id=:id`)
++    .run({ id: input.completionId, json: JSON.stringify(input.proposal), digest: input.digest, attempt: input.attemptId,
++      ...(input.prefix === "" ? { token: input.tokenDigest ?? null } : {}) });
++}
++export type SubagentExecutionRepo = ReturnType<typeof createSubagentExecutionRepo>;
++
++function createLinkedState(db: Database): RunLinkedState {
++  return {
++    onAdmitTx(input) {
++      const linked = db.prepare("SELECT run_id FROM subagent_executions WHERE run_id=:id OR parent_run_id=:id").get({ id: input.run.runId });
++      if (!input.link) {
++        if (linked) throw new Error("SUBAGENT_LINK_REQUIRED");
++        return;
++      }
++      if (input.request.initiator !== "subagent" || input.request.deliveryClass !== "internal"
++        || input.snapshot.contextMode !== "autonomous") throw new Error("SUBAGENT_INVALID_RUN_SCOPE");
++      if (input.link.kind === "subagent") admitChild(db, input, input.link);
++      else admitParent(db, input, input.link);
++    },
++    onTerminalTx: (fact) => settleSubagentTerminal(db, fact),
++  };
++}
+--- working-preimage/packages/core/src/db/subagent-terminal.ts
++++ current/packages/core/src/db/subagent-terminal.ts
+@@ -0,0 +1,88 @@
++/**
++ * INPUT: canonical cancellation/deadline-adjusted Run terminal fact inside its owning transaction
++ * OUTPUT: atomic private tail, truthful child/parent terminal report, outbox and exact pointer release
++ * POS: core/db — required delegation settlement participant; no IO, dispatch or publication
++ */
++import { ParentContinuationProposalSchema, ParentContinuationResultSchema, RunMessageBatchSchema,
++  SubagentProposalSchema, SubagentResultSchema, type SourceContext, type RunMessageBatch } from "@taki/shared";
++import type { Database, SqlRow } from "./sqlite.ts";
++import type { RunTerminalFact } from "./run-linked-state.ts";
++import { latestWorkSeq, readSubagentInput } from "./subagent-readers.ts";
++import { digestRunValue } from "./run-row-mappers.ts";
++import { appendRunMessageBatch } from "./run-message-repo.ts";
++
++export function settleSubagentTerminal(db: Database, fact: RunTerminalFact): void {
++  const row = db.prepare("SELECT * FROM subagent_executions WHERE run_id=:id OR parent_run_id=:id").get({ id: fact.run.runId });
++  if (!row) return;
++  const child = row.run_id === fact.run.runId;
++  const prefix = child ? "" : "parent_";
++  if (row[`${prefix}settled_at`] !== null) throw new Error("SUBAGENT_TERMINAL_CONFLICT");
++  const tail = row[`${prefix}terminal_messages_json`];
++  if (tail !== null && row[`${prefix}terminal_messages_attempt_id`] === fact.attempt.attemptId) {
++    appendRunMessageBatch(db, { runId: fact.run.runId, attemptId: fact.attempt.attemptId,
++      batch: RunMessageBatchSchema.parse(JSON.parse(String(tail))) satisfies RunMessageBatch });
++  }
++  if (child) settleChild(db, row, fact);
++  else settleParent(db, row, fact);
++}
++
++function settleChild(db: Database, row: SqlRow, fact: RunTerminalFact): void {
++  const proposal = row.proposal_json !== null && row.proposal_attempt_id === fact.attempt.attemptId
++    && row.proposal_token_digest === digestRunValue(JSON.parse(String(row.work_token_json)))
++    ? SubagentProposalSchema.parse(JSON.parse(String(row.proposal_json))) : null;
++  const body = proposal?.text ?? visibleText(db, fact);
++  const current = Number(row.through_work_seq) === latestWorkSeq(db, String(row.work_input_id));
++  const accepted = fact.finalOutcome === "completed" && current && proposal !== null;
++  const result = SubagentResultSchema.parse({ runId: fact.run.runId, attemptId: fact.attempt.attemptId,
++    subagentId: row.subagent_id, workInputId: row.work_input_id, throughWorkSeq: row.through_work_seq,
++    workExpiresAt: readSubagentInput(db, String(row.work_input_id)).workExpiresAt,
++    outcome: fact.finalOutcome, body, outputKind: accepted ? "validated" : outputKind(fact, body),
++    currentness: current ? "current" : "superseded", sourceContext: sourceContext(fact, proposal?.sourceContext, String(row.subagent_id)),
++    ...(accepted && proposal.artifact ? { artifact: proposal.artifact } : {}), receiptId: fact.receiptId, settledAt: fact.at });
++  const state = row.completion_policy === "record_only" ? "not_requested" : current ? "pending" : "withheld";
++  db.prepare(`UPDATE subagent_executions SET result_json=:json,result_digest=:digest,settled_at=:at,
++    completion_state=:state,completion_reason=:reason WHERE run_id=:id AND settled_at IS NULL`)
++    .run({ id: fact.run.runId, json: JSON.stringify(result), digest: digestRunValue(result), at: fact.at,
++      state, reason: state === "withheld" ? "superseded" : null });
++  const released = db.prepare(`UPDATE subagent_conversations SET active_run_id=NULL,control_version=control_version+1
++    WHERE subagent_id=:child AND active_run_id=:run`).run({ child: String(row.subagent_id), run: fact.run.runId });
++  if (released.changes !== 1) throw new Error("SUBAGENT_ACTIVE_RUN_CONFLICT");
++}
++
++function settleParent(db: Database, row: SqlRow, fact: RunTerminalFact): void {
++  const proposal = row.parent_proposal_json !== null && row.parent_proposal_attempt_id === fact.attempt.attemptId
++    ? ParentContinuationProposalSchema.parse(JSON.parse(String(row.parent_proposal_json))) : null;
++  const current = Number(row.through_work_seq) === latestWorkSeq(db, String(row.work_input_id));
++  const accepted = fact.finalOutcome === "completed" && current && proposal !== null;
++  const body = proposal?.text ?? visibleText(db, fact);
++  const result = ParentContinuationResultSchema.parse({ runId: fact.run.runId, attemptId: fact.attempt.attemptId,
++    outcome: fact.finalOutcome, body, outputKind: accepted ? "validated" : outputKind(fact, body),
++    decision: accepted ? proposal.decision : body === null ? "none" : "unstructured",
++    ...(accepted && proposal.decision === "no_action" ? { reason: proposal.reason } : {}),
++    sourceContext: sourceContext(fact, proposal?.sourceContext), receiptId: fact.receiptId, settledAt: fact.at });
++  const publication = result.decision === "reply" ? { state: "pending" }
++    : result.decision === "no_action" ? { state: "no_action" } : { state: "internal_only" };
++  db.prepare(`UPDATE subagent_executions SET parent_result_json=:json,parent_result_digest=:digest,
++    parent_settled_at=:at,publication_json=:publication WHERE run_id=:id AND parent_settled_at IS NULL`)
++    .run({ id: String(row.run_id), json: JSON.stringify(result), digest: digestRunValue(result), at: fact.at, publication: JSON.stringify(publication) });
++}
++
++function visibleText(db: Database, fact: RunTerminalFact): string | null {
++  const rows = db.prepare(`SELECT content FROM run_messages m WHERE run_id=:run AND attempt_id=:attempt
++    AND role='assistant' AND entry_kind IN ('output','partial') AND length(content)>0
++    AND seq>COALESCE((SELECT max(receipt.seq) FROM run_messages receipt WHERE receipt.run_id=m.run_id
++      AND receipt.attempt_id=m.attempt_id AND receipt.entry_kind='input'),0)
++    AND (entry_kind<>'partial' OR NOT EXISTS (SELECT 1 FROM run_messages completed
++      WHERE completed.run_id=m.run_id AND completed.attempt_id=m.attempt_id AND completed.step_number=m.step_number AND completed.entry_kind='output'))
++    ORDER BY seq DESC LIMIT 1`).all({ run: fact.run.runId, attempt: fact.attempt.attemptId });
++  // Without a collector, the last visible segment is a bounded unstructured report; the complete transcript remains queryable.
++  return rows[0] ? String(rows[0].content) : null;
++}
++
++function outputKind(fact: RunTerminalFact, body: string | null): "none" | "unstructured" | "partial" {
++  return body === null ? "none" : fact.finalOutcome === "completed" ? "unstructured" : "partial";
++}
++
++function sourceContext(fact: RunTerminalFact, source?: SourceContext, subagentId?: string): SourceContext {
++  return { ...source, generatedBy: { runId: fact.run.runId, attemptId: fact.attempt.attemptId, ...(subagentId ? { subagentId } : {}) } };
++}
+--- working-preimage/packages/core/src/db/subagent-readers.ts
++++ current/packages/core/src/db/subagent-readers.ts
+@@ -0,0 +1,70 @@
++/**
++ * INPUT: canonical delegation SQLite rows
++ * OUTPUT: validated private conversation/input/result projections and exact ownership reads
++ * POS: core/db — shared read boundary for delegation repositories, without lifecycle mutation
++ */
++import { SubagentConversationSchema, SubagentInputSchema, SubagentResultGroupSchema, SubagentExecutionSchema, type SubagentExecution,
++  type SubagentConversation, type SubagentInput, type SubagentResultGroup } from "@taki/shared";
++import type { Database, SqlRow } from "./sqlite.ts";
++
++export function readSubagent(db: Database, subagentId: string): SubagentConversation {
++  const row = db.prepare("SELECT * FROM subagent_conversations WHERE subagent_id=:subagentId").get({ subagentId });
++  if (!row) throw new Error("SUBAGENT_NOT_FOUND");
++  return SubagentConversationSchema.parse({ subagentId: row.subagent_id, characterId: row.character_id,
++    createdByRunId: row.created_by_run_id, label: row.label, createdAt: row.created_at,
++    initialContext: JSON.parse(String(row.initial_context_json)), initialContextDigest: row.initial_context_digest,
++    stopOrigin: row.stop_origin, controlVersion: row.control_version, nextInputSeq: row.next_input_seq, activeRunId: row.active_run_id });
++}
++
++export function readSubagentInput(db: Database, inputId: string): SubagentInput {
++  const row = db.prepare("SELECT * FROM subagent_inputs WHERE input_id=:inputId").get({ inputId });
++  if (!row) throw new Error("SUBAGENT_INPUT_NOT_FOUND");
++  return mapSubagentInput(row);
++}
++
++export function mapSubagentInput(row: SqlRow): SubagentInput {
++  const sender = row.sender_kind === "parent" ? { kind: "parent", runId: row.sender_run_id }
++    : row.sender_kind === "core" ? { kind: "core", ownerRef: row.sender_owner_ref } : { kind: "user" };
++  return SubagentInputSchema.parse({ inputId: row.input_id, subagentId: row.subagent_id, inputSeq: row.input_seq,
++    workInputId: row.work_input_id, workSeq: row.work_seq, operationKey: row.operation_key, requestDigest: row.request_digest,
++    kind: row.input_kind, sender, direction: row.direction_text, materials: JSON.parse(String(row.materials_json)),
++    toolSelection: row.tool_selection_json === null ? null : JSON.parse(String(row.tool_selection_json)),
++    createdAt: row.created_at, completionPolicy: row.completion_policy, workExpiresAt: row.work_expires_at,
++    consumed: row.consumed_run_id === null ? null : { runId: row.consumed_run_id, attemptId: row.consumed_attempt_id,
++      step: row.consumed_step, effectId: row.consumed_effect_id },
++    replyAcceptance: row.reply_acceptance_json === null ? null : JSON.parse(String(row.reply_acceptance_json)),
++  });
++}
++
++export function readSubagentExecution(db: Database, runId: string): SqlRow {
++  const row = db.prepare("SELECT * FROM subagent_executions WHERE run_id=:runId").get({ runId });
++  if (!row) throw new Error("SUBAGENT_EXECUTION_NOT_FOUND");
++  return row;
++}
++
++export function projectSubagentExecution(row: SqlRow): SubagentExecution {
++  const json = (key: string): unknown => row[key] === null ? null : JSON.parse(String(row[key]));
++  return SubagentExecutionSchema.parse({ runId: row.run_id, subagentId: row.subagent_id, workInputId: row.work_input_id,
++    triggerInputId: row.trigger_input_id, completionPolicy: row.completion_policy, throughWorkSeq: row.through_work_seq,
++    workToken: json("work_token_json"), proposal: json("proposal_json"), proposalAttemptId: row.proposal_attempt_id,
++    proposalDigest: row.proposal_digest, proposalTokenDigest: row.proposal_token_digest,
++    result: json("result_json"), resultDigest: row.result_digest, settledAt: row.settled_at,
++    completionState: row.completion_state, completionReason: row.completion_reason, parentRunId: row.parent_run_id,
++    parentProposal: json("parent_proposal_json"), parentProposalAttemptId: row.parent_proposal_attempt_id,
++    parentProposalDigest: row.parent_proposal_digest, parentResult: json("parent_result_json"), parentResultDigest: row.parent_result_digest,
++    parentSettledAt: row.parent_settled_at, publication: json("publication_json") });
++}
++
++export function readSubagentResult(db: Database, runId: string): SubagentResultGroup | null {
++  const row = readSubagentExecution(db, runId);
++  if (row.result_json === null) return null;
++  return SubagentResultGroupSchema.parse({ completionId: row.run_id, child: JSON.parse(String(row.result_json)),
++    childDigest: row.result_digest, completionState: row.completion_state, completionReason: row.completion_reason,
++    parentRunId: row.parent_run_id, parent: row.parent_result_json === null ? null : JSON.parse(String(row.parent_result_json)),
++    parentDigest: row.parent_result_digest,
++    publication: row.publication_json === null ? null : JSON.parse(String(row.publication_json)) });
++}
++
++export function latestWorkSeq(db: Database, workInputId: string): number {
++  return Number(db.prepare("SELECT max(work_seq) AS n FROM subagent_inputs WHERE work_input_id=:workInputId").get({ workInputId })?.n ?? 0);
++}
+--- working-preimage/packages/core/src/db/run-message-repo.ts
++++ current/packages/core/src/db/run-message-repo.ts
+@@ -0,0 +1,188 @@
++/**
++ * INPUT: visible completed steps, observed partial output and exact model Effect input batches
++ * OUTPUT: private ordered native messages, immutable first receipts and staged terminal tails
++ * POS: core/db — Run transcript owner; never writes Timeline or semantic Memory
++ */
++import { PrivateMessageSchema, RunMessageBatchSchema, RunMessageSchema, SubagentWorkTokenSchema,
++  type EffectLifecycle, type PrivateMessage, type RunMessage, type RunMessageBatch, type SubagentWorkToken } from "@taki/shared";
++import type { Database, SqlRow } from "./sqlite.ts";
++import { digestRunValue } from "./run-row-mappers.ts";
++import { readRunById } from "./run-readers.ts";
++import { readSubagent, readSubagentExecution, readSubagentInput } from "./subagent-readers.ts";
++
++export function createRunMessageRepo(db: Database) {
++  return {
++    history: (input: ChildHistoryQuery) => listChildHistory(db, input),
++    recordStep(input: { runId: string; attemptId: string; batch: RunMessageBatch }) {
++      const batch = prepareRunMessageBatch(input.batch);
++      db.transaction(() => {
++        assertActive(db, input, true);
++        appendRunMessageBatch(db, { ...input, batch });
++      });
++    },
++    stageTerminal: (input: { runId: string; attemptId: string; batch: RunMessageBatch }) => stageTerminalMessages(db, input),
++    /** Called inside EffectRepo.prepareIntent; its deferred FK joins the actual Effect insertion. */
++    recordModelInputs(input: { effect: EffectLifecycle; token: SubagentWorkToken; stepNumber: number; inputIds: readonly string[] }) {
++      const token = SubagentWorkTokenSchema.parse(input.token);
++      const effect = input.effect;
++      if (effect.kind !== "model" || !effect.inputDigest || effect.state !== "intent_committed") throw new Error("SUBAGENT_MODEL_INTENT_REQUIRED");
++      db.transaction(() => {
++        if (db.prepare("SELECT effect_id FROM run_effects WHERE effect_id=:id").get({ id: effect.effectId })) {
++          throw new Error("SUBAGENT_MODEL_INTENT_ALREADY_COMMITTED");
++        }
++        assertActive(db, effect);
++        validateInputToken(db, { ...input, token });
++        const records = input.inputIds.map((id) => readSubagentInput(db, id));
++        if (new Set(input.inputIds).size !== input.inputIds.length || records.some((record, index) => record.workInputId !== token.workInputId
++          || record.workSeq > token.throughWorkSeq || (index > 0 && record.workSeq <= (records[index - 1]?.workSeq ?? 0)))) {
++          throw new Error("SUBAGENT_INPUT_BATCH_MISMATCH");
++        }
++        const pending = db.prepare(`SELECT input_id FROM subagent_inputs WHERE work_input_id=:work
++          AND work_seq<=:through AND consumed_run_id IS NULL`).all({ work: token.workInputId, through: token.throughWorkSeq });
++        if (pending.some((record) => !input.inputIds.includes(String(record.input_id)))) throw new Error("SUBAGENT_INPUT_BATCH_INCOMPLETE");
++        for (const [index, record] of records.entries()) appendInputReceipt(db, { record, effect, step: input.stepNumber, index });
++        db.prepare("UPDATE subagent_executions SET through_work_seq=:through,work_token_json=:token WHERE run_id=:id")
++          .run({ id: effect.runId, through: token.throughWorkSeq, token: JSON.stringify(token) });
++      });
++    },
++    list(input: { runId: string; afterSeq?: number; limit?: number; replay?: boolean }): RunMessage[] {
++      const replay = input.replay ? `AND (entry_kind<>'input' OR seq=(SELECT min(first.seq) FROM run_messages first
++        WHERE first.run_id=m.run_id AND first.input_id=m.input_id))
++        AND (entry_kind<>'partial' OR NOT EXISTS (SELECT 1 FROM run_messages completed
++          WHERE completed.run_id=m.run_id AND completed.attempt_id=m.attempt_id AND completed.step_number=m.step_number AND completed.entry_kind='output'))` : "";
++      return db.prepare(`SELECT * FROM run_messages m WHERE run_id=:run AND seq>:after ${replay} ORDER BY seq LIMIT :limit`)
++        .all({ run: input.runId, after: input.afterSeq ?? 0, limit: Math.max(1, Math.min(input.limit ?? 50, 2000)) }).map(mapMessage);
++    },
++  };
++}
++
++function validateInputToken(db: Database, input: { effect: EffectLifecycle; token: SubagentWorkToken }): void {
++  const child = readSubagent(db, input.token.subagentId);
++  const execution = readSubagentExecution(db, input.effect.runId);
++  const captured = SubagentWorkTokenSchema.parse(JSON.parse(String(execution.work_token_json)));
++  if (child.activeRunId !== input.effect.runId || child.stopOrigin || child.controlVersion !== input.token.controlVersion
++    || execution.work_input_id !== input.token.workInputId || input.token.throughWorkSeq < Number(execution.through_work_seq)
++    || digestRunValue(captured.source ?? null) !== digestRunValue(input.token.source ?? null)) throw new Error("SUBAGENT_WORK_TOKEN_CONFLICT");
++  const watermark = db.prepare("SELECT input_id FROM subagent_inputs WHERE work_input_id=:work AND work_seq=:seq")
++    .get({ work: input.token.workInputId, seq: input.token.throughWorkSeq });
++  if (!watermark) throw new Error("SUBAGENT_WORK_TOKEN_CONFLICT");
++}
++
++function appendInputReceipt(db: Database, input: { record: ReturnType<typeof readSubagentInput>; effect: EffectLifecycle; step: number; index: number }): void {
++  const { record, effect } = input;
++  const message = PrivateMessageSchema.parse({ role: "user", content: record.direction,
++    sourceContext: { materials: record.materials.flatMap((material) => material.source ? [material.source] : []) } });
++  const digest = digestRunValue({ message, materials: record.materials });
++  const previous = db.prepare("SELECT * FROM run_messages WHERE model_effect_id=:effect AND input_id=:input")
++    .get({ effect: effect.effectId, input: record.inputId });
++  if (previous) {
++    if (previous.batch_digest !== digest || previous.step_number !== input.step || previous.message_index !== input.index
++      || previous.model_input_digest !== effect.inputDigest || previous.attempt_id !== effect.attemptId) throw new Error("RUN_MESSAGE_BATCH_CONFLICT");
++    return;
++  }
++  insertMessage(db, { runId: effect.runId, attemptId: effect.attemptId, stepNumber: input.step, messageIndex: input.index,
++    entryKind: "input", message, digest, inputId: record.inputId, effectId: effect.effectId, inputDigest: effect.inputDigest });
++  if (!record.consumed) db.prepare(`UPDATE subagent_inputs SET consumed_run_id=:run,consumed_attempt_id=:attempt,
++    consumed_step=:step,consumed_effect_id=:effect WHERE input_id=:id AND consumed_run_id IS NULL`)
++    .run({ id: record.inputId, run: effect.runId, attempt: effect.attemptId, step: input.step, effect: effect.effectId });
++}
++
++export function appendRunMessageBatch(db: Database, input: { runId: string; attemptId: string; batch: RunMessageBatch }): void {
++  const batch = prepareRunMessageBatch(input.batch);
++  const digest = digestRunValue(batch);
++  const rows = db.prepare(`SELECT batch_digest FROM run_messages
++    WHERE run_id=:run AND attempt_id=:attempt AND step_number=:step AND entry_kind=:kind ORDER BY message_index`)
++    .all({ run: input.runId, attempt: input.attemptId, step: batch.stepNumber, kind: batch.entryKind });
++  if (rows.length) {
++    if (rows.length !== batch.messages.length || rows.some((row) => row.batch_digest !== digest)) throw new Error("RUN_MESSAGE_BATCH_CONFLICT");
++    return;
++  }
++  for (const [index, message] of batch.messages.entries()) insertMessage(db, { ...input, stepNumber: batch.stepNumber,
++    entryKind: batch.entryKind, messageIndex: index, message, digest });
++}
++
++export function prepareRunMessageBatch(candidate: RunMessageBatch): RunMessageBatch {
++  const batch = RunMessageBatchSchema.parse(candidate);
++  const calls = new Map<string, string>();
++  const seenCalls = new Set<string>();
++  for (const message of batch.messages) {
++    if (batch.entryKind === "partial" && (message.role !== "assistant" || message.parts)) throw new Error("RUN_MESSAGE_INVALID_PARTIAL");
++    message.parts = message.parts?.map((part) => {
++      if (part.type === "tool-call") {
++        if (message.role !== "assistant" || seenCalls.has(part.toolCallId)) throw new Error("RUN_MESSAGE_INVALID_TOOL_GROUP");
++        seenCalls.add(part.toolCallId);
++        calls.set(part.toolCallId, part.toolName);
++        const safe = { ...part };
++        delete safe.input;
++        return safe;
++      }
++      if (part.type === "tool-result") {
++        if (message.role !== "tool" || calls.get(part.toolCallId) !== part.toolName) throw new Error("RUN_MESSAGE_INVALID_TOOL_GROUP");
++        calls.delete(part.toolCallId);
++      }
++      return part;
++    });
++  }
++  if (calls.size > 0) throw new Error("RUN_MESSAGE_INVALID_TOOL_GROUP");
++  return batch;
++}
++
++function insertMessage(db: Database, input: { runId: string; attemptId: string; stepNumber: number; messageIndex: number;
++  entryKind: "input" | "output" | "partial"; message: PrivateMessage; digest: string; inputId?: string; effectId?: string; inputDigest?: string }): void {
++  db.prepare(`INSERT INTO run_messages (run_id,attempt_id,step_number,message_index,entry_kind,role,content,
++    parts_json,source_context_json,input_id,model_effect_id,model_input_digest,batch_digest,created_at)
++    VALUES (:run,:attempt,:step,:index,:kind,:role,:content,:parts,:source,:input,:effect,:inputDigest,:digest,:at)`)
++    .run({ run: input.runId, attempt: input.attemptId, step: input.stepNumber, index: input.messageIndex, kind: input.entryKind,
++      role: input.message.role, content: input.message.content, parts: input.message.parts ? JSON.stringify(input.message.parts) : null,
++      source: input.message.sourceContext ? JSON.stringify(input.message.sourceContext) : null, input: input.inputId ?? null,
++      effect: input.effectId ?? null, inputDigest: input.inputDigest ?? null, digest: input.digest, at: new Date().toISOString() });
++}
++
++function assertActive(db: Database, input: { runId: string; attemptId: string }, allowCancellation = false): void {
++  const run = readRunById(db, input.runId);
++  if (run.activeAttemptId !== input.attemptId || (run.state !== "running" && !(allowCancellation && run.state === "cancel_requested"))) {
++    throw new Error("RUN_MESSAGE_STALE_ATTEMPT");
++  }
++  if (!db.prepare("SELECT run_id FROM subagent_executions WHERE run_id=:id OR parent_run_id=:id").get({ id: input.runId })) {
++    throw new Error("SUBAGENT_EXECUTION_NOT_FOUND");
++  }
++}
++
++function mapMessage(row: SqlRow): RunMessage {
++  return RunMessageSchema.parse({ seq: row.seq, runId: row.run_id, attemptId: row.attempt_id, stepNumber: row.step_number,
++    messageIndex: row.message_index, entryKind: row.entry_kind, role: row.role, content: row.content,
++    parts: row.parts_json === null ? undefined : JSON.parse(String(row.parts_json)),
++    sourceContext: row.source_context_json === null ? undefined : JSON.parse(String(row.source_context_json)),
++    inputId: row.input_id, modelEffectId: row.model_effect_id, modelInputDigest: row.model_input_digest, createdAt: row.created_at });
++}
++export type RunMessageRepo = ReturnType<typeof createRunMessageRepo>;
++
++interface ChildHistoryQuery { subagentId: string; workInputId?: string; afterSeq?: number; limit?: number; replay?: boolean }
++
++function listChildHistory(db: Database, input: ChildHistoryQuery): RunMessage[] {
++  const replay = input.replay ? `AND (m.entry_kind<>'input' OR m.seq=(SELECT min(first.seq) FROM run_messages first WHERE first.input_id=m.input_id))
++    AND (m.entry_kind<>'partial' OR NOT EXISTS (SELECT 1 FROM run_messages completed
++      WHERE completed.run_id=m.run_id AND completed.attempt_id=m.attempt_id AND completed.step_number=m.step_number AND completed.entry_kind='output'))` : "";
++  return db.prepare(`SELECT m.* FROM run_messages m JOIN subagent_executions e ON e.run_id=m.run_id
++    WHERE e.subagent_id=:child AND (:work IS NULL OR e.work_input_id=:work) AND m.seq>:after ${replay} ORDER BY m.seq LIMIT :limit`)
++    .all({ child: input.subagentId, work: input.workInputId ?? null, after: input.afterSeq ?? 0,
++      limit: Math.max(1, Math.min(input.limit ?? 50, 2000)) }).map(mapMessage);
++}
++
++function stageTerminalMessages(db: Database, input: { runId: string; attemptId: string; batch: RunMessageBatch }): void {
++  const batch = prepareRunMessageBatch(input.batch);
++  db.transaction(() => {
++    assertActive(db, input, true);
++    const row = db.prepare("SELECT * FROM subagent_executions WHERE run_id=:id OR parent_run_id=:id").get({ id: input.runId });
++    if (!row) throw new Error("SUBAGENT_EXECUTION_NOT_FOUND");
++    const prefix = row.run_id === input.runId ? "" : "parent_";
++    const json = JSON.stringify(batch);
++    const previous = row[`${prefix}terminal_messages_json`];
++    if (previous !== null && (previous !== json || row[`${prefix}terminal_messages_attempt_id`] !== input.attemptId)) {
++      throw new Error("RUN_MESSAGE_BATCH_CONFLICT");
++    }
++    db.prepare(`UPDATE subagent_executions SET ${prefix}terminal_messages_json=:json,
++      ${prefix}terminal_messages_attempt_id=:attempt WHERE run_id=:id`)
++      .run({ id: String(row.run_id), json, attempt: input.attemptId });
++  });
++}
+--- working-preimage/packages/core/src/db/run-linked-state.ts
++++ current/packages/core/src/db/run-linked-state.ts
+@@ -0,0 +1,27 @@
++/**
++ * INPUT: trusted Core linked-admission intent and canonical Run terminal facts
++ * OUTPUT: narrow synchronous delegation participation in existing Run transactions
++ * POS: core/db — internal repository contract, never supplied by RPC or model JSON
++ */
++import type { Attempt, Run, RunOutcome, RunSnapshot, SubagentWorkToken, TriggerRequest } from "@taki/shared";
++
++export type RunLinkedAdmission = (
++  | { kind: "subagent"; token: SubagentWorkToken; triggerInputId: string }
++  | { kind: "parent-continuation"; completionId: string; resultDigest: string }
++) & {
++  /** Rechecks process-owned source/capacity authority after asynchronous capture, with no IO. */
++  validateTx: () => void;
++};
++export interface RunTerminalFact {
++  run: Run;
++  attempt: Attempt;
++  finalOutcome: RunOutcome;
++  receiptId: string;
++  at: string;
++}
++export interface RunLinkedState {
++  onAdmitTx(input: { request: TriggerRequest; run: Run; attempt: Attempt; snapshot: RunSnapshot;
++    reused: boolean; link?: RunLinkedAdmission }): void;
++  onTerminalTx(fact: RunTerminalFact): void;
++  afterTerminalCommit?(fact: RunTerminalFact): void;
++}
+--- working-preimage/packages/core/src/db/run-repo.ts
++++ current/packages/core/src/db/run-repo.ts
+@@ -22,7 +22,9 @@
+ import { createRunEventRepo, type RunEventRepo } from "./run-event-repo.ts";
+ import type { RunEvent } from "@taki/shared";
+ import type { RunEventLiveBus } from "./run-event-live.ts";
+-import { activeAttempt, boundNonEmptyText, boundText, legalAttemptTerminal, legalTerminalTransition, lifecycleEvent } from "./run-event-factory.ts";
++import type { RunLinkedAdmission, RunLinkedState, RunTerminalFact } from "./run-linked-state.ts";
++import { settleRun, updateAttempt } from "./run-terminal-transition.ts";
++import { activeAttempt, boundNonEmptyText, boundText, lifecycleEvent } from "./run-event-factory.ts";
+ import { classifyRecovery, listQueue, listRecoverableRuns } from "./run-recovery-repo.ts";
+ import { transitionRunDelivery } from "./run-delivery-transition.ts";
+ import { transitionRunWork } from "./run-work-transition.ts";
+@@ -37,6 +39,7 @@
+   provider: string;
+   modelId: string;
+   now?: string;
++  linked?: RunLinkedAdmission;
+ }
+ 
+ export interface RunAdmissionResult {
+@@ -54,6 +57,8 @@
+ }
+ 
+ export interface RunRepo {
++  afterCommit(callback: () => void): void;
++  onTerminalCommit(listener: (fact: RunTerminalFact) => void): () => void;
+   holdWork(input: RunWorkHold): RunWorkResult;
+   resumeWork(input: RunWorkTransition): RunWorkResult;
+   holdDelivery(runId: string, attemptId: string, deliveryVersion: number): boolean;
+@@ -81,14 +86,16 @@
+ const TERMINAL = new Set<Run["state"]>([
+   "completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown",
+ ]);
+-const ATTEMPT_TERMINAL = new Set<Attempt["state"]>([
+-  "completed", "failed", "cancelled", "deadline_exceeded", "outcome_unknown",
+-]);
+ 
+ // eslint-disable-next-line max-lines-per-function
+-export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunEventRepo(db), liveBus?: RunEventLiveBus): RunRepo {
++export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunEventRepo(db), options?: RunEventLiveBus | { liveBus?: RunEventLiveBus; linkedState?: RunLinkedState }): RunRepo {
++  const liveBus = options && "publish" in options ? options : options?.liveBus;
++  const linkedState = options && "publish" in options ? undefined : options?.linkedState;
++  const terminalListeners = new Set<(fact: RunTerminalFact) => void>();
+   const now = () => new Date().toISOString();
+   return {
++    afterCommit: (callback) => db.afterCommit(callback),
++    onTerminalCommit(listener) { terminalListeners.add(listener); return () => { terminalListeners.delete(listener); }; },
+     holdWork: (input) => transitionRunWork({ db, events: eventRepo, live: liveBus }, input, false),
+     resumeWork: (input) => transitionRunWork({ db, events: eventRepo, live: liveBus }, input, true),
+     holdDelivery: (runId, attemptId, deliveryVersion) => transitionRunDelivery({ db, events: eventRepo, live: liveBus }, { runId, attemptId, deliveryVersion, resume: false }),
+@@ -96,7 +103,12 @@
+     admit(input) {
+       const requestHash = digestRunValue(input.request);
+       const existing = readRunByIdempotency(db, input.request.idempotencyKey);
+-      if (existing) return reuseAdmission({ db, eventRepo, row: existing, requestHash });
++      if (input.linked && !linkedState) throw new Error("RUN_LINKED_STATE_REQUIRED");
++      if (existing) {
++        const reused = reuseAdmission({ db, eventRepo, row: existing, requestHash });
++        db.transaction(() => linkedState?.onAdmitTx({ ...reused, request: input.request, link: input.linked }));
++        return reused;
++      }
+       const admittedAt = input.now ?? now();
+       const snapshotId = randomUUID();
+       const attemptId = randomUUID();
+@@ -105,13 +117,15 @@
+       let committed: RunEvent[] = [];
+       db.transaction(() => {
+         insertAdmission(db, { ...input, requestHash, snapshotId, attemptId, admittedAt, manifest });
++        linkedState?.onAdmitTx({ request: input.request, run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId),
++          snapshot: manifest, reused: false, link: input.linked });
+         committed = eventRepo.appendMany([
+           lifecycleEvent({ runId: input.runId, kind: "run.admitted", occurredAt: admittedAt, payload: { kind: "run.admitted", state: "queued", initiator: input.request.initiator, deliveryClass: input.request.deliveryClass, attemptOrdinal: 1 }, request: input.request }),
+           lifecycleEvent({ runId: input.runId, attemptId, kind: "attempt.prepared", occurredAt: admittedAt, payload: { kind: "attempt.prepared", state: "prepared", attemptOrdinal: 1 }, request: input.request }),
+           lifecycleEvent({ runId: input.runId, attemptId, kind: "context.snapshot", category: "context", source: "core.context-observer", occurredAt: admittedAt, payload: { kind: "context.snapshot", state: "captured", sourceCategories: manifest.contextDecision.sourceCategories, accountingQuality: manifest.contextDecision.tokenAccounting === "provider_reported" ? "reported" : manifest.contextDecision.tokenAccounting === "estimated" ? "estimated" : "unknown" } }),
+         ]);
+       });
+-      liveBus?.publish(committed);
++      db.afterCommit(() => liveBus?.publish(committed));
+       return { run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId), snapshot: manifest, eventTail: eventRepo.tail(input.runId), reused: false };
+     },
+     status: (runId) => readStatus(db, runId),
+@@ -120,17 +134,17 @@
+       const status = readStatus(db, runId);
+       if (TERMINAL.has(status.run.state) || status.run.activeAttemptId !== attemptId) return { started: false, status };
+       if (status.run.state === "cancel_requested") {
+-        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
++        return { started: false, status: settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, {
+           runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before start", at: now(),
+         }) };
+       }
+       if (status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.now()) {
+-        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
++        return { started: false, status: settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, {
+           runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before dispatch", errorCode: "deadline_exceeded", at: now(),
+         }) };
+       }
+       if (status.run.budgetLimit !== undefined && status.run.budgetUsed >= status.run.budgetLimit) {
+-        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
++        return { started: false, status: settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, {
+           runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before dispatch", errorCode: "budget_exceeded", at: now(),
+         }) };
+       }
+@@ -147,7 +161,7 @@
+           lifecycleEvent({ runId, attemptId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal } }),
+         ]);
+       });
+-      liveBus?.publish(committed);
++      db.afterCommit(() => liveBus?.publish(committed));
+       return { started: true, status: readStatus(db, runId) };
+     },
+     retry(runId, attemptId, reason) {
+@@ -182,7 +196,7 @@
+           lifecycleEvent({ runId, attemptId: nextId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal + 1 } }),
+         ]);
+       });
+-      liveBus?.publish(committed);
++      db.afterCommit(() => liveBus?.publish(committed));
+       return readStatus(db, runId);
+     },
+     settle(input) {
+@@ -191,7 +205,7 @@
+       const at = now();
+       const deadlineExpired = status.run.state !== "cancel_requested" && input.outcome === "completed"
+         && status.run.deadlineAt !== undefined && Date.parse(status.run.deadlineAt) <= Date.parse(at);
+-      return settle({ db, eventRepo, liveBus }, status, { ...input,
++      return settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { ...input,
+         outcome: deadlineExpired ? "deadline_exceeded" : input.outcome,
+         summary: boundText(deadlineExpired ? "captured deadline elapsed before settlement" : input.summary, 1000),
+         errorCode: boundNonEmptyText(deadlineExpired ? "deadline_exceeded" : input.errorCode, 100), at });
+@@ -213,7 +227,7 @@
+         changed = result.changes;
+         if (changed === 1) committed = [eventRepo.append(lifecycleEvent({ runId, kind: "run.cancel_requested", occurredAt: at, payload: { kind: "run.cancel_requested", state: "cancel_requested", reason: boundText(reason, 1000) ?? "cancel requested" } }))];
+       });
+-      liveBus?.publish(committed);
++      db.afterCommit(() => liveBus?.publish(committed));
+       return { run: readRunById(db, runId), changed: changed === 1 };
+     },
+     queue: (input) => listQueue(db, input),
+@@ -223,15 +237,15 @@
+       const status = readStatus(db, runId);
+       if (status.run.activeAttemptId !== attemptId || TERMINAL.has(status.run.state)) return false;
+       if (status.run.state === "cancel_requested") {
+-        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before effect dispatch", errorCode: "cancel_requested", at: now() });
++        settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before effect dispatch", errorCode: "cancel_requested", at: now() });
+         return false;
+       }
+       if (status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.now()) {
+-        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before effect dispatch", errorCode: "deadline_exceeded", at: now() });
++        settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before effect dispatch", errorCode: "deadline_exceeded", at: now() });
+         return false;
+       }
+       if (status.run.budgetLimit !== undefined && status.run.budgetUsed >= status.run.budgetLimit) {
+-        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before effect dispatch", errorCode: "budget_exceeded", at: now() });
++        settleRun({ db, eventRepo, liveBus, linkedState, terminalListeners }, status, { runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before effect dispatch", errorCode: "budget_exceeded", at: now() });
+         return false;
+       }
+       return status.run.state === "running";
+@@ -280,62 +294,6 @@
+   return { run, attempt: readAttemptById(db, run.activeAttemptId), snapshot, eventTail: eventRepo.tail(run.runId), reused: true };
+ }
+ 
+-function settle(deps: { db: Database; eventRepo: RunEventRepo; liveBus?: RunEventLiveBus }, status: RunStatusResult, input: {
+-  runId: string;
+-  attemptId: string;
+-  outcome: RunOutcome;
+-  retryability: Retryability;
+-  summary?: string;
+-  errorCode?: string;
+-  at?: string;
+-}): RunStatusResult {
+-  const at = input.at ?? new Date().toISOString();
+-  const { db, eventRepo, liveBus } = deps;
+-  const target = status.run.state === "cancel_requested" && input.outcome !== "outcome_unknown"
+-    ? "cancelled"
+-    : input.outcome;
+-  if (!legalTerminalTransition(status.run.state, target)) throw new Error("RUN_INVALID_TRANSITION");
+-  const attempt = activeAttempt(status);
+-  if (attempt.attemptId !== input.attemptId) return status;
+-  const attemptTarget = target === "skipped" ? "failed" : target;
+-  const receiptId = randomUUID();
+-  let committed: RunEvent[] = [];
+-  db.transaction(() => {
+-    if (!ATTEMPT_TERMINAL.has(attempt.state)) {
+-      if (!legalAttemptTerminal(attempt.state, attemptTarget)) throw new Error("ATTEMPT_INVALID_TRANSITION");
+-      updateAttempt(db, attempt, { state: attemptTarget, outcome: target, retryability: input.retryability,
+-        summary: input.summary, errorCode: input.errorCode, at });
+-    }
+-    const changed = db.prepare(`UPDATE runs SET state=:state,state_version=state_version+1,
+-      operation_phase='terminal',outcome=:outcome,retryability=:retryability,terminal_at=:at,
+-      receipt_id=:receiptId,updated_at=:at WHERE run_id=:runId AND state_version=:version AND state NOT IN
+-      ('completed','failed','cancelled','skipped','deadline_exceeded','outcome_unknown')`)
+-      .run({ state: target, outcome: target, retryability: input.retryability, at, receiptId,
+-        runId: input.runId, version: status.run.stateVersion });
+-    if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
+-    db.prepare(`INSERT INTO run_receipts
+-      (receipt_id,run_id,state,outcome,retryability,reason,action,attempt_count,snapshot_id,summary,created_at,updated_at)
+-      VALUES (:receiptId,:runId,:state,:outcome,:retryability,:reason,NULL,:attemptCount,:snapshotId,:summary,:at,:at)`)
+-      .run({ receiptId, runId: input.runId, state: target, outcome: target,
+-        retryability: input.retryability, reason: input.summary ?? null, attemptCount: status.attempts.length,
+-      snapshotId: status.run.snapshot.snapshotId, summary: input.summary ?? null, at });
+-    const boundaryEvent = lifecycleBoundaryEvent(input, status, at);
+-    committed = eventRepo.appendMany([
+-      lifecycleEvent({ runId: input.runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: attemptTarget, outcome: target, attemptOrdinal: attempt.ordinal, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
+-      ...(boundaryEvent ? [boundaryEvent] : []),
+-      lifecycleEvent({ runId: input.runId, kind: "run.settled", occurredAt: at, payload: { kind: "run.settled", state: target, outcome: target, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
+-    ]);
+-  });
+-  liveBus?.publish(committed);
+-  return readStatus(db, input.runId);
+-}
+-
+-function lifecycleBoundaryEvent(input: { runId: string; errorCode?: string; summary?: string }, status: RunStatusResult, at: string): Omit<RunEvent, "eventId" | "seq"> | undefined {
+-  if (input.errorCode === "deadline_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.deadline_exceeded", occurredAt: at, payload: { kind: "run.deadline_exceeded", state: "deadline_exceeded", reason: input.summary ?? "captured deadline elapsed" } });
+-  if (input.errorCode === "budget_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.budget_exceeded", occurredAt: at, payload: { kind: "run.budget_exceeded", state: "failed", reason: input.summary ?? "captured budget exhausted", used: status.run.budgetUsed, ...(status.run.budgetLimit === undefined ? {} : { limit: status.run.budgetLimit }) } });
+-  return undefined;
+-}
+-
+ function updateRun(db: Database, run: Run, input: {
+   state: Run["state"];
+   operationPhase: Run["operationPhase"];
+@@ -348,23 +306,3 @@
+     .run({ ...input, runId: run.runId, version: run.stateVersion });
+   if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
+ }
+-
+-function updateAttempt(db: Database, attempt: Attempt, input: {
+-  state: Attempt["state"];
+-  outcome?: RunOutcome;
+-  retryability?: Retryability;
+-  summary?: string;
+-  errorCode?: string;
+-  at: string;
+-}): void {
+-  const changed = db.prepare(`UPDATE run_attempts SET state=:state,state_version=state_version+1,
+-    outcome=:outcome,retryability=:retryability,result_summary=:summary,error_code=:errorCode,
+-    started_at=CASE WHEN :state='effect_running' AND started_at IS NULL THEN :at ELSE started_at END,
+-    settled_at=CASE WHEN :terminal=1 THEN :at ELSE settled_at END
+-    WHERE attempt_id=:attemptId AND run_id=:runId AND state_version=:version`)
+-    .run({ state: input.state, outcome: input.outcome ?? null, retryability: input.retryability ?? null,
+-      summary: input.summary ?? null, errorCode: input.errorCode ?? null, at: input.at,
+-      terminal: ATTEMPT_TERMINAL.has(input.state) ? 1 : 0, attemptId: attempt.attemptId,
+-      runId: attempt.runId, version: attempt.stateVersion });
+-  if (changed.changes !== 1) throw new Error("ATTEMPT_STALE_VERSION");
+-}
+--- working-preimage/packages/core/src/db/effect-repo.ts
++++ current/packages/core/src/db/effect-repo.ts
+@@ -15,7 +15,7 @@
+   capturedGenerationRef?: string; idempotencyKey?: string; reservedResultRef?: string; reservedUsageRef?: string; now?: string;
+   approvalRef?: EffectLifecycle["approvalRef"];
+   /** Trusted synchronous guard/charge in the intent transaction; failures roll back before provider dispatch. */
+-  onCommitIntent?: () => void;
++  onCommitIntent?: (effect: EffectLifecycle) => void;
+ }
+ export type EffectWaitingInput = Omit<EffectIntentInput, "approvalRef"> & { approvalRef: NonNullable<EffectLifecycle["approvalRef"]> };
+ export interface EffectSettlementInput {
+@@ -66,7 +66,7 @@
+         reservedUsageRef: input.reservedUsageRef ?? randomUUID(), startedAt: at });
+       let events: RunEvent[] = [];
+       db.transaction(() => {
+-        input.onCommitIntent?.();
++        input.onCommitIntent?.(effect);
+         reserveRunBudget(db, input.runId);
+         db.prepare(`INSERT INTO run_effects (effect_id,run_id,attempt_id,schema_version,kind,state,state_version,source_ref_json,executor_ref_json,approval_ref_json,input_digest,replay_posture,captured_generation_ref,idempotency_key,reserved_result_ref,reserved_usage_ref,started_at,created_at,updated_at) VALUES (:effectId,:runId,:attemptId,:schemaVersion,:kind,:state,0,:source,:executor,:approval,:digest,:replay,:generation,:idempotency,:result,:usage,:started,:at,:at)`).run({ effectId, runId: input.runId, attemptId: input.attemptId, schemaVersion: effect.schemaVersion, kind: effect.kind, state: effect.state, source: JSON.stringify(effect.sourceRef), executor: effect.executorRef ? JSON.stringify(effect.executorRef) : null, approval: effect.approvalRef ? JSON.stringify(effect.approvalRef) : null, digest: effect.inputDigest ?? null, replay: effect.replayPosture, generation: effect.capturedGenerationRef ?? null, idempotency: effect.idempotencyKey ?? null, result: effect.reservedResultRef ?? null, usage: effect.reservedUsageRef ?? null, started: at, at });
+         const attemptChanged = db.prepare("UPDATE run_attempts SET state_version=state_version+1 WHERE attempt_id=:attemptId AND run_id=:runId AND state IN ('intent_committed','effect_running')").run({ attemptId: input.attemptId, runId: input.runId });
+--- working-preimage/packages/core/src/db/sqlite.ts
++++ current/packages/core/src/db/sqlite.ts
+@@ -26,6 +26,8 @@
+   prepare(sql: string): SqlStatement;
+   /** BEGIN/COMMIT around fn, ROLLBACK on throw. Synchronous only — never await inside fn. */
+   transaction(fn: () => void): void;
++  /** Process notifications only, after the outermost successful commit; rollback discards them. */
++  afterCommit(callback: () => void): void;
+   close(): void;
+ }
+ 
+@@ -34,6 +36,7 @@
+   migrations: Migration[];
+   /** Reports which versions were applied this boot (empty when already up to date); main logs it. */
+   onMigrated?: (applied: number[]) => void;
++  onAfterCommitError?: (error: unknown) => void;
+ }
+ 
+ export function openDatabase(options: OpenDatabaseOptions): Database {
+@@ -41,15 +44,23 @@
+   // WAL gives the single-writer core non-blocking readers (no-op on :memory:); FKs default on, set for clarity.
+   raw.exec("PRAGMA journal_mode = WAL");
+   raw.exec("PRAGMA foreign_keys = ON");
+-  const db = wrap(raw);
++  const db = wrap(raw, options.onAfterCommitError);
+   const applied = runMigrations(db, options.migrations);
+   options.onMigrated?.(applied);
+   return db;
+ }
+ 
+-function wrap(raw: DatabaseSync): Database {
++interface TransactionState {
++  depth: number;
++  frames: Array<Array<() => void>>;
++  ready: Array<() => void>;
++  draining: boolean;
++  onError?: (error: unknown) => void;
++}
++
++function wrap(raw: DatabaseSync, onError?: (error: unknown) => void): Database {
+   let closed = false;
+-  const transactionState = { depth: 0 };
++  const transactionState: TransactionState = { depth: 0, frames: [], ready: [], draining: false, onError };
+   const assertActive = () => assertActiveTransaction(raw, transactionState.depth);
+   return {
+     exec(sql) {
+@@ -61,6 +72,14 @@
+       return wrapStatement(raw.prepare(sql), assertActive);
+     },
+     transaction: (fn) => runTransaction(raw, transactionState, fn),
++    afterCommit(callback) {
++      assertActive();
++      const frame = transactionState.frames.at(-1);
++      if (frame) { frame.push(callback); return; }
++      if (raw.isTransaction) throw new Error("sqlite afterCommit requires wrapper-managed transactions");
++      transactionState.ready.push(callback);
++      drainCommitted(transactionState);
++    },
+     // Idempotent: shutdown and test teardown may both close; node:sqlite throws on a double raw close.
+     close() {
+       if (closed) return;
+@@ -70,12 +89,14 @@
+   };
+ }
+ 
+-function runTransaction(raw: DatabaseSync, state: { depth: number }, fn: () => void): void {
++function runTransaction(raw: DatabaseSync, state: TransactionState, fn: () => void): void {
+   assertActiveTransaction(raw, state.depth);
+   const parentDepth = state.depth;
+   const savepoint = `taki_nested_${parentDepth}`;
+   raw.exec(parentDepth === 0 ? "BEGIN" : `SAVEPOINT ${savepoint}`);
+   state.depth = parentDepth + 1;
++  const callbacks: Array<() => void> = [];
++  state.frames.push(callbacks);
+   try {
+     fn();
+     assertActiveTransaction(raw, state.depth);
+@@ -90,7 +111,29 @@
+     throw error;
+   } finally {
+     state.depth = parentDepth;
++    state.frames.pop();
+   }
++  const parent = state.frames.at(-1);
++  if (parent) parent.push(...callbacks);
++  else {
++    state.ready.push(...callbacks);
++    drainCommitted(state);
++  }
++}
++
++function drainCommitted(state: TransactionState): void {
++  if (state.draining) return;
++  state.draining = true;
++  try {
++    while (state.ready.length > 0) {
++      const callback = state.ready.shift();
++      try { callback?.(); }
++      catch (error) {
++        try { state.onError?.(error); }
++        catch { /* A diagnostic sink cannot prevent later committed cleanup. */ }
++      }
++    }
++  } finally { state.draining = false; }
+ }
+ 
+ function assertActiveTransaction(raw: DatabaseSync, depth: number): void {
+--- working-preimage/packages/core/src/db/sqlite.test.ts
++++ current/packages/core/src/db/sqlite.test.ts
+@@ -172,3 +172,85 @@
+     },
+   );
+ });
++describe("outermost afterCommit", () => {
++  function database(onAfterCommitError?: (error: unknown) => void) {
++    const db = openDatabase({ path: ":memory:", migrations: [], onAfterCommitError }); dbs.push(db);
++    db.exec("CREATE TABLE records (id INTEGER PRIMARY KEY)");
++    return db;
++  }
++
++  it("runs only after the outer commit and preserves registration order across savepoints", () => {
++    const db = database(); const seen: string[] = [];
++    db.transaction(() => {
++      db.afterCommit(() => { expect(db.prepare("SELECT id FROM records").all()).toHaveLength(1); seen.push("outer-first"); });
++      db.transaction(() => { db.exec("INSERT INTO records VALUES (1)"); db.afterCommit(() => { seen.push("inner"); }); });
++      db.afterCommit(() => { seen.push("outer-last"); });
++      expect(seen).toEqual([]);
++    });
++    expect(seen).toEqual(["outer-first", "inner", "outer-last"]);
++  });
++
++  it("discards failed children and their merged grandchildren while a caught outer transaction can commit", () => {
++    const db = database(); const seen: string[] = [];
++    db.transaction(() => {
++      db.afterCommit(() => { seen.push("kept"); });
++      expect(() => db.transaction(() => {
++        db.transaction(() => { db.afterCommit(() => { seen.push("lost-grandchild"); }); });
++        db.afterCommit(() => { seen.push("lost-child"); });
++        db.exec("INSERT INTO records VALUES (1)"); throw new Error("inner");
++      })).toThrow("inner");
++      db.exec("INSERT INTO records VALUES (2)");
++    });
++    expect(seen).toEqual(["kept"]);
++    expect(db.prepare("SELECT id FROM records").all()).toEqual([{ id: 2 }]);
++  });
++
++  it("discards callbacks on outer rollback and actual deferred-FK COMMIT failure", () => {
++    const db = database(); let calls = 0;
++    expect(() => db.transaction(() => {
++      db.transaction(() => { db.afterCommit(() => { calls += 1; }); });
++      throw new Error("outer");
++    })).toThrow("outer");
++    db.exec("CREATE TABLE child (parent INTEGER REFERENCES records(id) DEFERRABLE INITIALLY DEFERRED)");
++    expect(() => db.transaction(() => { db.exec("INSERT INTO child VALUES (99)"); db.afterCommit(() => { calls += 1; }); })).toThrow();
++    expect(calls).toBe(0);
++    expect(db.prepare("SELECT * FROM child").all()).toEqual([]);
++    db.transaction(() => { db.afterCommit(() => { calls += 1; }); });
++    expect(calls).toBe(1);
++  });
++
++  it("refuses callback registration after implicit rollback and never leaks frames to another transaction", () => {
++    const db = database(); let calls = 0;
++    expect(() => db.transaction(() => {
++      db.afterCommit(() => { calls += 1; }); db.exec("INSERT INTO records VALUES (1)");
++      expect(() => db.transaction(() => { db.exec("INSERT OR ROLLBACK INTO records VALUES (1)"); })).toThrow();
++      expect(() => db.afterCommit(() => { calls += 100; })).toThrow("rolled back");
++    })).toThrow("rolled back");
++    db.transaction(() => { db.afterCommit(() => { calls += 10; }); });
++    expect(calls).toBe(10);
++  });
++
++  it("isolates callback and diagnostic errors while allowing FIFO reentrant commits", () => {
++    const errors: unknown[] = []; const db = database((error) => { errors.push(error); throw new Error("reporter"); });
++    const seen: string[] = [];
++    expect(() => db.transaction(() => {
++      db.exec("INSERT INTO records VALUES (1)");
++      db.afterCommit(() => { throw new Error("callback"); });
++      db.afterCommit(() => {
++        seen.push("first");
++        db.transaction(() => { db.exec("INSERT INTO records VALUES (2)"); db.afterCommit(() => { seen.push("reentrant"); }); });
++        db.afterCommit(() => { seen.push("outside"); });
++      });
++      db.afterCommit(() => { seen.push("second"); });
++    })).not.toThrow();
++    expect(errors).toHaveLength(1);
++    expect(seen).toEqual(["first", "second", "reentrant", "outside"]);
++    expect(db.prepare("SELECT id FROM records ORDER BY id").all()).toEqual([{ id: 1 }, { id: 2 }]);
++  });
++
++  it("refuses unmanaged raw transactions rather than prematurely notifying", () => {
++    const db = database(); let calls = 0; db.exec("BEGIN");
++    expect(() => db.afterCommit(() => { calls += 1; })).toThrow("wrapper-managed");
++    db.exec("ROLLBACK"); db.afterCommit(() => { calls += 1; }); expect(calls).toBe(1);
++  });
++});
+--- working-preimage/packages/core/src/db/index.md
++++ current/packages/core/src/db/index.md
+@@ -1,4 +1,12 @@
+ # core/db/
++- subagent-repo.ts — immutable private continuity and exact child stop/control CAS
++- subagent-input-repo.ts — idempotent addressed acceptance, separate work sequence and user-only latch continuation
++- subagent-execution-repo.ts — trusted atomic child/parent Run links, immutable proposals and completion outbox reads
++- subagent-terminal.ts — canonical terminal participation for private tails, final results and exact pointer release
++- subagent-readers.ts — validated conversation/input/result projections and exact work ownership reads
++- run-message-repo.ts — private native steps, partial staging and exact per-Effect addressed-input receipts
++- run-linked-state.ts — narrow trusted admission/terminal transaction participant contract
++- run-terminal-transition.ts — canonical adjusted terminal transaction, linked writes and outermost-commit notifications
+ - run-work-transition.ts — same-ledger quiescent accepted-purpose wait/resume with exact Attempt/version and atomic v3 evidence
+ - initiative-completion-source.ts — read-only bounded actual terminal background Runs and Class A publication exclusions
+ - user-timezone-repo.ts — validated reads and CAS replacement of the existing singleton with mode, designated device and last confirmation provenance
+--- working-preimage/packages/core/src/db/migrations/056-subagent-conversations.ts
++++ current/packages/core/src/db/migrations/056-subagent-conversations.ts
+@@ -0,0 +1,138 @@
++/**
++ * INPUT: canonical schema through 055 with existing Run/Attempt/Effect identities
++ * OUTPUT: four additive private delegation record families and exact work/receipt constraints
++ * POS: core/db/migrations — no relationship Timeline or Memory ingestion changes
++ */
++import type { Migration } from "../migration-runner.ts";
++
++export const subagentConversationsMigration056: Migration = {
++  version: 56,
++  sql: `
++CREATE TABLE subagent_conversations (
++ subagent_id TEXT PRIMARY KEY,
++ character_id TEXT NOT NULL,
++ created_by_run_id TEXT NOT NULL REFERENCES runs(run_id),
++ label TEXT NOT NULL,
++ initial_context_json TEXT NOT NULL CHECK(json_valid(initial_context_json)),
++ initial_context_digest TEXT NOT NULL,
++ stop_origin TEXT CHECK(stop_origin IN ('user','parent')),
++ control_version INTEGER NOT NULL DEFAULT 0 CHECK(control_version>=0),
++ next_input_seq INTEGER NOT NULL DEFAULT 1 CHECK(next_input_seq>0),
++ active_run_id TEXT UNIQUE REFERENCES runs(run_id),
++ created_at TEXT NOT NULL
++) STRICT;
++CREATE INDEX subagent_conversations_character ON subagent_conversations(character_id,created_at,subagent_id);
++CREATE TABLE subagent_inputs (
++ input_id TEXT PRIMARY KEY,
++ subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id) ON DELETE CASCADE,
++ input_seq INTEGER NOT NULL CHECK(input_seq>0),
++ work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id) ON DELETE CASCADE,
++ work_seq INTEGER NOT NULL CHECK(work_seq>0),
++ operation_key TEXT NOT NULL,
++ request_digest TEXT NOT NULL,
++ input_kind TEXT NOT NULL CHECK(input_kind IN ('work','message','continue')),
++ sender_kind TEXT NOT NULL CHECK(sender_kind IN ('parent','user','core')),
++ sender_run_id TEXT REFERENCES runs(run_id),
++ sender_owner_ref TEXT,
++ direction_text TEXT NOT NULL,
++ materials_json TEXT NOT NULL CHECK(json_valid(materials_json)),
++ tool_selection_json TEXT CHECK(tool_selection_json IS NULL OR json_valid(tool_selection_json)),
++ completion_policy TEXT NOT NULL CHECK(completion_policy IN ('record_only','request_parent')),
++ work_expires_at TEXT NOT NULL,
++ consumed_run_id TEXT REFERENCES runs(run_id),
++ consumed_attempt_id TEXT REFERENCES run_attempts(attempt_id),
++ consumed_step INTEGER CHECK(consumed_step>=0),
++ consumed_effect_id TEXT REFERENCES run_effects(effect_id) DEFERRABLE INITIALLY DEFERRED,
++ reply_acceptance_json TEXT CHECK(reply_acceptance_json IS NULL OR json_valid(reply_acceptance_json)),
++ created_at TEXT NOT NULL,
++ UNIQUE(subagent_id,input_seq), UNIQUE(work_input_id,work_seq), UNIQUE(subagent_id,operation_key),
++ CHECK((input_kind='work' AND work_input_id=input_id AND work_seq=1)
++   OR (input_kind<>'work' AND work_input_id<>input_id AND work_seq>1 AND tool_selection_json IS NULL AND reply_acceptance_json IS NULL)),
++ CHECK((sender_kind='user' AND sender_run_id IS NULL AND sender_owner_ref IS NULL)
++   OR (sender_kind='parent' AND sender_run_id IS NOT NULL AND sender_owner_ref IS NULL)
++   OR (sender_kind='core' AND sender_run_id IS NULL AND sender_owner_ref IS NOT NULL)),
++ CHECK((consumed_run_id IS NULL AND consumed_attempt_id IS NULL AND consumed_step IS NULL AND consumed_effect_id IS NULL)
++   OR (consumed_run_id IS NOT NULL AND consumed_attempt_id IS NOT NULL AND consumed_step IS NOT NULL AND consumed_effect_id IS NOT NULL))
++) STRICT;
++CREATE TABLE subagent_executions (
++ run_id TEXT PRIMARY KEY REFERENCES runs(run_id) ON DELETE CASCADE,
++ subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id) ON DELETE CASCADE,
++ work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id) ON DELETE CASCADE,
++ trigger_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id),
++ admission_digest TEXT NOT NULL,
++ completion_policy TEXT NOT NULL CHECK(completion_policy IN ('record_only','request_parent')),
++ through_work_seq INTEGER NOT NULL CHECK(through_work_seq>0),
++ work_token_json TEXT NOT NULL CHECK(json_valid(work_token_json)),
++ proposal_json TEXT CHECK(proposal_json IS NULL OR json_valid(proposal_json)),
++ proposal_attempt_id TEXT REFERENCES run_attempts(attempt_id),
++ proposal_digest TEXT,
++ proposal_token_digest TEXT,
++ terminal_messages_json TEXT CHECK(terminal_messages_json IS NULL OR json_valid(terminal_messages_json)),
++ terminal_messages_attempt_id TEXT REFERENCES run_attempts(attempt_id),
++ result_json TEXT CHECK(result_json IS NULL OR json_valid(result_json)),
++ result_digest TEXT,
++ settled_at TEXT,
++ completion_state TEXT NOT NULL CHECK(completion_state IN ('not_requested','pending','deferred','admitted','withheld')),
++ completion_reason TEXT CHECK(completion_reason IN ('foreground_busy','source_unavailable','authority_unavailable','superseded','source_retired','expired')),
++ parent_run_id TEXT UNIQUE REFERENCES runs(run_id),
++ parent_admission_digest TEXT,
++ parent_proposal_json TEXT CHECK(parent_proposal_json IS NULL OR json_valid(parent_proposal_json)),
++ parent_proposal_attempt_id TEXT REFERENCES run_attempts(attempt_id),
++ parent_proposal_digest TEXT,
++ parent_terminal_messages_json TEXT CHECK(parent_terminal_messages_json IS NULL OR json_valid(parent_terminal_messages_json)),
++ parent_terminal_messages_attempt_id TEXT REFERENCES run_attempts(attempt_id),
++ parent_result_json TEXT CHECK(parent_result_json IS NULL OR json_valid(parent_result_json)),
++ parent_result_digest TEXT,
++ parent_settled_at TEXT,
++ publication_json TEXT CHECK(publication_json IS NULL OR json_valid(publication_json)),
++ CHECK((result_json IS NULL AND result_digest IS NULL AND settled_at IS NULL)
++   OR (result_json IS NOT NULL AND result_digest IS NOT NULL AND settled_at IS NOT NULL)),
++ CHECK((parent_result_json IS NULL AND parent_result_digest IS NULL AND parent_settled_at IS NULL)
++   OR (parent_result_json IS NOT NULL AND parent_result_digest IS NOT NULL AND parent_settled_at IS NOT NULL)),
++ CHECK(parent_run_id IS NULL OR completion_state='admitted')
++) STRICT;
++CREATE UNIQUE INDEX subagent_one_active_execution ON subagent_executions(subagent_id) WHERE settled_at IS NULL;
++CREATE INDEX subagent_completion_queue ON subagent_executions(completion_state,settled_at,run_id);
++CREATE INDEX subagent_work_executions ON subagent_executions(work_input_id,settled_at,run_id);
++CREATE TABLE run_messages (
++ seq INTEGER PRIMARY KEY AUTOINCREMENT,
++ run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE CASCADE,
++ attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id),
++ step_number INTEGER NOT NULL CHECK(step_number>=0),
++ message_index INTEGER NOT NULL CHECK(message_index>=0),
++ entry_kind TEXT NOT NULL CHECK(entry_kind IN ('input','output','partial')),
++ role TEXT NOT NULL CHECK(role IN ('user','assistant','tool')),
++ content TEXT NOT NULL,
++ parts_json TEXT CHECK(parts_json IS NULL OR json_valid(parts_json)),
++ source_context_json TEXT CHECK(source_context_json IS NULL OR json_valid(source_context_json)),
++ input_id TEXT REFERENCES subagent_inputs(input_id) ON DELETE CASCADE,
++ model_effect_id TEXT REFERENCES run_effects(effect_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
++ model_input_digest TEXT,
++ batch_digest TEXT NOT NULL,
++ created_at TEXT NOT NULL,
++ CHECK((entry_kind='input' AND input_id IS NOT NULL AND model_effect_id IS NOT NULL AND model_input_digest IS NOT NULL)
++   OR (entry_kind<>'input' AND input_id IS NULL AND model_effect_id IS NULL AND model_input_digest IS NULL)),
++ CHECK(entry_kind<>'partial' OR (role='assistant' AND parts_json IS NULL))
++) STRICT;
++CREATE UNIQUE INDEX run_message_output_identity ON run_messages(run_id,attempt_id,step_number,entry_kind,message_index) WHERE entry_kind<>'input';
++CREATE UNIQUE INDEX run_message_input_receipt ON run_messages(model_effect_id,input_id) WHERE entry_kind='input';
++CREATE INDEX run_message_order ON run_messages(run_id,seq);
++CREATE TRIGGER subagent_context_immutable BEFORE UPDATE OF subagent_id,character_id,created_by_run_id,label,initial_context_json,initial_context_digest,created_at
++ ON subagent_conversations BEGIN SELECT RAISE(ABORT,'SUBAGENT_CONTEXT_IMMUTABLE'); END;
++CREATE TRIGGER subagent_input_immutable BEFORE UPDATE OF input_id,subagent_id,input_seq,work_input_id,work_seq,operation_key,request_digest,input_kind,sender_kind,sender_run_id,sender_owner_ref,direction_text,materials_json,tool_selection_json,completion_policy,work_expires_at,created_at
++ ON subagent_inputs BEGIN SELECT RAISE(ABORT,'SUBAGENT_INPUT_IMMUTABLE'); END;
++CREATE TRIGGER subagent_first_receipt_immutable BEFORE UPDATE OF consumed_run_id,consumed_attempt_id,consumed_step,consumed_effect_id
++ ON subagent_inputs WHEN OLD.consumed_run_id IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_RECEIPT_IMMUTABLE'); END;
++CREATE TRIGGER subagent_reply_binding_immutable BEFORE UPDATE OF reply_acceptance_json
++ ON subagent_inputs WHEN OLD.reply_acceptance_json IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_REPLY_BINDING_IMMUTABLE'); END;
++CREATE TRIGGER subagent_execution_identity_immutable BEFORE UPDATE OF run_id,subagent_id,work_input_id,trigger_input_id,admission_digest,completion_policy
++ ON subagent_executions BEGIN SELECT RAISE(ABORT,'SUBAGENT_EXECUTION_IMMUTABLE'); END;
++CREATE TRIGGER subagent_parent_link_immutable BEFORE UPDATE OF parent_run_id,parent_admission_digest
++ ON subagent_executions WHEN OLD.parent_run_id IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_PARENT_LINK_IMMUTABLE'); END;
++CREATE TRIGGER subagent_child_result_immutable BEFORE UPDATE OF result_json,result_digest,settled_at
++ ON subagent_executions WHEN OLD.settled_at IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_RESULT_IMMUTABLE'); END;
++CREATE TRIGGER subagent_parent_result_immutable BEFORE UPDATE OF parent_result_json,parent_result_digest,parent_settled_at
++ ON subagent_executions WHEN OLD.parent_settled_at IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_RESULT_IMMUTABLE'); END;
++CREATE TRIGGER run_messages_immutable BEFORE UPDATE ON run_messages BEGIN SELECT RAISE(ABORT,'RUN_MESSAGE_IMMUTABLE'); END;
++`,
++};
+--- working-preimage/packages/core/src/db/migrations/index-list.ts
++++ current/packages/core/src/db/migrations/index-list.ts
+@@ -59,6 +59,7 @@
+ import { initiativeWakePolicyMigration053 } from "./053-initiative-wake-policy.ts";
+ import { initiativeIntentionsMigration054 } from "./054-initiative-intentions.ts";
+ import { initiativeBackoffMigration055 } from "./055-initiative-backoff.ts";
++import { subagentConversationsMigration056 } from "./056-subagent-conversations.ts";
+ 
+ export const MIGRATIONS: Migration[] = [
+   timelineMigration001,
+@@ -116,4 +117,5 @@
+   initiativeWakePolicyMigration053,
+   initiativeIntentionsMigration054,
+   initiativeBackoffMigration055,
++  subagentConversationsMigration056,
+ ];
+--- working-preimage/packages/core/src/db/migrations/index.md
++++ current/packages/core/src/db/migrations/index.md
+@@ -58,3 +58,4 @@
+ - 053-initiative-wake-policy.ts — source-occurrence claims tied to canonical Runs and bounded policy diagnostics
+ - 054-initiative-intentions.ts — finite source-bound plans, immutable source opportunities and exact canonical Run claim bindings
+ - 055-initiative-backoff.ts — reset fences and canonical Run admission-time timezone metadata; no duplicate quota ledger
++- 056-subagent-conversations.ts — four private delegation record families with exact work, completion and input-receipt identities
+--- working-preimage/packages/core/src/harness/run-service.ts
++++ current/packages/core/src/harness/run-service.ts
+@@ -16,6 +16,8 @@
+   type QueueListParams, type QueueListResult,
+   type InitiativeSelectedContext,
+   type PreparedPublicationRunInput,
++  type SubagentWorkScope,
++  SubagentWorkTokenSchema,
+ } from "@taki/shared";
+ import type { RunAdmissionInput, RunAdmissionResult, RunRepo } from "../db/run-repo.ts";
+ import type { AutomaticMemoryRecall } from "../memory/automatic-memory-recall.ts";
+@@ -25,6 +27,7 @@
+ import { validateWorkAdmission, workBindingRefusal, type AcceptedWorkBinding } from "./run-work-binding.ts";
+ import { admitPreparedPublication, type PreparedPublicationAdmission } from "./run-prepared-publication.ts";
+ import type { ToolDisclosureSnapshot } from "../extensions/tool-disclosure-snapshot.ts";
++import type { RunLinkedAdmission } from "../db/run-linked-state.ts";
+ 
+ type SnapshotDraft = Omit<RunSnapshot, "snapshotId" | "runId" | "capturedAt" | "manifestDigest">;
+ 
+@@ -34,6 +37,8 @@
+ }
+ 
+ export interface RunExecutionContext {
++  /** Trusted linked identity; both roles use initiator=subagent but have different Memory authority. */
++  readonly workScope?: SubagentWorkScope;
+   readonly toolDisclosure?: ToolDisclosureSnapshot;
+   /** Trusted adapter binding, never reconstructed from a model-provided provenance string. */
+   readonly acceptedWork?: AcceptedWorkBinding;
+@@ -52,11 +57,12 @@
+ 
+ export interface RunSnapshotCapture<TAdmission = unknown> {
+   capture(request: TriggerRequest, runId: string, options?: {
+-    admission?: TAdmission; selectedContext?: InitiativeSelectedContext;
++    admission?: TAdmission; selectedContext?: InitiativeSelectedContext; workScope?: SubagentWorkScope;
+   }): Promise<CapturedRunSnapshot>;
+ }
+ 
+ export interface RunService<TAdmission = unknown> {
++  admitLinked(request: TriggerRequest, options: { linked: RunLinkedAdmission; admission?: TAdmission }): Promise<RunAdmissionResult>;
+   /** Trusted Core registration only; a request/provenance marker cannot construct its own source binding. */
+   admitAcceptedWork(request: TriggerRequest, binding: AcceptedWorkBinding, admission?: TAdmission): Promise<RunAdmissionResult>;
+   /** Derives text-only child admission from the original retained root; never recaptures model/Host authority. */
+@@ -90,9 +96,11 @@
+   modelId: string;
+ }): RunService<TAdmission> {
+   const contexts = new Map<string, RunExecutionContext>();
++  deps.repo.onTerminalCommit((fact) => release(contexts, fact.run.runId));
+   let accepting = true;
+   const admit = async (candidate: TriggerRequest, options: {
+     admission?: TAdmission; selectedContext?: InitiativeSelectedContext; acceptedWork?: AcceptedWorkBinding;
++    linked?: RunLinkedAdmission; workScope?: SubagentWorkScope;
+   }): Promise<RunAdmissionResult> => {
+     if (!accepting) throw new Error("RUN_ADMISSION_CLOSED");
+     const request = TriggerRequestSchema.parse(candidate);
+@@ -101,19 +109,32 @@
+     const proposedRunId = randomUUID();
+     const captured = await deps.snapshot.capture(request, proposedRunId, options);
+     if (options.acceptedWork) captured.context = Object.freeze({ ...captured.context, acceptedWork: options.acceptedWork });
++    if (options.workScope) captured.context = Object.freeze({ ...captured.context, workScope: options.workScope });
+     if (!accepting) { captured.context?.dispose?.(); throw new Error("RUN_ADMISSION_CLOSED"); }
+     let result: RunAdmissionResult;
+     try {
+       validateWorkAdmission(request, captured.context);
+       result = deps.repo.admit({ runId: proposedRunId, request, snapshot: captured.snapshot,
+-        provider: deps.provider, modelId: deps.modelId } satisfies RunAdmissionInput);
++        provider: deps.provider, modelId: deps.modelId, linked: options.linked } satisfies RunAdmissionInput);
+     } catch (error) {
+       captured.context?.dispose?.(); throw error;
+     }
+-    bindCapturedContext(contexts, result, captured);
++    // An admission observer can synchronously terminalize before this capture is bound.
++    result = { ...result, run: deps.repo.status(result.run.runId).run };
++    bindCapturedContext(contexts, result, { captured, disposeUnused: () => deps.repo.afterCommit(() => captured.context?.dispose?.()) });
+     return result;
+   };
+   return {
++    admitLinked(request, options) {
++      const link = options.linked.kind === "subagent"
++        ? { ...options.linked, token: SubagentWorkTokenSchema.parse(options.linked.token) } : { ...options.linked };
++      if (link.kind === "subagent") { Object.freeze(link.token.source); Object.freeze(link.token); }
++      Object.freeze(link);
++      const workScope: SubagentWorkScope = link.kind === "subagent"
++        ? { kind: "subagent", subagentId: link.token.subagentId, workInputId: link.token.workInputId }
++        : { kind: "parent-continuation", completionId: link.completionId };
++      return admit(request, { ...options, linked: link, workScope: Object.freeze(workScope) });
++    },
+     admitAcceptedWork(request, binding, admission) {
+       if (request.provenance.provider !== ACCEPTED_WORK_PROVIDER) throw new Error("RUN_WORK_BINDING_REQUIRED");
+       return admit(request, { admission, acceptedWork: binding });
+@@ -141,11 +162,7 @@
+     resumeDelivery: (runId, attemptId, version) => accepting && contexts.has(runId) && deps.repo.resumeDelivery(runId, attemptId, version),
+     admit: (request, admission, selectedContext) => admit(request, { admission, selectedContext }),
+     start(runId, attemptId) {
+-      const result = deps.repo.start(runId, attemptId);
+-      if (!result.started && ["cancelled", "completed", "failed", "skipped", "deadline_exceeded", "outcome_unknown"].includes(result.status.run.state)) {
+-        release(contexts, runId);
+-      }
+-      return result.started;
++      return deps.repo.start(runId, attemptId).started;
+     },
+     retry: (runId, attemptId, reason) => deps.repo.retry(runId, attemptId, reason),
+     // eslint-disable-next-line max-params
+@@ -153,12 +170,8 @@
+       const retryability = details.retryable === true
+         ? "retryable"
+         : details.retryable === false ? "not_retryable" : "unknown";
+-      const result = deps.repo.settle({ runId, attemptId, outcome, retryability,
++      return deps.repo.settle({ runId, attemptId, outcome, retryability,
+         summary: details.summary, errorCode: details.errorCode });
+-      if (["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"].includes(result.run.state)) {
+-        release(contexts, runId);
+-      }
+-      return result;
+     },
+     requestCancel(runId, reason) {
+       return deps.repo.cancel(runId, reason).changed;
+@@ -171,21 +184,28 @@
+ }
+ 
+ function release(contexts: Map<string, RunExecutionContext>, runId: string): void {
+-  contexts.get(runId)?.dispose?.();
++  const context = contexts.get(runId);
+   contexts.delete(runId);
+-}
+-
+-function bindCapturedContext(contexts: Map<string, RunExecutionContext>, result: RunAdmissionResult, captured: CapturedRunSnapshot): void {
++  context?.dispose?.();
++}
++
++function bindCapturedContext(contexts: Map<string, RunExecutionContext>, result: RunAdmissionResult,
++  input: { captured: CapturedRunSnapshot; disposeUnused: () => void }): void {
++  const { captured, disposeUnused } = input;
+   const terminal = ["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"].includes(result.run.state);
+   // An in-process duplicate keeps its original executable closures. After process-local context loss, persisted
+   // admission evidence is still authoritative: rebuilding a context may not silently select a different memory.
+-  if (result.reused && (terminal || contexts.has(result.run.runId))) { captured.context?.dispose?.(); return; }
++  if (terminal || (result.reused && contexts.has(result.run.runId))) { disposeUnused(); return; }
++  if (result.reused && captured.context?.workScope) {
++    disposeUnused();
++    throw new Error("SUBAGENT_CONTINUE_REQUIRED");
++  }
+   if (result.reused && result.run.provenance.provider === ACCEPTED_WORK_PROVIDER) {
+-    captured.context?.dispose?.();
++    disposeUnused();
+     throw new Error("RUN_WORK_CONTINUE_REQUIRED");
+   }
+   if (result.reused && !sameMemoryReference(result.snapshot.memory, captured.snapshot.memory)) {
+-    captured.context?.dispose?.();
++    disposeUnused();
+     const memory = result.snapshot.memory;
+     const refusal = MemoryErrorEnvelopeSchema.parse({ ok: false, requestId: result.run.runId,
+       providerId: memory.providerId, authorityEpochId: memory.authorityEpochId ?? null, capabilities: memory.capabilities,
+--- working-preimage/packages/core/src/harness/index.md
++++ current/packages/core/src/harness/index.md
+@@ -2,7 +2,7 @@
+ - prepared-publication-authorization.ts — immutable process-owned Class A authorization handles with exact acceptance scope/currentness checks; no business classifier or execution state
+ - run-work-binding.ts — strict synchronous accepted-purpose/authority and optional registered publication-grant checks; missing bindings require explicit continuation
+ - run-prepared-publication.ts — exact reference/revision child admission from the retained root snapshot, original Attempt and authorized delivery class; no business-policy literal, recapture or model Effect
+-- run-service.ts — Core-owned Trigger/accepted-root admission and Attempt-aware lifecycle; retains original authority for prepared children, rejects stale callbacks/lost accepted context, and finishes snapshot reads before atomic SQLite admission
++- run-service.ts — Core-owned admission with trusted linked work scopes, original snapshot/authority capture and exact context disposal after canonical outermost terminal commit
+ - run-snapshot-capture.ts — redaction-safe durable snapshot plus process-local Extension/Memory bindings, frozen tool names and disclosure identities excluded from authority digests; carries cancellation/deadlines through admission and preserves exact governed provider/capability/tool/recall/prompt bindings
+ - effect-lifecycle-service.ts — guarded Core effect boundary with contained observability event recording
+ - recovery-coordinator.ts — boot classification before admission, including terminal-Run pending delivery reconciliation
+--- working-preimage/packages/core/src/boot/core-bootstrap.ts
++++ current/packages/core/src/boot/core-bootstrap.ts
+@@ -48,7 +48,7 @@
+ }
+ 
+ /** The data root is read BEFORE the store exists, so it is the one knob env alone governs (registry: env-only). */
+-function openStore(env: Record<string, string | undefined>): { db: Database; applied: number[]; dataDir: string } {
++function openStore(env: Record<string, string | undefined>, onAfterCommitError: () => void): { db: Database; applied: number[]; dataDir: string } {
+   const { dataDir } = loadServerConfig(env);
+   // The composition root ensures the app data root exists before opening the db (first-boot);
+   // the db layer itself stays fs-free (invariant). Mirrors the paired-device-store sanctioned site.
+@@ -57,6 +57,7 @@
+   const db = openDatabase({
+     path: join(dataDir, "taki.db"),
+     migrations: MIGRATIONS,
++    onAfterCommitError,
+     // The logger's level is itself a knob, so it cannot exist yet — report the versions once it does.
+     onMigrated: (versions) => {
+       applied = versions;
+@@ -66,7 +67,9 @@
+ }
+ 
+ export function bootstrapCore(processEnv: Record<string, string | undefined>, options: { onConfigChanged?(key: string): void } = {}): CoreBootstrap {
+-  const { db, applied, dataDir } = openStore(processEnv);
++  let pendingCommitErrors = 0;
++  let reportCommitError = () => { pendingCommitErrors += 1; };
++  const { db, applied, dataDir } = openStore(processEnv, () => reportCommitError());
+   const repo = createConfigRepo(db);
+   const source = createConfigSource({ env: processEnv, repo });
+   const subscriptions = createConfigSubscriptions();
+@@ -76,6 +79,8 @@
+   const serverConfig = { ...loadServerConfig(env), dataDir };
+   const contextConfig = loadContextConfig(env);
+   const logger = createLogger(serverConfig.logLevel);
++  reportCommitError = () => logger.warn({ code: "SQLITE_AFTER_COMMIT_FAILED" }, "Committed database callback failed");
++  if (pendingCommitErrors > 0) logger.warn({ code: "SQLITE_AFTER_COMMIT_FAILED", count: pendingCommitErrors }, "Committed database callbacks failed during bootstrap");
+   logger
+     .child({ mod: "db" })
+     .info({ applied }, applied.length > 0 ? "migrations applied" : "schema already up to date");
+--- working-preimage/packages/core/src/boot/core-bootstrap.test.ts
++++ current/packages/core/src/boot/core-bootstrap.test.ts
+@@ -1,7 +1,7 @@
+ import { mkdtempSync } from "node:fs";
+ import { tmpdir } from "node:os";
+ import { join } from "node:path";
+-import { afterEach, describe, expect, it } from "vitest";
++import { afterEach, describe, expect, it, vi } from "vitest";
+ import { createConfigRepo } from "../db/config-repo.ts";
+ import { MIGRATIONS } from "../db/migrations/index-list.ts";
+ import { openDatabase } from "../db/sqlite.ts";
+@@ -44,6 +44,18 @@
+ }
+ 
+ describe("bootstrapCore", () => {
++  it("reports committed callback failures with a bounded code and preserves later cleanup", () => {
++    const result = boot({ TAKI_DATA_DIR: tempDataDir() });
++    const warning = vi.spyOn(result.logger, "warn").mockImplementation(() => {});
++    let cleaned = false;
++    expect(() => result.db.transaction(() => {
++      result.db.afterCommit(() => { throw new Error("private callback text must not enter logs"); });
++      result.db.afterCommit(() => { cleaned = true; });
++    })).not.toThrow();
++    expect(cleaned).toBe(true);
++    expect(warning).toHaveBeenCalledExactlyOnceWith({ code: "SQLITE_AFTER_COMMIT_FAILED" }, "Committed database callback failed");
++    warning.mockRestore();
++  });
+   it("notifies local policy after commit despite a failed socket or local observer", () => {
+     const seen: unknown[] = [];
+     const result = bootstrapCore({ ...PROVIDER_ENV, TAKI_DATA_DIR: tempDataDir() }, { onConfigChanged(key) {
+--- working-preimage/packages/core/src/boot/index.md
++++ current/packages/core/src/boot/index.md
+@@ -1,3 +1,3 @@
+ # core/boot/
+-- core-bootstrap.ts — bootstrapCore(env): opens the DB on the env-only data root, builds the config plane (repo/source/writer/subscriptions), then parses every loader against the RESOLVED env (env > stored > default) and constructs the model slots; returns the composition root's config+storage phase in one object
++- core-bootstrap.ts — bootstrapCore(env): opens the env-root DB, resolves stored configuration/model slots and connects bounded post-commit diagnostics after logging settings load
+ - hindsight-setup-boot.ts — composes the inactive B3 Hindsight setup service and operator methods without boot network/provider calls
+--- working-preimage/packages/core/src/db/run-terminal-transition.ts
++++ current/packages/core/src/db/run-terminal-transition.ts
+@@ -0,0 +1,101 @@
++/**
++ * INPUT: canonical Run settlement and exact active Attempt inside the existing repository
++ * OUTPUT: atomic terminal Run/Receipt/events plus required linked data and committed notifications
++ * POS: core/db — terminal transition shared by start, dispatch refusal, public settle and recovery
++ */
++import { randomUUID } from "node:crypto";
++import type { Attempt, RunOutcome, RunStatusResult, Retryability, RunEvent } from "@taki/shared";
++import type { Database } from "./sqlite.ts";
++import type { RunEventRepo } from "./run-event-repo.ts";
++import type { RunEventLiveBus } from "./run-event-live.ts";
++import type { RunLinkedState, RunTerminalFact } from "./run-linked-state.ts";
++import { activeAttempt, legalAttemptTerminal, legalTerminalTransition, lifecycleEvent } from "./run-event-factory.ts";
++import { readAttemptById, readRunById, readStatus } from "./run-readers.ts";
++
++const ATTEMPT_TERMINAL = new Set<Attempt["state"]>(["completed", "failed", "cancelled", "deadline_exceeded", "outcome_unknown"]);
++
++export function settleRun(deps: { db: Database; eventRepo: RunEventRepo; liveBus?: RunEventLiveBus; linkedState?: RunLinkedState; terminalListeners: Set<(fact: RunTerminalFact) => void> }, status: RunStatusResult, input: {
++  runId: string;
++  attemptId: string;
++  outcome: RunOutcome;
++  retryability: Retryability;
++  summary?: string;
++  errorCode?: string;
++  at?: string;
++}): RunStatusResult {
++  const at = input.at ?? new Date().toISOString();
++  const { db, eventRepo, liveBus } = deps;
++  const target = status.run.state === "cancel_requested" && input.outcome !== "outcome_unknown"
++    ? "cancelled"
++    : input.outcome;
++  if (!legalTerminalTransition(status.run.state, target)) throw new Error("RUN_INVALID_TRANSITION");
++  const attempt = activeAttempt(status);
++  if (attempt.attemptId !== input.attemptId) return status;
++  const attemptTarget = target === "skipped" ? "failed" : target;
++  const receiptId = randomUUID();
++  let committed: RunEvent[] = [];
++  db.transaction(() => {
++    if (!ATTEMPT_TERMINAL.has(attempt.state)) {
++      if (!legalAttemptTerminal(attempt.state, attemptTarget)) throw new Error("ATTEMPT_INVALID_TRANSITION");
++      updateAttempt(db, attempt, { state: attemptTarget, outcome: target, retryability: input.retryability,
++        summary: input.summary, errorCode: input.errorCode, at });
++    }
++    const changed = db.prepare(`UPDATE runs SET state=:state,state_version=state_version+1,
++      operation_phase='terminal',outcome=:outcome,retryability=:retryability,terminal_at=:at,
++      receipt_id=:receiptId,updated_at=:at WHERE run_id=:runId AND state_version=:version AND state NOT IN
++      ('completed','failed','cancelled','skipped','deadline_exceeded','outcome_unknown')`)
++      .run({ state: target, outcome: target, retryability: input.retryability, at, receiptId,
++        runId: input.runId, version: status.run.stateVersion });
++    if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
++    insertReceipt(db, { ...input, receiptId, outcome: target, at }, status);
++    const fact: RunTerminalFact = { run: readRunById(db, input.runId), attempt: readAttemptById(db, attempt.attemptId),
++      finalOutcome: target, receiptId, at };
++    deps.linkedState?.onTerminalTx(fact);
++    const boundaryEvent = lifecycleBoundaryEvent(input, status, at);
++    committed = eventRepo.appendMany([
++      lifecycleEvent({ runId: input.runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: attemptTarget, outcome: target, attemptOrdinal: attempt.ordinal, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
++      ...(boundaryEvent ? [boundaryEvent] : []),
++      lifecycleEvent({ runId: input.runId, kind: "run.settled", occurredAt: at, payload: { kind: "run.settled", state: target, outcome: target, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
++    ]);
++    db.afterCommit(() => liveBus?.publish(committed));
++    for (const listener of deps.terminalListeners) db.afterCommit(() => listener(fact));
++    db.afterCommit(() => deps.linkedState?.afterTerminalCommit?.(fact));
++  });
++  return readStatus(db, input.runId);
++}
++
++function insertReceipt(db: Database, input: { runId: string; receiptId: string; outcome: RunOutcome;
++  retryability: Retryability; summary?: string; at: string }, status: RunStatusResult): void {
++  db.prepare(`INSERT INTO run_receipts
++    (receipt_id,run_id,state,outcome,retryability,reason,action,attempt_count,snapshot_id,summary,created_at,updated_at)
++    VALUES (:receiptId,:runId,:state,:outcome,:retryability,:reason,NULL,:attemptCount,:snapshotId,:summary,:at,:at)`)
++    .run({ receiptId: input.receiptId, runId: input.runId, state: input.outcome, outcome: input.outcome,
++      retryability: input.retryability, reason: input.summary ?? null, attemptCount: status.attempts.length,
++      snapshotId: status.run.snapshot.snapshotId, summary: input.summary ?? null, at: input.at });
++}
++
++function lifecycleBoundaryEvent(input: { runId: string; errorCode?: string; summary?: string }, status: RunStatusResult, at: string): Omit<RunEvent, "eventId" | "seq"> | undefined {
++  if (input.errorCode === "deadline_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.deadline_exceeded", occurredAt: at, payload: { kind: "run.deadline_exceeded", state: "deadline_exceeded", reason: input.summary ?? "captured deadline elapsed" } });
++  if (input.errorCode === "budget_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.budget_exceeded", occurredAt: at, payload: { kind: "run.budget_exceeded", state: "failed", reason: input.summary ?? "captured budget exhausted", used: status.run.budgetUsed, ...(status.run.budgetLimit === undefined ? {} : { limit: status.run.budgetLimit }) } });
++  return undefined;
++}
++
++export function updateAttempt(db: Database, attempt: Attempt, input: {
++  state: Attempt["state"];
++  outcome?: RunOutcome;
++  retryability?: Retryability;
++  summary?: string;
++  errorCode?: string;
++  at: string;
++}): void {
++  const changed = db.prepare(`UPDATE run_attempts SET state=:state,state_version=state_version+1,
++    outcome=:outcome,retryability=:retryability,result_summary=:summary,error_code=:errorCode,
++    started_at=CASE WHEN :state='effect_running' AND started_at IS NULL THEN :at ELSE started_at END,
++    settled_at=CASE WHEN :terminal=1 THEN :at ELSE settled_at END
++    WHERE attempt_id=:attemptId AND run_id=:runId AND state_version=:version`)
++    .run({ state: input.state, outcome: input.outcome ?? null, retryability: input.retryability ?? null,
++      summary: input.summary ?? null, errorCode: input.errorCode ?? null, at: input.at,
++      terminal: ATTEMPT_TERMINAL.has(input.state) ? 1 : 0, attemptId: attempt.attemptId,
++      runId: attempt.runId, version: attempt.stateVersion });
++  if (changed.changes !== 1) throw new Error("ATTEMPT_STALE_VERSION");
++}
+--- working-preimage/packages/core/src/testing/run-service-stub.ts
++++ current/packages/core/src/testing/run-service-stub.ts
+@@ -18,6 +18,7 @@
+     return status;
+   };
+   return {
++    admitLinked: () => Promise.reject(new Error("RUN_LINKED_STATE_REQUIRED")),
+     admitAcceptedWork: () => Promise.reject(new Error("RUN_WORK_BINDING_REQUIRED")),
+     admitPreparedPublication: () => { throw new Error("PREPARED_ROOT_UNAVAILABLE"); },
+     holdWork: () => ({ changed: false, reason: "binding_lost" }),
+--- working-preimage/packages/core/src/testing/index.md
++++ current/packages/core/src/testing/index.md
+@@ -1,4 +1,5 @@
+ # testing/
++- run-service-stub.ts — in-memory transport-only Run service fixture; linked persistence and accepted-purpose authority require real repository fixtures
+ 
+ - mock-language-model.ts — MockLanguageModelV4 factories: streaming / slow-streaming (abort-window) / failing / fail-then-stream + error-part-then-stream (the two R2 overflow transport endings) / mid-stream-error / scripted tool-loop (stream) + generating / failing-generate / scripted (non-streaming generate); test-only; resolving/rejecting bodies are scripted fixtures, with real fetch behavior covered by the server transport regression
+ - memory-store.ts — :memory:-SQLite conversation-store fixture (db + repo + store); test-only
+@@ -11,7 +12,6 @@
+ - ws-test-client.ts — WS integration-test client harness (makeClient/openClient + frame helpers); test-only
+ - hindsight-http-test-fixture.ts — ephemeral loopback HTTP servers and observable unfinished-response cancellation for Hindsight clients; test-only
+ - capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles, a REAL in-memory Approval service, and operator/Host Connection fakes for the Shell-backed capability tools; test-only
+-- run-service-stub.ts — in-memory RunService transport fixture with admission manifests; unsupported accepted-work/prepared admission and quiescent transitions never grant authority
+ - seed-timeline-cli.ts — pre-boot CLI seeding timeline rows into <dataDir>/taki.db via the real migrations + repo (e2e polluted-history); test-only
+ - hindsight-application-fixtures.ts — complete hash-consistent D77 bundles/events and V1 baseline manifest fixtures
+ - hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures with explicit native cursor overrides, an admitted capability manifest and isolated SQLite authority
+--- working-preimage/packages/shared/src/subagent-schema.test.ts
++++ current/packages/shared/src/subagent-schema.test.ts
+@@ -0,0 +1,31 @@
++import { describe, expect, it } from "vitest";
++import { SubagentInputRequestSchema, SubagentToolSelectionSchema, SubagentWorkScopeSchema } from "./subagent-schema.ts";
++import { SourceContextSchema, ContextMaterialSchema, MaterialRefSchema } from "./context-source-schema.ts";
++import { TimelinePartSchema } from "./timeline-schema.ts";
++import { ParentContinuationProposalSchema } from "./subagent-result-schema.ts";
++
++describe("private work and source contracts", () => {
++  it("preserves explicit empty executable selections and disallows invented work scopes", () => {
++    expect(SubagentToolSelectionSchema.parse({ mode: "allow", names: [] })).toEqual({ mode: "allow", names: [] });
++    expect(SubagentToolSelectionSchema.parse({ mode: "inherit", excludeNames: ["write"] })).toEqual({ mode: "inherit", excludeNames: ["write"] });
++    expect(SubagentWorkScopeSchema.safeParse({ kind: "subagent", completionId: "parent" }).success).toBe(false);
++  });
++
++  it("keeps unknown source absent and known metadata lossless without fabricating mappings", () => {
++    expect(ContextMaterialSchema.parse({ key: "unknown", text: "I lost my job", source: {} }).source).toBeUndefined();
++    expect(SourceContextSchema.parse({ materials: [{}, {}] })).toEqual({});
++    const source = { label: "Interview", reference: "doc:17", speaker: "Narrator", time: "00:21" };
++    expect(SourceContextSchema.parse({ materials: [source] })).toEqual({ materials: [source] });
++    const part = { type: "tool-result", toolCallId: "read-1", toolName: "read", output: { type: "json", value: { ok: true, items: [] } },
++      sourceMaterials: [{ key: "document", source }] };
++    expect(TimelinePartSchema.parse(JSON.parse(JSON.stringify(part)))).toEqual(part);
++    expect(MaterialRefSchema.safeParse({ kind: "tool_result", runId: "r", attemptId: "a", toolCallId: "read-1", key: "document" }).success).toBe(false);
++  });
++
++  it("requires exact work for messages and rejects private authority fields on result collectors", () => {
++    expect(SubagentInputRequestSchema.safeParse({ subagentId: "11111111-1111-4111-8111-111111111111", operationKey: "send",
++      sender: { kind: "user" }, direction: "correct A", materials: [], input: { kind: "message" } }).success).toBe(false);
++    expect(ParentContinuationProposalSchema.safeParse({ decision: "reply", text: "Done", deliveryClass: "class_a" }).success).toBe(false);
++    expect(ParentContinuationProposalSchema.parse({ decision: "no_action", reason: "Already answered" })).toEqual({ decision: "no_action", reason: "Already answered" });
++  });
++});
+--- working-preimage/packages/core/src/db/subagent-repo.test.ts
++++ current/packages/core/src/db/subagent-repo.test.ts
+@@ -0,0 +1,441 @@
++import { randomUUID } from "node:crypto";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import type { RunOutcome, SubagentInput, SubagentProposal, TriggerRequest, RunEvent, ParentContinuationProposal } from "@taki/shared";
++import { openDatabase, type Database } from "./sqlite.ts";
++import { MIGRATIONS } from "./migrations/index-list.ts";
++import { createRunRepo, type RunAdmissionInput } from "./run-repo.ts";
++import { createSubagentRepo } from "./subagent-repo.ts";
++import { createSubagentInputRepo } from "./subagent-input-repo.ts";
++import { createSubagentExecutionRepo } from "./subagent-execution-repo.ts";
++import { createRunMessageRepo } from "./run-message-repo.ts";
++import { createRunEventRepo } from "./run-event-repo.ts";
++import { createRunEventLiveBus } from "./run-event-live.ts";
++import { createEffectRepo } from "./effect-repo.ts";
++import { createEffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
++import { createRunService } from "../harness/run-service.ts";
++import { createRecoveryCoordinator } from "../harness/recovery-coordinator.ts";
++import { digestRunValue } from "./run-row-mappers.ts";
++
++const dbs: Database[] = [];
++afterEach(() => { for (const db of dbs.splice(0)) db.close(); vi.useRealTimers(); });
++
++function request(key: string, overrides: Partial<TriggerRequest> = {}): TriggerRequest {
++  return { triggerRequestId: key, idempotencyKey: key, characterId: "taki", initiator: "subagent",
++    provenance: { provider: "core.subagent" }, deliveryClass: "internal", contextMode: "autonomous", ...overrides };
++}
++function snapshot(input: TriggerRequest): RunAdmissionInput["snapshot"] {
++  return { schemaVersion: "slice1.v1", characterId: input.characterId, initiator: input.initiator,
++    provenance: input.provenance, deliveryClass: input.deliveryClass, contextMode: input.contextMode,
++    modelProvider: "test", modelId: "test", primaryHostId: "core", hosts: [], extensions: [], extensionSnapshotDigest: "a".repeat(64),
++    governance: { policyGeneration: 1, registryRevision: 1, approvalGeneration: 1 },
++    memory: { providerId: "legacy-markdown", contractVersion: 1, capabilityDigest: "b".repeat(64),
++      capabilities: { providerId: "legacy-markdown", contractVersion: 1, retain: true, recall: true, reflect: false,
++        edit: false, invalidate: true, restore: false, conditionalMutation: false, idempotentWrites: false,
++        sparseRetrieval: true, vectorRetrieval: "unavailable", derivedMemoryRead: false } },
++    contextDecision: { sourceCategories: ["character"], tokenAccounting: "unknown" }, replayDecision: { status: "not_captured" },
++    budget: {}, implementation: { runtimeVersion: "test", schemaVersion: "slice1.v1" }, sourceRefs: [] };
++}
++
++function fixture() {
++  const errors: unknown[] = [];
++  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS, onAfterCommitError: (error) => { errors.push(error); } }); dbs.push(db);
++  const events: RunEvent[] = [];
++  const eventRepo = createRunEventRepo(db);
++  const live = createRunEventLiveBus(undefined, (batch) => { events.push(...batch); });
++  const executions = createSubagentExecutionRepo(db);
++  const terminal = vi.fn(); executions.linkedState.afterTerminalCommit = terminal;
++  const runs = createRunRepo(db, eventRepo, { liveBus: live, linkedState: executions.linkedState });
++  const inputs = createSubagentInputRepo(db); const children = createSubagentRepo(db); const messages = createRunMessageRepo(db);
++  const effects = createEffectRepo(db, eventRepo, live);
++  const parentRequest = request("parent", { initiator: "primary", contextMode: "primary", deliveryClass: "class_a", provenance: { provider: "chat" } });
++  const parent = runs.admit({ runId: randomUUID(), request: parentRequest, snapshot: snapshot(parentRequest), provider: "test", modelId: "test" });
++  const child = children.create({ characterId: "taki", createdByRunId: parent.run.runId, label: "Research", initialContext: { kind: "fresh" } });
++  const work = (key: string, policy: "record_only" | "request_parent" = "request_parent") => inputs.accept({
++    subagentId: child.subagentId, operationKey: key, sender: { kind: "parent", runId: parent.run.runId },
++    direction: key, materials: [], input: { kind: "work", completionPolicy: policy, lifetimeMinutes: 30, toolSelection: { mode: "allow", names: [] } },
++  }).input;
++  const link = (root: SubagentInput) => ({ kind: "subagent" as const, triggerInputId: root.inputId,
++    token: { subagentId: child.subagentId, workInputId: root.workInputId, throughWorkSeq: inputs.latestWorkSeq(root.workInputId),
++      controlVersion: children.get(child.subagentId).controlVersion }, validateTx: () => {} });
++  const admit = (root: SubagentInput, overrides: Partial<TriggerRequest> = {}) => {
++    const req = request(`execute:${root.inputId}`, { deadlineAt: root.workExpiresAt, provenance: { provider: "core.subagent", parentRunId: parent.run.runId }, ...overrides });
++    return runs.admit({ runId: randomUUID(), request: req, snapshot: snapshot(req), provider: "test", modelId: "test", linked: link(root) });
++  };
++  const settle = (admitted: ReturnType<typeof admit>, outcome: RunOutcome = "completed") => runs.settle({
++    runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, outcome, retryability: "not_retryable" });
++  const propose = (admitted: ReturnType<typeof admit>, proposal: SubagentProposal = { text: "Useful answer" }) => executions.recordProposal({
++    runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, workToken: executions.token(admitted.run.runId), proposal, digest: digestRunValue(proposal) });
++  return { db, errors, events, eventRepo, live, runs, children, inputs, executions, messages, effects, parent, child, work, link, admit, settle, propose, terminal };
++}
++
++describe("delegation inputs and linked admission", () => {
++  it("captures work expiry once before any Run, inherits it, and never renews it through duplicate/retry/reuse", () => {
++    vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-22T00:00:00.000Z"));
++    const f = fixture(); const work = f.work("A");
++    expect(work.workExpiresAt).toBe("2026-10-22T00:30:00.000Z");
++    vi.setSystemTime(new Date("2026-10-22T00:05:00.000Z"));
++    expect(f.work("A").workExpiresAt).toBe(work.workExpiresAt);
++    expect(() => f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "A", sender: { kind: "parent", runId: f.parent.run.runId },
++      direction: "A", materials: [], input: { kind: "work", completionPolicy: "request_parent", lifetimeMinutes: 60, toolSelection: { mode: "allow", names: [] } } })).toThrow("IDEMPOTENCY_CONFLICT");
++    const message = f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "extra", sender: { kind: "user" }, direction: "Extra", materials: [],
++      input: { kind: "message", workInputId: work.inputId, expectedControlVersion: 0 } }).input;
++    expect(message.workExpiresAt).toBe(work.workExpiresAt);
++    expect(() => f.admit(work, { deadlineAt: undefined })).toThrow("DEADLINE_MISMATCH");
++    expect(() => f.admit(work, { deadlineAt: "2026-10-22T01:00:00.000Z" })).toThrow("DEADLINE_MISMATCH");
++    const first = f.admit(work); f.runs.start(first.run.runId, first.attempt.attemptId);
++    const retry = f.runs.retry(first.run.runId, first.attempt.attemptId, "context overflow");
++    expect(retry.run.deadlineAt).toBe(work.workExpiresAt);
++    f.runs.settle({ runId: first.run.runId, attemptId: retry.run.activeAttemptId!, outcome: "completed", retryability: "not_retryable" });
++    const reused = f.admit(work, { triggerRequestId: "resume", idempotencyKey: "resume" });
++    expect(reused.run.deadlineAt).toBe(work.workExpiresAt);
++    f.runs.cancel(reused.run.runId); f.runs.start(reused.run.runId, reused.attempt.attemptId);
++    expect(() => f.db.prepare("UPDATE subagent_inputs SET work_expires_at='2027-01-01T00:00:00Z' WHERE input_id=:id").run({ id: work.inputId })).toThrow("IMMUTABLE");
++    vi.setSystemTime(new Date("2026-10-22T00:31:00.000Z"));
++    expect(() => f.admit(work, { triggerRequestId: "expired", idempotencyKey: "expired" })).toThrow("WORK_EXPIRED");
++  });
++
++  it("rejects stale addressed controls atomically and pages child history by actual cross-Run insertion order", () => {
++    const f = fixture(); const a = f.work("A"); const first = f.admit(a); f.runs.start(first.run.runId, first.attempt.attemptId);
++    expect(() => f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "stale", sender: { kind: "user" }, direction: "Stale", materials: [],
++      input: { kind: "message", workInputId: a.inputId, expectedControlVersion: 0 } })).toThrow("CONTROL_CONFLICT");
++    f.messages.recordStep({ runId: first.run.runId, attemptId: first.attempt.attemptId,
++      batch: { stepNumber: 0, entryKind: "output", messages: [{ role: "assistant", content: "A output" }] } });
++    f.settle(first);
++    const second = f.admit(f.work("B")); f.runs.start(second.run.runId, second.attempt.attemptId);
++    f.messages.recordStep({ runId: second.run.runId, attemptId: second.attempt.attemptId,
++      batch: { stepNumber: 0, entryKind: "output", messages: [{ role: "assistant", content: "B output" }] } });
++    const page = f.messages.history({ subagentId: f.child.subagentId, limit: 1, replay: true });
++    expect(page[0]?.content).toBe("A output");
++    expect(f.messages.history({ subagentId: f.child.subagentId, afterSeq: page[0]!.seq, replay: true })[0]?.content).toBe("B output");
++  });
++
++  it("keeps independent B separate from A and deduplicates input operations including explicit empty tools", () => {
++    const f = fixture(); const a = f.work("A"); const active = f.admit(a); const control = f.children.get(f.child.subagentId).controlVersion;
++    const b = f.work("B", "record_only");
++    const correction = f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "correct-A", sender: { kind: "user" },
++      direction: "Use the corrected date", materials: [], input: { kind: "message", expectedControlVersion: f.children.get(f.child.subagentId).controlVersion, workInputId: a.inputId } });
++    expect([a.inputSeq, b.inputSeq, correction.input.inputSeq]).toEqual([1, 2, 3]);
++    expect([a.workSeq, b.workSeq, correction.input.workSeq]).toEqual([1, 1, 2]);
++    expect(correction.input.completionPolicy).toBe("request_parent");
++    expect(f.children.get(f.child.subagentId)).toMatchObject({ controlVersion: control, activeRunId: active.run.runId });
++    expect(a.toolSelection).toEqual({ mode: "allow", names: [] });
++    expect(f.work("A").inputId).toBe(a.inputId);
++    expect(() => f.work("A", "record_only")).toThrow("SUBAGENT_INPUT_IDEMPOTENCY_CONFLICT");
++    expect(() => f.admit(b)).toThrow("SUBAGENT_CONTROL_CONFLICT");
++  });
++
++  it("captures selected context once and excludes raw tool inputs while retaining actual paired results", () => {
++    const f = fixture();
++    const value = f.children.create({ characterId: "taki", createdByRunId: f.parent.run.runId, label: "Selected",
++      initialContext: { kind: "snapshot", materials: [], messages: [
++        { role: "assistant", content: "", parts: [{ type: "tool-call", toolCallId: "call", toolName: "read", input: { secret: "private" } }] },
++        { role: "tool", content: "Read failed", parts: [{ type: "tool-result", toolCallId: "call", toolName: "read",
++          output: { type: "json", value: { ok: false, error: "unavailable" } }, sourceMaterials: [{ key: "document", source: { label: "Interview" } }] }] },
++      ] } });
++    expect(JSON.stringify(f.children.get(value.subagentId))).not.toContain("private");
++    expect(JSON.stringify(f.children.get(value.subagentId))).toContain("unavailable");
++    expect(() => f.db.prepare("UPDATE subagent_conversations SET initial_context_json='{}' WHERE subagent_id=:id").run({ id: value.subagentId })).toThrow("IMMUTABLE");
++  });
++
++  it("reuses only an exact linked admission and rolls back every row when linked admission fails", () => {
++    const f = fixture(); const work = f.work("A"); const req = request("linked", { deadlineAt: work.workExpiresAt }); const link = f.link(work);
++    const input = { runId: randomUUID(), request: req, snapshot: snapshot(req), provider: "test", modelId: "test", linked: link };
++    const first = f.runs.admit(input);
++    f.runs.start(first.run.runId, first.attempt.attemptId);
++    expect(f.runs.admit({ ...input, runId: randomUUID() }).reused).toBe(true);
++    expect(() => f.runs.admit({ ...input, linked: { ...link, token: { ...link.token, throughWorkSeq: 2 } } })).toThrow("SUBAGENT_ADMISSION_CONFLICT");
++    const b = f.work("B"); const count = f.events.length;
++    f.settle(first);
++    const before = f.db.prepare("SELECT count(*) n FROM runs").get()?.n;
++    f.db.exec("CREATE TRIGGER refuse_child BEFORE INSERT ON subagent_executions BEGIN SELECT RAISE(ABORT,'linked failure'); END");
++    expect(() => f.admit(b)).toThrow("linked failure");
++    expect(f.db.prepare("SELECT count(*) n FROM runs").get()?.n).toBe(before);
++    expect(f.children.get(f.child.subagentId).activeRunId).toBeNull();
++    expect(f.events.length).toBe(count + 2);
++  });
++
++  it("keeps the user latch through parent interruption/messages and requires an explicit exact user continuation", () => {
++    const f = fixture(); const work = f.work("A");
++    const target = { subagentId: f.child.subagentId, workInputId: work.inputId, expectedControlVersion: 0 };
++    expect(f.children.stop({ target, origin: "user" }).changed).toBe(true);
++    expect(f.children.stop({ target: { ...target, expectedControlVersion: 1 }, origin: "parent" }).changed).toBe(false);
++    expect(() => f.admit(work)).toThrow("SUBAGENT_STOPPED");
++    const input = { subagentId: f.child.subagentId, operationKey: "continue", direction: "", materials: [],
++      input: { kind: "continue" as const, workInputId: work.inputId, expectedControlVersion: 1 } };
++    expect(() => f.inputs.accept({ ...input, sender: { kind: "parent", runId: f.parent.run.runId } })).toThrow("SUBAGENT_USER_CONTINUE_REQUIRED");
++    const continued = f.inputs.accept({ ...input, sender: { kind: "user" } });
++    expect(f.children.get(f.child.subagentId)).toMatchObject({ stopOrigin: null, controlVersion: 2 });
++    expect(f.inputs.accept({ ...input, sender: { kind: "user" } })).toMatchObject({ reused: true, input: { inputId: continued.input.inputId } });
++  });
++
++  it("atomically rolls back the stop latch when exact Run cancellation fails", () => {
++    const f = fixture(); const work = f.work("A"); const admitted = f.admit(work);
++    expect(() => f.children.stop({ target: { subagentId: f.child.subagentId, workInputId: work.inputId,
++      expectedRunId: admitted.run.runId, expectedControlVersion: 1 }, origin: "user", cancelRunTx: () => { throw new Error("cancel failed"); } })).toThrow("cancel failed");
++    expect(f.children.get(f.child.subagentId)).toMatchObject({ stopOrigin: null, controlVersion: 1 });
++  });
++});
++
++describe("canonical delegation terminal participation", () => {
++  it.each([false, true])("binds the proposal to exact consumed input and accepts only a current replacement (replace=%s)", (replace) => {
++    const f = fixture(); const work = f.work("A"); const admitted = f.admit(work); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    f.propose(admitted, { text: "Old body", sourceContext: { materials: [{ label: "Old source" }] } });
++    f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId,
++      batch: { stepNumber: 0, entryKind: "output", messages: [{ role: "assistant", content: "Old body" }] } });
++    const correction = f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "correct", sender: { kind: "user" }, direction: "New input", materials: [],
++      input: { kind: "message", workInputId: work.inputId, expectedControlVersion: 1 } }).input;
++    const token = { ...f.executions.token(admitted.run.runId), throughWorkSeq: 2 };
++    f.effects.prepareIntent({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, kind: "model", sourceRef: { type: "model", provider: "test", modelId: "test" },
++      inputDigest: "f".repeat(64), replayPosture: "never", onCommitIntent: (effect) => f.messages.recordModelInputs({ effect, token, stepNumber: 1, inputIds: [work.inputId, correction.inputId] }) });
++    if (replace) f.propose(admitted, { text: "Current body", sourceContext: { materials: [{ label: "Current source" }] } });
++    f.settle(admitted);
++    const result = f.executions.result(admitted.run.runId)!;
++    if (replace) expect(result).toMatchObject({ completionState: "pending", child: { body: "Current body", outputKind: "validated", currentness: "current", throughWorkSeq: 2 } });
++    else {
++      expect(result).toMatchObject({ completionState: "pending", child: { body: null, outputKind: "none", currentness: "current", throughWorkSeq: 2 } });
++      expect(result.child.sourceContext.materials).toBeUndefined();
++    }
++    expect(JSON.stringify(result)).not.toContain("Old source");
++    expect(f.messages.history({ subagentId: f.child.subagentId }).some((row) => row.content === "Old body")).toBe(true);
++  });
++
++  it("accepts a genuinely newer current proposal identity while rejecting same-identity changes and stale Attempt callbacks", () => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId); f.propose(admitted);
++    expect(() => f.propose(admitted, { text: "Different at same identity" })).toThrow("PROPOSAL_CONFLICT");
++    const retry = f.runs.retry(admitted.run.runId, admitted.attempt.attemptId, "context overflow");
++    expect(() => f.propose(admitted, { text: "Late old callback" })).toThrow("PROPOSAL_STALE");
++    const current = { ...admitted, attempt: retry.attempts.find((attempt) => attempt.attemptId === retry.run.activeAttemptId)! };
++    f.propose(current, { text: "Current answer" }); f.settle(current);
++    expect(f.executions.result(admitted.run.runId)?.child).toMatchObject({ attemptId: current.attempt.attemptId, body: "Current answer", outputKind: "validated" });
++  });
++
++  it("does not reject an already committed admission when an observer terminalizes it and unused capture disposal throws", async () => {
++    const f = fixture(); const work = f.work("A"); const publish = f.live.publish;
++    f.live.publish = (events) => {
++      publish(events);
++      const admission = events.find((event) => event.kind === "run.admitted");
++      if (!admission) return;
++      f.runs.cancel(admission.runId);
++      f.runs.start(admission.runId, f.runs.status(admission.runId).run.activeAttemptId!);
++    };
++    const disposed = vi.fn(() => { throw new Error("unused disposal failed"); });
++    const service = createRunService({ repo: f.runs, provider: "test", modelId: "test",
++      snapshot: { async capture(input) { return { snapshot: snapshot(input), context: { dispose: disposed } }; } } });
++    const admitted = await service.admitLinked(request("observer-cancel", { deadlineAt: work.workExpiresAt }), { linked: f.link(work) });
++    expect(admitted.run.state).toBe("cancelled"); expect(disposed).toHaveBeenCalledTimes(1);
++    expect(service.context(admitted.run.runId)).toBeUndefined(); expect(f.errors).toHaveLength(1);
++  });
++
++  it.each([
++    ["start-cancel", "cancelled"], ["start-deadline", "deadline_exceeded"], ["start-budget", "failed"],
++    ["guard-cancel", "cancelled"], ["guard-deadline", "deadline_exceeded"], ["guard-budget", "failed"],
++    ["public-settle", "completed"], ["recovery", "cancelled"],
++  ] as const)("records and releases through %s using final outcome %s", async (path, outcome) => {
++    const f = fixture(); const work = f.work("A"); const admitted = f.admit(work);
++    const runId = admitted.run.runId; const attemptId = admitted.attempt.attemptId;
++    if (path.startsWith("guard") || path === "public-settle") f.runs.start(runId, attemptId);
++    if (path.endsWith("cancel") || path === "recovery") f.runs.cancel(runId);
++    if (path.endsWith("deadline")) f.db.prepare("UPDATE runs SET deadline_at='2000-01-01T00:00:00.000Z' WHERE run_id=:id").run({ id: runId });
++    if (path.endsWith("budget")) f.db.prepare("UPDATE runs SET budget_limit=0 WHERE run_id=:id").run({ id: runId });
++    if (path.startsWith("start")) expect(f.runs.start(runId, attemptId).started).toBe(false);
++    else if (path.startsWith("guard")) expect(f.runs.guardDispatch(runId, attemptId)).toBe(false);
++    else if (path === "public-settle") f.settle(admitted);
++    else {
++      const restarted = createRunRepo(f.db, f.eventRepo, { linkedState: createSubagentExecutionRepo(f.db).linkedState });
++      const recovery = createRecoveryCoordinator({ db: f.db, runs: restarted, effects: createEffectLifecycleService(f.effects) });
++      await recovery.scan();
++    }
++    const result = f.executions.result(runId);
++    expect(result).toMatchObject({ completionState: "pending", child: { runId, attemptId, outcome, body: null, outputKind: "none" } });
++    expect(f.runs.status(runId).run.outcome).toBe(outcome);
++    expect(f.children.get(f.child.subagentId).activeRunId).toBeNull();
++    const old = JSON.stringify(result); const count = f.events.length;
++    f.settle(admitted, "failed");
++    expect(JSON.stringify(f.executions.result(runId))).toBe(old);
++    expect(f.events).toHaveLength(count);
++  });
++
++  it.each(["cancelled", "deadline_exceeded", "outcome_unknown"] as const)("never accepts a success proposal beside %s", (outcome) => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId); f.propose(admitted);
++    if (outcome === "cancelled") f.runs.cancel(admitted.run.runId);
++    if (outcome === "deadline_exceeded") f.db.prepare("UPDATE runs SET deadline_at='2000-01-01T00:00:00.000Z' WHERE run_id=:id").run({ id: admitted.run.runId });
++    f.settle(admitted, outcome === "outcome_unknown" ? outcome : "completed");
++    expect(f.executions.result(admitted.run.runId)?.child).toMatchObject({ outcome, body: "Useful answer", outputKind: "partial" });
++  });
++
++  it("retains A/request-parent while independent B/record-only waits and parent stop leaves the child alone", () => {
++    const f = fixture(); const a = f.work("A"); const admitted = f.admit(a); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    const b = f.work("B", "record_only"); f.runs.cancel(f.parent.run.runId);
++    expect(f.runs.status(admitted.run.runId).run.state).toBe("running");
++    f.propose(admitted, { text: "A result", sourceContext: { materials: [{ label: "Selected source", speaker: "Narrator" }] } }); f.settle(admitted);
++    expect(f.executions.result(admitted.run.runId)).toMatchObject({ completionState: "pending", child: { currentness: "current", body: "A result" } });
++    const next = f.admit(b); f.runs.start(next.run.runId, next.attempt.attemptId); f.settle(next);
++    expect(f.executions.result(next.run.runId)?.completionState).toBe("not_requested");
++    expect(f.executions.pending().map((item) => item?.completionId)).toEqual([admitted.run.runId]);
++  });
++
++  it("withholds only a result with an unconsumed correction to its own work", () => {
++    const f = fixture(); const a = f.work("A"); const admitted = f.admit(a); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    f.work("B", "record_only");
++    f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "steer", sender: { kind: "user" }, direction: "Correction", materials: [],
++      input: { kind: "message", expectedControlVersion: f.children.get(f.child.subagentId).controlVersion, workInputId: a.inputId } });
++    f.propose(admitted); f.settle(admitted);
++    expect(f.executions.result(admitted.run.runId)).toMatchObject({ completionState: "withheld", completionReason: "superseded", child: { currentness: "superseded" } });
++  });
++
++  it("rolls back terminal Run/Attempt/Receipt/events, private final tail and child pointer when the participant fails", () => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    f.messages.stageTerminal({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId,
++      batch: { stepNumber: 0, entryKind: "partial", messages: [{ role: "assistant", content: "observed partial" }] } });
++    const before = f.runs.status(admitted.run.runId); const count = f.events.length;
++    f.db.exec("CREATE TRIGGER refuse_result BEFORE UPDATE OF result_json ON subagent_executions BEGIN SELECT RAISE(ABORT,'terminal failure'); END");
++    expect(() => f.settle(admitted)).toThrow("terminal failure");
++    expect(f.runs.status(admitted.run.runId)).toEqual(before);
++    expect(f.messages.list({ runId: admitted.run.runId })).toEqual([]);
++    expect(f.children.get(f.child.subagentId).activeRunId).toBe(admitted.run.runId);
++    expect(f.events).toHaveLength(count); expect(f.terminal).not.toHaveBeenCalled();
++  });
++
++  it("defers context disposal and notifications to the outer commit, and isolates a throwing disposer", async () => {
++    const f = fixture(); const disposed = vi.fn(() => { throw new Error("disposal failed"); });
++    const service = createRunService({ repo: f.runs, provider: "test", modelId: "test",
++      snapshot: { async capture(input) { return { snapshot: snapshot(input), context: { dispose: disposed } }; } } });
++    const work = f.work("A"); const admitted = await service.admitLinked(request("service-child", { deadlineAt: work.workExpiresAt }), { linked: f.link(work) });
++    service.start(admitted.run.runId, admitted.attempt.attemptId); const count = f.events.length;
++    expect(() => f.db.transaction(() => { service.settle(admitted.run.runId, admitted.attempt.attemptId, "completed");
++      expect(disposed).not.toHaveBeenCalled(); expect(f.events).toHaveLength(count); throw new Error("outer rollback"); })).toThrow("outer rollback");
++    expect(service.context(admitted.run.runId)).toBeDefined(); expect(f.executions.result(admitted.run.runId)).toBeNull();
++    f.db.transaction(() => { f.settle(admitted); expect(disposed).not.toHaveBeenCalled(); });
++    expect(disposed).toHaveBeenCalledTimes(1); expect(f.errors).toHaveLength(1);
++    expect(service.context(admitted.run.runId)).toBeUndefined(); expect(f.terminal).toHaveBeenCalledTimes(1);
++    f.settle(admitted); expect(disposed).toHaveBeenCalledTimes(1);
++  });
++
++  it("rolls back linked settlement on deferred COMMIT failure without events or disposal", () => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    const count = f.events.length;
++    f.db.exec("CREATE TABLE commit_failure (id TEXT REFERENCES runs(run_id) DEFERRABLE INITIALLY DEFERRED)");
++    expect(() => f.db.transaction(() => { f.settle(admitted); f.db.exec("INSERT INTO commit_failure VALUES ('missing')"); })).toThrow();
++    expect(f.runs.status(admitted.run.runId).run.state).toBe("running");
++    expect(f.executions.result(admitted.run.runId)).toBeNull(); expect(f.events).toHaveLength(count); expect(f.terminal).not.toHaveBeenCalled();
++  });
++});
++
++describe("private model input receipts and parent synthesis", () => {
++  it("keeps completed steps idempotent, partials distinct and stale Attempt callbacks unable to settle current work", () => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    const batch = { stepNumber: 0, entryKind: "output" as const, messages: [{ role: "assistant" as const, content: "Completed visible step" }] };
++    f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, batch });
++    f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, batch });
++    expect(() => f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId,
++      batch: { ...batch, messages: [{ role: "assistant", content: "different" }] } })).toThrow("RUN_MESSAGE_BATCH_CONFLICT");
++    f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId,
++      batch: { stepNumber: 0, entryKind: "partial", messages: [{ role: "assistant", content: "Earlier partial" }] } });
++    expect(f.messages.list({ runId: admitted.run.runId })).toHaveLength(2);
++    expect(f.messages.list({ runId: admitted.run.runId, replay: true })).toHaveLength(1);
++    f.runs.retry(admitted.run.runId, admitted.attempt.attemptId, "context overflow");
++    f.settle(admitted);
++    expect(f.executions.result(admitted.run.runId)).toBeNull();
++    expect(() => f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, batch })).toThrow("STALE_ATTEMPT");
++  });
++
++  it("revalidates the child stop token after asynchronous snapshot capture and disposes a refused capture", async () => {
++    const f = fixture(); const work = f.work("A"); const disposed = vi.fn(); const linked = f.link(work);
++    const service = createRunService({ repo: f.runs, provider: "test", modelId: "test", snapshot: { async capture(input) {
++      await Promise.resolve();
++      f.children.stop({ target: { subagentId: f.child.subagentId, workInputId: work.inputId, expectedControlVersion: 0 }, origin: "user" });
++      return { snapshot: snapshot(input), context: { dispose: disposed } };
++    } } });
++    await expect(service.admitLinked(request("capture-race", { deadlineAt: work.workExpiresAt }), { linked })).rejects.toThrow("SUBAGENT_STOPPED");
++    expect(disposed).toHaveBeenCalledTimes(1);
++    expect(f.executions.list({ subagentId: f.child.subagentId })).toEqual([]);
++    expect(f.db.prepare("SELECT count(*) n FROM runs").get()?.n).toBe(1);
++  });
++
++  it.each(["internal_result", "no_action", "reply"] as const)("retains a completed parent %s decision without publishing speech", (decision) => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId); f.propose(admitted); f.settle(admitted);
++    const group = f.executions.result(admitted.run.runId)!;
++    const req = request(`subagent-completion:${admitted.run.runId}`, { deadlineAt: f.inputs.get(f.executions.get(admitted.run.runId).workInputId).workExpiresAt, provenance: { provider: "core.subagent-completion" }, payloadRef: admitted.run.runId });
++    const parent = f.runs.admit({ runId: randomUUID(), request: req, snapshot: snapshot(req), provider: "test", modelId: "test",
++      linked: { kind: "parent-continuation", completionId: admitted.run.runId, resultDigest: group.childDigest, validateTx: () => {} } });
++    f.runs.start(parent.run.runId, parent.attempt.attemptId);
++    const proposal: ParentContinuationProposal = decision === "no_action" ? { decision, reason: "Already answered", text: "Retained synthesis" }
++      : { decision, text: "Retained synthesis" };
++    f.executions.recordParentProposal({ runId: parent.run.runId, attemptId: parent.attempt.attemptId, proposal, digest: digestRunValue(proposal) });
++    const retry = f.runs.retry(parent.run.runId, parent.attempt.attemptId, "context overflow");
++    expect(() => f.executions.recordParentProposal({ runId: parent.run.runId, attemptId: parent.attempt.attemptId, proposal, digest: digestRunValue(proposal) })).toThrow("PROPOSAL_STALE");
++    f.executions.recordParentProposal({ runId: parent.run.runId, attemptId: retry.run.activeAttemptId!, proposal, digest: digestRunValue(proposal) });
++    f.runs.settle({ runId: parent.run.runId, attemptId: retry.run.activeAttemptId!, outcome: "completed", retryability: "not_retryable" });
++    expect(f.executions.get(admitted.run.runId).parentResult?.decision).toBe(decision);
++    expect(f.executions.result(admitted.run.runId)?.publication?.state).toBe(decision === "reply" ? "pending" : decision === "no_action" ? "no_action" : "internal_only");
++    expect(f.db.prepare("SELECT count(*) n FROM timeline_messages").get()?.n).toBe(0);
++    expect(f.db.prepare("SELECT count(*) n FROM run_deliveries").get()?.n).toBe(0);
++  });
++
++  it("records only actual model intents, preserves first receipts across repeated calls/retries, and orders visible native steps", () => {
++    const f = fixture(); const work = f.work("A"); const admitted = f.admit(work); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    const token = f.executions.token(admitted.run.runId);
++    const message = f.inputs.accept({ subagentId: f.child.subagentId, operationKey: "later", sender: { kind: "user" }, direction: "Later",
++      materials: [], input: { kind: "message", expectedControlVersion: f.children.get(f.child.subagentId).controlVersion, workInputId: work.inputId } }).input;
++    expect(f.inputs.get(work.inputId).consumed).toBeNull();
++    const prepare = (step: number, ids: string[]) => f.effects.prepareIntent({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId,
++      kind: "model", sourceRef: { type: "model", provider: "test", modelId: "test" }, inputDigest: "c".repeat(64), replayPosture: "never",
++      onCommitIntent: (effect) => f.messages.recordModelInputs({ effect, token, stepNumber: step, inputIds: ids }) });
++    const first = prepare(0, [work.inputId]);
++    expect(f.inputs.get(message.inputId).consumed).toBeNull();
++    prepare(0, [work.inputId]);
++    expect(f.inputs.get(work.inputId).consumed?.effectId).toBe(first.effectId);
++    expect(f.messages.list({ runId: admitted.run.runId })).toHaveLength(2);
++    expect(f.messages.list({ runId: admitted.run.runId, replay: true })).toHaveLength(1);
++    f.messages.recordStep({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, batch: { stepNumber: 0, entryKind: "output", messages: [
++      { role: "assistant", content: "", parts: [{ type: "tool-call", toolCallId: "read", toolName: "read", input: { private: "secret" } }] },
++      { role: "tool", content: "No matches", parts: [{ type: "tool-result", toolCallId: "read", toolName: "read", output: { type: "json", value: { ok: true, items: [] } },
++        sourceMaterials: [{ key: "search", source: { reference: "doc:1" } }] }] },
++    ] } });
++    token.throughWorkSeq = 2; prepare(1, [message.inputId]);
++    const rows = f.messages.list({ runId: admitted.run.runId, replay: true });
++    expect(rows.map((row) => row.entryKind)).toEqual(["input", "output", "output", "input"]);
++    expect(JSON.stringify(rows)).not.toContain("secret"); expect(JSON.stringify(rows)).toContain("doc:1");
++    const next = f.runs.retry(admitted.run.runId, admitted.attempt.attemptId, "context overflow");
++    const secondAttempt = next.run.activeAttemptId!;
++    f.effects.prepareIntent({ runId: admitted.run.runId, attemptId: secondAttempt, kind: "model", sourceRef: { type: "model", provider: "test", modelId: "test" },
++      inputDigest: "d".repeat(64), replayPosture: "never", onCommitIntent: (effect) => f.messages.recordModelInputs({ effect, token, stepNumber: 0, inputIds: [work.inputId, message.inputId] }) });
++    expect(f.inputs.get(work.inputId).consumed?.attemptId).toBe(admitted.attempt.attemptId);
++    expect(f.messages.list({ runId: admitted.run.runId, replay: true })).toHaveLength(4);
++  });
++
++  it("rolls back receipt and watermark if Effect insertion fails, and refuses a skipped pending input", () => {
++    const f = fixture(); const work = f.work("A"); const admitted = f.admit(work); f.runs.start(admitted.run.runId, admitted.attempt.attemptId);
++    const token = f.executions.token(admitted.run.runId);
++    const input = { runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, kind: "model" as const,
++      sourceRef: { type: "model" as const, provider: "test", modelId: "test" }, inputDigest: "a".repeat(64), replayPosture: "never" as const };
++    expect(() => f.effects.prepareIntent({ ...input, onCommitIntent: (effect) => f.messages.recordModelInputs({ effect, token, stepNumber: 0, inputIds: [] }) })).toThrow("BATCH_INCOMPLETE");
++    f.db.exec("CREATE TRIGGER refuse_effect BEFORE INSERT ON run_effects BEGIN SELECT RAISE(ABORT,'effect failure'); END");
++    expect(() => f.effects.prepareIntent({ ...input, onCommitIntent: (effect) => f.messages.recordModelInputs({ effect, token, stepNumber: 0, inputIds: [work.inputId] }) })).toThrow("effect failure");
++    expect(f.inputs.get(work.inputId).consumed).toBeNull(); expect(f.messages.list({ runId: admitted.run.runId })).toEqual([]);
++    expect(f.runs.status(admitted.run.runId).run.budgetUsed).toBe(0);
++  });
++
++  it("atomically links one parent synthesis with trusted main scope and retains a cancelled reply as partial internal evidence", async () => {
++    const f = fixture(); const admitted = f.admit(f.work("A")); f.runs.start(admitted.run.runId, admitted.attempt.attemptId); f.propose(admitted); f.settle(admitted);
++    const completion = f.executions.result(admitted.run.runId)!;
++    const scopes: unknown[] = [];
++    const service = createRunService({ repo: f.runs, provider: "test", modelId: "test",
++      snapshot: { async capture(input, _run, options) { scopes.push(options?.workScope); return { snapshot: snapshot(input), context: {} }; } } });
++    const req = request(`subagent-completion:${admitted.run.runId}`, { deadlineAt: f.inputs.get(f.executions.get(admitted.run.runId).workInputId).workExpiresAt, provenance: { provider: "core.subagent-completion", parentRunId: f.parent.run.runId }, payloadRef: admitted.run.runId });
++    const linked = { kind: "parent-continuation" as const, completionId: admitted.run.runId, resultDigest: completion.childDigest, validateTx: () => {} };
++    const parent = await service.admitLinked(req, { linked });
++    expect((await service.admitLinked(req, { linked })).reused).toBe(true);
++    expect(scopes[0]).toEqual({ kind: "parent-continuation", completionId: admitted.run.runId });
++    expect(parent.snapshot.memory.capabilities.retain).toBe(true);
++    service.start(parent.run.runId, parent.attempt.attemptId);
++    const proposal: ParentContinuationProposal = { decision: "reply", text: "Synthesis", sourceContext: { materials: [{ label: "Interview" }] } };
++    f.executions.recordParentProposal({ runId: parent.run.runId, attemptId: parent.attempt.attemptId, proposal, digest: digestRunValue(proposal) });
++    service.requestCancel(parent.run.runId); service.settle(parent.run.runId, parent.attempt.attemptId, "completed");
++    const result = f.executions.result(admitted.run.runId);
++    expect(result).toMatchObject({ completionState: "admitted", parentRunId: parent.run.runId,
++      parent: { outcome: "cancelled", outputKind: "partial", body: "Synthesis", decision: "unstructured" }, publication: { state: "internal_only" } });
++    expect(f.executions.pending()).toEqual([]);
++    expect(f.executions.setCompletion({ completionId: admitted.run.runId, state: "deferred", reason: "foreground_busy" })).toBe(false);
++  });
++});
+--- working-preimage/packages/core/src/db/migrations/056-subagent-conversations.test.ts
++++ current/packages/core/src/db/migrations/056-subagent-conversations.test.ts
+@@ -0,0 +1,57 @@
++import { mkdtempSync } from "node:fs";
++import { tmpdir } from "node:os";
++import { join } from "node:path";
++import { afterEach, describe, expect, it } from "vitest";
++import { openDatabase, type Database } from "../sqlite.ts";
++import { runMigrations, type Migration } from "../migration-runner.ts";
++import { MIGRATIONS } from "./index-list.ts";
++import { subagentConversationsMigration056 } from "./056-subagent-conversations.ts";
++import { rmTempDir } from "../../testing/rm-temp.ts";
++
++const dbs: Database[] = [];
++const dirs: string[] = [];
++afterEach(() => { for (const db of dbs.splice(0)) db.close(); for (const dir of dirs.splice(0)) rmTempDir(dir); });
++function open(path: string, migrations: Migration[]) {
++  const db = openDatabase({ path, migrations }); dbs.push(db); return db;
++}
++const families = ["subagent_conversations", "subagent_inputs", "run_messages", "subagent_executions"];
++
++describe("subagent migration 056", () => {
++  it("keeps the registry strictly ascending and creates all four families on a fresh install", () => {
++    const versions = MIGRATIONS.map((migration) => migration.version);
++    expect(versions).toEqual([...new Set(versions)].sort((a, b) => a - b));
++    expect(versions.at(-1)).toBe(56);
++    const db = open(":memory:", MIGRATIONS);
++    for (const name of families) expect(db.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name=:name").get({ name })?.name).toBe(name);
++    expect(runMigrations(db, MIGRATIONS)).toEqual([]);
++    expect(db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
++  });
++
++  it.each(["current", "old-t4"])("upgrades populated %s lineage and reopens without changing old text or migration receipts", (lineage) => {
++    const dir = mkdtempSync(join(tmpdir(), "taki-subagent-migration-")); dirs.push(dir);
++    const path = join(dir, "state.db");
++    const migrations = lineage === "current" ? MIGRATIONS.filter((migration) => migration.version <= 55)
++      : [...MIGRATIONS.filter((migration) => migration.version <= 34), { version: 35, sql: "ALTER TABLE timeline_messages ADD COLUMN presentation TEXT;" }];
++    const old = open(path, migrations);
++    old.exec("INSERT INTO timeline_messages(id,character_id,role,content,created_at) VALUES ('old','taki','user','Original narrator: 我 lost my job','2026-10-21T00:00:00Z')");
++    const text = old.prepare("SELECT * FROM timeline_messages WHERE id='old'").get();
++    const receipts = old.prepare("SELECT * FROM migrations ORDER BY version").all();
++    old.close();
++    const upgraded = open(path, MIGRATIONS);
++    expect(upgraded.prepare("SELECT * FROM timeline_messages WHERE id='old'").get()).toEqual(text);
++    expect(upgraded.prepare("SELECT * FROM migrations WHERE version<=:version ORDER BY version").all({ version: lineage === "current" ? 55 : 35 })).toEqual(receipts);
++    expect(upgraded.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
++    upgraded.close();
++    const reopened = open(path, MIGRATIONS);
++    expect(runMigrations(reopened, MIGRATIONS)).toEqual([]);
++  });
++
++  it("refuses a conflicting pre-existing table without leaving partial new schema or a receipt", () => {
++    const db = open(":memory:", MIGRATIONS.filter((migration) => migration.version < 56));
++    db.exec("CREATE TABLE subagent_inputs (wrong TEXT)");
++    expect(() => runMigrations(db, [subagentConversationsMigration056])).toThrow();
++    expect(db.prepare("SELECT name FROM sqlite_schema WHERE name='subagent_conversations'").get()).toBeUndefined();
++    expect(db.prepare("SELECT version FROM migrations WHERE version=56").get()).toBeUndefined();
++    expect(db.prepare("PRAGMA table_info(subagent_inputs)").all().map((row) => row.name)).toEqual(["wrong"]);
++  });
++});

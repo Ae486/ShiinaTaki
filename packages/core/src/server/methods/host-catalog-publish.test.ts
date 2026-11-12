@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { HostCatalogPublishParams } from "@taki/shared";
 import { createHostCatalogStore } from "../../hosts/host-catalog.ts";
+import type { ExtensionChangeObserver } from "../../extensions/notify-extension-change.ts";
 import type { Connection } from "../connection-registry.ts";
 import { createConnectionRegistry } from "../connection-registry.ts";
 import { createMethodRegistry, type MethodContext } from "../method-registry.ts";
@@ -23,9 +24,9 @@ function ctx(hostId = HOST, connectionGeneration = 1): MethodContext {
   return { connection, notify: () => undefined, close: () => undefined, onClose: () => undefined };
 }
 
-function currentHost() {
+function currentHost(onChange?: ExtensionChangeObserver) {
   const connections = createConnectionRegistry();
-  const catalogs = createHostCatalogStore();
+  const catalogs = createHostCatalogStore({ onChange });
   const connection = connections.create();
   const provenance = connections.authenticate(connection, {
     deviceId: HOST,
@@ -72,17 +73,20 @@ describe("hostCatalogPublishMethod", () => {
     ["protocol", { protocolVersion: 2 }],
     ["catalog schema", { catalogSchemaVersion: 2 }],
   ])("retires the current generation after an unsupported %s version for the same provenance", (_label, overrides) => {
-    const { catalogs, candidate, connection, method } = currentHost();
+    const changed = vi.fn();
+    const { catalogs, candidate, connection, method } = currentHost(changed);
 
     expect(method.handler({ ...candidate, ...overrides }, { ...ctx(), connection })).toEqual({
       accepted: false,
       reason: "unsupported_version",
     });
     expect(catalogs.get(HOST)).toBeUndefined();
+    expect(changed.mock.calls).toEqual([[["extension-status"]], [["extension-status"]]]);
   });
 
   it("retires the current generation after a non-monotonic catalog candidate for the same provenance", () => {
-    const { catalogs, candidate, connection, connections } = currentHost();
+    const changed = vi.fn();
+    const { catalogs, candidate, connection, connections } = currentHost(changed);
     const method = hostCatalogPublishMethod(catalogs, connections);
     expect(method.handler({ ...candidate, catalogGeneration: 2 }, { ...ctx(), connection })).toEqual({ accepted: true });
 
@@ -91,10 +95,12 @@ describe("hostCatalogPublishMethod", () => {
       reason: "stale_generation",
     });
     expect(catalogs.get(HOST)).toBeUndefined();
+    expect(changed).toHaveBeenCalledTimes(3);
   });
 
   it("does not retire the current catalog for wrong-host or wrong-generation semantic candidates", () => {
-    const { catalogs, candidate, connection, method } = currentHost();
+    const changed = vi.fn();
+    const { catalogs, candidate, connection, method } = currentHost(changed);
 
     expect(method.handler({ ...candidate, hostId: "22222222-2222-4222-8222-222222222222" }, {
       ...ctx(), connection,
@@ -104,11 +110,13 @@ describe("hostCatalogPublishMethod", () => {
       reason: "stale_generation",
     });
     expect(catalogs.get(HOST)).toBeDefined();
+    expect(changed).toHaveBeenCalledExactlyOnceWith(["extension-status"]);
   });
 
   it("retires the current generation catalog when a complete replacement candidate is invalid", async () => {
     const connections = createConnectionRegistry();
-    const catalogs = createHostCatalogStore();
+    const changed = vi.fn();
+    const catalogs = createHostCatalogStore({ onChange: changed });
     const connection = connections.create();
     const provenance = connections.authenticate(connection, {
       deviceId: HOST,
@@ -131,6 +139,7 @@ describe("hostCatalogPublishMethod", () => {
     expect(response).toMatchObject({ error: { code: -32602 } });
     expect(catalogs.get(HOST)).toBeUndefined();
     expect(catalogs.hostsForCapability("screenshot")).toHaveLength(0);
+    expect(changed.mock.calls).toEqual([[["extension-status"]], [["extension-status"]]]);
   });
 
   it("does not let an operator or stale socket retire the current Host catalog with invalid params", async () => {

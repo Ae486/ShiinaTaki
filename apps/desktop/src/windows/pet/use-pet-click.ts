@@ -7,7 +7,6 @@
 
 import { useCallback } from "react";
 import type { PetScene } from "@/renderer/pet-scene.js";
-import { useChatBubbleStore } from "@/features/chat-bubble/chat-bubble-store.js";
 import { useInteractionStore } from "@/stores/interaction-store.js";
 
 export function usePetClick(scene: PetScene | null): (x: number, y: number) => void {
@@ -17,10 +16,8 @@ export function usePetClick(scene: PetScene | null): (x: number, y: number) => v
     (x, y) => {
       if (!scene) return;
       const region = scene.handleClick(x, y); // fires the region reaction, returns the region (null if off-model)
-      // Body click → open the bubble; head poke → reaction only. Never reset an already-open bubble (would wipe a
-      // streaming reply); opening is a no-op when already open.
+      // Opening reveals the current read projection. Resetting here would erase a reply that continued while closed.
       if (region !== null && region !== "head" && !useInteractionStore.getState().bubbleOpen) {
-        useChatBubbleStore.getState().reset();
         setBubbleOpen(true);
       }
     },

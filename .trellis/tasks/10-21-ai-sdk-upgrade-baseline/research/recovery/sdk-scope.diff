@@ -1,0 +1,562 @@
+--- a/packages/core/package.json
++++ b/packages/core/package.json
+@@ -11,10 +11,10 @@
+     "test": "vitest run"
+   },
+   "dependencies": {
+-    "@ai-sdk/mcp": "^2.0.10",
+-    "@ai-sdk/openai-compatible": "^3.0.5",
++    "@ai-sdk/mcp": "2.0.81",
++    "@ai-sdk/openai-compatible": "3.0.75",
+     "@taki/shared": "workspace:*",
+-    "ai": "^7.0.17",
++    "ai": "7.0.148",
+     "croner": "^10.0.1",
+     "cross-spawn": "7.0.6",
+     "fflate": "^0.8.3",
+--- a/packages/core/src/agents/chat-agent.ts
++++ b/packages/core/src/agents/chat-agent.ts
+@@ -4,6 +4,7 @@
+  * POS:    core/agents — the existing ToolLoopAgent boundary; owns abort/retract and one context-overflow retry,
+  *         preserving day-stable instructions, volatile message-tail context, and detached memory writes
+  */
++/* eslint max-lines: ["error", { "max": 363, "skipBlankLines": true, "skipComments": true }] -- Keep SDK abort failure and completed-step capture beside retry/commit ordering; splitting these turn-owner seams would obscure that contract. */
+ import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
+ import { captureToolDisplayNames, type ChatSendParams, type ImageAttachment, type InitiativeSelectedContext, type RunMemoryReference, type TimelineEntry } from "@taki/shared";
+ import { initiativeInstructions, initiativeReplay, restrictInitiativeTools } from "./initiative-context.ts";
+@@ -32,6 +33,7 @@
+ import type { ToolDisclosureSnapshot } from "../extensions/tool-disclosure-snapshot.ts";
+ import { bindCapturedSkillLoad, createToolDisclosure, type SkillToolBundle } from "./tool-disclosure.ts";
+ import { bindCapturedToolExecution } from "../governance/captured-tool-execution.ts";
++import { observeProviderStreamFailure } from "./provider-stream-failure.ts";
+ 
+ /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
+ export interface TurnContext {
+@@ -302,7 +304,9 @@
+   const clock = { now, timezone: selected ? undefined : deps.userTimezone?.() };
+   const memoryContext = selected ? "" : attempt.runContext?.assembleMemory?.(controlMessage) ?? deps.memory.assemble({ characterId, currentMessage: controlMessage });
+   const instructions = selected ? initiativeInstructions(selected) : composeInstructions(deps, { characterId, memoryContext, memoryPrompt: attempt.runContext?.memoryPrompt, runInstructions: attempt.runContext?.instructions }, clock);
+-  const selectedModel = vision ? vision.model : deps.model;
++  let providerStreamFailure: { error: unknown } | undefined;
++  const selectedModel = observeProviderStreamFailure(vision ? vision.model : deps.model,
++    (error) => { providerStreamFailure ??= { error }; });
+   const { model, observability } = createRunObservabilityModel({
+     model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
+     onCommitModelIntent: turn?.onCommitModelIntent,
+@@ -321,6 +325,9 @@
+     instructions,
+     tools,
+     toolOrder,
++    prepareCall: (settings) => ({ ...settings,
++      // The SDK fallback prints raw provider exceptions. Core handles the unchanged public error part.
++      onError: () => undefined }),
+     prepareStep: ({ steps }) => ({ activeTools: disclosure.activeTools(steps) }),
+     telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
+       integrations: observability ? [observability.telemetry, requestTelemetry] : [requestTelemetry] },
+@@ -331,7 +338,9 @@
+     // Capture each completed step before a later request can fail and reject the aggregate response promise.
+     // The same completed-step fact preserves the existing prohibition on retrying completed tool effects.
+     onStepEnd: (event) => {
+-      state.stepEnded = true;
++      // SDK 7.0.148 also emits onStepEnd for an error-only provider response before the public error part.
++      // That failed request must retain the one clean overflow retry; completed tools still fence replay.
++      state.stepEnded ||= event.finishReason !== "error" || event.content.length > 0;
+       state.recording.capture(event.stepNumber, event.response.messages);
+     },
+   });
+@@ -366,6 +375,9 @@
+     else if (part.type === "error") throw part.error;
+   }
+   observability?.assertHealthy();
++  // The SDK now cancels its reader immediately on abort, which can replace a physical provider rejection
++  // with a graceful public abort. Preserve that original throw ending and its no-detached-writes contract.
++  if (turn?.signal?.aborted && providerStreamFailure) throw providerStreamFailure.error;
+   if (!primary && turn?.onSettledText && !turn.signal?.aborted) turn.onSettledText(await result.text);
+   state.afterCommit = () => {
+     if (!primary) return;
+--- a/packages/core/src/agents/index.md
++++ b/packages/core/src/agents/index.md
+@@ -31,6 +31,8 @@
+ - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
+ - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
+ - model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
++- provider-stream-failure.ts — observes physical provider read/cancel failure so SDK immediate abort cancellation preserves Core's original throw ending
++- sdk-wire-compatibility.test.ts — real compatible-provider SSE regression: complete streamed arguments, distinct sparse/repeated IDs, unsafe finish suppression, and abort aggregate settlement
+ - model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
+ - run-observability-telemetry.ts — per-attempt SDK composition sharing immutable invocations with optional activity; legacy callers gain no invented Run/Effect
+ - tool-invocation.ts — immutable IDs/name-only snapshots and SDK-object bridge; real optional Run lineage, exact request identity and conservative ambiguity
+--- /dev/null
++++ b/packages/core/src/agents/provider-stream-failure.ts
+@@ -0,0 +1,36 @@
++/**
++ * INPUT: one selected provider model and a per-attempt failure observer
++ * OUTPUT: model preserving the physical provider stream failure across SDK abort cancellation
++ * POS: core/agents — compatibility observation only; never changes cancellation or executes/retries a call
++ */
++import { wrapLanguageModel, type LanguageModel, type LanguageModelMiddleware } from "ai";
++
++export function observeProviderStreamFailure(model: LanguageModel, observe: (error: unknown) => void): LanguageModel {
++  const middleware: LanguageModelMiddleware = {
++    specificationVersion: "v4",
++    async wrapStream({ doStream }) {
++      const result = await doStream();
++      const reader = result.stream.getReader();
++      let cancelled = false;
++      return { ...result, stream: new ReadableStream({
++        async pull(controller) {
++          try {
++            const next = await reader.read();
++            if (cancelled) return;
++            if (next.done) controller.close();
++            else controller.enqueue(next.value);
++          } catch (error) {
++            observe(error);
++            if (!cancelled) controller.error(error);
++          }
++        },
++        async cancel(reason) {
++          cancelled = true;
++          try { await reader.cancel(reason); }
++          catch (error) { observe(error); throw error; }
++        },
++      }) };
++    },
++  };
++  return wrapLanguageModel({ model: model as Parameters<typeof wrapLanguageModel>[0]["model"], middleware });
++}
+--- a/packages/core/src/agents/run-observability-telemetry.test.ts
++++ b/packages/core/src/agents/run-observability-telemetry.test.ts
+@@ -6,7 +6,7 @@
+ import { createEffectRepo } from "../db/effect-repo.ts";
+ import { createEffectLifecycleService, type EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+ import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
+-import { failingMockModel, midStreamErrorModel, scriptedModel, streamingMockModel } from "../testing/mock-language-model.ts";
++import { abortRejectingModel, failingMockModel, midStreamErrorModel, scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
+ import { createChatAgent } from "./chat-agent.ts";
+ 
+ const fixtures: CompanionFixture[] = [];
+@@ -48,6 +48,27 @@
+ }
+ 
+ describe("Run observability telemetry", () => {
++  it.each([false, true])("settles one unknown model Effect without replay after partial cancel, rejecting=%s", async rejecting => {
++    const { companion, events, lifecycle } = fixture();
++    const controller = new AbortController();
++    const model = rejecting ? abortRejectingModel(["partial", "never"], 20) : slowStreamingModel(["partial", "never"], 20);
++    const agent = createChatAgent({ model, store: companion.conversation, memory: companion.memory, effectLifecycle: lifecycle });
++    let failure: unknown;
++    try {
++      for await (const delta of agent.stream({ characterId: "taki", message: "Fixture" }, {
++        runId: "run", attemptId: "attempt", signal: controller.signal,
++      })) { expect(delta).toBe("partial"); controller.abort("fixture cancel"); }
++    } catch (error) { failure = error; }
++    if (rejecting) expect(failure).toBe("fixture cancel");
++    else expect(failure).toBeUndefined();
++    expect(model.doStreamCalls).toHaveLength(1);
++    expect(companion.db.prepare("SELECT state,outcome FROM run_effects WHERE kind='model'").all())
++      .toEqual([{ state: "terminal", outcome: "outcome_unknown" }]);
++    expect(events.list("run").filter(event => event.payload.kind === "model.response.settled")).toHaveLength(1);
++    expect(companion.conversation.history("taki")).toEqual([
++      { role: "user", content: "Fixture" }, { role: "assistant", content: "partial" },
++    ]);
++  });
+   it("persists one successful model lifecycle with authoritative detailed usage and measured timing", async () => {
+     const { companion, events, lifecycle } = fixture();
+     const agent = createChatAgent({
+--- /dev/null
++++ b/packages/core/src/agents/sdk-wire-compatibility.test.ts
+@@ -0,0 +1,105 @@
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { APICallError, ToolLoopAgent, isStepCount, tool } from "ai";
++import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
++import { z } from "zod";
++import { createChatAgent } from "./chat-agent.ts";
++import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
++import { midStreamErrorModel } from "../testing/mock-language-model.ts";
++
++const fixtures: CompanionFixture[] = [];
++afterEach(() => { vi.restoreAllMocks(); for (const fixture of fixtures.splice(0)) fixture.cleanup(); });
++
++function chunk(delta: unknown, finishReason: string | null = null): string {
++  return `data: ${JSON.stringify({ id: "wire-fixture", object: "chat.completion.chunk", created: 0, model: "fixture",
++    choices: [{ index: 0, delta, finish_reason: finishReason }] })}\n\n`;
++}
++
++function call(index: number, id: string, input: { arguments: string; name?: string }) {
++  return { index, id, type: "function", function: input };
++}
++
++function wireModel(firstResponse: string) {
++  const requests: Array<{ messages: Array<{ role: string; content: string | null }> }> = [];
++  const provider = createOpenAICompatible({ name: "compatibility-wire", baseURL: "https://fixture.invalid/v1",
++    fetch: async (_url, init) => {
++      requests.push(JSON.parse(String(init?.body)));
++      const body = requests.length === 1 ? firstResponse : chunk({ content: "Done" }, "stop");
++      return new Response(body + "data: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } });
++    } });
++  return { model: provider("fixture"), requests };
++}
++
++async function run(firstResponse: string, schema: z.ZodType = z.number()) {
++  const fixture = createCompanionFixture(); fixtures.push(fixture);
++  const wire = wireModel(firstResponse);
++  const execute = vi.fn(async (input: unknown) => ({ ok: true, input }));
++  const agent = createChatAgent({ model: wire.model, store: fixture.conversation, memory: fixture.memory,
++    extraTools: { probe: tool({ description: "Fixture", inputSchema: schema, execute }) } });
++  for await (const delta of agent.stream({ characterId: "taki", message: "Run the fixture" })) void delta;
++  return { fixture, execute, requests: wire.requests };
++}
++
++describe("existing SDK consumers over actual compatible-provider SSE", () => {
++  it("preserves the exact provider exception without SDK console disclosure", async () => {
++    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
++    const error = new APICallError({ message: "Private fixture failure", url: "https://fixture.invalid/v1",
++      requestBodyValues: { privatePrompt: "must-not-log" }, statusCode: 401, responseBody: "private response" });
++    const fixture = createCompanionFixture(); fixtures.push(fixture);
++    const agent = createChatAgent({ model: midStreamErrorModel([], error), store: fixture.conversation, memory: fixture.memory });
++    const consumed = (async () => { for await (const delta of agent.stream({ characterId: "taki", message: "Fixture" })) void delta; })();
++    await expect(consumed).rejects.toBe(error);
++    expect(consoleError).not.toHaveBeenCalled();
++  });
++  it("executes only the complete final argument when a JSON number prefix is already parseable", async () => {
++    const firstResponse = chunk({ tool_calls: [call(0, "number", { arguments: "1", name: "probe" })] })
++      + chunk({ tool_calls: [call(0, "number", { arguments: "2" })] }, "tool_calls");
++    const { execute, requests } = await run(firstResponse);
++    expect(execute).toHaveBeenCalledOnce();
++    expect(execute.mock.calls[0]?.[0]).toBe(12);
++    expect(requests).toHaveLength(2);
++    const result = requests[1]?.messages.find(message => message.role === "tool");
++    expect(JSON.parse(result?.content ?? "null")).toEqual({ ok: true, input: 12 });
++  });
++
++  it("keeps distinct invocations and ordered replay for repeated wire IDs and noncontiguous indexes", async () => {
++    const firstResponse = chunk({ tool_calls: [call(4, "repeated", { arguments: "1", name: "probe" }), call(9, "repeated", { arguments: "2", name: "probe" })] }, "tool_calls");
++    const { execute, fixture } = await run(firstResponse);
++    expect(execute.mock.calls.map(([input]) => input)).toEqual([1, 2]);
++    const results = fixture.conversation.history("taki").filter(message => message.role === "tool")
++      .flatMap(message => Array.isArray(message.content) ? message.content : []).filter(part => part.type === "tool-result");
++    expect(results).toHaveLength(2);
++    expect(new Set(results.map(part => part.toolCallId)).size).toBe(2);
++    expect(results.map(part => part.output)).toEqual([
++      { type: "json", value: { ok: true, input: 1 } }, { type: "json", value: { ok: true, input: 2 } },
++    ]);
++  });
++
++  it.each(["length", "content_filter", "error", "unexpected"])("does not execute proposed tools on finish_reason=%s", async finishReason => {
++    const { execute, fixture } = await run(chunk({ tool_calls: [call(0, "unsafe", { arguments: "1", name: "probe" })] }, finishReason));
++    expect(execute).not.toHaveBeenCalled();
++    const toolRows = fixture.conversation.history("taki").filter(message => message.role === "tool");
++    expect(toolRows).toEqual([]);
++  });
++
++  it("settles aggregate results and closes iteration after abort even when the provider cancel promise stalls", async () => {
++    const abort = new AbortController();
++    const cancel = vi.fn(() => new Promise<void>(() => undefined));
++    const provider = createOpenAICompatible({ name: "abort-wire", baseURL: "https://fixture.invalid/v1",
++      fetch: async () => new Response(new ReadableStream<Uint8Array>({
++        start(controller) { controller.enqueue(new TextEncoder().encode(chunk({ content: "partial" }))); }, cancel,
++      }), { headers: { "content-type": "text/event-stream" } }) });
++    const agent = new ToolLoopAgent({ model: provider("fixture"), stopWhen: isStepCount(1) });
++    const result = await agent.stream({ prompt: "Fixture", abortSignal: abort.signal });
++    const aggregates = Promise.allSettled([result.text, result.totalUsage, result.steps, result.responseMessages]);
++    const consumed = (async () => {
++      for await (const part of result.fullStream) if (part.type === "text-delta") abort.abort("fixture cancel");
++    })();
++    const settled = await Promise.race([
++      Promise.all([aggregates, consumed]),
++      new Promise<never>((_resolve, reject) => setTimeout(() => reject(new Error("abort results did not settle")), 1000).unref()),
++    ]);
++    expect(settled[0]).toHaveLength(4);
++    expect(settled[0].every(result => result.status === "rejected")).toBe(true);
++    expect(abort.signal.reason).toBe("fixture cancel");
++  });
++});
+--- a/packages/core/src/mcp/index.md
++++ b/packages/core/src/mcp/index.md
+@@ -1,6 +1,7 @@
+ # core/mcp/
+ - mcp-config.ts — strict zod schemas + parseMcpServers body parse for mcp-servers.json (operator-owned; NEVER agent-reachable; env/header values may be `secret-ref:` markers post-migration) — the file is a SEED-ONLY legacy input consumed once by mcp-desired-repo
+ - mcp-connect.ts — sanctioned MCP transport-construction boundary (ADR 0006); builds a stdio/http transport + connects
++- mcp-http.test.ts — real loopback HTTP fixture for legacy initialization, delayed modern discovery and structured-only results
+ - mcp-stdio-launch.ts / mcp-stdio-relay.mjs — portable command/args launch tuple plus Windows cross-spawn relay; no platform adapter leaks into desired config
+ - mcp-schema-compat.ts — deep-clone definitions; narrow verified optional-nullable properties; isolate unsafe tools
+ - legacy-mcp-deny.ts — read-only mcp-approvals.json deny adapter; missing is empty, allows inert, corrupt/ambiguous state fail-closed
+--- a/packages/core/src/mcp/mcp-http.test.ts
++++ b/packages/core/src/mcp/mcp-http.test.ts
+@@ -7,7 +7,8 @@
+ 
+ // A node:http Streamable-HTTP MCP fixture (research §4b): POST -> 200 + JSON-RPC body, notification -> 202,
+ // GET -> 405 (the transport treats 405 as "no inbound SSE" and proceeds).
+-function startHttpFixture(): Promise<{ url: string; server: Server }> {
++function startHttpFixture(options: { structuredOnly?: boolean; modernDelayMs?: number } = {}): Promise<{ url: string; server: Server; methods: string[] }> {
++  const methods: string[] = [];
+   const server = createServer((req, res) => {
+     if (req.method === "GET") {
+       res.writeHead(405).end();
+@@ -17,18 +18,33 @@
+     req.on("data", (chunk) => (body += chunk));
+     req.on("end", () => {
+       const msg = JSON.parse(body);
++      methods.push(msg.method);
+       if (msg.id === undefined) {
+         res.writeHead(202).end();
+         return;
+       }
+-      res.writeHead(200, { "content-type": "application/json" });
+-      res.end(JSON.stringify(reply(msg)));
++      const send = (result: unknown) => {
++        res.writeHead(200, { "content-type": "application/json" });
++        res.end(JSON.stringify(result));
++      };
++      if (options.modernDelayMs !== undefined && msg.method === "server/discover") {
++        setTimeout(() => send({ jsonrpc: "2.0", id: msg.id,
++          result: { resultType: "success", supportedVersions: ["2026-07-28"], capabilities: { tools: {} } } }), options.modernDelayMs);
++      } else if (options.modernDelayMs !== undefined && msg.method === "initialize") {
++        send({ jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Modern-only fixture" } });
++      } else if (options.structuredOnly && msg.method === "tools/call") {
++        send({ jsonrpc: "2.0", id: msg.id, result: { structuredContent: { echo: msg.params?.arguments?.text } } });
++      } else {
++        const response = reply(msg) as { result?: Record<string, unknown> };
++        if (options.modernDelayMs !== undefined && response.result) response.result.resultType = "success";
++        send(response);
++      }
+     });
+   });
+   return new Promise((resolve) => {
+     server.listen(0, "127.0.0.1", () => {
+       const port = (server.address() as AddressInfo).port;
+-      resolve({ url: `http://127.0.0.1:${port}/mcp`, server });
++      resolve({ url: `http://127.0.0.1:${port}/mcp`, server, methods });
+     });
+   });
+ }
+@@ -63,7 +79,7 @@
+   return { jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Method not found" } };
+ }
+ 
+-let running: { url: string; server: Server } | null = null;
++let running: { url: string; server: Server; methods: string[] } | null = null;
+ let manager: McpManager | null = null;
+ afterEach(async () => {
+   await manager?.close();
+@@ -93,4 +109,27 @@
+     };
+     expect(result.content[0]?.text).toBe("echo: over-http");
+   });
++
++  it("preserves structured-only results through the actual transport and namespaced tool", async () => {
++    running = await startHttpFixture({ structuredOnly: true });
++    const { logger } = createCaptureLogger();
++    manager = createMcpManager({ logger, connect: defaultConnect });
++    await manager.reconcile([{ serverId: "structured", ownerHostId: "11111111-1111-4111-8111-111111111111",
++      configRevision: 1, config: { url: running.url }, selectedTools: [], enabled: true }]);
++    const result = await manager.tools().structured_echo?.execute?.({ text: "complete" }, { toolCallId: "structured", messages: [], context: undefined });
++    expect(result).toMatchObject({ structuredContent: { echo: "complete" },
++      content: [{ type: "text", text: '{"echo":"complete"}' }] });
++    expect(running.methods.filter(method => method === "tools/call")).toHaveLength(1);
++  });
++
++  it("waits for delayed modern-only HTTP discovery inside the Core candidate budget", async () => {
++    running = await startHttpFixture({ modernDelayMs: 1100 });
++    const { logger } = createCaptureLogger();
++    manager = createMcpManager({ logger, connect: defaultConnect, candidateDeadlineMs: 4000 });
++    await manager.reconcile([{ serverId: "modern", ownerHostId: "11111111-1111-4111-8111-111111111111",
++      configRevision: 1, config: { url: running.url }, selectedTools: [], enabled: true }]);
++    expect(manager.tools().modern_echo).toBeDefined();
++    expect(running.methods).toContain("server/discover");
++    expect(running.methods).not.toContain("initialize");
++  });
+ });
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -131,17 +131,17 @@
+   packages/core:
+     dependencies:
+       '@ai-sdk/mcp':
+-        specifier: ^2.0.10
+-        version: 2.0.10(zod@4.4.3)
++        specifier: 2.0.81
++        version: 2.0.81(zod@4.4.3)
+       '@ai-sdk/openai-compatible':
+-        specifier: ^3.0.5
+-        version: 3.0.5(zod@4.4.3)
++        specifier: 3.0.75
++        version: 3.0.75(zod@4.4.3)
+       '@taki/shared':
+         specifier: workspace:*
+         version: link:../shared
+       ai:
+-        specifier: ^7.0.17
+-        version: 7.0.17(zod@4.4.3)
++        specifier: 7.0.148
++        version: 7.0.148(zod@4.4.3)
+       croner:
+         specifier: ^10.0.1
+         version: 10.0.1
+@@ -201,42 +201,32 @@
+ 
+ packages:
+ 
+-  '@ai-sdk/gateway@4.0.13':
+-    resolution: {integrity: sha512-EIiMZZMEAc3yZ3nywrJfKigrkaNwqrQgGsj0QbQ6x3Y73MlQe68EElR2cm/8I5dvBci3PFyahMRe3NwR8OOb9A==}
++  '@ai-sdk/gateway@4.0.121':
++    resolution: {integrity: sha512-cPNXvQ4B5OkmVAm98Dxe1fHdMthyqqqAG0HJx3D92NUa9FpcvkNxdAqiuZdeAhNAodFb9lBrslzzzEwxuVS53A==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/mcp@2.0.10':
+-    resolution: {integrity: sha512-LP47CEk3e6BwCqXamvv4nKbgOWQ5z5T/qS/J2fola5h98KTy7JT7I1yw5LKtB89MZBLviYmEh98Ep4ovHOz/vA==}
++  '@ai-sdk/mcp@2.0.81':
++    resolution: {integrity: sha512-2ZqfHLu1K93uPse+QWbcNjkznCtM6UHMoNWjUDpmM9kCr+y9bWcf5VWfNAWi4ziQoncZPJo2qUWeDIXgrqLsKg==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/openai-compatible@3.0.5':
+-    resolution: {integrity: sha512-4UtDxT6Ga7U225o5fBEgtCFZHba4/iTDXRqMrU62yEfTrFks4o+F4jt0D3OWmUasR9LPFzLy0KnEITxFDtc89g==}
++  '@ai-sdk/openai-compatible@3.0.75':
++    resolution: {integrity: sha512-Zs+EWsK1XprpCR6+VIva50W2YuD3TNSymd5DKFh8XSrroK0copxm2BlSDRKWVdx3SZEh1XqD+1cgYzGR7huL4A==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/provider-utils@5.0.5':
+-    resolution: {integrity: sha512-oI0t3dvCoqWNV1I8o1Rybi2DXDvHES5r/TrwtJW90tuFLVepgJlftPxrcjh8vaSvjqC2diTuA2vXyjKAyHJm4A==}
++  '@ai-sdk/provider-utils@5.0.65':
++    resolution: {integrity: sha512-LCugcsP8oWmdeI3BASf4Fuo1wiC6Qx0YrefFssl7n12s+LV4DNi5RdwWQrtrB4oek3GGNQRN/h/NSwVZM2eHKw==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+ 
+-  '@ai-sdk/provider-utils@5.0.7':
+-    resolution: {integrity: sha512-OSm5/5kdrHa11WIOo5LYgDKnxYWp5aB/wx5EXRHi0jpUGduMDeB6oht9U6p+UNNWIP3F/EqPpV8d7vdP/iRnqg==}
+-    engines: {node: '>=22'}
+-    peerDependencies:
+-      zod: ^3.25.76 || ^4.1.8
+-
+-  '@ai-sdk/provider@4.0.2':
+-    resolution: {integrity: sha512-pfPoy9J1B1xV7cqJ8MYHOsDYrMv5tR3+EMNfI249OhkD2uRakvav3Fo7XpD2luuN/YNCBY7KfEQc7vEV7KEtyw==}
+-    engines: {node: '>=22'}
+-
+-  '@ai-sdk/provider@4.0.3':
+-    resolution: {integrity: sha512-e0CpNWJUY7OxAFAnCZkw+ri9QOHWwTs1tXP42782KFGCU07qt8NiXCrCVowyCB5dP2r5/Uls+g2oPd8kOJn9dw==}
++  '@ai-sdk/provider@4.0.31':
++    resolution: {integrity: sha512-3wJnwVTFg8SwOyoZCv+ov7Re2GB+7IQnU5a5MYJACrtiWDDUHgqTBeeesq2MB2ddgojzL8hgWleltwpAgtUqfg==}
+     engines: {node: '>=22'}
+ 
+   '@emnapi/core@1.11.1':
+@@ -805,8 +795,8 @@
+     engines: {node: '>=0.4.0'}
+     hasBin: true
+ 
+-  ai@7.0.17:
+-    resolution: {integrity: sha512-kpIjNtN0tyUaxzkAs7b8YF48WZzc71dKu0HqFPSAWg/avu1Ogv50UPE9hpVMr+kb33zsEa6LrAU9DZHMNscvzw==}
++  ai@7.0.148:
++    resolution: {integrity: sha512-FPgfIAhz/FrlzcvqTN7pGGibahR5rD19NXZWX9WQ1tskTic+CN+jxvubpreyq8uN1maIEHPwvZmil/3IYN8FIw==}
+     engines: {node: '>=22'}
+     peerDependencies:
+       zod: ^3.25.76 || ^4.1.8
+@@ -1815,6 +1805,10 @@
+ 
+   undici-types@7.18.2:
+     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
++
++  undici@7.30.1:
++    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
++    engines: {node: '>=20.18.1'}
+ 
+   unified@11.0.5:
+     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
+@@ -2010,47 +2004,37 @@
+ 
+ snapshots:
+ 
+-  '@ai-sdk/gateway@4.0.13(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.2
+-      '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
++  '@ai-sdk/gateway@4.0.121(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
+       '@vercel/oidc': 3.2.0
+       zod: 4.4.3
+ 
+-  '@ai-sdk/mcp@2.0.10(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.3
+-      '@ai-sdk/provider-utils': 5.0.7(zod@4.4.3)
++  '@ai-sdk/mcp@2.0.81(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
++      cross-spawn: 7.0.6
+       pkce-challenge: 5.0.1
+       zod: 4.4.3
+ 
+-  '@ai-sdk/openai-compatible@3.0.5(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.2
+-      '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
++  '@ai-sdk/openai-compatible@3.0.75(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
+       zod: 4.4.3
+ 
+-  '@ai-sdk/provider-utils@5.0.5(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.2
++  '@ai-sdk/provider-utils@5.0.65(zod@4.4.3)':
++    dependencies:
++      '@ai-sdk/provider': 4.0.31
+       '@standard-schema/spec': 1.1.0
+       '@workflow/serde': 4.1.0
+       eventsource-parser: 3.1.0
++      undici: 7.30.1
+       zod: 4.4.3
+ 
+-  '@ai-sdk/provider-utils@5.0.7(zod@4.4.3)':
+-    dependencies:
+-      '@ai-sdk/provider': 4.0.3
+-      '@standard-schema/spec': 1.1.0
+-      '@workflow/serde': 4.1.0
+-      eventsource-parser: 3.1.0
+-      zod: 4.4.3
+-
+-  '@ai-sdk/provider@4.0.2':
+-    dependencies:
+-      json-schema: 0.4.0
+-
+-  '@ai-sdk/provider@4.0.3':
++  '@ai-sdk/provider@4.0.31':
+     dependencies:
+       json-schema: 0.4.0
+ 
+@@ -2555,11 +2539,11 @@
+ 
+   acorn@8.17.0: {}
+ 
+-  ai@7.0.17(zod@4.4.3):
+-    dependencies:
+-      '@ai-sdk/gateway': 4.0.13(zod@4.4.3)
+-      '@ai-sdk/provider': 4.0.2
+-      '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
++  ai@7.0.148(zod@4.4.3):
++    dependencies:
++      '@ai-sdk/gateway': 4.0.121(zod@4.4.3)
++      '@ai-sdk/provider': 4.0.31
++      '@ai-sdk/provider-utils': 5.0.65(zod@4.4.3)
+       zod: 4.4.3
+ 
+   ajv@6.15.0:
+@@ -3763,6 +3747,8 @@
+ 
+   undici-types@7.18.2: {}
+ 
++  undici@7.30.1: {}
++
+   unified@11.0.5:
+     dependencies:
+       '@types/unist': 3.0.3

@@ -149,6 +149,13 @@ config flip, not a refactor.
 > logged exemption (**D40**), while `additionalProperties:false` is already met and every other property is required.
 > `avatar_set_expression` and `screenshot` are strict-ready as authored.
 
+**S8. Provider function parameters must render a root `type: "object"`.** Inspect the installed SDK's
+`asSchema(inputSchema).jsonSchema`; accepting inputs in Zod does not establish provider compatibility. Keep domain
+unions where they belong and normalize a separate strict object-shaped tool input at the execution boundary.
+`heartbeat_respond` uses all-required nullable fields with outcome-specific validation, then maps into its unchanged
+persisted decision union. C3 real DeepSeek compatible-endpoint evidence accepts this non-strict wire shape and rejects
+the former untyped root `oneOf`; nullable support in that endpoint is not proof of DeepSeek strict-mode support (D40).
+
 ## R — Result & error
 
 **R1. Never-throw `execute`: every failure degrades into a structured `{ok:false, code, message}` the model can read;
@@ -167,9 +174,18 @@ than opaque error codes or tracebacks"; e.g. "The `user_id` parameter must be a 
 enum list is in the tool spec and an out-of-enum arg becomes a readable `tool-error` the model self-corrects on
 (`./agent-runtime.md` 1e).
 
-**R3. Return only high-signal context; prefer semantic fields over low-level identifiers (`name`/`file_type`/`image_url`,
-not `uuid`/`mime_type`/`256px_url`).** `[A-WTA]`. — Our precedent: `screenshot` returns `{path, width, height, bytes,
-description?}`; `process_list` returns `{processes, count}`.
+**R3. Return high-signal context selected by its next decision, retrieval or action consumer.** `[A-WTA]`.
+Preserve requested content, source meaning, meaningful outcome/partial/paging facts and exact functional selectors.
+An ID, hash or version needed for a subsequent call, evidence selection or CAS remains useful even when opaque.
+Omit only proven duplicate or internal bookkeeping fields; do not strip recursively by field spelling.
+Use family-owned SDK `toModelOutput` when execution collectors, canonical records or UI callers need the full result.
+Validate the actual next SDK request and raw collector separately; SDK validation errors bypass normal result projection.
+Unknown third-party fields remain intact without an adapter-specific contract. `[A-WTA]` `[O-FC]` `[MCP-SPEC]`
+Implementation seam: [AI SDK tools and tool calling](https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling),
+verified locally with `ai@7.0.148`. The [approved audit](../../../docs/PROMPT-AND-TOOL-OPTIMIZATION-2026-11-01.md)
+records per-family field decisions. Memory views preserve semantic policy, attribution, nonempty source/entity/scope
+evidence and temporal facts. Scheduler mutation receipts may be compact, but `list` stays complete because it is the
+existing diagnostic retrieval path. No result gets arbitrary truncation merely to meet a smaller size target.
 
 **R4. Result budget: cap/truncate large outputs with a machine-readable `truncated` flag and a sensible default; tell the
 model how to narrow.** `[A-WTA]` ("we restrict tool responses to 25,000 tokens by default … make many small, targeted
@@ -218,10 +234,24 @@ metrics + m5 §C1): the SDK has **no consecutive-failure brake** — a tool fail
 
 ## B — Birth checklist
 
-**B1. Classify at birth: presentation (fire-and-forget, `{ok:true}` only, name into `PRESENTATION_TOOL_NAMES`) vs
+**B1. Classify at birth: presentation (returns only a Presentation Outcome, name into `PRESENTATION_TOOL_NAMES`) vs
 informational (the loop must continue).** Our `./agent-runtime.md` "Classify every tool" (T1 1c); industry mirror = MCP
 read/write separation `[GOOG]`. — Our precedent: `avatar/presentation-stop.ts` + `PRESENTATION_TOOL_NAMES`; an
 informational tool must NEVER enter that set (a step co-calling it last would stop the loop with its result unread).
+
+**B1a. A presentation tool returns the Presentation Outcome, never a publication ack (D80, 2026-09-19).** Its
+`execute` publishes with a Core-generated `commandId`, awaits `avatar-outcomes.ts` (bounded by
+`TAKI_AVATAR_OUTCOME_DEADLINE_MS`; instant `not_rendered` with zero subscribers; `unknown` on deadline or turn abort)
+and returns exactly one of: `{ok:true, outcome:"applied"|"not_rendered"}`, `{ok:false, outcome:"rejected",
+code:"AVATAR_REJECTED", reason}`, `{ok:false, outcome:"superseded", code:"CANCELLED", state:"cancelled"}`,
+`{ok:false, outcome:"unknown", code:"OUTCOME_UNKNOWN", state:"outcome_unknown"}` (`avatar-tool-result.ts`). The
+description states that a busy rejection is normal and must not be retried or apologized for (D3). Never queue,
+escalate priority, or re-publish on a rejection; `toolCallId` is correlation only, never the command identity.
+
+**B1b. One correction per turn for an invalid presentation call (D69).** `presentationTailStop` does not stop on a
+step whose presentation call carries the SDK `invalid` marker, so the model reads the validation error once; a second
+invalid presentation step in the same turn stops. A VALID call stops as before regardless of its outcome — a
+rejection is never a reason to re-generate.
 
 **B2. One tool per `x-tool.ts` exporting `createXTool(deps): ToolSet`, wired at exactly one registry site; the handler is
 thin — it delegates to a capability client / subscription, no business logic inline.** Our `CLAUDE.md` (naming +
@@ -273,10 +303,18 @@ selects a looser descriptor/posture. Standard MCP transport and raw-name executi
 
 - **`exec`'s single opaque `command` param** vs the explicit-named-params guidance (S4/S6): defended by `[A-BEA]`'s own
   format guidance — "Keep the format close to what the model has seen naturally occurring in text … no formatting
-  overhead"; a raw shell command string is the most model-natural encoding. Decomposing `command` would also move the
+  overhead"; an ordinary command string is the most model-natural encoding. Decomposing `command` would also move the
   trusted argument classifier out of the owning Host. `exec`'s output already satisfies R3 (semantic result) + R4
   (`truncated` flag) + D3 (result semantics in the description). Nothing in this standard argues to change `exec` input
   or output — leave it untouched.
+  Its description must match the current Host implementation: one executable plus parsed arguments, with no implicit
+  shell; an approved compound command still needs an explicitly invoked installed interpreter. Quotes group arguments,
+  backslashes remain literal, and each invocation starts with the configured cwd and scrubbed environment rather than
+  inheriting a previous invocation's changes. `ok:true` means an execution result was returned, not that its child exited
+  successfully. Verified examples and failure cases are recorded in
+  `11-02-context-attribution-token-efficiency/research/exec-guidance-delivery-20261104.md`; the source boundaries remain
+  `exec/parser.rs`, `exec/resolve.rs` and `exec/sandbox.rs`. This clarifies D1/D3 and `[A-BEA]`, without adding shell
+  features, changing authority or copying another tool's timeout/background contract.
 - **`shell_open`'s http/https/mailto scheme constraint** stays a description constraint enforced Shell-side, not a schema
   `enum` (S1) — `target` is a full URL/path, not a clean finite set; enforcement is deliberately Shell-side governance,
   same rationale as `exec` (→ T2b).

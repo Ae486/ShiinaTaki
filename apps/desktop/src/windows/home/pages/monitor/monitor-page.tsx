@@ -1,197 +1,89 @@
 /**
- * INPUT:  Home's disposable operator WsClient generation
- * OUTPUT: DSH-shaped three-zone monitor (L1): compact Run browser | grouped ledger | on-demand closable inspector
- *         with a drag-adjustable width; filters live in the browser pane; stacks under a narrow container
- * POS:    ui/windows/home/pages/monitor — operator-only developer surface; no technical identifiers in primary rows.
- *         Tiles ride SelectionTile (U1: the selected run and the inspected row close on a second click), filters ride
- *         Field, and loading/empty/error ride Skeleton/EmptyState/FeedbackLine with a retry action. The ledger
- *         bottom-pins with pause-on-scroll-up (use-trajectory-follow, reset per selection via the ledger key). Hidden pages stop
- *         working (P1e): the controller unsubscribes + stops publishing while hidden and refetches on reactivation.
+ * INPUT:  Home's current client/visibility generation and disposable Monitor controller state
+ * OUTPUT: overall cache strip, full-height Run browser, DSH trajectory workspace and explicit read states
+ * POS:    ui/monitor — Monitor alone owns its page scroll geometry; see third-party-notices.md (DeepSeek MIT)
  */
-import { useEffect, useMemo, useState } from "react";
-import type { MonitorMode, RunInitiator, RunMonitorSummary, RunState, TrajectoryRow } from "@taki/shared";
-import { useHomeClient } from "../../home-client-context.ts";
-import { LabeledRows, PageCard } from "../../page-card.tsx";
-import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
-import { FeedbackLine } from "@/components/ui/feedback-line.js";
-import { Field, FIELD_CONTROL } from "@/components/ui/field.js";
-import { SelectionTile } from "@/components/ui/selection-tile.js";
-import { Skeleton } from "@/components/ui/skeleton.js";
-import { EmptyState } from "@/components/ui/empty-state.js";
-import { ActionButton } from "../../action-button.tsx";
-import {
-  createMonitorController, INITIAL_MONITOR_STATE,
-  type MonitorController, type MonitorFilters, type MonitorViewState,
-} from "./monitor-controller.ts";
-import { groupTrajectoryRows } from "./monitor-view.tsx";
-import { useTrajectoryFollow } from "./use-trajectory-follow.ts";
-import { InspectorPane, INSPECTOR_WIDTH_DEFAULT, MonitorThreeZones } from "./monitor-layout.tsx";
-import { usePageVisible } from "../../page-visibility-store.ts";
-import { INITIATOR_OPTIONS, STATE_OPTIONS, connectionKindLabel, wireLabel } from "./monitor-labels.ts";
-
-function readableTime(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.valueOf()) ? value : date.toLocaleString();
-}
-
-function FiltersCard({ draft, setDraft, onApply, applying }: {
-  draft: MonitorFilters;
-  setDraft(next: MonitorFilters): void;
-  onApply(): void;
-  applying: boolean;
-}) {
-  return (
-    <PageCard title="筛选" action={<ActionButton tone="primary" busy={applying} disabled={applying} onClick={onApply}>应用</ActionButton>}>
-      <div className="flex flex-col gap-2">
-        <Field label="搜索">
-          <input value={draft.text} maxLength={100} placeholder="触发器 / 摘要" className={FIELD_CONTROL}
-            onChange={(event) => setDraft({ ...draft, text: event.target.value })} />
-        </Field>
-        <Field label="发起方">
-          <select value={draft.initiator} className={FIELD_CONTROL}
-            onChange={(event) => setDraft({ ...draft, initiator: event.target.value as RunInitiator | "" })}>
-            <option value="">全部</option>{INITIATOR_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </Field>
-        <Field label="状态">
-          <select value={draft.state} className={FIELD_CONTROL}
-            onChange={(event) => setDraft({ ...draft, state: event.target.value as RunState | "" })}>
-            <option value="">全部</option>{STATE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </Field>
-      </div>
-    </PageCard>
-  );
-}
-
-// Compact browser tile (L1): readable label first, one outcome line, one time/counts line — the technical joins
-// stay in the inspector. The character line is dropped (the controller pins the filter to the active character).
-function RunTile({ run, selected, onSelect }: { run: RunMonitorSummary; selected: boolean; onSelect(): void }) {
-  return (
-    <SelectionTile selected={selected} onSelect={onSelect}>
-      <p className="truncate text-sm font-medium text-text-strong">{run.title}</p>
-      <p className="truncate text-xs text-text-secondary">
-        {run.initiatorLabel} · {run.outcome ? `${wireLabel(run.state)} / ${wireLabel(run.outcome)}` : wireLabel(run.state)}
-      </p>
-      <p className="truncate text-xs text-text-secondary">{readableTime(run.queuedAt)} · {run.attemptCount} 次尝试 / {run.effectCount} 个效果</p>
-    </SelectionTile>
-  );
-}
-
-function RunsCard({ view, controller }: { view: MonitorViewState; controller: MonitorController }) {
-  return (
-    <PageCard title="Run 记录" action={view.nextCursor ? <ActionButton onClick={() => void controller.loadOlderRuns()} disabled={view.loadingRuns}>加载更早记录</ActionButton> : undefined}>
-      <div className="flex flex-col gap-2">
-        {view.loadingRuns && view.runs.length === 0 && <Skeleton lines={4} />}
-        {view.runs.map((run) => (
-          <RunTile key={run.key} run={run} selected={run.key === view.selectedRunKey} onSelect={() => void controller.select(run.key)} />
-        ))}
-        {!view.loadingRuns && view.runs.length === 0 && <EmptyState title="没有符合条件的 Run" hint="调整筛选条件后重新应用。" />}
-      </div>
-    </PageCard>
-  );
-}
-
-function TrajectoryRowTile({ row, selected, onSelect }: { row: TrajectoryRow; selected: boolean; onSelect(): void }) {
-  return (
-    <SelectionTile selected={selected} onSelect={onSelect}>
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-text-body">{row.label}</p>
-        <span className="text-xs text-text-secondary">{wireLabel(row.surface)}</span>
-      </div>
-      <LabeledRows rows={[
-        { label: "阶段", value: wireLabel(row.phase) },
-        { label: "状态", value: row.outcome ? `${row.status} / ${row.outcome}` : row.status },
-        ...(row.contextLabel ? [{ label: "上下文", value: row.contextLabel }] : []),
-        ...(row.kind === "attempt" ? [{ label: "尝试", value: String(row.attemptOrdinal) }] : []),
-        ...(row.kind === "effect" ? [{ label: "效果", value: wireLabel(row.effectKind) }] : []),
-        { label: "时间", value: readableTime(row.occurredAt) },
-        ...(row.summary ? [{ label: "摘要", value: row.summary }] : []),
-        ...(row.errorReason ? [{ label: "原因", value: row.errorReason }] : []),
-      ]} />
-    </SelectionTile>
-  );
-}
-
-function TrajectoryCard({ view, controller }: { view: MonitorViewState; controller: MonitorController }) {
-  const trajectory = view.trajectory;
-  // The follow hook runs before the null return (hook order is unconditional); while no trajectory is mounted the
-  // scroll element does not exist and the follow is dormant.
-  const follow = useTrajectoryFollow(trajectory ? trajectory.rows.length : 0);
-  if (!trajectory) return null;
-  return (
-    <PageCard title={`轨迹 · ${trajectory.run.title}`} action={trajectory.hasMore ? <ActionButton onClick={() => void controller.loadMoreTrajectory()} disabled={view.loadingTrajectory}>加载更多</ActionButton> : undefined}>
-      {/* The ledger owns its scroll (reactive-read-models.md §f): rows append at the bottom, so the view bottom-pins
-        while the operator sits at the bottom and pauses on scroll-up. The resume control renders only while genuinely
-        paused-from-bottom and is a real control (resume() scrolls back and re-pins). */}
-      <div ref={follow.scrollRef} onScroll={follow.onScroll} tabIndex={0} aria-label="轨迹事件"
-        className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto">
-        {view.loadingTrajectory && trajectory.rows.length === 0 && <Skeleton lines={4} />}
-        {groupTrajectoryRows(trajectory.rows).map((group) => (
-          <section key={group.key} aria-label={group.label} className="flex flex-col gap-1.5">
-            <h3 className="text-xs font-semibold text-text-secondary">{group.label}</h3>
-            {group.rows.map((row) => (
-              <TrajectoryRowTile key={row.rowKey} row={row} selected={view.inspectedRowKey === row.rowKey} onSelect={() => void controller.inspect(row.rowKey)} />
-            ))}
-          </section>
-        ))}
-        {trajectory.rows.length === 0 && !view.loadingTrajectory && <EmptyState title="该 Run 暂无轨迹事件" />}
-      </div>
-      {!follow.following && (
-        <div className="mt-2 flex justify-center">
-          <ActionButton tone="ghost" onClick={follow.resume}>已暂停跟随 · 回到底部</ActionButton>
-        </div>
-      )}
-    </PageCard>
-  );
-}
+import type { MonitorController, MonitorViewState } from "./monitor-controller.ts";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
+import { connectionKindLabel, monitorModeLabel } from "./monitor-labels.ts";
+import { MonitorRunBrowser } from "./monitor-run-browser.tsx";
+import { TrajectoryWorkspace } from "./trajectory-workspace.tsx";
+import { useMonitorController } from "./use-monitor-controller.ts";
+import css from "./monitor-workspace.module.css";
+import { useState, type ReactNode } from "react";
+import { InitiativePolicyDiagnostics } from "@/features/initiative-patterns/initiative-policy-diagnostics.js";
+import { CacheUsageStrip } from "./cache-usage-strip.tsx";
+import { useCacheUsage } from "./use-cache-usage.ts";
+import { useMaintenanceMonitor } from "./use-maintenance-monitor.ts";
+import { MaintenanceMonitorPanel } from "./maintenance-monitor-panel.tsx";
 
 export function MonitorPage() {
-  const { client, status } = useHomeClient();
-  const [view, setView] = useState<MonitorViewState>(INITIAL_MONITOR_STATE);
-  const controller = useMemo(() => createMonitorController(setView), []);
-  const [draft, setDraft] = useState<MonitorFilters>(INITIAL_MONITOR_STATE.filters);
-  const [inspectorWidth, setInspectorWidth] = useState(INSPECTOR_WIDTH_DEFAULT);
-  const visible = usePageVisible("monitor");
+  const [section, setSection] = useState<"runs" | "maintenance">("runs");
+  const monitor = useMonitorController(section === "runs");
+  const cache = useCacheUsage(monitor.view.mode, section === "runs");
+  const maintenance = useMaintenanceMonitor(monitor.view.mode, section === "maintenance");
+  return <MonitorWorkspace {...monitor} policy={<InitiativePolicyDiagnostics enabled={monitor.view.mode !== "DISABLED"} />}
+    cache={<CacheUsageStrip {...cache} />} section={section} onSectionChange={setSection}
+    maintenance={<MaintenanceMonitorPanel {...maintenance} />} />;
+}
 
-  useEffect(() => {
-    controller.bind(client);
-    return () => controller.dispose();
-  }, [client, controller]);
-  // P1e: while hidden the controller tears its live subscription down and stops re-publishing; reactivation
-  // re-attaches and refetches (monitorState → restore) with the selection kept in page memory.
-  useEffect(() => { controller.setVisible(visible); }, [controller, visible]);
+interface MonitorWorkspaceProps {
+  view: MonitorViewState;
+  controller: MonitorController;
+  connectionKind: string;
+  visible: boolean;
+  policy?: ReactNode;
+  cache?: ReactNode;
+  maintenance?: ReactNode;
+  section?: "runs" | "maintenance";
+  onSectionChange?: (section: "runs" | "maintenance") => void;
+}
 
-  const modeHint: Record<MonitorMode, string> = {
-    DISABLED: "开发监控已关闭；Run 正确性证据仍由 Core 保留。",
-    FEEDBACK_ONLY: "仅展示有界生命周期反馈。",
-    FULL_LOCAL: "展示有界、脱敏的本地开发细节。",
-  };
+export function MonitorWorkspace({ view, controller, connectionKind, visible, policy, cache, maintenance,
+  section = "runs", onSectionChange }: MonitorWorkspaceProps) {
+  return <section className={css.root} aria-label="运行监视">
+    {onSectionChange && view.mode !== "DISABLED" && <nav className={css.sections} aria-label="监控链路">
+      <button type="button" aria-pressed={section === "runs"} onClick={() => onSectionChange("runs")}>正常链路</button>
+      <button type="button" aria-pressed={section === "maintenance"} onClick={() => onSectionChange("maintenance")}>后台维护</button>
+    </nav>}
+    {section === "runs" && policy}
+    {section === "runs" && view.mode !== "DISABLED" && cache}
+    {section === "runs" && view.error && <div className={css.notice} role="alert"><span>{view.error}</span>
+      <button type="button" onClick={() => void (view.retryRunKey ? controller.select(view.retryRunKey) : controller.refresh())}>
+        {view.retryRunKey ? "重试切换" : "重试"}
+      </button>
+    </div>}
+    <div className={css.workspace}>
+      {view.mode === "DISABLED" ? <div className={css.empty} role="status">
+        <strong>{view.loadingRuns ? "正在读取运行监视…" : "运行监视未启用"}</strong>
+        {!view.loadingRuns && <span>可在设置中开启运行监视。</span>}
+      </div> : section === "maintenance" ? maintenance : <>
+        <MonitorRunBrowser view={view} controller={controller} active={visible} />
+        <TrajectoryWorkspace key={view.selectedRunKey ?? "none"} view={view} controller={controller} active={visible} />
+      </>}
+    </div>
+    <footer className={css.footer} aria-label="监视状态">
+      <span>{connectionKindLabel(connectionKind)}</span>
+      <span className={css.readStatus}><span role="status">{section === "runs" ? monitorReadStatus(view) : "后台维护独立记录"}</span>
+        <PendingIndicator active={visible && (view.loadingRuns || view.loadingTrajectory || view.recovering || view.refreshingSummary)}
+          label={monitorPendingLabel(view)} />
+      </span>
+      <span>{monitorModeLabel(view.mode)} · 只读</span>
+    </footer>
+  </section>;
+}
 
-  return (
-    <>
-      <PageHeader title="运行监视" hint={`${modeHint[view.mode]} 这是只读开发面板。`} busy={view.loadingRuns || view.loadingTrajectory} />
-      <PageBody>
-        {view.error && <PageAlert action={{ label: "重试", onClick: () => void controller.refresh() }}>{view.error}</PageAlert>}
-        {view.stale && <FeedbackLine tone="warn">实时流已落后，正在从 durable cursor 重新读取。</FeedbackLine>}
-        {view.mode === "DISABLED" ? <PageCard title="监控未启用"><p className="text-xs text-text-secondary">请在 Core 配置中启用 FEEDBACK_ONLY 或 FULL_LOCAL。</p></PageCard> : (
-          <MonitorThreeZones
-            browser={<><FiltersCard draft={draft} setDraft={setDraft} onApply={() => void controller.applyFilters(draft)} applying={view.loadingRuns} /><RunsCard view={view} controller={controller} /></>}
-            // Keyed on the selection: a newly selected run remounts the ledger, resetting the tail-follow to
-            // bottom-pinned for the fresh trajectory instead of inheriting the previous run's scroll position.
-            ledger={<TrajectoryCard key={view.selectedRunKey ?? "none"} view={view} controller={controller} />}
-            inspector={view.inspector && (
-              <InspectorPane
-                inspector={view.inspector}
-                width={inspectorWidth}
-                onWidthChange={setInspectorWidth}
-                onClose={() => controller.closeInspector()}
-              />
-            )}
-          />
-        )}
-        <p className="text-xs text-text-secondary">连接：{connectionKindLabel(status.kind)}{view.loadingInspector ? " · 检查器读取中…" : ""}</p>
-      </PageBody>
-    </>
-  );
+function monitorReadStatus(view: MonitorViewState): string {
+  if (view.stale) return "当前为上次读取的记录";
+  if (view.trajectory) return `已载入 ${view.trajectory.rows.length} 条记录`;
+  if (view.loadingTrajectory) return "正在载入轨迹…";
+  if (view.loadingRuns && view.runs.length === 0) return "正在读取运行记录…";
+  return "";
+}
+
+function monitorPendingLabel(view: MonitorViewState): string {
+  if (view.loadingTrajectory) return "正在载入所选运行的轨迹";
+  if (view.recovering) return "正在补读记录";
+  if (view.refreshingSummary) return "正在更新统计";
+  return "正在读取运行记录";
 }

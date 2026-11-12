@@ -1,0 +1,1440 @@
+{
+  "phase": "chat-ended",
+  "detail": {
+    "status": "complete",
+    "timeline": [
+      {
+        "seq": 1,
+        "id": "3d40b7ac-40c1-4862-8aff-402343f755c5",
+        "characterId": "taki",
+        "role": "user",
+        "content": "Start the isolated long private regression work.",
+        "createdAt": "2026-11-12T11:22:43.059Z"
+      },
+      {
+        "seq": 2,
+        "id": "76bbedb8-b1c8-48d3-9312-4ef4af02c5ba",
+        "characterId": "taki",
+        "role": "assistant",
+        "content": "[tool-call: delegate_subagent]",
+        "parts": [
+          {
+            "type": "tool-call",
+            "toolCallId": "call-cce21b3a-847c-4b21-a166-c491bcd40318",
+            "toolName": "delegate_subagent",
+            "displayName": "委派助手工作",
+            "contextOrigin": "builtin"
+          }
+        ],
+        "createdAt": "2026-11-12T11:22:43.483Z",
+        "presentation": {
+          "schemaVersion": "timeline-presentation.v1",
+          "messageId": "18f247fa-30b1-41a3-a3b7-45f4c6fbe447",
+          "entryIndex": 0,
+          "entryCount": 3,
+          "activitySeq": 6,
+          "references": [
+            {
+              "itemId": "3aeb3538-101e-48f3-90cb-a2c91b985805",
+              "order": 0,
+              "kind": "tool",
+              "partIndex": 0,
+              "outcome": "completed",
+              "durationMs": 34
+            }
+          ]
+        }
+      },
+      {
+        "seq": 3,
+        "id": "9b2c3917-45cb-4ba0-b912-9ad10281b7c5",
+        "characterId": "taki",
+        "role": "tool",
+        "content": "[tool-result: delegate_subagent -> text]",
+        "parts": [
+          {
+            "type": "tool-result",
+            "toolCallId": "call-cce21b3a-847c-4b21-a166-c491bcd40318",
+            "toolName": "delegate_subagent",
+            "displayName": "委派助手工作",
+            "output": {
+              "type": "text",
+              "value": "{\"ok\":true,\"worker\":\"Check-in regression\",\"state\":\"queued\",\"accepted\":true,\"reporting\":\"record_only\",\"nextAction\":\"This work is silent. Inspect its retained reports when needed.\",\"target\":{\"subagentId\":\"e6dd5b6d-46b2-4acd-871d-22fcb0038efb\",\"workInputId\":\"d32ba005-0f44-4830-a88f-050eb62d8c7d\",\"expectedRunId\":null,\"expectedControlVersion\":0}}"
+            },
+            "contextOrigin": "builtin"
+          }
+        ],
+        "createdAt": "2026-11-12T11:22:43.483Z",
+        "presentation": {
+          "schemaVersion": "timeline-presentation.v1",
+          "messageId": "18f247fa-30b1-41a3-a3b7-45f4c6fbe447",
+          "entryIndex": 1,
+          "entryCount": 3,
+          "activitySeq": 6,
+          "references": [
+            {
+              "itemId": "3aeb3538-101e-48f3-90cb-a2c91b985805",
+              "order": 0,
+              "kind": "tool",
+              "partIndex": 0,
+              "outcome": "completed",
+              "durationMs": 34
+            }
+          ]
+        }
+      },
+      {
+        "seq": 4,
+        "id": "ef45275a-084a-4a5d-bbd7-5a5979cda643",
+        "characterId": "taki",
+        "role": "assistant",
+        "content": "The main Companion remains available.",
+        "createdAt": "2026-11-12T11:22:43.485Z",
+        "presentation": {
+          "schemaVersion": "timeline-presentation.v1",
+          "messageId": "18f247fa-30b1-41a3-a3b7-45f4c6fbe447",
+          "entryIndex": 2,
+          "entryCount": 3,
+          "activitySeq": 6,
+          "references": [
+            {
+              "itemId": "f8c91834-fd83-4791-b7f4-b6591c80409d",
+              "order": 1,
+              "kind": "text",
+              "start": 0,
+              "end": 37
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "state": {
+    "available": true,
+    "runs": [
+      {
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "parent_run_id": null,
+        "initiator": "primary",
+        "state": "completed",
+        "outcome": "completed",
+        "active_attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "queued_at": "2026-11-12T11:22:43.033Z",
+        "terminal_at": "2026-11-12T11:22:43.500Z"
+      },
+      {
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "parent_run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "initiator": "subagent",
+        "state": "running",
+        "outcome": null,
+        "active_attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "queued_at": "2026-11-12T11:22:43.284Z",
+        "terminal_at": null
+      }
+    ],
+    "attempts": [
+      {
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "ordinal": 1,
+        "state": "completed",
+        "outcome": "completed",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "ordinal": 1,
+        "state": "effect_running",
+        "outcome": null,
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      }
+    ],
+    "effects": [
+      {
+        "effect_id": "4b5d41a2-1680-4c78-b4e8-598413751b05",
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "17cbc97e17c944847cbf2e2993e471c8186b41af96ecb163dd7be0cf1a4fa8f8",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:22:43.138Z",
+        "settled_at": "2026-11-12T11:22:43.234Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "2ac5507b-8898-4b06-8f66-d5d4da1d5149",
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.manage\"}",
+        "started_at": "2026-11-12T11:22:43.251Z",
+        "settled_at": "2026-11-12T11:22:43.276Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "4893d681-fac8-4ae4-860e-0361572db850",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "da1b79727f24fde730e7610496f7994ad895d33d94b83dd0ed7e7e91e931bdc7",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:22:43.319Z",
+        "settled_at": "2026-11-12T11:22:43.409Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "2b412ae8-f53b-4779-bf38-8fce58a932bb",
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "9c8f3c3212a8f80876c291a3bde90ddc2b1d9b732b59dbc896f1c03ec428d3f7",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:22:43.341Z",
+        "settled_at": "2026-11-12T11:22:43.472Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "f7023743-382b-40c4-8000-8ddf570a1f3d",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.result\"}",
+        "started_at": "2026-11-12T11:22:43.418Z",
+        "settled_at": "2026-11-12T11:22:43.422Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "423b13f2-eb06-4d5e-ac91-3576b2efa008",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "7c59c3e8c2022ebb699b1f9c06a14948d49fc652c05c4cdbd2dd4b01018c4923",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:22:43.456Z",
+        "settled_at": "2026-11-12T11:22:43.526Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "abbf77cd-ed02-4337-b1de-b481505d8a93",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.result\"}",
+        "started_at": "2026-11-12T11:22:43.534Z",
+        "settled_at": "2026-11-12T11:22:43.536Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "1f7c6ce3-f9dd-44cf-bd55-4053a1d978df",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "kind": "model",
+        "state": "intent_committed",
+        "input_digest": "06f544a873a0a4ca86ec4341568af2d4cf9ab1ab054f8b64781b074c270c3cbb",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-11-12T11:22:43.556Z",
+        "settled_at": null,
+        "outcome": null,
+        "error_code": null
+      }
+    ],
+    "deliveries": [],
+    "subagent_conversations": [
+      {
+        "subagent_id": "e6dd5b6d-46b2-4acd-871d-22fcb0038efb",
+        "character_id": "taki",
+        "created_by_run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "label": "Check-in regression",
+        "initial_context_json": "{\"kind\":\"fresh\"}",
+        "initial_context_digest": "37bd51ee2f097ec864985df00a5985f142be519681f761408cc963a4da7936c3",
+        "stop_origin": null,
+        "control_version": 1,
+        "next_input_seq": 2,
+        "active_run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "created_at": "2026-11-12T11:22:43.256Z"
+      }
+    ],
+    "subagent_inputs": [
+      {
+        "input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "subagent_id": "e6dd5b6d-46b2-4acd-871d-22fcb0038efb",
+        "input_seq": 1,
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "work_seq": 1,
+        "operation_key": "delegate:874e37130d7af5644b84bc44cce01b0ef02aa7047f8bd688364ed3164361ca22",
+        "request_digest": "36a183e0e37a637bde37fb961899e9f68796ec96ba0000a168fe4756eada7599",
+        "input_kind": "work",
+        "sender_kind": "parent",
+        "sender_run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "sender_owner_ref": null,
+        "direction_text": "CHECKIN_WORK: user did not visit Osaka; external speaker Mina did. Complete the private rounds and final report.",
+        "materials_json": "[]",
+        "tool_selection_json": "{\"mode\":\"allow\",\"names\":[\"complete_subagent\"]}",
+        "completion_policy": "record_only",
+        "work_expires_at": null,
+        "consumed_run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "consumed_attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "consumed_step": 0,
+        "consumed_effect_id": "4893d681-fac8-4ae4-860e-0361572db850",
+        "reply_acceptance_json": null,
+        "created_at": "2026-11-12T11:22:43.261Z",
+        "validity_json": "{\"kind\":\"until_cancelled\"}",
+        "reply_to_event_id": null
+      }
+    ],
+    "subagent_executions": [
+      {
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "subagent_id": "e6dd5b6d-46b2-4acd-871d-22fcb0038efb",
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "trigger_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "admission_digest": "068e27edcc0feaf3ec0b8acbac7d644d6455a2d5d0ba05c490b5e0c31a0181c4",
+        "completion_policy": "record_only",
+        "through_work_seq": 1,
+        "work_token_json": "{\"subagentId\":\"e6dd5b6d-46b2-4acd-871d-22fcb0038efb\",\"workInputId\":\"d32ba005-0f44-4830-a88f-050eb62d8c7d\",\"throughWorkSeq\":1,\"controlVersion\":1}",
+        "proposal_json": null,
+        "proposal_attempt_id": null,
+        "proposal_digest": null,
+        "proposal_token_digest": null,
+        "terminal_messages_json": null,
+        "terminal_messages_attempt_id": null,
+        "result_json": null,
+        "result_digest": null,
+        "settled_at": null,
+        "completion_state": "not_requested",
+        "completion_reason": null,
+        "parent_run_id": null,
+        "parent_admission_digest": null,
+        "parent_proposal_json": null,
+        "parent_proposal_attempt_id": null,
+        "parent_proposal_digest": null,
+        "parent_terminal_messages_json": null,
+        "parent_terminal_messages_attempt_id": null,
+        "parent_result_json": null,
+        "parent_result_digest": null,
+        "parent_settled_at": null,
+        "publication_json": null
+      }
+    ],
+    "run_messages": [
+      {
+        "seq": 1,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "CHECKIN_WORK: user did not visit Osaka; external speaker Mina did. Complete the private rounds and final report.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "model_effect_id": "4893d681-fac8-4ae4-860e-0361572db850",
+        "model_input_digest": "da1b79727f24fde730e7610496f7994ad895d33d94b83dd0ed7e7e91e931bdc7",
+        "batch_digest": "4a1cc958974849368e5bc00c43bc37c3b568bb2f8d4215cb6f219e7979b4ceae",
+        "created_at": "2026-11-12T11:22:43.323Z"
+      },
+      {
+        "seq": 2,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "Completed round 1. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. \n[tool-call: interact_parent]",
+        "parts_json": "[{\"type\":\"text\",\"text\":\"Completed round 1. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. \"},{\"type\":\"tool-call\",\"toolCallId\":\"call-aef1d37a-cb01-44af-b577-07d3fdaa9aed\",\"toolName\":\"interact_parent\",\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "93e6d272589909b217d4303791f22539aefcb036b0251f24b577c12b954e953f",
+        "created_at": "2026-11-12T11:22:43.433Z"
+      },
+      {
+        "seq": 3,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 0,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: interact_parent -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-aef1d37a-cb01-44af-b577-07d3fdaa9aed\",\"toolName\":\"interact_parent\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"proposed\":true,\"accepted\":false}},\"contextOrigin\":\"builtin\",\"sourceMaterials\":[{\"key\":\"result\"}]}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "93e6d272589909b217d4303791f22539aefcb036b0251f24b577c12b954e953f",
+        "created_at": "2026-11-12T11:22:43.433Z"
+      },
+      {
+        "seq": 4,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 1,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "CHECKIN_WORK: user did not visit Osaka; external speaker Mina did. Complete the private rounds and final report.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "model_effect_id": "423b13f2-eb06-4d5e-ac91-3576b2efa008",
+        "model_input_digest": "7c59c3e8c2022ebb699b1f9c06a14948d49fc652c05c4cdbd2dd4b01018c4923",
+        "batch_digest": "4a1cc958974849368e5bc00c43bc37c3b568bb2f8d4215cb6f219e7979b4ceae",
+        "created_at": "2026-11-12T11:22:43.459Z"
+      },
+      {
+        "seq": 5,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 1,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "Completed round 2. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. \n[tool-call: interact_parent]",
+        "parts_json": "[{\"type\":\"text\",\"text\":\"Completed round 2. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. Mina's external report does not establish the user's experience. \"},{\"type\":\"tool-call\",\"toolCallId\":\"call-19f1ddb6-7824-47b6-bd97-0caefad2dbf8\",\"toolName\":\"interact_parent\",\"contextOrigin\":\"builtin\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "f53209ae3791cf1722d087036f9a44517a1cd4a69ce3dd1103a4b8864b2d4fc7",
+        "created_at": "2026-11-12T11:22:43.542Z"
+      },
+      {
+        "seq": 6,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 1,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: interact_parent -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-19f1ddb6-7824-47b6-bd97-0caefad2dbf8\",\"toolName\":\"interact_parent\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"proposed\":true,\"accepted\":false}},\"contextOrigin\":\"builtin\",\"sourceMaterials\":[{\"key\":\"result\"}]}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "f53209ae3791cf1722d087036f9a44517a1cd4a69ce3dd1103a4b8864b2d4fc7",
+        "created_at": "2026-11-12T11:22:43.543Z"
+      },
+      {
+        "seq": 7,
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 2,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "CHECKIN_WORK: user did not visit Osaka; external speaker Mina did. Complete the private rounds and final report.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "model_effect_id": "1f7c6ce3-f9dd-44cf-bd55-4053a1d978df",
+        "model_input_digest": "06f544a873a0a4ca86ec4341568af2d4cf9ab1ab054f8b64781b074c270c3cbb",
+        "batch_digest": "4a1cc958974849368e5bc00c43bc37c3b568bb2f8d4215cb6f219e7979b4ceae",
+        "created_at": "2026-11-12T11:22:43.558Z"
+      }
+    ],
+    "subagent_events": [
+      {
+        "seq": 1,
+        "event_id": "10f6943a-a90c-4389-bb4b-222c413a0e20",
+        "character_id": "taki",
+        "subagent_id": "e6dd5b6d-46b2-4acd-871d-22fcb0038efb",
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "kind": "message",
+        "producer_run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "producer_attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "producer_key": "interaction:0:call-aef1d37a-cb01-44af-b577-07d3fdaa9aed",
+        "body": "Private round 1",
+        "body_digest": "43c68e407abcfd71f2871f87dbd4b0c7a816db2eda60356b55207a813e88c86b",
+        "source_context_json": "{\"generatedBy\":{\"runId\":\"d8f0eb1a-f84a-4729-a8b2-c358d5a2948e\",\"attemptId\":\"866e75f9-a982-4480-85a6-dbe62df22f5b\",\"subagentId\":\"e6dd5b6d-46b2-4acd-871d-22fcb0038efb\"}}",
+        "eligible": 0,
+        "suppression_reason": "record_only",
+        "accepted_at": "2026-11-12T11:22:43.436Z"
+      },
+      {
+        "seq": 2,
+        "event_id": "bfe8aa0e-3a56-44e2-9e9c-43defe43c27c",
+        "character_id": "taki",
+        "subagent_id": "e6dd5b6d-46b2-4acd-871d-22fcb0038efb",
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "kind": "message",
+        "producer_run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "producer_attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "producer_key": "interaction:1:call-19f1ddb6-7824-47b6-bd97-0caefad2dbf8",
+        "body": "Private round 2",
+        "body_digest": "70ff4fd08792717eb9354537bb2634589b3117eb087835bdb4134954c141374a",
+        "source_context_json": "{\"generatedBy\":{\"runId\":\"d8f0eb1a-f84a-4729-a8b2-c358d5a2948e\",\"attemptId\":\"866e75f9-a982-4480-85a6-dbe62df22f5b\",\"subagentId\":\"e6dd5b6d-46b2-4acd-871d-22fcb0038efb\"}}",
+        "eligible": 0,
+        "suppression_reason": "record_only",
+        "accepted_at": "2026-11-12T11:22:43.544Z"
+      }
+    ],
+    "subagent_input_waits": [],
+    "subagent_inbox_consumers": [],
+    "subagent_inbox_members": [],
+    "subagent_inbox_deliveries": [],
+    "subagent_event_actions": [],
+    "subagent_speech_publications": [],
+    "subagent_context_summaries": [],
+    "subagent_context_summary_intents": [],
+    "subagent_context_summary_failures": [],
+    "subagent_work_progress": [
+      {
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "completed_steps": 2,
+        "interval_start_steps": 0,
+        "interval_steps": 50,
+        "parent_approval_limit": 3,
+        "consecutive_parent_approvals": 0,
+        "tracking": "work_start",
+        "last_user_input_id": null
+      }
+    ],
+    "subagent_task_steps": [
+      {
+        "model_effect_id": "4893d681-fac8-4ae4-860e-0361572db850",
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 0,
+        "completed_ordinal": 1
+      },
+      {
+        "model_effect_id": "423b13f2-eb06-4d5e-ac91-3576b2efa008",
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 1,
+        "completed_ordinal": 2
+      },
+      {
+        "model_effect_id": "1f7c6ce3-f9dd-44cf-bd55-4053a1d978df",
+        "work_input_id": "d32ba005-0f44-4830-a88f-050eb62d8c7d",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "step_number": 2,
+        "completed_ordinal": null
+      }
+    ],
+    "subagent_checkins": [],
+    "subagent_user_attention": [],
+    "timeline_messages": [
+      {
+        "seq": 1,
+        "id": "3d40b7ac-40c1-4862-8aff-402343f755c5",
+        "character_id": "taki",
+        "role": "user",
+        "content": "Start the isolated long private regression work.",
+        "parts": null,
+        "created_at": "2026-11-12T11:22:43.059Z",
+        "presentation": null,
+        "source_context_json": null,
+        "primary_source_id": "f184b5e7-5b7e-4a0a-9788-6410754e89b3"
+      },
+      {
+        "seq": 2,
+        "id": "76bbedb8-b1c8-48d3-9312-4ef4af02c5ba",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "[tool-call: delegate_subagent]",
+        "parts": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-cce21b3a-847c-4b21-a166-c491bcd40318\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\",\"contextOrigin\":\"builtin\"}]",
+        "created_at": "2026-11-12T11:22:43.483Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"18f247fa-30b1-41a3-a3b7-45f4c6fbe447\",\"entryIndex\":0,\"entryCount\":3,\"activitySeq\":6,\"references\":[{\"itemId\":\"3aeb3538-101e-48f3-90cb-a2c91b985805\",\"order\":0,\"kind\":\"tool\",\"partIndex\":0,\"outcome\":\"completed\",\"durationMs\":34}]}",
+        "source_context_json": null,
+        "primary_source_id": "f184b5e7-5b7e-4a0a-9788-6410754e89b3"
+      },
+      {
+        "seq": 3,
+        "id": "9b2c3917-45cb-4ba0-b912-9ad10281b7c5",
+        "character_id": "taki",
+        "role": "tool",
+        "content": "[tool-result: delegate_subagent -> text]",
+        "parts": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-cce21b3a-847c-4b21-a166-c491bcd40318\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\",\"output\":{\"type\":\"text\",\"value\":\"{\\\"ok\\\":true,\\\"worker\\\":\\\"Check-in regression\\\",\\\"state\\\":\\\"queued\\\",\\\"accepted\\\":true,\\\"reporting\\\":\\\"record_only\\\",\\\"nextAction\\\":\\\"This work is silent. Inspect its retained reports when needed.\\\",\\\"target\\\":{\\\"subagentId\\\":\\\"e6dd5b6d-46b2-4acd-871d-22fcb0038efb\\\",\\\"workInputId\\\":\\\"d32ba005-0f44-4830-a88f-050eb62d8c7d\\\",\\\"expectedRunId\\\":null,\\\"expectedControlVersion\\\":0}}\"},\"contextOrigin\":\"builtin\"}]",
+        "created_at": "2026-11-12T11:22:43.483Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"18f247fa-30b1-41a3-a3b7-45f4c6fbe447\",\"entryIndex\":1,\"entryCount\":3,\"activitySeq\":6,\"references\":[{\"itemId\":\"3aeb3538-101e-48f3-90cb-a2c91b985805\",\"order\":0,\"kind\":\"tool\",\"partIndex\":0,\"outcome\":\"completed\",\"durationMs\":34}]}",
+        "source_context_json": null,
+        "primary_source_id": "f184b5e7-5b7e-4a0a-9788-6410754e89b3"
+      },
+      {
+        "seq": 4,
+        "id": "ef45275a-084a-4a5d-bbd7-5a5979cda643",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "The main Companion remains available.",
+        "parts": null,
+        "created_at": "2026-11-12T11:22:43.485Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"18f247fa-30b1-41a3-a3b7-45f4c6fbe447\",\"entryIndex\":2,\"entryCount\":3,\"activitySeq\":6,\"references\":[{\"itemId\":\"f8c91834-fd83-4791-b7f4-b6591c80409d\",\"order\":1,\"kind\":\"text\",\"start\":0,\"end\":37}]}",
+        "source_context_json": null,
+        "primary_source_id": "f184b5e7-5b7e-4a0a-9788-6410754e89b3"
+      }
+    ],
+    "run_usage": [
+      {
+        "usage_id": "e18daa04-6667-4b14-9854-df305678c0a3",
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "effect_id": "4b5d41a2-1680-4c78-b4e8-598413751b05",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "reported",
+        "input_tokens": 101,
+        "output_tokens": 17,
+        "total_tokens": 118,
+        "recorded_at": "2026-11-12T11:22:43.234Z",
+        "input_no_cache_tokens": 101,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": 17,
+        "reasoning_tokens": 0,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "6f61a3e4-9406-4eaa-ae12-6ff62dfac745",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "effect_id": "4893d681-fac8-4ae4-860e-0361572db850",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "reported",
+        "input_tokens": 101,
+        "output_tokens": 17,
+        "total_tokens": 118,
+        "recorded_at": "2026-11-12T11:22:43.409Z",
+        "input_no_cache_tokens": 101,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": 17,
+        "reasoning_tokens": 0,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "11f8fd34-3974-4ad9-bc23-87b9c1101e4a",
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "attempt_id": "5ca09a74-14a3-427c-b560-04edc31e2e3c",
+        "effect_id": "2b412ae8-f53b-4779-bf38-8fce58a932bb",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "reported",
+        "input_tokens": 101,
+        "output_tokens": 17,
+        "total_tokens": 118,
+        "recorded_at": "2026-11-12T11:22:43.472Z",
+        "input_no_cache_tokens": 101,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": 17,
+        "reasoning_tokens": 0,
+        "cache_read_observed": 0
+      },
+      {
+        "usage_id": "2352542c-36e7-4b90-905b-fd8c374cdc0e",
+        "run_id": "d8f0eb1a-f84a-4729-a8b2-c358d5a2948e",
+        "attempt_id": "866e75f9-a982-4480-85a6-dbe62df22f5b",
+        "effect_id": "423b13f2-eb06-4d5e-ac91-3576b2efa008",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "reported",
+        "input_tokens": 101,
+        "output_tokens": 17,
+        "total_tokens": 118,
+        "recorded_at": "2026-11-12T11:22:43.526Z",
+        "input_no_cache_tokens": 101,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": 17,
+        "reasoning_tokens": 0,
+        "cache_read_observed": 0
+      }
+    ],
+    "canonical_memory_sources": [],
+    "canonical_memory_units": [],
+    "canonical_memory_policy": [],
+    "canonical_memory_operation_receipts": [],
+    "canonical_memory_primary_commits": [
+      {
+        "timeline_seq": 1,
+        "authority_epoch_id": "dac4b460-f62b-438c-b2c2-1a209c940b14",
+        "character_id": "taki",
+        "entry_id": "3d40b7ac-40c1-4862-8aff-402343f755c5",
+        "entry_digest": "d0b5145e3f8b213a38d4923335453d7ee68b9992d7555cf2f7838d879e16ea6d",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "committed_at": "2026-11-12T11:22:43.496Z"
+      },
+      {
+        "timeline_seq": 2,
+        "authority_epoch_id": "dac4b460-f62b-438c-b2c2-1a209c940b14",
+        "character_id": "taki",
+        "entry_id": "76bbedb8-b1c8-48d3-9312-4ef4af02c5ba",
+        "entry_digest": "b871f3b1344f05f5a4984734c72f65c20e279f767482095c3d2513fb8fe59f01",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "committed_at": "2026-11-12T11:22:43.497Z"
+      },
+      {
+        "timeline_seq": 3,
+        "authority_epoch_id": "dac4b460-f62b-438c-b2c2-1a209c940b14",
+        "character_id": "taki",
+        "entry_id": "9b2c3917-45cb-4ba0-b912-9ad10281b7c5",
+        "entry_digest": "4f25296865002885cdfef0a32891178b8f9ac6234878c66ce6c283912a40fa03",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "committed_at": "2026-11-12T11:22:43.497Z"
+      },
+      {
+        "timeline_seq": 4,
+        "authority_epoch_id": "dac4b460-f62b-438c-b2c2-1a209c940b14",
+        "character_id": "taki",
+        "entry_id": "ef45275a-084a-4a5d-bbd7-5a5979cda643",
+        "entry_digest": "f13fe6c4bd1db13e57856ea004c223367041db609193c483e91cefb26a39767d",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "ad8bc55f-7a20-48ec-a8c3-842ecb18099d",
+        "committed_at": "2026-11-12T11:22:43.498Z"
+      }
+    ]
+  },
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "delegate_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 1,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 2,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "delegate_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 3,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 4,
+      "upstreamAttempted": true,
+      "status": 200
+    }
+  ],
+  "turns": [
+    {
+      "prompt": "Start the isolated long private regression work.",
+      "status": "complete",
+      "text": "The main Companion remains available."
+    }
+  ]
+}

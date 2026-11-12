@@ -8,6 +8,9 @@
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
 - hindsight-client.ts — authenticated REST client with finite HTTP deadlines, prompt cancellation even for an abort-ignoring delegate, response bounds and typed setup/Bank-stats/import/replica/recovery/native-read/D77 application-state methods
 - hindsight-cursor-reset.ts — §5.7 native 409 classification: a well-formed `cursor_ahead` is HINDSIGHT_PROVIDER_ROLLBACK_DETECTED carrying the native lineage/generation (kept only when they match the Core checkpoint), anything else stays HINDSIGHT_CURSOR_RESET_REQUIRED; bodies are never logged
+- Request attribution — direct primary assembly forwards canonical construction spans without another native read or model operation
+- hindsight-recall-evidence.ts — exact native/source/artifact/policy lifetime and retain-completion bindings; unsupported opaque records refuse before control reads
+- hindsight-source-lifetime.ts — bounded immutable source/native/policy evidence codec shared by original ingestion and whole-write receipts
 - hindsight-runtime-client.ts — bounded native recall/reflect POST methods through the existing authenticated requester; no Canonical hydration or runtime activation
 - hindsight-http-transport.ts — single HTTP/HTTPS request under the captured total deadline, bounded decompression, and no redirect/retry or hidden fetch phase timeout
 - hindsight-pending-client.ts — canonical retain-to-native wire mapping and B0 expected-revision/mutation-ID replay with bounded native receipts
@@ -83,7 +86,7 @@
 - hindsight-application-writer.ts — common preparation clock, original unfinished-binding lookup and durable command identity with verified receipt/application status
 - hindsight-ingestion-contract.ts — durable source-only plans, original retain payloads, stable operation identities and coverage codecs
 - hindsight-ingestion-lifetime.ts — owner cancellation, serial ingestion chains and a drain that waits for every underlying operation
-- hindsight-ingestion.ts — source-only ingestion with restart-safe gate/Bank coverage, pre-retirement flush and owned stop/drain
+- hindsight-ingestion.ts — independent exact primary-source ingestion, conservative coverage gaps and strict custody-aware flush, one Write Gate and serialized shutdown/drain
 - hindsight-memory-pending-read.ts — separate unconfirmed overlays, gated by exact scope and current known target policy
 - hindsight-memory-provider-context.ts — guarded request allowances and optional sync-admitted evidence reader; persisted capability snapshots, shrinking operation deadlines and closed provider/availability errors
 - hindsight-memory-provider.ts — native reads/reflection with foreground cold-admission cancellation, truthful Pending outcomes and stable authority

@@ -20,13 +20,23 @@ const entry = {
   createdAt: "2026-07-10T00:00:00.000Z",
 };
 
+describe("TimelineEntry source context", () => {
+  it("preserves optional known facts separately from role and original speech", () => {
+    const sourceContext = { generatedBy: { runId: "run", attemptId: "attempt" }, materials: [{ label: "Interview" }] };
+    expect(TimelineEntrySchema.parse({ ...entry, sourceContext })).toEqual({ ...entry, sourceContext });
+    expect(TimelineEntrySchema.parse(entry)).toEqual(entry);
+    expect(TimelineEntrySchema.safeParse({ ...entry, sourceContext: { materials: [{ speaker: 42 }] } }).success).toBe(false);
+  });
+});
+
 describe("TIMELINE_METHODS", () => {
-  it("names the four timeline methods", () => {
+  it("names the compatible timeline methods and complete batch notification", () => {
     expect(TIMELINE_METHODS).toEqual({
       history: "timeline.history",
       subscribe: "timeline.subscribe",
       appended: "timeline.appended",
       removed: "timeline.removed",
+      committed: "timeline.committed",
     });
   });
 });
@@ -71,6 +81,27 @@ describe("TimelinePartSchema", () => {
     expect(
       TimelinePartSchema.safeParse({ type: "tool-result", toolCallId: "c1", toolName: "t", output: "raw" }).success,
     ).toBe(false);
+  });
+
+  it("round-trips bounded display names without changing tool identity or business output", () => {
+    const displayName = "🛠".repeat(120);
+    const parts = [
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_key", displayName },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_key", displayName,
+        output: { type: "json", value: { displayName: "x".repeat(300), input: "business data" }, hash: "business-hash" } },
+    ];
+    for (const part of parts) expect(TimelinePartSchema.parse(part)).toEqual(part);
+  });
+
+  it("omits invalid optional display metadata while retaining strict canonical validation", () => {
+    for (const displayName of [null, 7, {}, "", " \t\n", "x".repeat(241), "🛠".repeat(121)]) {
+      for (const type of ["tool-call", "tool-result"] as const) {
+        const part = { type, toolCallId: "c1", toolName: "opaque_key", displayName, output: { type: "text", value: "done" } };
+        const parsed = TimelinePartSchema.parse(part);
+        expect("displayName" in parsed ? parsed.displayName : undefined).toBeUndefined();
+        expect(TimelinePartSchema.safeParse({ ...part, toolName: "" }).success).toBe(false);
+      }
+    }
   });
 
   it("round-trips an image part (#17) and rejects an unsupported media type / empty ref", () => {

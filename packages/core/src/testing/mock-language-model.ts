@@ -47,11 +47,11 @@ export function slowStreamingModel(deltas: string[], chunkDelayInMs: number): Mo
 }
 
 /**
- * Transport-faithful cancel: on abort it ERRORS the model stream with the raw (string) reason — mirroring undici
- * rejecting the in-flight body read with `signal.reason`. That string fails the SDK's isAbortError name check, so the
- * SDK errors the stream and the chat loop's for-await THROWS the reason. This is the prefill-cancel ending that
- * simulateReadableStream cannot reproduce (its reads always resolve, always taking the graceful abort branch). Deltas
- * arrive on a timer so a cancel can be timed before the first (throw-ending retract) or after it (throw-ending stop).
+ * Scripted rejecting provider: abort errors the model stream with the original reason, unlike the resolving
+ * simulateReadableStream fixture. Historically SDK 7.0.17 surfaced a string throw; SDK 7.0.148 can cancel its reader
+ * first and return gracefully. Core's approved cancellation policy must not infer callback eligibility from either
+ * ending. Real fetch/provider transforms are covered separately by chat-send-sdk-transport.test.ts. Timed deltas
+ * allow cancellation before the first output or after a retained partial response.
  */
 export function abortRejectingModel(deltas: string[], chunkDelayInMs: number): MockLanguageModelV4 {
   return new MockLanguageModelV4({
@@ -73,7 +73,7 @@ export function abortRejectingModel(deltas: string[], chunkDelayInMs: number): M
               controller.close();
             }
           }, chunkDelayInMs);
-          // undici rejects the body read with signal.reason verbatim — reproduce that as a stream error.
+          // Deliberately exercise a rejecting model body; this does not replace the real HTTP/fetch fixture.
           abortSignal?.addEventListener("abort", () => {
             clearInterval(timer);
             controller.error(abortSignal.reason);

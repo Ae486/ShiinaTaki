@@ -44,7 +44,7 @@ export interface MemoryOperationMethods {
   memoryOperationList(params?: Partial<MemoryOperationListParams>): Promise<MemoryOperation[]>;
   /** Cancels an admitted-only operation; a claimed/running/settled one rejects with a closed reason. */
   memoryOperationCancel(operationId: string): Promise<MemoryOperation>;
-  /** Subscribes this socket to memory.operations.changed pushes (exact-once per client generation). */
+  /** Shares accepted membership per socket; failed setup can be retried by explicit caller demand. */
   subscribeMemoryOperations(): Promise<void>;
 }
 
@@ -66,14 +66,17 @@ export function memoryOperationMethods(request: <T>(method: string, params: JSON
     memoryOperationCancel: async (operationId) =>
       MemoryOperationCancelResultSchema.parse(await request(MEMORY_OPERATION_METHODS.cancel, { operationId })).operation,
     subscribeMemoryOperations: () => {
-      subscription ??= request<unknown>(MEMORY_OPERATION_METHODS.subscribe, {}).then((result) => {
+      if (subscription) return subscription;
+      const attempt = request<unknown>(MEMORY_OPERATION_METHODS.subscribe, {}).then((result) => {
         MemoryOperationSubscribeResultSchema.parse(result);
       }).catch((cause: unknown) => {
-        // Explicit read-model recovery may retry a failed subscription; successful subscriptions remain shared.
-        subscription = null;
+        // A lost/invalid acknowledgement is not accepted membership. Retry only on another demand,
+        // retaining concurrent sharing and the current generation's native request deadline cleanup.
+        if (subscription === attempt) subscription = null;
         throw cause;
       });
-      return subscription;
+      subscription = attempt;
+      return attempt;
     },
   };
 }

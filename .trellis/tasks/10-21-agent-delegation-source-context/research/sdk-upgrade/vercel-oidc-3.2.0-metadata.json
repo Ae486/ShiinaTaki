@@ -1,0 +1,95 @@
+{
+  "url": "https://registry.npmjs.org/%40vercel%2Foidc/3.2.0",
+  "metadata": {
+    "bugs": {
+      "url": "https://github.com/vercel/vercel/issues"
+    },
+    "dist": {
+      "shasum": "5782a4d4904443f015808705b5537cf9c3b68528",
+      "tarball": "https://registry.npmjs.org/@vercel/oidc/-/oidc-3.2.0.tgz",
+      "fileCount": 37,
+      "integrity": "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==",
+      "signatures": [
+        {
+          "sig": "MEUCIAztumU20yxULcZ/klPNpsCgVVY469B9U1owB4yfh+x4AiEA9gMSWLzZC4Ro6tENFpVQYimNZXv5PAP51OAgF/KZ4ME=",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@vercel%2foidc@3.2.0",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 104725
+    },
+    "name": "@vercel/oidc",
+    "_from": "file:vercel-oidc-3.2.0.tgz",
+    "types": "./dist/index.d.ts",
+    "engines": {
+      "node": ">= 20"
+    },
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "browser": "./dist/index-browser.js",
+        "require": "./dist/index.js",
+        "workflow": "./dist/index-browser.js",
+        "react-native": "./dist/index-browser.js"
+      }
+    },
+    "license": "Apache-2.0",
+    "scripts": {
+      "test": "vitest",
+      "build": "pnpm run build:code && pnpm run build:docs",
+      "pretest": "pnpm run build:code",
+      "build:code": "node ../../utils/build.mjs",
+      "build:docs": "typedoc && prettier --write docs/**/*.md docs/*.md"
+    },
+    "_npmUser": {
+      "name": "vercel-release-bot",
+      "email": "infra+release@vercel.com"
+    },
+    "homepage": "https://vercel.com",
+    "_resolved": "/tmp/172e4e01d562ef2a79272d0570e22c60/vercel-oidc-3.2.0.tgz",
+    "_integrity": "sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==",
+    "repository": {
+      "url": "git+https://github.com/vercel/vercel.git",
+      "type": "git",
+      "directory": "packages/oidc"
+    },
+    "_npmVersion": "9.9.4",
+    "description": "Runtime OIDC helpers intended for use with Vercel Functions",
+    "directories": {},
+    "maintainers": [
+      {
+        "name": "vercel-release-bot",
+        "email": "infra+release@vercel.com"
+      },
+      {
+        "name": "zeit-bot",
+        "email": "team@zeit.co"
+      }
+    ],
+    "_nodeVersion": "22.22.0",
+    "publishConfig": {
+      "access": "public"
+    },
+    "_hasShrinkwrap": false,
+    "devDependencies": {
+      "vitest": "2.0.1",
+      "typedoc": "0.24.6",
+      "tinyspawn": "1.3.1",
+      "typescript": "4.9.5",
+      "typedoc-plugin-markdown": "4.1.2",
+      "typedoc-plugin-mdn-links": "3.2.3"
+    },
+    "peerDependenciesMeta": {},
+    "_npmOperationalInternal": {
+      "tmp": "tmp/oidc_3.2.0_1770775217109_0.9603700276490716",
+      "host": "s3://npm-registry-packages-npm-production"
+    },
+    "_id": "@vercel/oidc@3.2.0",
+    "version": "3.2.0"
+  }
+}

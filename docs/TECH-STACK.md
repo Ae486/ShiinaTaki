@@ -14,9 +14,9 @@ Selection principle: glue mature components, build only the domain-specific part
 | Skills | SKILL.md folders (OpenClaw/Claude Code convention) | Loader lists descriptions in prompt, loads full content on demand |
 | WS API | `ws` + JSON-RPC 2.0 + zod schemas in shared package; `json-rpc-2.0` (npm) as envelope library | ADR 0004. Device identity + pairing from day one. Envelope lib is transport-agnostic, composes with `ws` + zod (per ecosystem scan 07-07) |
 | Storage | `node:sqlite` behind a thin wrapper | Zero native deps; wrapper keeps better-sqlite3 swap trivial if stability disappoints |
-| Memory | Markdown files in Workspace + SQLite FTS5 index | OpenClaw-proven pattern; vector search deferred |
-| Scheduler | `croner` (cron) + heartbeat interval reading HEARTBEAT.md | |
-| Config | JSON file + zod validation, edited via settings panel | Secrets NOT in config file — see keyring below |
+| Memory | Provider-neutral runtime with one active Memory Authority; canonical Local and Hindsight/Replica contracts | ADR 0009 and the active migration/runtime selection govern current behavior; legacy Markdown storage is not the Heartbeat integration contract |
+| Scheduler and initiative | Existing `croner` Scheduled provider; typed Core-owned Interaction Patterns and shared Signal/Wake Policy for Heartbeat | Initiative development reuses RunService, ChatAgent and the existing Monitor; no mutable HEARTBEAT.md authority or separate Agent loop |
+| Config | Core-owned sparse SQLite settings overlay with zod validation; explicit environment > stored > default | Existing operator settings API owns writes; secrets stay outside this value store |
 | TTS (reserved) | `SpeechProvider` interface; wire contract = OpenAI-compatible `POST /v1/audio/speech` against user's VPS | See `docs/TTS-INTERFACE.md`. v1: interface + settings fields + playback path only |
 
 ## Character & model import
@@ -70,7 +70,7 @@ pnpm workspaces monorepo: `packages/shared` (protocol + zod), `packages/core` (A
 
 ## Mobile (later phase, architecture-ready)
 
-Phone connects as a read-only `node` over the same WS protocol (pairing built in, ADR 0004). Android confirmed as target: notification listener + usage signals are feasible. App shell candidate: Capacitor wrapping the Pet UI web code (Live2D reuse). Off-LAN transport via VPS relay — out of v1 scope.
+Phone connects as a presentation/operator frontend to the same Core over the authenticated API (pairing and role separation in ADR 0004), including when Core runs on a VPS. It does not run a second Core or imply an Execution Host. Android remains the later target; Capacitor wrapping the Pet UI web code is a candidate, not a selected implementation. Any future notification-listener, usage-signal or other device capability provider is a separate, explicitly governed Node role rather than a requirement of the phone frontend.
 
 Cross-device data access follows the single-owner pattern: the Agent Core is the only reader/writer of the database; every client (Shell, Pet UI, phone) queries and subscribes over the WS API. Desktop-sampled data reaches the phone as a server-push event the moment it is stored — no shared database file, no sync engine, no conflict resolution, because there is exactly one writer. Phones receive extracted summaries, not raw screenshots (bandwidth + privacy).
 
@@ -80,3 +80,5 @@ Deployment topologies (clarified 2026-07-07; the rule in both: **the database al
 - **VPS-hosted core** (production target, v1.5): the user runs a 24/7 VPS (4C/24G) — Core + DB + Workspace memory + TTS live there; taki is persistently online. The desktop becomes Pet UI frontend + capability node (Shell connects over the same WS protocol, unchanged role); the phone is a pure frontend. Desktop off = screen sensing and desktop capabilities unavailable (tools return structured "node offline" errors), while chat, memory, heartbeat, and MCP/network tools keep running.
 - Deltas the VPS mode needs (all small, none architectural): transport security (Tailscale preferred — zero TLS management; public WSS + device tokens as fallback, pairing already in ADR 0004), a per-OS secrets backend for the core (Credential Manager on Windows; restricted-permission file/env on Ubuntu headless), a headless Linux packaging target (systemd unit), and node-offline degradation wording in tool descriptions.
 - **Cross-platform guarantee**: `packages/core` + `packages/shared` must run on Windows AND Ubuntu (architecture invariant 8, CLAUDE.md). Enforced by CI from M1: test matrix `windows-latest` + `ubuntu-latest` runs core/shared typecheck + tests on every push — platform drift is caught at commit time, not at deployment time.
+
+User Presence clarification (owner, 2026-09-08): Core uptime, an authenticated connection, User Presence, message presentation and Execution Host availability are distinct. Core needs a fresh, evidence-backed view of the user across clients so absence is not misclassified as ignored messages or readiness to handle a user-dependent step. Reserve authenticated per-client reports, expiry, cross-device aggregation and explicit unknown states in the Heartbeat design. A background phone connection or push route proves reachability only; a fresh phone interaction may establish User Presence while the desktop Host remains unavailable. Core-only work allowed by policy may continue during user absence. The current planning record is `.trellis/tasks/09-08-t4-heartbeat/`; this is a contract reservation, not a claim that presence reporting or the phone application is implemented.

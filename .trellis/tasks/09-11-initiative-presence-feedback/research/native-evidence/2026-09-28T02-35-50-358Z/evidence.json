@@ -1,0 +1,1997 @@
+{
+  "checks": [
+    "actual development StrictMode and independent Home/Chat/Pet sources; opening/focus is not input",
+    "lazy Skeleton and closed Pet do not expose committed messages or open the bubble",
+    "real rendered Chat and Pet text qualify after two seconds; programmatic opening remains input-free",
+    "actual StrictMode and same-client render remount keep one live source identity",
+    "visible unfocused text remains eligible",
+    "native minimize ends both Home/Chat visibility; restore requires actual exposure again",
+    "hidden retained Chat stays ineligible; Home settings use the designated source and real device zone",
+    "synthetic DOM input rejected; trusted browser input accepted; renewal preserves original age",
+    "Home reconnect replaces only Home source and carries no old input",
+    "closing the bubble and hiding its native window withdraw exposure",
+    "offscreen new content gives no exposure and preserves the reader scroll/selection anchor"
+  ],
+  "diagnostics": [
+    [
+      {
+        "label": "home",
+        "operation": "is_visible",
+        "result": true,
+        "hidden": false
+      },
+      {
+        "label": "home",
+        "operation": "is_minimized",
+        "result": false,
+        "hidden": false
+      },
+      {
+        "label": "home",
+        "operation": "is_focused",
+        "result": false,
+        "hidden": false
+      }
+    ],
+    [
+      {
+        "label": "pet",
+        "operation": "is_visible",
+        "result": true,
+        "hidden": false
+      },
+      {
+        "label": "pet",
+        "operation": "is_minimized",
+        "result": false,
+        "hidden": false
+      },
+      {
+        "label": "pet",
+        "operation": "is_focused",
+        "result": false,
+        "hidden": false
+      }
+    ]
+  ],
+  "directory": "G:\\Temp\\taki-c2-native-YmQrG0",
+  "limitation": "scripted server; fixture Pet opener; no renderer/model or proof of human reading",
+  "reports": [
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 1,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562953676
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 1,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562953687
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 2,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562953713
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 2,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562953717
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 1,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562953724
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 2,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562953733
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 3,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": true
+      },
+      "at": 1790562958286
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 3,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": true
+      },
+      "at": 1790562960454
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 4,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": false
+      },
+      "at": 1790562960565
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 5,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562960566
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 6,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562960572
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 7,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562960573
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 8,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562960575
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 9,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562960575
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 10,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562960606
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 11,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": true
+      },
+      "at": 1790562962744
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 4,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": true
+      },
+      "at": 1790562962745
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 5,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": false
+      },
+      "at": 1790562962822
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 6,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": false
+      },
+      "at": 1790562962822
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 7,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562962822
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 3,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562962823
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 12,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": false
+      },
+      "at": 1790562962829
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 13,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": true
+      },
+      "at": 1790562964836
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 14,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": false
+      },
+      "at": 1790562965147
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 15,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562965147
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 16,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562965301
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 8,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": null
+      },
+      "at": 1790562965305
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 4,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": null
+      },
+      "at": 1790562965305
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 9,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": true
+      },
+      "at": 1790562967314
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 10,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": true
+      },
+      "at": 1790562967314
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 11,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": true
+      },
+      "at": 1790562967314
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 17,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": true
+      },
+      "at": 1790562967315
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 12,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": false
+      },
+      "at": 1790562967376
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 13,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": false
+      },
+      "at": 1790562967377
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 14,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": false
+      },
+      "at": 1790562967377
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 15,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562967377
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 18,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": false
+      },
+      "at": 1790562967384
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 16,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562968687
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 5,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562968689
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 17,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562968697
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 18,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562968698
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 6,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": null
+      },
+      "at": 1790562968698
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 7,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": null
+      },
+      "at": 1790562968698
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 19,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": true
+      },
+      "at": 1790562969390
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 19,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": null
+      },
+      "at": 1790562969883
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 20,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": true
+      },
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 21,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": true
+      },
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 22,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": true
+      },
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 23,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": true
+      },
+      "at": 1790562971898
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 24,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 0
+        }
+      },
+      "at": 1790562973284
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 8,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 0
+        }
+      },
+      "at": 1790562973285
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 20,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": false
+      },
+      "at": 1790562975587
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 21,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562975587
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 22,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562975594
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 23,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": true,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562975594
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 24,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": true
+      },
+      "at": 1790562977596
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 25,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": false
+      },
+      "at": 1790562983710
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 26,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": false
+      },
+      "at": 1790562983711
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 27,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": false
+      },
+      "at": 1790562983711
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 28,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": false
+      },
+      "at": 1790562983711
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 29,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 10426
+        }
+      },
+      "at": 1790562983712
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 9,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 10428
+        }
+      },
+      "at": 1790562983713
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 30,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 10435
+        }
+      },
+      "at": 1790562983720
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 31,
+        "observedAgeMs": 0,
+        "surface": "chat",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 10435
+        }
+      },
+      "at": 1790562983720
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 10,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 10438
+        }
+      },
+      "at": 1790562983723
+    },
+    {
+      "connection": 3,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77cfe0f0-4233-43b9-9e60-ca50f69f6d5d",
+        "sequence": 11,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": {
+          "sequence": 1,
+          "kind": "pointer",
+          "ageMs": 10439
+        }
+      },
+      "at": 1790562983723
+    },
+    {
+      "connection": 6,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "b8ee0458-becf-41c8-b116-ab2cba24708a",
+        "sequence": 1,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562984076
+    },
+    {
+      "connection": 6,
+      "name": "taki-home",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "b8ee0458-becf-41c8-b116-ab2cba24708a",
+        "sequence": 2,
+        "observedAgeMs": 0,
+        "surface": "home",
+        "state": "active",
+        "visible": true,
+        "focused": true,
+        "lastInput": null
+      },
+      "at": 1790562984092
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 25,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": false
+      },
+      "at": 1790562984190
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 32,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": true
+      },
+      "at": 1790562985735
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 33,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": true
+      },
+      "at": 1790562985735
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 34,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": true
+      },
+      "at": 1790562985735
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 35,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": true
+      },
+      "at": 1790562985736
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 26,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562990605
+    },
+    {
+      "connection": 5,
+      "name": "taki-pet",
+      "method": "presence.report",
+      "params": {
+        "sourceId": "77907a57-7c05-42dd-90e2-5527926bb2a6",
+        "sequence": 27,
+        "observedAgeMs": 0,
+        "surface": "pet",
+        "state": "active",
+        "visible": false,
+        "focused": false,
+        "lastInput": null
+      },
+      "at": 1790562990614
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 36,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": false
+      },
+      "at": 1790562991272
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 37,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": false
+      },
+      "at": 1790562991273
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 38,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": false
+      },
+      "at": 1790562991273
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 39,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": false
+      },
+      "at": 1790562991273
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 40,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 4,
+        "exposed": true
+      },
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 41,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 1,
+        "exposed": true
+      },
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 42,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 6,
+        "exposed": true
+      },
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 43,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 7,
+        "exposed": true
+      },
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 44,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 2,
+        "exposed": true
+      },
+      "at": 1790562993301
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 45,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 3,
+        "exposed": true
+      },
+      "at": 1790562993301
+    },
+    {
+      "connection": 2,
+      "name": "taki-chat",
+      "method": "timeline.presentation.report",
+      "params": {
+        "sourceId": "a5dc72f7-962f-4d0c-8317-946b1a8f12bf",
+        "sequence": 46,
+        "observedAgeMs": 0,
+        "characterId": "taki",
+        "timelineSeq": 5,
+        "exposed": true
+      },
+      "at": 1790562993301
+    }
+  ],
+  "calls": [
+    {
+      "connection": 2,
+      "method": "connect",
+      "at": 1790562953662
+    },
+    {
+      "connection": 2,
+      "method": "config.subscribe",
+      "at": 1790562953665
+    },
+    {
+      "connection": 2,
+      "method": "timeline.subscribe",
+      "at": 1790562953665
+    },
+    {
+      "connection": 2,
+      "method": "config.list",
+      "at": 1790562953667
+    },
+    {
+      "connection": 2,
+      "method": "chat.activity.read",
+      "at": 1790562953667
+    },
+    {
+      "connection": 2,
+      "method": "timeline.history",
+      "at": 1790562953668
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562953675
+    },
+    {
+      "connection": 3,
+      "method": "connect",
+      "at": 1790562953680
+    },
+    {
+      "connection": 3,
+      "method": "config.subscribe",
+      "at": 1790562953683
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.read",
+      "at": 1790562953687
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562953687
+    },
+    {
+      "connection": 3,
+      "method": "observability.state",
+      "at": 1790562953688
+    },
+    {
+      "connection": 3,
+      "method": "config.list",
+      "at": 1790562953691
+    },
+    {
+      "connection": 5,
+      "method": "connect",
+      "at": 1790562953713
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562953713
+    },
+    {
+      "connection": 5,
+      "method": "config.subscribe",
+      "at": 1790562953714
+    },
+    {
+      "connection": 5,
+      "method": "avatar.report",
+      "at": 1790562953715
+    },
+    {
+      "connection": 5,
+      "method": "config.list",
+      "at": 1790562953715
+    },
+    {
+      "connection": 5,
+      "method": "avatar.subscribe",
+      "at": 1790562953715
+    },
+    {
+      "connection": 5,
+      "method": "timeline.subscribe",
+      "at": 1790562953717
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562953717
+    },
+    {
+      "connection": 5,
+      "method": "chat.activity.read",
+      "at": 1790562953718
+    },
+    {
+      "connection": 5,
+      "method": "timeline.history",
+      "at": 1790562953720
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562953723
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562953733
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562958285
+    },
+    {
+      "connection": 5,
+      "method": "chat.activity.read",
+      "at": 1790562958418
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562960453
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562960565
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562960566
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562960572
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562960573
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562960575
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562960575
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562960606
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562962744
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562962745
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562962821
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562962822
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562962822
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562962823
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562962829
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562964836
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562965146
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562965147
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.read",
+      "at": 1790562965162
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.read",
+      "at": 1790562965195
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.read",
+      "at": 1790562965218
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562965301
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562965305
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562965305
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562967314
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562967314
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562967314
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562967315
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562967376
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562967377
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562967377
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562967377
+    },
+    {
+      "connection": 3,
+      "method": "permission.levelGet",
+      "at": 1790562967378
+    },
+    {
+      "connection": 3,
+      "method": "permission.cellsGet",
+      "at": 1790562967378
+    },
+    {
+      "connection": 3,
+      "method": "approval.list",
+      "at": 1790562967378
+    },
+    {
+      "connection": 3,
+      "method": "config.list",
+      "at": 1790562967380
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562967384
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562968687
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562968689
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562968697
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562968698
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562968698
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562968698
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562969390
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.update",
+      "at": 1790562969687
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.read",
+      "at": 1790562969690
+    },
+    {
+      "connection": 3,
+      "method": "user-timezone.report",
+      "at": 1790562969692
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562969883
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562971897
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562973284
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562973285
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562975587
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562975587
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562975594
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562975594
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562977596
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562983710
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562983711
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562983711
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562983711
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562983711
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562983713
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562983720
+    },
+    {
+      "connection": 2,
+      "method": "presence.report",
+      "at": 1790562983720
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562983723
+    },
+    {
+      "connection": 3,
+      "method": "presence.report",
+      "at": 1790562983723
+    },
+    {
+      "connection": 6,
+      "method": "connect",
+      "at": 1790562984070
+    },
+    {
+      "connection": 6,
+      "method": "config.subscribe",
+      "at": 1790562984071
+    },
+    {
+      "connection": 6,
+      "method": "user-timezone.read",
+      "at": 1790562984076
+    },
+    {
+      "connection": 6,
+      "method": "presence.report",
+      "at": 1790562984076
+    },
+    {
+      "connection": 6,
+      "method": "observability.state",
+      "at": 1790562984079
+    },
+    {
+      "connection": 6,
+      "method": "config.list",
+      "at": 1790562984083
+    },
+    {
+      "connection": 6,
+      "method": "user-timezone.read",
+      "at": 1790562984084
+    },
+    {
+      "connection": 6,
+      "method": "user-timezone.report",
+      "at": 1790562984087
+    },
+    {
+      "connection": 6,
+      "method": "presence.report",
+      "at": 1790562984092
+    },
+    {
+      "connection": 5,
+      "method": "timeline.presentation.report",
+      "at": 1790562984190
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562985735
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562985735
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562985735
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562985736
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562990605
+    },
+    {
+      "connection": 5,
+      "method": "presence.report",
+      "at": 1790562990614
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562991272
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562991273
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562991273
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562991273
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993300
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993301
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993301
+    },
+    {
+      "connection": 2,
+      "method": "timeline.presentation.report",
+      "at": 1790562993301
+    }
+  ],
+  "guiOutput": ""
+}

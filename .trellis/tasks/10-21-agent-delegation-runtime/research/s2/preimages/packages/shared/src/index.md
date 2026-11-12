@@ -1,0 +1,108 @@
+# shared/src/
+- run-work-schema.ts — bounded accepted-work transition contracts and strict v3 lifecycle events; no publication authority
+- prepared-publication-schema.ts — generic accepted-source/candidate, explicit Class A authorization scope, reference-only publication and exact edit-ticket data; serialized scope is not a live grant
+- co-watching-publication-schema.ts — isolated M51 accepted Co-Watching classification data for the business adapter; no public RPC or acceptance authority
+- interaction-pattern-schema.ts / interaction-pattern-protocol.ts — finite definitions, immutable reviews, strict lifecycle/CAS and data-free invalidations
+- initiative-wake-schema.ts — accepted source envelopes and bounded same-Monitor policy facts
+- initiative-setup-schema.ts — explicit Skill/seed setup with actual config/source readiness
+- effect-lifecycle-schema.ts — closed provider-neutral effect current-state and authoritative aggregate/cache/reasoning usage contracts with replay/redaction bounds
+- harness-schema.ts — strict provider-neutral Trigger Request, Run/Attempt, immutable authority/capability snapshot, Receipt, and run.status contracts
+- observability-schema.ts — bounded Run queries, independent forward/tail/before cursors, exact machine-only correlation, captured names, typed semantic Inspector sections, and live notification contracts
+- observability-presentation.ts — English-wire to Chinese Monitor labels and omission-preserving usage/cache detail projection
+- scheduled-task-schema.ts — canonical durable schedule definitions and operator management protocol
+- user-timezone-schema.ts — validated IANA User Timezone state, honest confirmation/source metadata and connection-bound operator read/update/report contracts
+- index.ts — package public entry; named re-exports of protocol contracts and pure presentation vocabulary; package public entry; named cross-package protocol exports, with D78 composition-only schemas kept in their defining modules
+- ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
+- json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
+- error-code-schema.ts — closed cross-process ErrorCode union
+- host-control-schema.ts — canonical Execution Host negotiation/catalog/control/cancel/settlement schemas, distinct DENIED vs APPROVAL_REQUIRED failures, exact acknowledgement union, and frozen method names
+- host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
+- host-control-api.ts — focused named public export surface for Host-control schemas and types
+- connect-schema.ts — role/handshake schemas with operator-only command-display offer/echo and separate Host negotiation
+- chat-schema.ts — chat methods including ordered activity/read, accepted send identity, legacy cancellation/events, and in-flight image input
+- chat-activity-schema.ts — strict ordered language/tool events, real phase/outcome vocabulary, bounded recovery snapshots and incremental UTF-8 accounting
+- timeline-presentation-schema.ts — independently validated batch coverage and consistent canonical item references; corrupt references fall back without hiding history or losing handoff identity
+- timeline-schema.ts — canonical Timeline history, optional stable presentation metadata, complete batch commits and compatible append/remove notifications
+- config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
+- timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
+- media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
+- avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command/outcome schemas (LLM-driven expression/motion push, Core-generated commandId, Pet-reported Presentation Outcome); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
+- character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror
+- approval-decision-schema.ts — canonical current/stored Approval binding revisions, fixed-order serializers, durable rows, safe labels, and list usability schemas
+- approval-schema.ts — canonical Approval envelopes, optional complete-command marker, dual-unit chunk bounds and exact literal reconstruction
+- approval-api.ts — focused named public facade for canonical Approval schemas, serializers, and types
+- legacy-approval-schema.ts — compatibility-only LegacyApproval* MCP prompt schemas used by dormant Core and CLI code
+- permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures
+- governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
+- extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, optional exact MCP toolName disclosure, and call-result schemas
+- extension-change-schema.ts — strict operator-only aggregate subscription, unique closed change targets and process-local invalidation revision; no source content or Rust mirror
+- governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
+- governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
+- governance-api.ts — focused named public facade for governance and permission exports
+- governance-presentation.ts — exact-key Chinese capability/cell descriptions, including analysis query/Co-Watching controls, and posture/override labels; separate from authority and safe for unknown historical keys
+- tool-presentation.ts — fixed/MCP readable names including analysis, recommendation preparation and Co-Watching, bounded labels and frozen own-key snapshots; unknown routing keys stay unresolved
+- perception-schema.ts — strict operator Privacy Pause/card reads and writer plus opt-in subscribe/changed schemas; changes carry only a process-local invalidation revision, with no Rust mirror
+- capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
+- capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
+- secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
+- hindsight-connection-schema.ts — exact Hindsight 0.9.0 connection, independent G1/D78 compatibility, Bank, LLM-health, and sanitized-error contracts
+- hindsight-setup-schema.ts — operator-only Hindsight setup state, managed receipt, and memory.hindsight.* method schemas
+- mcp-lifecycle-schema.ts — MCP_METHODS + marker-only desired-server wire schemas + expectedConfigRevision writes + bounded tool-name/list contracts + sanitized active/draining runtime diagnostics + McpRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
+- skill-lifecycle-schema.ts — strict Skill package lifecycle/operator protocol, import limits, provenance, trust, scan, and runtime projections
+- ws-defaults.ts — default loopback WS host/port constants
+- memory-provider-domain-schema.ts — strict canonical authority, Bank, source, unit, derived, policy, capability, and error contracts
+- memory-provider-operation-schema.ts — consistent retain pending/zero-result/per-Bank receipts and mutation supersession contracts alongside recall/reflect
+- memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
+- memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
+- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, retry/manual state, and closed truthful status contracts
+- pending-memory-schema.ts — immutable write intents, legacy phases, versioned factual proof/dispatch state, and unconfirmed overlays
+- hindsight-native-result-schema.ts — tracked native commands, immutable paged full results, and compact G1 receipt contracts
+- hindsight-native-proof-encoding.ts — portable typed hash fields and UTF-8 serialization, independent of legacy local hashes
+- hindsight-journal-schema.ts — complete Hindsight transaction batches, per-change lineage, cursor windows, and unique object transitions
+- memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
+- hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts
+- run-event-schema.ts — versioned durable Run/Event facts with exact model/invocation association, captured tool names, and real processing-start timing; versioned durable Run/Event contracts, including model/tool/context/governance observability facts
+- hindsight-local-coverage-schema.ts — complete current Local manifest witnesses, bounded change comparisons and truthful cutover coverage status
+- hindsight-source-evidence-schema.ts — versioned typed source/unit evidence, representation gaps and exact native-object confirmation contracts
+- hindsight-current-capture-schema.ts — complete typed current Local state and an explicit disposition for every frozen witness
+- hindsight-current-canonical-schema.ts — existing Canonical constraints with lossless JSON validators for the new D78 adapter
+- hindsight-json-schema.ts — bounded own-key JSON validation preserving prototype-shaped keys as inert data
+- hindsight-current-state-schema.ts — mirrored D78 structured transfer, stable native object mappings and typed refusal contracts
+- hindsight-current-state-encoding.ts — separate tagged JSON/binary64 codec with cross-language Unicode ordering
+- hindsight-native-snapshot-schema.ts — strict original logical snapshot wire envelopes and bounded structured payload values
+- hindsight-current-evidence-schema.ts — immutable D78 preparation and validated current import evidence contracts
+- hindsight-cutover-verification-schema.ts — finite native requirement/input/action/model/certificate evidence and retained-snapshot binding
+- hindsight-current-status-schema.ts — versioned durable current-import/verification counts, independent of historical B2 counters
+- hindsight-current-invalidation-schema.ts — authenticated native drift observations, exact proof bindings and exclusion of transport uncertainty
+- hindsight-application-artifact-schema.ts — typed application bodies, bindings, immutable CAS commands and historical receipts
+- hindsight-application-body-schema.ts — bounded multipart wire schemas with separate byte and semantic checksums
+- hindsight-application-content-schema.ts — the matching typed application body without treating arbitrary JSON as another protocol
+- hindsight-application-encoding.ts — iterative tagged binary64 JSON matching native application_state/codec.py
+- hindsight-application-json-reader.ts — strict JSON values with duplicate-key refusal and no container-recursion limit
+- hindsight-application-json.ts — lossless JSON validation and iterative wire serialization without an inherited depth quota
+- hindsight-application-native-schema.ts — kind-checked native evidence and separately hashed original document evidence
+- hindsight-application-primitives-schema.ts — closed wire primitives matching the native TakiApplication models
+- hindsight-application-read-schema.ts — closed paired-checkpoint read contracts and guarded reflection policy context
+- hindsight-application-replica-schema.ts — lossless replica payload and record contracts with unchanged logical identity and credential checks
+- hindsight-memory-consumer-schema.ts — versioned consumer validators that preserve supported JSON and all factual result references
+- hindsight-native-runtime-schema.ts — validated native fields, preserving omitted values, nulls, and typed JSON
+- memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
+- memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
+- memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability, setup, per-Bank replica/Pending, operations, derivedFreshness literal unknown)
+- initiative-schema.ts — bounded selected-context provenance, object-root model tool input normalized to strict domain decisions, delivery state and policy diagnostics
+- initiative-event-schema.ts — strict v2 initiative/delivery business facts; existing v1 event decoder and legacy Monitor projections remain supported
+- presence-schema.ts — bounded authenticated source reports, input age, refusal vocabulary and independent aggregate presence facts
+- timeline-presentation-report-schema.ts — ordinary committed Timeline exposure by source and sequence, without reading acknowledgements
+- initiative-wake-schema.ts — strict accepted wake-source envelopes and deterministic same-Monitor policy status
+- initiative-intention-schema.ts — bounded automatic plan/source/lifecycle/refusal contracts separate from factual Memory and Scheduled Tasks
+- initiative-backoff-schema.ts — semantic qualified-feedback policy status and strict operator read/reset/invalidation contracts
+- browser-playback-schema.ts — selected player observations, opaque Chromium document tokens and strict paired-Host report/read contracts; no consent or credential fields
+- co-watching-schema.ts — bounded explicit acceptance/invitation, retained original native requests, analyzing/failed/unknown states, model proposals and versioned operator read/control contracts
+- co-watching-analysis-read-schema.ts — bounded analysis/original-result read pages, exact reference/view/offset selections and closed failures without watching acceptance
+- co-watching-invitation-schema.ts — committed invitation projections and exact operator accept/defer command/results; observation never grants consent
+- media-access-schema.ts — exact native Bilibili part and bounded video-byte access evidence, without analysis or consent
+- media-analysis-schema.ts — independent URL answers and bounded selected recommendation preparation/status/cancellation without playback consent
+- context-source-schema.ts — optional retained material descriptions, generation origins and exact material references
+- run-message-schema.ts — private visible native messages and exact model-intent receipt coordinates
+- subagent-schema.ts — immutable child context, work-scoped inputs, tool selection, trusted scope and control data
+- subagent-result-schema.ts — separate proposals, canonical child/parent terminal reports and completion/publication projections

@@ -1,0 +1,32 @@
+{
+  "kind": "transparent-request-hold-relay",
+  "requests": [
+    {
+      "requestNumber": 1,
+      "bodySha256": "cceb51b2a64cdee3a5169ec66ea5c90e5b3d0aec98ff4eeca19b1ed39ac8c73d",
+      "gate": "release",
+      "heldAt": "2026-10-23T03:56:21.398Z",
+      "releasedAt": "2026-10-23T03:56:21.449Z",
+      "forwardedAt": "2026-10-23T03:56:21.450Z",
+      "finishedAt": "2026-10-23T03:56:21.462Z",
+      "status": 200,
+      "aborted": null,
+      "failure": null
+    },
+    {
+      "requestNumber": 2,
+      "bodySha256": "a474977ded6f3061ae10850b15c6f4b0993ba5ef3636a816b091e3337058624e",
+      "gate": "cancel",
+      "heldAt": "2026-10-23T03:56:21.469Z",
+      "releasedAt": null,
+      "forwardedAt": null,
+      "finishedAt": "2026-10-23T03:56:21.531Z",
+      "status": null,
+      "aborted": "client-closed",
+      "failure": null
+    }
+  ],
+  "physicalUpstreamAttempts": 1,
+  "active": 0,
+  "closed": true
+}

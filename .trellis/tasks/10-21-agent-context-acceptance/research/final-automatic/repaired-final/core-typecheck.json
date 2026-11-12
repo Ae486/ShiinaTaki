@@ -1,0 +1,10 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/core",
+    "typecheck"
+  ],
+  "exitCode": 0,
+  "seconds": 32.6
+}

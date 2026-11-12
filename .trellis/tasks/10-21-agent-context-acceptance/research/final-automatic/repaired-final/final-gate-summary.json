@@ -1,0 +1,142 @@
+{
+  "status": "passed",
+  "humanAcceptance": "not_started",
+  "typescript": {
+    "packages": [
+      {
+        "package": "packages/shared",
+        "passed": 680,
+        "skipped": 0
+      },
+      {
+        "package": "apps/cli",
+        "passed": 50,
+        "skipped": 0
+      },
+      {
+        "package": "apps/desktop",
+        "passed": 1231,
+        "skipped": 0
+      },
+      {
+        "package": "packages/core",
+        "passed": 4136,
+        "skipped": 5
+      }
+    ],
+    "passed": 6097,
+    "skipped": 5,
+    "failed": 0
+  },
+  "deterministicE2E": {
+    "passed": 20,
+    "skipped": 3,
+    "failed": 0
+  },
+  "finalRootChecks": [
+    {
+      "name": "lint",
+      "command": [
+        "pnpm.cmd",
+        "lint"
+      ],
+      "exitCode": 0,
+      "seconds": 28.38
+    },
+    {
+      "name": "tests-bounded",
+      "command": [
+        "pnpm.cmd",
+        "-r",
+        "test",
+        "--maxWorkers=4"
+      ],
+      "exitCode": 0,
+      "seconds": 244.28
+    }
+  ],
+  "finalCoreTypecheck": {
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/core",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 32.6
+  },
+  "wholeTypecheckReused": {
+    "name": "typecheck",
+    "command": [
+      "pnpm.cmd",
+      "-r",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 37.5
+  },
+  "e2eAndBuild": [
+    {
+      "name": "deterministic-e2e",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/e2e",
+        "exec",
+        "vitest",
+        "run",
+        "src/agent-context-runtime.e2e.test.ts",
+        "src/agent-context-r2.e2e.test.ts",
+        "src/agent-context-restart.e2e.test.ts",
+        "src/agent-context-real.e2e.test.ts",
+        "src/fixture/real-provider-observer.e2e.test.ts",
+        "src/fixture/agent-context-timing-relay.e2e.test.ts",
+        "--maxWorkers=2",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-agent-context-acceptance\\research\\final-automatic\\repaired-final\\deterministic-e2e.json"
+      ],
+      "cwd": "H:\\TakiAgent-worktrees\\t4",
+      "exitCode": 0,
+      "seconds": 52.63,
+      "finishedAt": "2026-10-23T03:56:22Z",
+      "providerEnvironmentStripped": true,
+      "liveEnabled": false
+    },
+    {
+      "name": "desktop-build",
+      "command": [
+        "pnpm.cmd",
+        "--filter",
+        "@taki/desktop",
+        "build"
+      ],
+      "cwd": "H:\\TakiAgent-worktrees\\t4",
+      "exitCode": 0,
+      "seconds": 3.41,
+      "finishedAt": "2026-10-23T03:56:26Z",
+      "providerEnvironmentStripped": true,
+      "liveEnabled": false
+    }
+  ],
+  "nativeInputParity": {
+    "files": 54,
+    "unchanged": 54,
+    "priorRustTestsPassed": 211
+  },
+  "externalRequestsInFinalGates": 0,
+  "functionalLiveCampaigns": {
+    "externalRequests": 52,
+    "reportedTokens": 451434,
+    "includesFailedAndSupersededTrials": true
+  },
+  "remainingGates": [
+    "human conversation/UI/playback acceptance",
+    "native hindsight-taki extraction/reflection",
+    "T4/main migration convergence"
+  ],
+  "narrativeCaveats": [
+    "unsupported A3 correction narrative",
+    "ambiguous Co-Watching tone wording"
+  ]
+}

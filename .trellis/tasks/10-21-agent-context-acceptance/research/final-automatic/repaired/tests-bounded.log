@@ -1,0 +1,277 @@
+Scope: 5 of 6 workspace projects
+packages/shared test$ vitest run "--maxWorkers=4"
+packages/shared test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+packages/shared test:  Test Files  76 passed (76)
+packages/shared test:       Tests  680 passed (680)
+packages/shared test:    Start at  11:49:03
+packages/shared test:    Duration  11.00s (transform 2.53s, setup 0ms, import 14.53s, tests 1.66s, environment 11ms)
+packages/shared test: Done
+apps/desktop test$ vitest run --passWithNoTests "--maxWorkers=4"
+apps/cli test$ vitest run "--maxWorkers=4"
+packages/core test$ vitest run "--maxWorkers=4"
+packages/core test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+apps/cli test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/cli
+apps/desktop test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop
+apps/cli test:  Test Files  8 passed (8)
+apps/cli test:       Tests  50 passed (50)
+apps/cli test:    Start at  11:49:14
+apps/cli test:    Duration  4.05s (transform 5.01s, setup 0ms, import 9.25s, tests 526ms, environment 2ms)
+apps/cli test: Done
+apps/desktop test:  Test Files  205 passed (205)
+apps/desktop test:       Tests  1231 passed (1231)
+apps/desktop test:    Start at  11:49:15
+apps/desktop test:    Duration  46.57s (transform 16.63s, setup 0ms, import 86.34s, tests 10.64s, environment 35ms)
+apps/desktop test: Done
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts (16 tests | 16 failed) 1598ms
+packages/core test:      × uses real C2 dispositions at 3/6/9 and ignores replay without changing hard counters 110ms
+packages/core test:      × excludes absent opportunity, no invitation, Class A, silent, express and unpresented held speech 91ms
+packages/core test:      × tightens the existing cadence, uses actual admissions and expires evidence at the rolling seven-day boundary 96ms
+packages/core test:      × fully resets only from persisted same-Character input and never revives older pending invitations 93ms
+packages/core test:      × counts all admitted Class B judgments for the daily stage, not just utterances 94ms
+packages/core test:      × preserves full operator reset across reopen and late qualified feedback without refunding admission history 150ms
+packages/core test:      × releases the 'America/New_York' daily bound at the actual civil boundary after '2026-03-08T05:30:00.000Z' 90ms
+packages/core test:      × releases the 'America/New_York' daily bound at the actual civil boundary after '2026-11-01T04:30:00.000Z' 91ms
+packages/core test:      × releases the 'America/Santiago' daily bound at the actual civil boundary after '2026-09-06T04:30:00.000Z' 90ms
+packages/core test:      × does not mint daily capacity by moving across the date line or back to the original zone 89ms
+packages/core test:      × keeps missing original-zone history conservative for 48 hours without assigning today's timezone 91ms
+packages/core test:      × keeps normal-stage jitter authoritative and refuses invalid or unrelated admission capture 88ms
+packages/core test:      × keeps feedback and reset evidence unchanged when a reset transaction fails 90ms
+packages/core test:      × preserves captured timezone through DST, timezone changes, duplicate capture and clock rewind 90ms
+packages/core test:      × recovers missed engagement after actual file reopen and retains committed feedback when observers throw 150ms
+packages/core test:      × does not expose correlation IDs or raw content in the semantic projection 92ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts (6 tests | 1 failed) 2608ms
+packages/core test:      × stops an abort-ignoring model and its queued pass before SQLite closes, refusing every late tool callback 468ms
+packages/core test:  ❯ src/db/migrations/035-timeline-presentation.test.ts (1 test | 1 failed) 115ms
+packages/core test:      × upgrades 034 additively, preserves canonical bytes, and reopens without applying again 113ms
+packages/core test: ⎯⎯⎯⎯⎯⎯ Failed Tests 18 ⎯⎯⎯⎯⎯⎯⎯
+packages/core test:  FAIL  src/db/migrations/035-timeline-presentation.test.ts > Timeline presentation migration 035 > upgrades 034 additively, preserves canonical bytes, and reopens without applying again
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ src/db/migrations/035-timeline-presentation.test.ts:35:5
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
+packages/core test:  FAIL  src/db/migrations/035-timeline-presentation.test.ts > Timeline presentation migration 035 > upgrades 034 additively, preserves canonical bytes, and reopens without applying again
+packages/core test: Error: EPERM, Permission denied: \\?\G:\Temp\taki-live-migration-FowhNU '\\?\G:\Temp\taki-live-migration-FowhNU'
+packages/core test:  ❯ src/db/migrations/035-timeline-presentation.test.ts:17:5
+packages/core test:      15|   for (const directory of directories.splice(0)) {
+packages/core test:      16|     if (dirname(resolve(directory)) !== resolve(tmpdir()) || !basename…
+packages/core test:      17|     rmSync(directory, { recursive: true, force: true });
+packages/core test:        |     ^
+packages/core test:      18|   }
+packages/core test:      19| });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > uses real C2 dispositions at 3/6/9 and ignores replay without changing hard counters
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:96:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > excludes absent opportunity, no invitation, Class A, silent, express and unpresented held speech
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:109:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > tightens the existing cadence, uses actual admissions and expires evidence at the rolling seven-day boundary
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:118:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > fully resets only from persisted same-Character input and never revives older pending invitations
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:133:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > counts all admitted Class B judgments for the daily stage, not just utterances
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:148:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > preserves full operator reset across reopen and late qualified feedback without refunding admission history
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:162:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > releases the 'America/New_York' daily bound at the actual civil boundary after '2026-03-08T05:30:00.000Z'
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > releases the 'America/New_York' daily bound at the actual civil boundary after '2026-11-01T04:30:00.000Z'
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > releases the 'America/Santiago' daily bound at the actual civil boundary after '2026-09-06T04:30:00.000Z'
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:179:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > does not mint daily capacity by moving across the date line or back to the original zone
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:189:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > keeps missing original-zone history conservative for 48 hours without assigning today's timezone
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:201:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > keeps normal-stage jitter authoritative and refuses invalid or unrelated admission capture
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:212:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > keeps feedback and reset evidence unchanged when a reset transaction fails
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:224:42
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > preserves captured timezone through DST, timezone changes, duplicate capture and clock rewind
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:233:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > recovers missed engagement after actual file reopen and retains committed feedback when observers throw
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:247:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/19]⎯
+packages/core test:  FAIL  src/initiative/backoff/initiative-backoff.test.ts > qualified feedback backoff > does not expose correlation IDs or raw content in the semantic projection
+packages/core test: Error: table timeline_messages has no column named source_context_json
+packages/core test:  ❯ Object.prepare src/db/sqlite.ts:72:32
+packages/core test:      70|     prepare(sql) {
+packages/core test:      71|       assertActive();
+packages/core test:      72|       return wrapStatement(raw.prepare(sql), assertActive);
+packages/core test:        |                                ^
+packages/core test:      73|     },
+packages/core test:      74|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+packages/core test:  ❯ createTimelineRepo src/db/timeline-repo.ts:73:21
+packages/core test:  ❯ fixture src/initiative/backoff/initiative-backoff.test.ts:47:78
+packages/core test:  ❯ src/initiative/backoff/initiative-backoff.test.ts:263:15
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/19]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts > policy curator cancellation and repeated input admission > stops an abort-ignoring model and its queued pass before SQLite closes, refusing every late tool callback
+packages/core test: AssertionError: expected { state: 'claimed', …(1) } to match object { state: 'claimed', …(1) }
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test:   {
+packages/core test: -   "prompt_version": "taki-hindsight-policy-curator/v1",
+packages/core test: +   "prompt_version": "taki-hindsight-policy-curator/v2",
+packages/core test:     "state": "claimed",
+packages/core test:   }
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts:32:8
+packages/core test:      30|     ]);
+packages/core test:      31|     expect(f.db.prepare("SELECT state,prompt_version FROM hindsight_po…
+packages/core test:      32|       .toMatchObject({ state: "claimed", prompt_version: "taki-hindsig…
+packages/core test:        |        ^
+packages/core test:      33|     expect(f.banks[0]!.server.calls).toHaveLength(0); await f.close();…
+packages/core test:      34|     release.resolve(); await tick(); await tick();
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/19]⎯
+packages/core test:  Test Files  3 failed | 499 passed | 1 skipped (503)
+packages/core test:       Tests  18 failed | 4118 passed | 5 skipped (4141)
+packages/core test:    Start at  11:49:14
+packages/core test:    Duration  230.58s (transform 29.58s, setup 0ms, import 319.86s, tests 422.89s, environment 71ms)
+packages/core test: Failed
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

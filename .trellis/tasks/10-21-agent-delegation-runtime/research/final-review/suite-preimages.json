@@ -1,0 +1,32 @@
+[
+  {
+    "path": "packages/core/src/initiative/backoff/initiative-backoff.test.ts",
+    "preimage": "suite-preimages/packages/core/src/initiative/backoff/initiative-backoff.test.ts",
+    "sha256": "a89908b38ea4d4390e925864c4394d1eb82f848cd15cfc7afdabb1ea44a017cc"
+  },
+  {
+    "path": "packages/core/src/initiative/backoff/index.md",
+    "preimage": "suite-preimages/packages/core/src/initiative/backoff/index.md",
+    "sha256": "105c9a444afbc8ef014bd9baf1373a8f83e30551e5afba6c9cf9bf76cc0cdff6"
+  },
+  {
+    "path": "packages/core/src/db/migrations/035-timeline-presentation.test.ts",
+    "preimage": "suite-preimages/packages/core/src/db/migrations/035-timeline-presentation.test.ts",
+    "sha256": "c528c579f713275d7bfb8d74276b75c5da537a9c339892586fa5530b66c952bc"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index.md",
+    "preimage": "suite-preimages/packages/core/src/db/migrations/index.md",
+    "sha256": "c23c9dd5c4e017f55a639b2b73bd4d0da4338a5b23b6a8804175dda3c09dbe79"
+  },
+  {
+    "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts",
+    "preimage": "suite-preimages/packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts",
+    "sha256": "02589f21c343a690c60e7e7f644938891e1f34d79044bcca770c0f9efe89c680"
+  },
+  {
+    "path": "packages/core/src/memory/hindsight/index.md",
+    "preimage": "suite-preimages/packages/core/src/memory/hindsight/index.md",
+    "sha256": "0dfccf6b1fff49e330e6cf98f9bb7d52c2bdcd2458fe38bc62750e552c79522e"
+  }
+]

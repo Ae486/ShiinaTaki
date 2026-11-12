@@ -1,0 +1,130 @@
+[
+  {
+    "path": "packages/core/src/db/run-linked-state.ts",
+    "sha256": "f076f6b07685132726d2f5695d55ba996584806e92717f20d78da4af2a2e0e27"
+  },
+  {
+    "path": "packages/core/src/db/subagent-conversation-repo.ts",
+    "sha256": "1eb0a9c72ab5de3a83cc01f8a6709f10dcaaeb178f29df52a35f806f87e3f632"
+  },
+  {
+    "path": "packages/core/src/db/subagent-conversation.test.ts",
+    "sha256": "03acb51af90485f08231bb74cfb61a74e549976c536b570f01d357851e9cec20"
+  },
+  {
+    "path": "packages/core/src/db/subagent-execution-repo.ts",
+    "sha256": "2dcb819257f3c45d3637a59808ee85f1ea3e149d8466074b49538fd1526f2637"
+  },
+  {
+    "path": "packages/core/src/db/subagent-inbox-repo.ts",
+    "sha256": "9186f5e7bf9d29d74394a383ba9a15df05d18d4159dd605193f65eb3db27ea13"
+  },
+  {
+    "path": "packages/core/src/db/subagent-inbox-recovery-repo.ts",
+    "sha256": "eaa6af763510cf932e0fab6d1f59e389a6f4afc865368e54b4f430d472ae07cf"
+  },
+  {
+    "path": "packages/core/src/db/subagent-input-repo.ts",
+    "sha256": "9a2ee28001c7b884232b41586ee44621c2c804c92abcfa2a64a54edbf3f869ef"
+  },
+  {
+    "path": "packages/core/src/db/subagent-speech-repo.ts",
+    "sha256": "d4514052b5ac4d49fe2967e0da09bb01b524389ac16ee2ed42256782c55e432e"
+  },
+  {
+    "path": "packages/core/src/db/migrations/056-subagent-conversations.test.ts",
+    "sha256": "cdd82c6a5431739d48da54a0dc72372964317ec0228a0d5539e5d5b57d3b3aaa"
+  },
+  {
+    "path": "packages/core/src/db/migrations/058-agent-inbox.test.ts",
+    "sha256": "6015cd2675b3fbb32bbed526246856803cf3f897560e14b2f90399bd6ea9271b"
+  },
+  {
+    "path": "packages/core/src/db/migrations/061-subagent-presentation.ts",
+    "sha256": "a89daae4a57793474f022e5055ff18c48a6f4d1328ec274f1fe7240bad984dd1"
+  },
+  {
+    "path": "packages/core/src/db/migrations/062-subagent-inbox-resume.ts",
+    "sha256": "cfb4b3746f8079fa3b659352b035ac3b02d1656f82709de627df3a0dea464a5d"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.ts",
+    "sha256": "c2f5ae3953acfceebc276679123a03df0a0a8c41e5cdfbc69c2a8c8d1fd4f49f"
+  },
+  {
+    "path": "packages/core/src/harness/run-service.ts",
+    "sha256": "0b0460c5fa012015685f311230c31440a04d16c75e51208601a0e303a610b585"
+  },
+  {
+    "path": "packages/core/src/harness/delegation-tools.test.ts",
+    "sha256": "353f76dc73a96eae55e9a4318c28bb087e3cafc4d181771894333daaedbbdde7"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-activity.ts",
+    "sha256": "c239e1746d745717c86646b379fa31d04cba8070a73ddef3050c3a5994ea8b75"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-completion.test.ts",
+    "sha256": "50fd88880b1dfeb75fe0e560e110ce099a9f94322c8eec8ab9bf8d4e7db0ee20"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-execution.ts",
+    "sha256": "36fd959a96cf21f7b5b1d4fc66a0d0b00c7575933de66a172d8edf6fda9c76be"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-inbox-context.ts",
+    "sha256": "db1a7f437838032345d0e5bc5d4efe90388a446bbbee1c2228f43a14f15f05d3"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-inbox-execution.ts",
+    "sha256": "bbf533c1664f449e891c6c8e3c8f404be28d968c22de90af0bb0b050598c63ca"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-inbox-recovery.test.ts",
+    "sha256": "bea08dae72d3449af7a4c149b84eaaa6a0db068b592362c929d8b9986360280d"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-materials.test.ts",
+    "sha256": "f875d654bc2bbefc30579e8686a401e7c09022db5a047d0e7e6601ae7383c198"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-service.ts",
+    "sha256": "ce47525782caca5cec76e4803126b67bb824d48b13f03280315e554f9ec282fa"
+  },
+  {
+    "path": "packages/core/src/server/methods/subagent-methods.ts",
+    "sha256": "23eb3d10306352e5fb07e38558d6b60c616bc3f3712e29b0a82f487d7a81ced4"
+  },
+  {
+    "path": "packages/core/src/server/methods/subagent-methods.test.ts",
+    "sha256": "c495844d060ed896b840171cafefe90706dbb754561d3a4a0657212037c29b4a"
+  },
+  {
+    "path": "packages/shared/src/subagent-api-schema.ts",
+    "sha256": "41af1103e53c5603c75bdc9c06646ba00eee780a9b233de147b098eb1ad05ab2"
+  },
+  {
+    "path": "packages/shared/src/subagent-conversation-schema.ts",
+    "sha256": "cad3d52d468f1c4039328d466c5c7a1c46b462f5abcee3ac0f307d6b9a9b8b18"
+  },
+  {
+    "path": "packages/shared/src/subagent-inbox-schema.ts",
+    "sha256": "40fc9be0f864eb061a6c860d6dbd95cc0db5fffd028ede80a63622044e49642f"
+  },
+  {
+    "path": "packages/shared/src/index.ts",
+    "sha256": "f9b0a5357ab845647e6210aa1df9019ad58bcd4c4e4595538898ce7569877b05"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-state.ts",
+    "sha256": "2d3eb81f50620ea17010692be347a0ad3a07ec32ae57eae7386667f4c476a958"
+  },
+  {
+    "path": "packages/core/src/agents/subagent-interact-tool.ts",
+    "sha256": "bb06daa03489a1bf48252175a27563172c6ffb4ca6845decdd614b4126ebf50b"
+  },
+  {
+    "path": "packages/core/src/harness/subagent-inbox-retry.test.ts",
+    "sha256": "a32fa2e92a9bda9be85a946db664b5d9fbcf85dfa53e3c912c9f7825a15c82e4"
+  }
+]

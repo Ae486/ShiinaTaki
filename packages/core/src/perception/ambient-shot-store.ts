@@ -7,7 +7,11 @@
  *         other file. Every path is derived from the store's own dir + a validated own-shape name — never from a caller.
  */
 import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+import { join, resolve } from "node:path";
+
+// Store instances for Sampling and viewing preparation can share the same ambient directory.
+const protectedFiles = new Map<string, number>();
 
 // The store's closed namespace: an `ambient-` prefix + an ISO-8601 timestamp with ':' replaced by '-' (colons are
 // illegal in Windows filenames; the Workspace stays OS-neutral). discard/sweep only ever touch a name matching this,
@@ -15,7 +19,7 @@ import { join } from "node:path";
 // anything else. The PREFIX is what makes the isolation structural rather than merely wired: the on-demand store
 // (capabilities/screenshot-store) writes the bare `<ts>.png` shape, so even if someone ever pointed this store at the
 // on-demand directory, a user-requested capture still could not match — and retention here is automatic.
-const FILE_RE = /^ambient-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.\d{3}Z\.png$/;
+const FILE_RE = /^ambient-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.\d{3}Z(?:-[a-f0-9-]{36})?\.png$/;
 
 export interface SavedAmbientShot {
   /** The store-internal filename — the ONLY handle a caller may pass back (never a path). */
@@ -31,7 +35,9 @@ export interface AmbientSweep {
 export interface AmbientShotStore {
   /** Persist one ambient frame; null when the write failed (perception must degrade, never crash, on a full disk). */
   save(dataBase64: string, at: number): SavedAmbientShot | null;
-  /** Delete one frame this store saved (drop-after-describe). A foreign/malformed name is a no-op, not an fs call. */
+  /** Protect pending/in-use native evidence from the periodic retention sweep. */
+  protect?(name: string): () => void;
+  /** Delete one frame this store saved. A foreign/malformed name is a no-op, not an fs call. */
   discard(name: string): void;
   /** Delete ambient frames whose mtime predates the cutoff (retention sweep); a missing dir is an empty sweep. */
   sweepOlderThan(cutoffMs: number): AmbientSweep;
@@ -41,6 +47,18 @@ export function createAmbientShotStore(deps: { ambientDir: string }): AmbientSho
   const dir = deps.ambientDir;
   return {
     save: (dataBase64, at) => save(dir, dataBase64, at),
+    protect(name) {
+      if (!FILE_RE.test(name)) return () => undefined;
+      const path = resolve(dir, name);
+      protectedFiles.set(path, (protectedFiles.get(path) ?? 0) + 1);
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        const count = protectedFiles.get(path) ?? 0;
+        if (count <= 1) protectedFiles.delete(path); else protectedFiles.set(path, count - 1);
+      };
+    },
     discard(name) {
       if (!FILE_RE.test(name)) return;
       try {
@@ -55,7 +73,7 @@ export function createAmbientShotStore(deps: { ambientDir: string }): AmbientSho
 
 function save(dir: string, dataBase64: string, at: number): SavedAmbientShot | null {
   const buffer = Buffer.from(dataBase64, "base64");
-  const name = `ambient-${new Date(at).toISOString().replaceAll(":", "-")}.png`;
+  const name = `ambient-${new Date(at).toISOString().replaceAll(":", "-")}-${randomUUID()}.png`;
   try {
     mkdirSync(dir, { recursive: true }); // first-write lazily creates the dir (screenshot-store precedent)
     writeFileSync(join(dir, name), buffer);
@@ -70,6 +88,7 @@ function sweep(dir: string, cutoffMs: number): AmbientSweep {
   let freedBytes = 0;
   for (const name of ownFiles(dir)) {
     const path = join(dir, name);
+    if (protectedFiles.has(resolve(path))) continue;
     try {
       const stat = statSync(path);
       if (stat.mtimeMs >= cutoffMs) continue;

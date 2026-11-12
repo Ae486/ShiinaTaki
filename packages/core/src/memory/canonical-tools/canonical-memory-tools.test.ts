@@ -2,8 +2,26 @@ import { describe, expect, it } from "vitest";
 import { createCanonicalMemoryTools } from "./canonical-memory-tools.ts";
 import { attachEffectExecutionContext } from "../../governance/governed-tool.ts";
 import { memoryEffectMetadata } from "./memory-effect-tool.ts";
+import { DEFAULT_INTENTIONS_DAYS } from "../../config/memory-config.ts";
+import type { RetainRequest } from "@taki/shared";
 
 describe("canonical memory tools", () => {
+  it("keeps the shared Hindsight default unchanged when no Local retention override is supplied", async () => {
+    const retained: RetainRequest[] = [];
+    const coordinator = { capabilities: async () => ({ providerId: "hindsight", contractVersion: 1 as const,
+      retain: true, recall: false, reflect: false, edit: false, invalidate: false, restore: false,
+      conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true,
+      vectorRetrieval: "unavailable" as const, derivedMemoryRead: false }),
+    retain: async (request: RetainRequest) => { retained.push(request); return { ok: false as const }; } };
+    const tools = await createCanonicalMemoryTools({ coordinator: coordinator as never,
+      router: { globalBankId: () => "g", characterBankId: () => "c", characterId: () => "taki" } });
+    await tools.retain!.execute!({ content: "future plan", layer: "intentions", context: null }, { toolCallId: "call", messages: [] } as never);
+    expect(retained).toHaveLength(1);
+    const request = retained[0]!;
+    expect(request.policy.retention.kind === "expiring" &&
+      Date.parse(request.policy.retention.expiresAt!) - Date.parse(request.provenance.capturedAt)).toBe(DEFAULT_INTENTIONS_DAYS * 86_400_000);
+  });
+
   it("filters unsupported reflect and uses exact Hindsight-aligned names", async () => {
     const capabilities = async () => ({ providerId: "local", contractVersion: 1 as const, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false });
     const coordinator = { capabilities, retain: async () => ({ ok: false as const }), recall: async () => ({ ok: false as const }), reflect: async () => ({ ok: false as const }), mutate: async () => ({ ok: false as const }) };

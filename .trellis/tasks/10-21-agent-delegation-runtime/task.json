@@ -1,0 +1,33 @@
+{
+  "id": "agent-delegation-runtime",
+  "name": "agent-delegation-runtime",
+  "title": "Shared-runtime agent delegation",
+  "description": "Implement settled G1-G4 through shared Runtime owners, retained child continuity, addressed input, completion intent and child conversation controls.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-10-21",
+  "completedAt": null,
+  "branch": "task/t4-skills-mcp-productization",
+  "base_branch": "main",
+  "worktree_path": "H:/TakiAgent-worktrees/t4",
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-21-agent-delegation-source-context",
+  "relatedFiles": [],
+  "notes": "Owner-authorized development continues under the reviewed child gates. Real-model E2E tests are explicitly authorized on 2026-10-22 with bounded cases and isolated test-owned state. No commit, push, archive, production publication or real-user data mutation is authorized.",
+  "meta": {
+    "execution_gate": "passed_sdk_and_joint_contract",
+    "active_slice": "S1-S3 and S7 delivered; automatic acceptance passed; stopped before human",
+    "owner_authorization": "Optimize global rules first; enter development when preparation is complete (2026-10-21)",
+    "real_model_e2e_authorization": "Explicit owner approval on 2026-10-22; bounded functional E2E testing with isolated test-owned state.",
+    "s1_gate": "passed_independent_review",
+    "current_main_migration_gate": "not_passed_preexisting_049_plus_lineage_split; T4-only functional verification"
+  }
+}

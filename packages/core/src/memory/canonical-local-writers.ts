@@ -35,6 +35,7 @@ export function fenceCanonicalLocalWriters(input: {
   const foreground = { ...FOREGROUND, canQueue: input.canQueue };
   return {
     engine: {
+      ...engine,
       reconcile: engine.reconcile, assemble: (work) => { fence.assertAlive(); return engine.assemble(work); }, tidy: engine.tidy,
       createTools: (characterId, seq) => fenceMemoryToolWrites(engine.createTools(characterId, seq), fence, foreground),
       createBackgroundTools: (characterId, seq) => fenceMemoryToolWrites(engine.createBackgroundTools(characterId, seq), fence, BACKGROUND),
@@ -57,8 +58,8 @@ export function fenceCanonicalLocalWriters(input: {
         throw error;
       }
     } },
-    tidy: { maybeRun: (characterId) => fence.admit(() => tidy.maybeRun(characterId)),
-      runNow: (characterId) => fence.admit(() => tidy.runNow(characterId)) },
+    tidy: { ...tidy, maybeRun: (characterId) => fence.admit(() => tidy.maybeRun(characterId)),
+      runNow: (characterId, options) => fence.admit(() => tidy.runNow(characterId, options)) },
     captureRun: async (characterId) => {
       fence.assertAlive();
       // A fenced interval keeps chat usable: the Run's tools refuse writes structurally, and the custody group Chat

@@ -1,0 +1,8 @@
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Historical migration preservation, complete union schema and atomic refusal"}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Historical Approval and Host governance projection parity"}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Deterministic versus real-provider test distinctions"}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Durable producer facts, waiting/cancel/restart and Home status"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Required checks, supported failure evidence and real Core startup"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/persistence-lineages.md","reason":"Actual frozen schema and immutable receipt/Approval preservation evidence"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/runtime-contracts.md","reason":"Original cross-layer runtime requirements and required evidence levels"}
+{"file":".trellis/tasks/11-11-main-t4-baseline-integration/research/plan-advisor.md","reason":"Independent planning findings and required isolation/compatibility checks"}

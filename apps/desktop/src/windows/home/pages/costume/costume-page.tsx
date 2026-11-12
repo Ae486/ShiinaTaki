@@ -1,10 +1,8 @@
 /**
- * INPUT:  none (page root); reads the costume list and drives import + switching through its hooks.
- * OUTPUT: <CostumePage> — the costume surface migrated out of the retired pet-side CharacterPanel: import a model
- *         archive, then pick a costume. The row being switched shows its own indicator + Cancel, a failed switch says
- *         why and leaves the highlight where it was, and a failed list refresh keeps the last good list on screen.
- * POS:    ui/windows/home/pages/costume — presentational; a pick is COMMANDED to the pet window, which owns the scene
- *         and reports back what actually happened.
+ * INPUT:  costume/import hooks and the Home client; Pet result events govern switching.
+ * OUTPUT: <CostumePage> — import actions/resource warnings plus result-driven costume selection.
+ * POS:    ui/windows/home/pages/costume — presentation only; import and switching stay hook-owned.
+ *         The Pet owns the scene; failed list refreshes retain the last good list with retry.
  */
 
 import { useRef } from "react";
@@ -44,10 +42,11 @@ function ImportRow({
       />
       <ActionButton
         tone="primary"
+        busy={isImporting}
         onClick={() => inputRef.current?.click()}
         disabled={!connectionReady || isImporting}
       >
-        {isImporting ? "导入中…" : "导入模型 (.zip/.zst)"}
+        导入模型 (.zip/.zst)
       </ActionButton>
     </>
   );
@@ -55,6 +54,7 @@ function ImportRow({
 
 function CostumeList({ costume }: { costume: CostumePageView }) {
   if (costume.loading) return <Skeleton lines={4} />;
+  if (!costume.hasSnapshot) return costume.listError ? null : <p className="text-xs text-text-secondary">等待连接以读取服装列表。</p>;
   if (costume.view.rows.length === 0) return <EmptyState title="尚未导入角色" hint="开发环境使用内置模型。" />;
   return (
     <div className="flex flex-col gap-0.5">
@@ -75,11 +75,6 @@ function CostumeList({ costume }: { costume: CostumePageView }) {
 function ImportFeedback({ state }: { state: CharacterImport }) {
   return (
     <>
-      {state.result && (
-        <div className="mt-2">
-          <FeedbackLine tone="ok">已导入 {state.result.characterId}（{state.result.costumes.length} 套服装）</FeedbackLine>
-        </div>
-      )}
       {state.warnings.length > 0 && (
         <div className="mt-1">
           <FeedbackLine tone="warn">{state.warnings.length} 条可选资源警告（加载时容错）</FeedbackLine>
@@ -106,13 +101,13 @@ export function CostumePage() {
         {error && <PageAlert>{error}</PageAlert>}
         {costume.listError && (
           <PageAlert action={{ label: "重试", onClick: () => void costume.refresh() }}>
-            服装列表读取失败（下方为上次结果）：{costume.listError}
+            服装列表读取失败{costume.hasSnapshot ? "（下方为上次结果）" : ""}：{costume.listError}
           </PageAlert>
         )}
 
         <PageCard title="导入模型">
           <ImportRow
-            onPick={(file) => void importState.importFile(file).then(costume.refresh)}
+            onPick={(file) => void importState.importFile(file).then(costume.invalidate)}
             isImporting={importState.isImporting}
             connectionReady={costume.connectionReady}
           />
@@ -124,6 +119,7 @@ export function CostumePage() {
           action={
             <ActionButton
               onClick={() => void costume.refresh()}
+              busy={costume.refreshing}
               disabled={!costume.connectionReady || costume.refreshing}
             >
               刷新列表

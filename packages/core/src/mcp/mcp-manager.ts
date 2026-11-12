@@ -1,11 +1,12 @@
 /**
  * INPUT:  durable desired MCP revisions plus catalog events, governance context, and runtime lifecycle budgets
- * OUTPUT: createMcpManager(deps) -> reconcile/CRUD-runtime/test/status/per-turn-tools/idempotent-close surface
+ * OUTPUT: reconcile/CRUD-runtime/test/status/per-turn-tools/close with bounded lifecycle change observations
  * POS:    core/mcp — thin plane-3 orchestrator; publication tokens and generation records are process-local only
  */
 import type { Tool, ToolSet } from "ai";
 import type { McpCandidateOutcome, McpServerConfig, McpServerStatus, McpTestResult } from "@taki/shared";
 import type { McpToolRef } from "./mcp-tool-identity.ts";
+import { notifyExtensionChange } from "../extensions/notify-extension-change.ts";
 import { buildTurnTools, type TurnInteractive } from "./mcp-turn-tools.ts";
 import { closeGeneration, retireGeneration, type GenerationRecord } from "./mcp-generations.ts";
 import { closeMcpClient } from "./mcp-client-close.ts";
@@ -58,7 +59,7 @@ export type McpManagerDeps = ManagerStateDeps;
 export function createMcpManager(deps: McpManagerDeps): McpManager {
   const state = createManagerState(deps);
   return {
-    tools: (interactive) => buildTurnTools(state.active, state.governance, interactive),
+    tools: (interactive) => buildTurnTools(state.active, { governance: state.governance, interactive, projectImageResult: state.projectImageResult }),
     snapshot: (interactive) => snapshotTools(state, interactive),
     describe: (toolKey) => describeTool(state, toolKey),
     reconcile: (servers) => reconcileManager(state, servers),
@@ -74,7 +75,7 @@ export function createMcpManager(deps: McpManagerDeps): McpManager {
 }
 
 function snapshotTools(state: ManagerState, interactive?: TurnInteractive): readonly McpToolSnapshot[] {
-  const tools: ToolSet = buildTurnTools(state.active, state.governance, interactive);
+  const tools: ToolSet = buildTurnTools(state.active, { governance: state.governance, interactive, projectImageResult: state.projectImageResult });
   const entries: McpToolSnapshot[] = [];
   for (const record of state.active.values()) {
     for (const [toolKey, ref] of record.refs) {
@@ -129,12 +130,13 @@ async function reconcileManager(state: ManagerState, servers: McpDesiredRuntime[
 
 function disableTracked(state: ManagerState, input: McpDesiredRuntime): void {
   trackDesired(state, { ...input, enabled: false });
-  disconnectActive(state, input.serverId);
+  if (!disconnectActive(state, input.serverId)) notifyExtensionChange(state.onChange, ["mcp"]);
 }
 
 function removeTracked(state: ManagerState, serverId: string): void {
-  withdrawDesired(state, serverId, true);
-  disconnectActive(state, serverId);
+  const removed = withdrawDesired(state, serverId, true);
+  const disconnected = disconnectActive(state, serverId);
+  if (removed && !disconnected) notifyExtensionChange(state.onChange, ["mcp"]);
 }
 
 function secretClearedManager(state: ManagerState, ref: string): void {
@@ -154,6 +156,7 @@ function secretClearedManager(state: ManagerState, ref: string): void {
       reason: "secret-unresolvable",
       message: "a referenced MCP secret was cleared; restore it and reconnect",
     });
+    notifyExtensionChange(state.onChange, ["mcp"]);
     state.log.warn({ server: serverId }, "mcp generation retired: a referenced secret was cleared");
   }
 }
@@ -235,11 +238,13 @@ async function closeManagerOnce(state: ManagerState): Promise<void> {
   state.closed = true;
   for (const candidate of state.candidates.values()) candidate.controller.abort();
   const records = uniqueRecords(state);
+  const hadActive = state.active.size > 0;
   state.active.clear();
   for (const record of records) {
     state.draining.add(record);
     retireGeneration(record, state.shutdownBudgetMs);
   }
+  if (hadActive) notifyExtensionChange(state.onChange, ["mcp", "extension-status"]);
   const deadline = Date.now() + state.shutdownBudgetMs;
   while (Date.now() < deadline && hasPendingWork(state, records)) await delay(10);
   const closes = records.map((record) => closeGeneration(record, record.leases > 0));

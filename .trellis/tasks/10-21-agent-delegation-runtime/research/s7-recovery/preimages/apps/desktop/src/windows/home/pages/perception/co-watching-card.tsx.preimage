@@ -1,0 +1,76 @@
+/**
+ * INPUT: Core Co-Watching state and explicit operator selection
+ * OUTPUT: one-video acceptance, truthful preparation/delivery status and stop controls
+ * POS: Home Perception — no local timers, inferred success or exposure of internal authority identifiers
+ */
+import { useState } from "react";
+import type { CoWatchingFailure, CoWatchingSession } from "@taki/shared";
+import { ActionButton } from "../../action-button.tsx";
+import { PageCard } from "../../page-card.tsx";
+import { ReadObservationNotice } from "../../read-observation-notice.tsx";
+import { useHomeStore } from "../../home-store.ts";
+import { useCoWatching } from "./use-co-watching.ts";
+
+const STATUS: Record<CoWatchingSession["status"], string> = { starting: "正在开始", analyzing: "正在分析视频，可以继续聊天", reading: "正在读取分析", preparing: "正在准备回应",
+  ready: "已就绪，等待对应播放片段", revising: "正在调整后续回应", stopped: "已停止", failed: "未能继续" };
+const REASON: Record<CoWatchingFailure, string> = { source_lost: "所选播放来源已失效", authority_changed: "执行权限或分析配置已变化",
+  analysis_unavailable: "暂时无法读取分析", analysis_failed: "视频分析未完成，可在聊天中说明后续安排", analysis_unknown: "暂时无法确认原分析任务，未重复提交",
+  analysis_mismatch: "分析与所选视频不匹配", skill_unavailable: "共看技能尚未就绪",
+  preparation_failed: "准备回应失败", plan_invalid: "准备的内容未通过校验", expired: "已到本次共看的结束时间", stopped: "已按要求停止", shutdown: "服务已关闭" };
+
+function SessionStatus({ session }: { session: CoWatchingSession }) {
+  return <div className="space-y-1 text-xs text-text-body" role="status">
+    <p>{session.title} · {STATUS[session.status]}</p>
+    <p>准备内容：{session.preparedCount === null ? "尚未确认" : `${session.preparedCount} 条`}；已确认发送：{session.sentCount} 条</p>
+    <p>本次最晚结束时间：{new Date(session.expiresAt).toLocaleString()}</p>
+    {session.reason && <p>{REASON[session.reason]}</p>}
+  </div>;
+}
+
+export function CoWatchingCard() {
+  const state = useCoWatching();
+  const [selection, setSelection] = useState("");
+  const [minutes, setMinutes] = useState("120");
+  const navigate = useHomeStore((value) => value.navigate);
+  const session = state.data?.session;
+  const active = session && session.status !== "stopped" && session.status !== "failed";
+  const choices = (state.data?.sources ?? []).flatMap((source) => (state.data?.analyses ?? []).filter((analysis) =>
+    analysis.media.bvid === source.source.media.bvid && analysis.media.cid === source.source.media.cid
+    && analysis.media.page === source.source.media.page).map((analysis) => ({ sourceRef: source.sourceRef,
+      analysisId: analysis.analysisId, key: `${source.sourceRef}:${analysis.analysisId}`, label: `${analysis.title} · 分P ${analysis.media.page}` })));
+  const selected = choices.find((choice) => choice.key === selection) ?? (selection === "" ? choices[0] : undefined);
+  const lifetimeMinutes = Number(minutes);
+  const validMinutes = Number.isInteger(lifetimeMinutes) && lifetimeMinutes >= 5 && lifetimeMinutes <= 720;
+  const blocked = !state.connected || state.pending;
+  return <PageCard title="一起看视频" action={<div className="flex items-center gap-2">
+    <span className={`text-xs text-warn-strong ${state.stale ? "" : "invisible"}`}>状态待确认</span>
+    <ActionButton disabled={blocked} busy={state.loading} onClick={() => void state.controller.refresh()}>刷新共看</ActionButton>
+  </div>}>
+    <div className="space-y-3">
+      <p className="text-xs text-text-body">选择当前视频及已有分析后开始。回应会随播放片段出现；暂停、拖动或切离视频时暂缓发送。可在聊天中调整后续表达。</p>
+      <ReadObservationNotice observation={state.observation} onRefresh={() => state.controller.refresh()} disabled={blocked} />
+      {!state.data?.enabled && state.data && <p className="text-xs text-text-secondary">请先允许接收播放状态，并解除隐私暂停。</p>}
+      {!active && <div className="space-y-2">
+        <label className="block text-xs text-text-body">视频与分析
+          <select aria-label="共看视频与分析" className="mt-1 w-full rounded border border-border bg-surface-sunken p-2" disabled={blocked} value={selected?.key ?? ""} onChange={(event) => setSelection(event.target.value)}>
+            <option value="">请选择已分析的播放来源</option>
+            {choices.map((choice) => <option key={choice.key} value={choice.key}>{choice.label}</option>)}
+          </select>
+        </label>
+        {choices.length === 0 && <p className="text-xs text-text-secondary">暂无匹配的分析。请保持已连接的视频页面打开，并登记该视频的已完成分析。</p>}
+        <label className="block text-xs text-text-body">最长共看时间（5–720 分钟）
+          <input aria-label="最长共看分钟数" type="number" min={5} max={720} step={1} className="ml-2 w-20 rounded border border-border p-1" disabled={blocked} value={minutes} onChange={(event) => setMinutes(event.target.value)} />
+        </label>
+        <ActionButton tone="primary" disabled={blocked || state.stale || !state.data?.enabled || !selected || !validMinutes} onClick={() => {
+          if (selected) void state.controller.start({ sourceRef: selected.sourceRef, analysisId: selected.analysisId, lifetimeMinutes });
+        }}>开始共看</ActionButton>
+      </div>}
+      {session && <SessionStatus session={session} />}
+      <div className="flex gap-2">
+        {active && <ActionButton disabled={blocked} onClick={() => void state.controller.stop(session.sessionId)}>停止共看</ActionButton>}
+        <ActionButton tone="link" onClick={() => navigate("chat")}>前往聊天调整表达 →</ActionButton>
+      </div>
+      {(state.error || state.commandError) && <p role="alert" className="text-xs text-danger">{[state.commandError, state.error].filter(Boolean).join(" ")}</p>}
+    </div>
+  </PageCard>;
+}

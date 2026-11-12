@@ -1,0 +1,220 @@
+{
+  "startedAt": "2026-11-12T10:02:55.540Z",
+  "finishedAt": "2026-11-12T10:03:08.123Z",
+  "passed": true,
+  "resultPath": "G:\\TakiAgent-integration\\.trellis\\tasks\\11-11-main-t4-baseline-integration\\research\\smoke-core-result-2026-11-12T10-02-55-540Z-35220.json",
+  "artifactRoot": "G:/taki-integration-boot-3V55M2",
+  "profileDir": "G:\\taki-integration-boot-3V55M2\\os-profile",
+  "tempDir": "G:\\taki-integration-boot-3V55M2\\temp",
+  "node": "v24.18.0",
+  "repo": "G:\\TakiAgent-integration\\",
+  "environment": "allowlisted OS executable variables plus fresh G: USERPROFILE/APPDATA/LOCALAPPDATA/TEMP/TMP and isolated test settings; no env file/real provider/key helper",
+  "stop": "Windows force termination via child.kill(SIGTERM) after socket close; not graceful shutdown evidence",
+  "providerCalls": [
+    {
+      "path": "/v1/chat/completions",
+      "model": "integration-controlled-model",
+      "stream": false,
+      "authorizationPresent": false
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "integration-controlled-model",
+      "stream": true,
+      "authorizationPresent": false
+    }
+  ],
+  "results": [
+    {
+      "name": "no-model",
+      "dataDir": "G:\\taki-integration-boot-3V55M2\\no-model",
+      "port": 8453,
+      "corePid": 34948,
+      "listeningMs": 4376,
+      "beforeAdmission": {
+        "runs": 0,
+        "completedRuns": 0,
+        "migrationHead": 77,
+        "runRecords": [],
+        "attempts": [],
+        "assistantReplies": []
+      },
+      "basicPlaneAvailable": true,
+      "afterRefusal": {
+        "runs": 0,
+        "completedRuns": 0,
+        "migrationHead": 77,
+        "runRecords": [],
+        "attempts": [],
+        "assistantReplies": []
+      },
+      "refusal": "CONFIG_REFUSED",
+      "reason": "MODEL_UNAVAILABLE",
+      "modelConfigured": true,
+      "beforeRecoveredChat": {
+        "runs": 0,
+        "completedRuns": 0,
+        "migrationHead": 77,
+        "runRecords": [],
+        "attempts": [],
+        "assistantReplies": []
+      },
+      "afterRecoveredChat": {
+        "runs": 1,
+        "completedRuns": 1,
+        "migrationHead": 77,
+        "runRecords": [
+          {
+            "run_id": "5419bead-9574-4225-8f65-79173bfae3ff",
+            "initiator": "primary",
+            "state": "completed",
+            "outcome": "completed",
+            "terminal_at": "2026-11-12T10:03:00.226Z"
+          }
+        ],
+        "attempts": [
+          {
+            "run_id": "5419bead-9574-4225-8f65-79173bfae3ff",
+            "model_id": "integration-controlled-model",
+            "state": "completed",
+            "outcome": "completed"
+          }
+        ],
+        "assistantReplies": [
+          {
+            "content": "Integration live configuration recovered without a Core restart."
+          }
+        ]
+      },
+      "chat": {
+        "runId": "5419bead-9574-4225-8f65-79173bfae3ff",
+        "messageId": "5d07a1dd-eb68-445b-ac47-c9e9bc496020",
+        "reply": "Integration live configuration recovered without a Core restart.",
+        "completedMs": 155,
+        "sameCorePid": 34948,
+        "sameOperatorConnection": true
+      },
+      "applyRecovered": true,
+      "controlledProviderTest": true,
+      "failedApplyRetainsLastGood": true,
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "providerCalls": 2,
+      "durationMs": 4701,
+      "afterProcessExit": {
+        "runs": 1,
+        "completedRuns": 1,
+        "migrationHead": 77,
+        "runRecords": [
+          {
+            "run_id": "5419bead-9574-4225-8f65-79173bfae3ff",
+            "initiator": "primary",
+            "state": "completed",
+            "outcome": "completed",
+            "terminal_at": "2026-11-12T10:03:00.226Z"
+          }
+        ],
+        "attempts": [
+          {
+            "run_id": "5419bead-9574-4225-8f65-79173bfae3ff",
+            "model_id": "integration-controlled-model",
+            "state": "completed",
+            "outcome": "completed"
+          }
+        ],
+        "assistantReplies": [
+          {
+            "content": "Integration live configuration recovered without a Core restart."
+          }
+        ]
+      }
+    },
+    {
+      "name": "invalid-optional-memory",
+      "dataDir": "G:\\taki-integration-boot-3V55M2\\invalid-optional-memory",
+      "port": 8487,
+      "corePid": 33544,
+      "listeningMs": 3999,
+      "beforeAdmission": {
+        "runs": 0,
+        "completedRuns": 0,
+        "migrationHead": 77,
+        "runRecords": [],
+        "attempts": [],
+        "assistantReplies": []
+      },
+      "basicPlaneAvailable": true,
+      "afterRefusal": {
+        "runs": 0,
+        "completedRuns": 0,
+        "migrationHead": 77,
+        "runRecords": [],
+        "attempts": [],
+        "assistantReplies": []
+      },
+      "refusal": "CONFIG_REFUSED",
+      "reason": "MODEL_UNAVAILABLE",
+      "modelConfigured": false,
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "providerCalls": 0,
+      "durationMs": 4094,
+      "afterProcessExit": {
+        "runs": 0,
+        "completedRuns": 0,
+        "migrationHead": 77,
+        "runRecords": [],
+        "attempts": [],
+        "assistantReplies": []
+      }
+    },
+    {
+      "name": "reopen-last-good",
+      "dataDir": "G:\\taki-integration-boot-3V55M2\\no-model",
+      "port": 8493,
+      "corePid": 16368,
+      "listeningMs": 3619,
+      "beforeAdmission": {
+        "runs": 1,
+        "completedRuns": 1,
+        "migrationHead": 77,
+        "runRecords": [
+          {
+            "run_id": "5419bead-9574-4225-8f65-79173bfae3ff",
+            "initiator": "primary",
+            "state": "completed",
+            "outcome": "completed",
+            "terminal_at": "2026-11-12T10:03:00.226Z"
+          }
+        ],
+        "attempts": [
+          {
+            "run_id": "5419bead-9574-4225-8f65-79173bfae3ff",
+            "model_id": "integration-controlled-model",
+            "state": "completed",
+            "outcome": "completed"
+          }
+        ],
+        "assistantReplies": [
+          {
+            "content": "Integration live configuration recovered without a Core restart."
+          }
+        ]
+      },
+      "basicPlaneAvailable": true,
+      "reopenedLastGood": true,
+      "modelConfigured": true,
+      "reopenedCompletedRun": true,
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "providerCalls": 0,
+      "durationMs": 3699
+    }
+  ]
+}

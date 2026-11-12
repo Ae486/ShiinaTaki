@@ -53,6 +53,9 @@ it("captures actual pinned Bank identity and rejects config ABA, secret, setup a
         });
         expect(verify).not.toHaveBeenCalled();
         expect(readHindsightConfigurationContext(deps, { kind: "global" })).toEqual(local);
+        // Configuration comparison reads current control identity; full publication proof remains an admission boundary.
+        expect(verify).not.toHaveBeenCalled();
+        h.runtime.transitions.verifySelectedAuthority();
         expect(verify).toHaveBeenCalled();
       } finally { verify.mockRestore(); }
     } finally { observer.close(); }

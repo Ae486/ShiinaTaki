@@ -12,6 +12,7 @@ type State = keyof typeof BACKUP_STATES;
 
 function ops(state: State, patch: Partial<MemoryOperationsView> = {}): MemoryOperationsView {
   return { status: BACKUP_STATES[state], loading: false, error: null, busyKey: null, feedback: null, connectionReady: true,
+    tidy: null, tidyLoading: false, tidyError: null, submitTidy: async () => { throw new Error("Unexpected Tidy submission"); },
     refresh: noop, submit: noop, submitSync: noop, configureSync: noop, cancel: noop, ...patch };
 }
 
@@ -21,7 +22,7 @@ function block(state: State, locked = false, busyKey: string | null = null): str
   return renderToStaticMarkup(<HindsightBackupBlock backup={backup} ops={ops(state, { busyKey })} locked={locked} />);
 }
 
-const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((match) => match[1]);
+const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>(.*?)<\/button>/g)].map((match) => match[1]?.replace(/<[^>]*>/g, ""));
 const disabledCount = (markup: string) => markup.match(/<button[^>]*disabled=""/g)?.length ?? 0;
 /** Everything before the collapsed diagnostics: the operator-facing part of the block. */
 const primary = (markup: string) => markup.split("备份诊断")[0] ?? "";

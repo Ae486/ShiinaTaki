@@ -7,12 +7,15 @@ import { createHash } from "node:crypto";
 import type { LanguageModelMiddleware } from "ai";
 import type { EffectLifecycle, UsageRecord } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import { withRunUsageOwner } from "../observability/model-usage-context.ts";
+import { primaryCacheUsage } from "../observability/primary-cache-usage.ts";
 
 interface ModelEffectContext {
   lifecycle: EffectLifecycleService;
   runId: string;
   attemptId: string;
   observer?: ModelEffectObserver;
+  onCommitModelIntent?: (effect: EffectLifecycle) => void;
 }
 
 type WrapStreamArgs = Parameters<NonNullable<LanguageModelMiddleware["wrapStream"]>>[0];
@@ -28,6 +31,7 @@ export interface ModelEffectBinding {
 export interface ModelEffectObserver {
   bindEffect(input: { effect: EffectLifecycle; provider: string; modelId: string }): ModelEffectBinding;
   firstOutput(input: ModelEffectBinding & { outputKind: "text" | "reasoning" | "tool" }): void;
+  toolCall?(input: ModelEffectBinding & { toolCallId: string; toolName: string }): void;
   fail(input: ModelEffectBinding & { errorCode: string; outcome: "failed" | "outcome_unknown" }): void;
 }
 
@@ -37,7 +41,7 @@ export function createModelEffectMiddleware(context: ModelEffectContext): Langua
     async wrapGenerate({ doGenerate, params, model }) {
       const binding = prepareBinding(context, model, params);
       try {
-        const result = await doGenerate();
+        const result = await withRunUsageOwner(doGenerate, binding.effect);
         if (!context.observer) settleDirect({ context, effect: binding.effect, model, usage: result.usage });
         return result;
       } catch (error) {
@@ -49,7 +53,7 @@ export function createModelEffectMiddleware(context: ModelEffectContext): Langua
       const binding = prepareBinding(context, model, params);
       let result;
       try {
-        result = await doStream();
+        result = await withRunUsageOwner(doStream, binding.effect);
       } catch (error) {
         fail(context, binding, params.abortSignal?.aborted ? "provider_abort" : "provider_error");
         throw error;
@@ -80,19 +84,22 @@ function prepareBinding(
     executorRef: { type: "provider", provider: model.provider },
     inputDigest: digestForModelRequest(params),
     replayPosture: "never",
+    onCommitIntent: context.onCommitModelIntent,
   });
   return context.observer?.bindEffect({ effect, provider: model.provider, modelId: model.modelId })
     ?? { effect, callId: effect.effectId };
 }
 
-function observeStream(input: {
+interface ObservedModelStream {
   stream: ReadableStream<ProviderStreamPart>;
   binding: ModelEffectBinding;
   context: ModelEffectContext;
   model: { provider: string; modelId: string };
-}): ReadableStream<ProviderStreamPart> {
+}
+
+function observeStream(input: ObservedModelStream): ReadableStream<ProviderStreamPart> {
   const reader = input.stream.getReader();
-  let firstOutput = false;
+  const observeOutput = createOutputObserver(input);
   let terminal = false;
   const interrupt = (errorCode: string): void => {
     if (terminal) return;
@@ -109,11 +116,7 @@ function observeStream(input: {
           return;
         }
         const part = next.value;
-        const outputKind = meaningfulOutput(part);
-        if (!firstOutput && outputKind) {
-          firstOutput = true;
-          input.context.observer?.firstOutput({ ...input.binding, outputKind });
-        }
+        observeOutput(part);
         if (part.type === "error") interrupt("provider_stream_error");
         if (part.type === "finish") {
           terminal = true;
@@ -132,6 +135,20 @@ function observeStream(input: {
       await reader.cancel(reason);
     },
   });
+}
+
+function createOutputObserver(input: Pick<ObservedModelStream, "binding" | "context">) {
+  let firstOutput = false;
+  return (part: ProviderStreamPart): void => {
+    if (part.type === "tool-call") input.context.observer?.toolCall?.({
+      ...input.binding, toolCallId: part.toolCallId, toolName: part.toolName,
+    });
+    const outputKind = meaningfulOutput(part);
+    if (!firstOutput && outputKind) {
+      firstOutput = true;
+      input.context.observer?.firstOutput({ ...input.binding, outputKind });
+    }
+  };
 }
 
 function meaningfulOutput(part: ProviderStreamPart): "text" | "reasoning" | "tool" | undefined {
@@ -177,6 +194,7 @@ function settleDirect(input: {
 }
 
 interface ProviderUsage {
+  raw?: unknown;
   inputTokens: { total?: number; noCache?: number; cacheRead?: number; cacheWrite?: number };
   outputTokens: { total?: number; text?: number; reasoning?: number };
 }
@@ -186,6 +204,7 @@ function usageRecord(
   usage: ProviderUsage | undefined,
 ): Omit<UsageRecord, "usageId" | "schemaVersion" | "runId" | "attemptId" | "effectId" | "recordedAt"> {
   const normalized = usage ?? { inputTokens: {}, outputTokens: {} };
+  const cache = primaryCacheUsage(normalized, normalized.inputTokens.total);
   const counts = [normalized.inputTokens.total, normalized.inputTokens.noCache, normalized.inputTokens.cacheRead,
     normalized.inputTokens.cacheWrite, normalized.outputTokens.total, normalized.outputTokens.text, normalized.outputTokens.reasoning];
   return {
@@ -193,9 +212,10 @@ function usageRecord(
     modelId: model.modelId,
     quality: counts.some((value) => value !== undefined) ? "reported" : "unknown",
     inputTokens: normalized.inputTokens.total,
+    cacheReadObserved: cache.cacheReadObserved,
     inputTokenDetails: compactDetails({
       noCacheTokens: normalized.inputTokens.noCache,
-      cacheReadTokens: normalized.inputTokens.cacheRead,
+      cacheReadTokens: cache.cacheReadTokens,
       cacheWriteTokens: normalized.inputTokens.cacheWrite,
     }),
     outputTokens: normalized.outputTokens.total,

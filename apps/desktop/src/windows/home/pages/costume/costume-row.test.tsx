@@ -27,7 +27,8 @@ describe("CostumeRow", () => {
   it("shows a busy indicator and a Cancel control on the row being switched (#75)", () => {
     const pending = markup({ pending: true });
 
-    expect(pending).toContain("animate-spin");
+    expect(pending).toContain('aria-busy="true"');
+    expect(pending).not.toContain("切换中…");
     expect(pending).toContain("taki-summer");
     expect(pending).toContain("取消");
   });

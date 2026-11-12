@@ -8,6 +8,7 @@ import type { SkillMeta } from "./skill-scanner.ts";
 import type { SkillsState } from "./skills-state.ts";
 import type { SkillCatalogManager } from "./skill-catalog-manager.ts";
 import { parseSkillDocument } from "./skill-package-store.ts";
+import { attributedRenderer, contextText, joinContextText } from "../agents/context-attribution.ts";
 
 // Closed local error union (mirrors memory-tools; execute never throws).
 export type SkillLoadResult =
@@ -27,7 +28,7 @@ const LIST_HEADER = "Skills you can load with load_skill:";
 
 export function createSkillsLoader(deps: { skills: SkillMeta[]; state: SkillsState; catalog?: SkillCatalogManager }): SkillsLoader {
   if (deps.catalog) return {
-    renderList() { return deps.catalog!.list().map((entry) => `- ${entry.row.skillName}: ${entry.row.description}`).join("\n") ? `${LIST_HEADER}\n${deps.catalog!.list().map((entry) => `- ${entry.row.skillName}: ${entry.row.description}`).join("\n")}` : ""; },
+    renderList: attributedRenderer(() => renderSkillList(deps.catalog!.list().map((entry) => `- ${entry.row.skillName}: ${entry.row.description}`))),
     load(name) { const result = deps.catalog!.load(name); if ("ok" in result) { if (result.code === "INVALID") return { ok: false as const, code: "IO_ERROR" as const, message: result.message }; return { ok: false as const, code: result.code as "NOT_FOUND" | "DISABLED", message: result.message }; } return { ok: true as const, content: result.content, contentRevision: result.contentRevision, files: result.files }; },
     describe(name) { return deps.catalog!.describe(name); },
     readResource(name, path) { return deps.catalog!.readResource(name, path); },
@@ -35,12 +36,12 @@ export function createSkillsLoader(deps: { skills: SkillMeta[]; state: SkillsSta
   const byName = new Map(deps.skills.map((skill) => [skill.name, skill]));
 
   return {
-    renderList() {
+    renderList: attributedRenderer(() => {
       const lines = deps.skills
         .filter((skill) => !deps.state.isDisabled(skill.name))
         .map((skill) => `- ${skill.name}: ${skill.description}`);
-      return lines.length > 0 ? `${LIST_HEADER}\n${lines.join("\n")}` : "";
-    },
+      return renderSkillList(lines);
+    }),
     load(name) {
       const skill = byName.get(name);
       if (!skill) return { ok: false, code: "NOT_FOUND", message: `no skill named '${name}'` };
@@ -56,4 +57,9 @@ export function createSkillsLoader(deps: { skills: SkillMeta[]; state: SkillsSta
       return skill ? { name: skill.name, contentRevision: skill.contentRevision } : undefined;
     },
   };
+}
+
+function renderSkillList(lines: string[]) {
+  return lines.length ? joinContextText([contextText(`${LIST_HEADER}\n`, "instructions"),
+    contextText(lines.join("\n"), "instructions", "skill")], "") : contextText("", "instructions");
 }

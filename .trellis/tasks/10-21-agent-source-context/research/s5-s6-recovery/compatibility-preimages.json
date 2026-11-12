@@ -1,0 +1,10 @@
+[
+  {
+    "path": "packages/core/src/initiative/intentions/intention-service.test.ts",
+    "sha256": "4c292312a9ff85b05a3f66072a71fa204ddd8d0f79efb0643289f26b4af3612b"
+  },
+  {
+    "path": "packages/core/src/memory/hindsight/hindsight-policy-curator.test.ts",
+    "sha256": "52ebba1de87611525bc61170f278b3c49cc83edba11e5a6ed8453dd50dcf1283"
+  }
+]

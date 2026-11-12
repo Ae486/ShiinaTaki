@@ -1,0 +1,12 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/desktop",
+    "build"
+  ],
+  "startedAt": "2026-09-26T11:35:26.173541+00:00",
+  "seconds": 2.328,
+  "exitCode": 0,
+  "log": "desktop-current-lock-build-2026-09-26.log"
+}

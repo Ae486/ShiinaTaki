@@ -45,6 +45,7 @@ export function wrapExecute(tool: Tool): Tool {
       try {
         return await inner(input, options);
       } catch (error) {
+        if (options.abortSignal?.aborted) return { ok: false, code: "CANCELLED", message: "MCP tool call was cancelled" } satisfies McpToolFailure;
         return { ok: false, code: errorCode(error), message: "MCP tool call failed" } satisfies McpToolFailure;
       }
     },

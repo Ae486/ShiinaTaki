@@ -9,11 +9,13 @@ import { createContext, useContext } from "react";
 import { TIMING_POLICY_DEVELOPMENT_DEFAULTS, type TimingPolicy } from "@taki/shared";
 import type { WsClient } from "@/lib/ws-client.js";
 import type { ConnectionStatus } from "@/stores/connection-store.js";
+import type { UserTimezoneController } from "@/features/presence/user-timezone-controller.js";
 
 export interface HomeClient {
   client: WsClient | null;
   status: ConnectionStatus;
   currentTimingPolicy: () => TimingPolicy;
+  timezone?: UserTimezoneController | null;
 }
 
 export const HomeClientContext = createContext<HomeClient>({

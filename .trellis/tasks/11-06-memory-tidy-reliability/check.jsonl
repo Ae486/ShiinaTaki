@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/backend/canonical-local-memory-runtime.md", "reason": "Protect authority, CAS, provenance and exact effects"}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Queryable durable outcomes, single flight and no reconnect replay"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Required automated and real boot checks"}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Actual UI recovery and visibility behavior"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/prd.md", "reason": "Original owner requirements and complete acceptance criteria"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/design.md", "reason": "Final implementation contract and tradeoffs"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/backlog-optimization.md", "reason": "Verify current backlog follow-up independently of historical repair results"}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Normal metric exclusion and independent background operation contracts"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/maintenance-monitor-plan.md", "reason": "Approved background monitor implementation and compatibility plan"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/maintenance-monitor-advisor.md", "reason": "Independent pre-implementation producer and metric challenge"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/maintenance-monitor-final-review.md", "reason": "Final independent review and verified Legacy compatibility corrections"}

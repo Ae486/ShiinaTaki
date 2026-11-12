@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Locked renderer stack, load/teardown order, generation-split param API, BanG Dream model facts"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Size/responsibility guard, perf and test rules for apps/desktop"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Where things live; the lab is the sanctioned exception (isolated under apps/desktop/lab/)"}
+{"file": "docs/TTS-INTERFACE.md", "reason": "Reserved OpenAI-compatible local-TTS wire contract the second speech provider implements"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/mouth-pose-capability-2026-09-08.md", "reason": "Actual mouth ranges, visible pose limits, model-specific mapping and C2 phantom parameter evidence"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/reference-mouth-control-2026-09-08.md", "reason": "Ryza and BANDORI signal processing, text timing and verified renderer-binding boundaries"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/realtime-mouth-provider-options-2026-09-09.md", "reason": "Fish cue contract, Azure timed visemes and official MotionSync provider/engine boundaries"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/realtime-mouth-design-2026-09-09.md", "reason": "Unified cue-clock-profile-writer design and staged selection of realtime mouth sources"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/phase4-fish-live-findings-2026-09-10.md", "reason": "Live Fish proxy synthesis and native Cubism 3 playback evidence; no perceptual acceptance claim"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/phase4-fish-mouth-automation-2026-09-10.md", "reason": "Automated real-Fish native/custom C2/C3 mouth metrics, static pose evidence and optimization gates"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/panel-integration-findings-2026-09-18.md", "reason": "Three-arm panel acceptance, engine per-frame restore order and owner-only limits"}

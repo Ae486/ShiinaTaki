@@ -46,6 +46,7 @@ export interface MemoryCoordinator {
 }
 
 export interface CapturedMemoryCoordinator {
+  readonly isCurrent?: () => boolean;
   readonly snapshot: RunMemoryReference;
   readonly authority: MemoryAuthorityEpoch;
   readonly coordinator: MemoryCoordinator;
@@ -79,7 +80,7 @@ async function captureRun(deps: CoordinatorDeps): Promise<CapturedMemoryCoordina
     authorityEpochId: epoch.epochId, contractVersion: caps.contractVersion, capabilities: caps });
   const binding = Object.freeze({ epoch, provider, methods, capabilities: caps, snapshot });
   if (caps.providerId !== epoch.providerId || !bindingCurrent(deps, binding)) throw new Error("MEMORY_AUTHORITY_MISMATCH");
-  return Object.freeze({ snapshot, authority: epoch, coordinator: Object.freeze(operations(deps, binding)) });
+  return Object.freeze({ snapshot, authority: epoch, isCurrent: () => bindingCurrent(deps, binding), coordinator: Object.freeze(operations(deps, binding)) });
 }
 
 async function capabilities(deps: CoordinatorDeps): Promise<MemoryProviderCapabilities> {

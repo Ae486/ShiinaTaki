@@ -11,6 +11,7 @@ import {
   type JsonValue,
 } from "@taki/shared";
 import { HindsightApplicationCommandKeySchema, applicationCommandIntentHash } from "./hindsight-application-command-contract.ts";
+import { HindsightSourceLifetimeSchema } from "../memory/hindsight/hindsight-source-lifetime.ts";
 
 export const HindsightMemoryWriteIdentitySchema = z.strictObject({
   key: HindsightApplicationCommandKeySchema, namespace: TakiApplicationNamespaceSchema,
@@ -24,7 +25,8 @@ export const HindsightMemoryWriteTargetSchema = z.strictObject({
 });
 export type HindsightMemoryWriteTarget = z.infer<typeof HindsightMemoryWriteTargetSchema>;
 export const HindsightMemoryWriteTerminalSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("retain"), result: HindsightMemoryRetainCompletedResultV1Schema }),
+  z.strictObject({ kind: z.literal("retain"), result: HindsightMemoryRetainCompletedResultV1Schema,
+    sourceLifetime: HindsightSourceLifetimeSchema.optional() }),
   z.strictObject({ kind: z.literal("mutation"), result: HindsightMemoryMutationResultV1Schema
     .refine((value) => value.outcome !== "pending", "a terminal write cannot remain pending") }),
   z.strictObject({ kind: z.literal("error"), code: MemoryErrorCodeSchema }),

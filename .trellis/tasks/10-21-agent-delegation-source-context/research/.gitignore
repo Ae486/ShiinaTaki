@@ -1,0 +1,11 @@
+# Third-party package and documentation copies used for source inspection.
+# Regenerable from the exact versions recorded in the research notes; never commit (licenses vary).
+delegation-runtime/packages/
+delegation-runtime/adapters/
+delegation-runtime/docs/
+sdk-upgrade/*/package/
+sdk-upgrade/*-src-*.ts
+sdk-upgrade/*-CHANGELOG.md
+source-context-prompts/*.mdx
+source-context-prompts/ai-*.ts
+source-context-prompts/anthropic-*.md

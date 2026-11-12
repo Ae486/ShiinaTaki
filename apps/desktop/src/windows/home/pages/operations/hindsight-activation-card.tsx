@@ -31,7 +31,7 @@ export function HindsightActivationCard({ activation }: { activation: HindsightA
         {error && <FeedbackLine tone="danger" action={{ label: "重试", onClick: () => void activation.refresh() }}>状态读取失败：{error}</FeedbackLine>}
         {loading && status && <p className="text-xs text-text-secondary">正在等待最新状态，操作暂不可用。</p>}
         {status ? <ActivationBody status={status} activation={activation} locked={locked} />
-          : loading ? <Skeleton lines={4} /> : <p className="text-xs text-text-secondary">暂无可用的启用状态。</p>}
+          : connectionReady && loading ? <Skeleton lines={4} /> : <p className="text-xs text-text-secondary">暂无可用的启用状态。</p>}
         {activation.feedback && <FeedbackLine tone={activation.feedback.tone}>{activation.feedback.message}</FeedbackLine>}
       </div>
     </PageCard>

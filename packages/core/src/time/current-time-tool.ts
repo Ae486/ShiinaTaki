@@ -1,13 +1,13 @@
 /**
- * INPUT:  an LLM get_current_time call (no args)
- * OUTPUT: createCurrentTimeTool() -> ToolSet { get_current_time }; returns { ok, iso, local, timezone, epochMs, capturedAt }
+ * INPUT:  an LLM get_current_time call (no args), optional live User Timezone authority
+ * OUTPUT: createCurrentTimeTool(options?) -> ToolSet { get_current_time }; returns { ok, iso, local, timezone, epochMs, capturedAt }
  * POS:    core/time — a PURE Core tool (reads new Date(); NOT a capability — no OS crossing, no Gate, no approval);
  *         informational (NOT presentation — never added to PRESENTATION_TOOL_NAMES); execute NEVER throws
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 
-export function createCurrentTimeTool(): ToolSet {
+export function createCurrentTimeTool(options: { userTimezone?: () => string } = {}): ToolSet {
   return {
     get_current_time: tool({
       description:
@@ -19,11 +19,13 @@ export function createCurrentTimeTool(): ToolSet {
       execute: () => {
         try {
           const now = new Date();
+          // Read once per invocation; a supplied authority must never be replaced by the Core host's zone.
+          const timezone = options.userTimezone ? options.userTimezone() : Intl.DateTimeFormat().resolvedOptions().timeZone;
           return {
             ok: true as const,
             iso: now.toISOString(),
-            local: now.toLocaleString(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            local: now.toLocaleString(undefined, { timeZone: timezone }),
+            timezone,
             epochMs: now.getTime(),
             // Q5 class marker: identical to `iso` BY CONSTRUCTION (same Date) — every state-snapshot result carries
             // capturedAt, so batch 7's folds read one field name across the class instead of special-casing this tool.

@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { LanguageModel } from "ai";
 import type { UtilityConfig } from "../config/utility-config.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { generatingModel } from "../testing/mock-language-model.ts";
 import { createUtilitySlot } from "./utility-slot.ts";
+import { currentModelUsageOwner } from "../observability/model-usage-context.ts";
 
 const UTILITY: UtilityConfig = {
   baseUrl: "https://utility.example.com",
@@ -17,6 +19,27 @@ function slot(config?: UtilityConfig | null) {
 }
 
 describe("utility slot model resolution (T5-R11)", () => {
+  it("starts unavailable, refuses without usage, and preserves admitted bindings through queue wait and disable", async () => {
+    let model: LanguageModel | undefined;
+    const { logger } = createCaptureLogger();
+    const utility = createUtilitySlot({ resolveModel: () => model, logger });
+    const task = vi.fn(async () => true);
+    await expect(utility.run("unavailable", task)).rejects.toThrow("MODEL_UNAVAILABLE");
+    expect(task).not.toHaveBeenCalled(); expect(utility.usage().calls).toBe(0);
+    model = generatingModel("old"); const old = model;
+    const admitted = utility.capture!();
+    let release!: () => void;
+    const blocker = utility.run("hold", () => new Promise<void>((done) => { release = done; }));
+    const queued = admitted.run("queued", async () => utility.model);
+    await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+    model = generatingModel("new"); const fresh = utility.capture!();
+    model = undefined;
+    release(); await blocker;
+    expect(await queued).toBe(old);
+    expect(await fresh.run("new", async () => utility.model)).not.toBe(old);
+    expect(utility.available?.()).toBe(false);
+    await utility.stop();
+  });
   it("falls back to the MAIN model when no utility slot is configured", () => {
     const h = slot();
     expect(h.slot.model).toBe(h.mainModel);
@@ -97,5 +120,28 @@ describe("utility slot usage accounting", () => {
     const before = h.slot.usage();
     await h.slot.run("a", async () => ({ usage: { inputTokens: 3, outputTokens: 2 } }));
     expect(before.calls).toBe(0);
+  });
+});
+
+describe("utility slot auxiliary usage ownership", () => {
+  it("wraps the resolved model once and establishes ownership only while the serial task executes", async () => {
+    const mainModel = generatingModel("main");
+    const { logger } = createCaptureLogger();
+    const wrapModel = vi.fn((model: LanguageModel) => model);
+    const slot = createUtilitySlot({ mainModel, logger, usageMeter: { wrapModel } });
+    expect(wrapModel).toHaveBeenCalledOnce();
+    expect(wrapModel).toHaveBeenCalledWith(mainModel, { source: "utility", label: "utility" });
+    expect(currentModelUsageOwner()).toBeUndefined();
+
+    let captured: ReturnType<typeof currentModelUsageOwner> = undefined;
+    await slot.run("canonical extraction", async () => {
+      captured = currentModelUsageOwner();
+      return { usage: { inputTokens: 3, outputTokens: 2 } };
+    });
+
+    expect(captured).toMatchObject({ owner: "auxiliary", taskId: expect.any(String), label: "canonical extraction" });
+    expect(Object.isFrozen(captured)).toBe(true);
+    expect(currentModelUsageOwner()).toBeUndefined();
+    expect(slot.usage()).toEqual({ calls: 1, inputTokens: 3, outputTokens: 2, usageUnknown: 0 });
   });
 });

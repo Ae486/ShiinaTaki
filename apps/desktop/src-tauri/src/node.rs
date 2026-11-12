@@ -82,6 +82,7 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
     std::fs::create_dir_all(&data_dir)?;
 
     let device_id = ensure_device_id(secrets.as_ref())?;
+    let browser_attachment = crate::browser_attachment::BrowserAttachment::load_recoverable(&data_dir, secrets.clone());
     let decisions = Arc::new(DecisionStore::load(data_dir.join("gate-decisions.json")));
     let auditor = Arc::new(FileAuditor::new(data_dir.join("audit.jsonl")));
     // The active Permission Level is read exactly once here — operator-written file, frozen for the process
@@ -129,6 +130,7 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
     }
 
     Ok(WsClient {
+        local_auth: false,
         url,
         device_id,
         device_name,
@@ -138,6 +140,7 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
         handlers: Arc::new(handlers),
         exec_policy,
         status,
+        browser_attachment,
     })
 }
 

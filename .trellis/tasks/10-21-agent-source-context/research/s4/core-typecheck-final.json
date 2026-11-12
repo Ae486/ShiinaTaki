@@ -1,0 +1,4 @@
+{
+  "command": "pnpm --filter @taki/core typecheck",
+  "exitCode": 0
+}

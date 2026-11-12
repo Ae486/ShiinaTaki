@@ -1,10 +1,11 @@
 /**
  * INPUT:  TimelineSubscribeParams from a dispatched timeline.subscribe request + a subscriptions registry
- * OUTPUT: timelineSubscribeMethod(subscriptions) -> MethodDefinition (operator-only); pushes timeline.appended/removed
+ * OUTPUT: operator-only Character subscription for timeline append/remove/commit and ordered chat activity
  * POS:    core/server/methods — one file per WS method; registers a sink + a ctx.onClose auto-unsubscribe
  */
 import {
   TIMELINE_METHODS,
+  CHAT_METHODS,
   TimelineSubscribeParamsSchema,
   type TimelineSubscribeParams,
   type TimelineSubscribeResult,
@@ -22,6 +23,8 @@ export function timelineSubscribeMethod(subscriptions: TimelineSubscriptions): M
       subscriptions.subscribe(characterId, connection, {
         appended: (entry) => ctx.notify(TIMELINE_METHODS.appended, entry),
         removed: (ref) => ctx.notify(TIMELINE_METHODS.removed, ref),
+        committed: (batch) => ctx.notify(TIMELINE_METHODS.committed, batch),
+        activity: (event) => ctx.notify(CHAT_METHODS.activity, event),
       });
       // No explicit unsubscribe method this slice (prd §2): auto-cleanup when the socket closes.
       ctx.onClose(() => subscriptions.unsubscribe(characterId, connection));

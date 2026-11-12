@@ -25,13 +25,21 @@ import { DEFAULT_HINDSIGHT_POLICY_PROMPT, DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS,
   DEFAULT_HINDSIGHT_POLICY_REVIEW_MODE, DEFAULT_HINDSIGHT_POLICY_REVIEW_TIME,
   DEFAULT_HINDSIGHT_POLICY_REVIEW_INTERVAL_MS, DEFAULT_HINDSIGHT_POLICY_REVIEW_THRESHOLD,
   HINDSIGHT_POLICY_REVIEW_TIME_PATTERN } from "./hindsight-policy-config.ts";
+import { INITIATIVE_POLICY_FIELDS } from "./initiative-policy-config.ts";
+import { INITIATIVE_WAKE_KNOBS } from "./initiative-wake-knobs.ts";
+import { VIEWING_INVITATION_KNOBS } from "./viewing-invitation-config.ts";
+import { INTENTION_WINDOW_KNOB } from "./initiative-intention-config.ts";
+import { SUBAGENT_CHECKIN_KNOBS } from "./subagent-config.ts";
 import { DEFAULT_TTL_DAYS } from "./attachment-config.ts";
+import { AVATAR_OUTCOME_DEADLINE_KEY, DEFAULT_AVATAR_OUTCOME_DEADLINE_MS } from "./avatar-config.ts";
 import { DEFAULT_COMPACT_KEEP_MESSAGES, DEFAULT_COMPACT_TRIGGER_RATIO, DEFAULT_CONTEXT_TOKENS, DEFAULT_HISTORY_RATIO } from "./context-config.ts";
 import { DEFAULT_LOG_LEVEL, DEFAULT_TRUST_LOOPBACK, LOG_LEVELS } from "./server-config.ts";
 import {
   DEFAULT_INTENTIONS_DAYS,
   DEFAULT_PINNED_BUDGET,
   DEFAULT_TIDY_MAX_STEPS,
+  DEFAULT_TIDY_BATCH_TIMEOUT_MS,
+  DEFAULT_TIDY_INPUT_TOKENS,
   DEFAULT_TIDY_REPORT_CAP,
   DEFAULT_TIDY_STALE_DAYS,
   DEFAULT_TIDY_WRITE_THRESHOLD,
@@ -102,17 +110,24 @@ function pattern(spec: { regex: RegExp; message: string }): Pick<Knob, "schema" 
 }
 
 export const CONFIG_KNOBS: Knob[] = [
+  ...INITIATIVE_WAKE_KNOBS,
+  INTENTION_WINDOW_KNOB,
+  ...SUBAGENT_CHECKIN_KNOBS,
+  { key: "TAKI_INITIATIVE_ENABLED", ...bool(), default: false, apply: "live", description: "Enable Class B initiative admission and delivery; requires a valid Core opportunity source." },
+  ...Object.entries(INITIATIVE_POLICY_FIELDS).map(([field, entry]): Knob => ({ ...entry,
+    ...int({ min: 1, max: 2_147_483_647 }), apply: "live",
+    description: `Initiative ${field}; effective for later admissions and publication checks.` })),
   // --- server / bootstrap ---
   {
     key: "TAKI_WS_HOST",
     schema: z.string().min(1).refine((host) => host !== "0.0.0.0" && host !== "::", "wildcard binds are not allowed"),
     input: { kind: "string" },
     default: DEFAULT_WS_HOST,
-    apply: "restart",
+    apply: "live",
     description: "WS bind address (loopback only — wildcard binds are refused).",
   },
-  { key: "TAKI_WS_PORT", ...int({ min: 1, max: 65535 }), default: DEFAULT_WS_PORT, apply: "restart", description: "WS listen port." },
-  { key: "TAKI_LOG_LEVEL", ...choice(LOG_LEVELS), default: DEFAULT_LOG_LEVEL, apply: "restart", description: "Log verbosity." },
+  { key: "TAKI_WS_PORT", ...int({ min: 1, max: 65535 }), default: DEFAULT_WS_PORT, apply: "live", description: "WS listen port." },
+  { key: "TAKI_LOG_LEVEL", ...choice(LOG_LEVELS), default: DEFAULT_LOG_LEVEL, apply: "live", description: "Log verbosity." },
   {
     key: "TAKI_DATA_DIR",
     ...str(),
@@ -121,8 +136,8 @@ export const CONFIG_KNOBS: Knob[] = [
     apply: "env-only",
     description: "App data root (db, workspace, devices). Bootstrap value — env only.",
   },
-  { key: "TAKI_PROMPT_DIR", ...str(), default: null, apply: "restart", description: "Prompt-card library root; unset uses the bundled prompt/ tree." },
-  { key: "TAKI_TRUST_LOOPBACK_OPERATOR", ...bool(), default: DEFAULT_TRUST_LOOPBACK, apply: "restart", description: "Auto-trust loopback operators (off forces pairing)." },
+  { key: "TAKI_PROMPT_DIR", ...str(), default: null, apply: "live", description: "Prompt-card library root; unset uses the bundled prompt/ tree." },
+  { key: "TAKI_TRUST_LOOPBACK_OPERATOR", ...bool(), default: DEFAULT_TRUST_LOOPBACK, apply: "live", description: "Explicit legacy loopback operator trust; native local admission always verifies profile identity." },
   { key: MONITOR_MODE_CONFIG_KEY, ...choice(["DISABLED", "FEEDBACK_ONLY", "FULL_LOCAL"]), default: "DISABLED", apply: "live", description: "Local developer Run monitor mode; disabled hides the Home monitor." },
 
   // --- desktop connection and cross-window operation timing (development-tunable; final defaults need runtime data) ---
@@ -138,54 +153,56 @@ export const CONFIG_KNOBS: Knob[] = [
   timing("homeResultMs", "live", "Home wait for the pet costume result in milliseconds."),
 
   // --- model slots (the three API keys are credential-manager material, never stored here) ---
-  { key: "TAKI_PROVIDER_BASE_URL", ...str(), default: null, apply: "restart", description: "Main chat provider base URL." },
-  { key: "TAKI_PROVIDER_API_KEY", ...str(), default: null, apply: "restart", secret: true, description: "Main chat provider API key." },
-  { key: "TAKI_PROVIDER_MODEL", ...str(), default: null, apply: "restart", description: "Main chat model id." },
-  { key: "TAKI_VLM_BASE_URL", ...str(), default: null, apply: "restart", description: "Vision slot base URL; the whole slot is all-or-nothing." },
-  { key: "TAKI_VLM_API_KEY", ...str(), default: null, apply: "restart", secret: true, description: "Vision slot API key." },
-  { key: "TAKI_VLM_MODEL", ...str(), default: null, apply: "restart", description: "Vision model id; unset disables vision." },
-  { key: "TAKI_UTILITY_BASE_URL", ...str(), default: null, apply: "restart", description: "Background/utility slot base URL; all-or-nothing." },
-  { key: "TAKI_UTILITY_API_KEY", ...str(), default: null, apply: "restart", secret: true, description: "Background/utility slot API key." },
-  { key: "TAKI_UTILITY_MODEL", ...str(), default: null, apply: "restart", description: "Background model id; unset rides the main model." },
+  { key: "TAKI_PROVIDER_BASE_URL", ...str(), default: null, apply: "live", description: "Main chat provider base URL." },
+  { key: "TAKI_PROVIDER_API_KEY", ...str(), default: null, apply: "live", secret: true, description: "Main chat provider API key." },
+  { key: "TAKI_PROVIDER_MODEL", ...str(), default: null, apply: "live", description: "Main chat model id." },
+  { key: "TAKI_UTILITY_BASE_URL", ...str(), default: null, apply: "live", description: "Background/utility slot base URL; all-or-nothing." },
+  { key: "TAKI_UTILITY_API_KEY", ...str(), default: null, apply: "live", secret: true, description: "Background/utility slot API key." },
+  { key: "TAKI_UTILITY_MODEL", ...str(), default: null, apply: "live", description: "Background model id; unset rides the main model." },
 
   // --- context window + compaction ---
-  { key: "TAKI_PROVIDER_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the main slot." },
-  { key: "TAKI_VLM_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the vision slot." },
-  { key: "TAKI_UTILITY_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the utility slot." },
-  { key: "TAKI_CONTEXT_HISTORY_RATIO", ...ratio(), default: DEFAULT_HISTORY_RATIO, apply: "restart", description: "Share of the window replayed as history." },
-  { key: "TAKI_PROVIDER_INCLUDE_USAGE", ...bool(), default: false, apply: "restart", description: "Ask the provider for streaming usage numbers." },
-  { key: "TAKI_COMPACT_TRIGGER_RATIO", ...ratio(), default: DEFAULT_COMPACT_TRIGGER_RATIO, apply: "restart", description: "Complete projected-input fill that triggers compaction." },
-  { key: "TAKI_COMPACT_KEEP_MESSAGES", ...int({ min: 1 }), default: DEFAULT_COMPACT_KEEP_MESSAGES, apply: "restart", description: "Newest messages compaction keeps live." },
+  { key: "TAKI_PROVIDER_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "live", description: "Declared context window of the main slot." },
+  { key: "TAKI_UTILITY_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "live", description: "Declared context window of the utility slot." },
+  { key: "TAKI_CONTEXT_HISTORY_RATIO", ...ratio(), default: DEFAULT_HISTORY_RATIO, apply: "live", description: "Share of the window replayed as history." },
+  { key: "TAKI_PROVIDER_INCLUDE_USAGE", ...bool(), default: false, apply: "live", description: "Ask the provider for streaming usage numbers." },
+  { key: "TAKI_COMPACT_TRIGGER_RATIO", ...ratio(), default: DEFAULT_COMPACT_TRIGGER_RATIO, apply: "live", description: "Complete projected-input fill that triggers compaction." },
+  { key: "TAKI_COMPACT_KEEP_MESSAGES", ...int({ min: 1 }), default: DEFAULT_COMPACT_KEEP_MESSAGES, apply: "live", description: "Newest messages compaction keeps live." },
 
   // --- agent loop + media ---
-  { key: "TAKI_MAX_STEPS", ...int({ min: 1, max: 50 }), default: DEFAULT_MAX_STEPS, apply: "restart", description: "Tool-loop step cap per turn." },
-  { key: "TAKI_ATTACHMENT_TTL_DAYS", ...int({ min: 1 }), default: DEFAULT_TTL_DAYS, apply: "restart", description: "Days raw attachment bytes are kept (descriptions are permanent)." },
+  { key: "TAKI_MAX_STEPS", ...int({ min: 1, max: 50 }), default: DEFAULT_MAX_STEPS, apply: "live", description: "Tool-loop step cap per turn." },
+  { key: "TAKI_ATTACHMENT_TTL_DAYS", ...int({ min: 1 }), default: DEFAULT_TTL_DAYS, apply: "live", description: "Days original image bytes remain available for native replay; expired images cannot be recovered." },
+  // Read on every avatar tool call (the outcomes factory takes a deadline reader), hence live.
+  { key: AVATAR_OUTCOME_DEADLINE_KEY, ...int({ min: 100, max: 10_000 }), default: DEFAULT_AVATAR_OUTCOME_DEADLINE_MS, apply: "live", description: "How long an avatar tool waits for the Pet window's presentation outcome." },
 
   // --- ambient perception (privacy) ---
-  { key: "TAKI_AMBIENT_SCREENSHOT", ...bool(), default: false, apply: "restart", description: "Enable ambient screen sampling (default off)." },
+  { key: "TAKI_BROWSER_PLAYBACK_ENABLED", ...bool(), default: false, apply: "live", description: "Accept selected browser playback observations from paired Hosts; Privacy Pause still applies." },
+  ...VIEWING_INVITATION_KNOBS,
+  { key: "TAKI_AMBIENT_SCREENSHOT", ...bool(), default: false, apply: "live", description: "Enable ambient screen sampling (default off)." },
   {
     key: "TAKI_AMBIENT_SCREENSHOT_RETENTION",
     ...pattern({ regex: DAYS_OR_MODE, message: 'expected "drop", "keep" or a positive number of days' }),
     default: "drop",
-    apply: "restart",
-    description: 'Raw ambient frames: "drop" after describe, "keep", or a day count.',
+    apply: "live",
+    description: 'Raw ambient frames: "drop" after consumption or expiry, "keep", or a day count.',
   },
 
   // --- memory engine ---
-  { key: "TAKI_MEMORY_PINNED_BUDGET", ...int({ min: 1 }), default: DEFAULT_PINNED_BUDGET, apply: "restart", description: "Token safety valve for the pinned memory region." },
+  { key: "TAKI_MEMORY_PINNED_BUDGET", ...int({ min: 1 }), default: DEFAULT_PINNED_BUDGET, apply: "live", description: "Token safety valve for the pinned memory region." },
   {
     key: "TAKI_MEMORY_BM25_WEIGHTS",
     ...pattern({ regex: BM25_CSV, message: "expected three positive numbers: disclosure,content,searchTerms" }),
     default: "2,1,2",
-    apply: "restart",
+    apply: "live",
     description: "bm25 column weights: disclosure,content,searchTerms.",
   },
-  { key: "TAKI_MEMORY_STOPLIST", ...choice(["on", "off"]), default: "on", apply: "restart", description: "Stop-word filtering in the memory segmenter." },
-  { key: "TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS", ...int({ min: 1 }), default: DEFAULT_INTENTIONS_DAYS, apply: "restart", description: "Fallback lifetime of an intention with no explicit expiry." },
-  { key: "TAKI_MEMORY_TIDY_WRITE_THRESHOLD", ...int({ min: 1 }), default: DEFAULT_TIDY_WRITE_THRESHOLD, apply: "restart", description: "New memory writes that trigger a tidy pass." },
-  { key: "TAKI_MEMORY_TIDY_MAX_STEPS", ...int({ min: 1 }), default: DEFAULT_TIDY_MAX_STEPS, apply: "restart", description: "Step ceiling for one tidy pass." },
-  { key: "TAKI_MEMORY_TIDY_STALE_DAYS", ...int({ min: 1 }), default: DEFAULT_TIDY_STALE_DAYS, apply: "restart", description: "Age at which a never-recalled memory becomes a tidy candidate." },
-  { key: "TAKI_MEMORY_TIDY_REPORT_CAP", ...int({ min: 1 }), default: DEFAULT_TIDY_REPORT_CAP, apply: "restart", description: "Per-class candidate cap in the tidy report." },
+  { key: "TAKI_MEMORY_STOPLIST", ...choice(["on", "off"]), default: "on", apply: "live", description: "Stop-word filtering in the memory segmenter." },
+  { key: "TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS", ...int({ min: 1 }), default: DEFAULT_INTENTIONS_DAYS, apply: "live", description: "Fallback lifetime of an intention with no explicit expiry." },
+  { key: "TAKI_MEMORY_TIDY_WRITE_THRESHOLD", ...int({ min: 1 }), default: DEFAULT_TIDY_WRITE_THRESHOLD, apply: "live", description: "New memory writes that trigger a tidy pass." },
+  { key: "TAKI_MEMORY_TIDY_MAX_STEPS", ...int({ min: 1 }), default: DEFAULT_TIDY_MAX_STEPS, apply: "live", description: "Model-step ceiling for each memory tidy batch." },
+  { key: "TAKI_MEMORY_TIDY_STALE_DAYS", ...int({ min: 1 }), default: DEFAULT_TIDY_STALE_DAYS, apply: "live", description: "Age at which a never-recalled memory becomes a tidy candidate." },
+  { key: "TAKI_MEMORY_TIDY_REPORT_CAP", ...int({ min: 1 }), default: DEFAULT_TIDY_REPORT_CAP, apply: "live", description: "Memory candidates per tidy batch; complete duplicate groups stay together." },
+  { key: "TAKI_MEMORY_TIDY_BATCH_TIMEOUT_MS", ...int({ min: 1 }), default: DEFAULT_TIDY_BATCH_TIMEOUT_MS, apply: "live", description: "Execution timeout for each memory tidy batch, excluding queue time (ms)." },
+  { key: "TAKI_MEMORY_TIDY_INPUT_TOKENS", ...int({ min: 1 }), default: DEFAULT_TIDY_INPUT_TOKENS, apply: "live", description: "Estimated initial tidy input budget, including instructions, tools and the review report." },
 
   // --- inactive Hindsight setup plane (B3; does not select Memory Authority) ---
   { key: "TAKI_HINDSIGHT_ENABLED", ...bool(), default: false, apply: "live", description: "Allow explicit Hindsight validation and setup actions." },

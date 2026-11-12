@@ -1,0 +1,20 @@
+{
+  "completed": [
+    "a1-external",
+    "a2-self-report"
+  ],
+  "candidateOnly": true,
+  "sourceAndPlayback": "synthetic accepted source; no actual playback",
+  "selectedCases": [
+    "a1-external",
+    "a2-self-report"
+  ],
+  "logicalGenerationsLimit": 6,
+  "campaign": "final-prompt-regression",
+  "semanticReview": "Review saved outputs; deterministic checks alone do not pass semantics.",
+  "requestedModel": "deepseek-v4-flash",
+  "physicalRequestsLimit": 7,
+  "sourceUnchanged": true,
+  "deadlineExceeded": false,
+  "observationFailures": []
+}

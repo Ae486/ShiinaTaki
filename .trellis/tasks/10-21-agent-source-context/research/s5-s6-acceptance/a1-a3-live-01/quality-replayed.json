@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "code": "non_shrinking",
+  "sourceTokens": 116,
+  "summaryTokens": 245,
+  "storedFailureCode": "SUMMARY_GENERATION_FAILED",
+  "kind": "zero-paid replay of actual saved source/output through production quality policy"
+}

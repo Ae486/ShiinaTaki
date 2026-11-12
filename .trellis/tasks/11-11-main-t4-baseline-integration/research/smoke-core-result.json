@@ -1,0 +1,49 @@
+{
+  "artifactRoot": "G:/taki-integration-boot-d2tHGh",
+  "node": "v24.18.0",
+  "repo": "G:\\TakiAgent-integration\\",
+  "environment": "allowlisted OS variables plus isolated test settings; no env file/real provider/key helper",
+  "stop": "Windows child termination after socket close",
+  "providerCalls": [
+    {
+      "path": "/v1/chat/completions",
+      "model": "integration-controlled-model",
+      "authorizationPresent": false
+    }
+  ],
+  "results": [
+    {
+      "name": "no-model",
+      "dataDir": "G:\\taki-integration-boot-d2tHGh\\no-model",
+      "port": 8972,
+      "listeningMs": 4776,
+      "refusal": "CONFIG_REFUSED",
+      "reason": "MODEL_UNAVAILABLE",
+      "modelConfigured": true,
+      "applyRecovered": true,
+      "controlledProviderTest": true,
+      "failedApplyRetainsLastGood": true,
+      "runs": 0,
+      "migrationHead": 77
+    },
+    {
+      "name": "invalid-optional-memory",
+      "dataDir": "G:\\taki-integration-boot-d2tHGh\\invalid-optional-memory",
+      "port": 8977,
+      "listeningMs": 4357,
+      "refusal": "CONFIG_REFUSED",
+      "reason": "MODEL_UNAVAILABLE",
+      "modelConfigured": false,
+      "runs": 0,
+      "migrationHead": 77
+    },
+    {
+      "name": "reopen-last-good",
+      "dataDir": "G:\\taki-integration-boot-d2tHGh\\no-model",
+      "port": 8988,
+      "listeningMs": 3980,
+      "reopenedLastGood": true,
+      "modelConfigured": true
+    }
+  ]
+}

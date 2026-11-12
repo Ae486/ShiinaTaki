@@ -44,7 +44,7 @@ describe("Canonical Local foreground memory wiring", () => {
       const runs = createRunService({ repo: createRunRepo(db), provider: "deterministic", modelId: "fixture",
         snapshot: createRunSnapshotCapture({ memory: { captureRun: memory.captureRun }, provider: "deterministic", modelId: "fixture",
           governance: { level: () => ({ level: "standard", policyGeneration: 1, registryRevision: 1 }) },
-          extensions: { runContext: () => ({ tools: {}, instructions: "", snapshot: { runId: "capture", primaryHostId: "core",
+          extensions: { runContext: () => ({ tools: {}, toolDisclosure: { deferredToolNames: [], describedTools: {}, skills: {} }, instructions: "", snapshot: { runId: "capture", primaryHostId: "core",
             hosts: [], entries: [], collisions: [], budget: { maxEntries: 1, maxDescriptionChars: 1, maxSearchResults: 1, maxCalls: 1 } } }) } }) });
       const admitted = await runs.admit({ triggerRequestId: "trigger", idempotencyKey: "turn", characterId: "taki",
         initiator: "primary", provenance: { provider: "chat" }, deliveryClass: "class_a", contextMode: "primary" });

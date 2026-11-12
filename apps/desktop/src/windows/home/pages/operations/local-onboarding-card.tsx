@@ -34,7 +34,7 @@ export function LocalOnboardingCard({ onboarding }: { onboarding: LocalOnboardin
         {onboarding.error && <FeedbackLine tone="danger">状态读取失败：{onboarding.error}</FeedbackLine>}
         {onboarding.stale && onboarding.status && <p className="text-xs text-text-secondary">正在等待最新状态，操作暂不可用。</p>}
         {onboarding.status ? <OnboardingBody onboarding={onboarding} locked={locked} />
-          : onboarding.loading ? <Skeleton lines={4} /> : <p className="text-xs text-text-secondary">暂无可用的引导状态。</p>}
+          : onboarding.connectionReady && onboarding.loading ? <Skeleton lines={4} /> : <p className="text-xs text-text-secondary">暂无可用的引导状态。</p>}
         {onboarding.feedback && <FeedbackLine tone={onboarding.feedback.tone}>{onboarding.feedback.message}</FeedbackLine>}
       </div>
     </PageCard>

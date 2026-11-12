@@ -1,0 +1,103 @@
+{
+  "id": "a2-self-report",
+  "stage": "compaction-started",
+  "question": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+  "initial": "我理解的是你的事：你本人被裁员了，你负责的项目也停了。",
+  "summary": null,
+  "followup": "仅根据当前提供的对话记录，回顾一下：谁失业了、谁的项目停了？",
+  "sourceRows": [
+    {
+      "seq": 1,
+      "id": "957ef9af-6194-4826-9cf5-090612d0a111",
+      "characterId": "taki",
+      "role": "user",
+      "content": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+      "createdAt": "2026-10-23T03:10:34.507Z"
+    },
+    {
+      "seq": 2,
+      "id": "e7a1ca23-d0bc-4474-b1f8-fde6c7394b03",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "我理解的是你的事：你本人被裁员了，你负责的项目也停了。",
+      "createdAt": "2026-10-23T03:10:35.772Z"
+    },
+    {
+      "seq": 3,
+      "id": "38ae90b8-7fbf-450f-bd53-9f4f93efa0d1",
+      "characterId": "taki",
+      "role": "user",
+      "content": "先把这个话题放一放，换个轻松一点的聊天内容。",
+      "createdAt": "2026-10-23T03:10:35.777Z"
+    },
+    {
+      "seq": 4,
+      "id": "f8bb21f1-990c-4c30-b1c8-d0ef65595f71",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "可以，我们先放松一会儿，再回到刚才的话题。",
+      "createdAt": "2026-10-23T03:10:35.777Z"
+    },
+    {
+      "seq": 5,
+      "id": "2af4d53b-cda4-456c-a381-08ce0e45c9ed",
+      "characterId": "taki",
+      "role": "user",
+      "content": "给我介绍一种常见的颜色搭配吧。",
+      "createdAt": "2026-10-23T03:10:35.777Z"
+    },
+    {
+      "seq": 6,
+      "id": "bd9a2f21-a10c-4203-abf2-23ec0e53ad05",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "蓝色和白色是常见搭配，也可以调整深浅来形成不同的感觉。",
+      "createdAt": "2026-10-23T03:10:35.777Z"
+    }
+  ],
+  "finalReplay": [
+    {
+      "role": "user",
+      "content": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。"
+    },
+    {
+      "role": "assistant",
+      "content": "我理解的是你的事：你本人被裁员了，你负责的项目也停了。"
+    },
+    {
+      "role": "user",
+      "content": "先把这个话题放一放，换个轻松一点的聊天内容。"
+    },
+    {
+      "role": "assistant",
+      "content": "可以，我们先放松一会儿，再回到刚才的话题。"
+    },
+    {
+      "role": "user",
+      "content": "给我介绍一种常见的颜色搭配吧。"
+    },
+    {
+      "role": "assistant",
+      "content": "蓝色和白色是常见搭配，也可以调整深浅来形成不同的感觉。"
+    }
+  ],
+  "utilityUsage": {
+    "calls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "usageUnknown": 0
+  },
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-flash",
+      "quality": "reported",
+      "input_tokens": 1225,
+      "output_tokens": 81,
+      "total_tokens": 1306
+    }
+  ],
+  "compaction": [],
+  "memoryFlush": "unexercised: no canonical witness callbacks installed; test-controlled flush seam",
+  "primaryWitnessCount": 0
+}

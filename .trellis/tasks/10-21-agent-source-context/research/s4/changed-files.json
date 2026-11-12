@@ -1,0 +1,198 @@
+[
+  {
+    "path": "packages/shared/src/prepared-publication-schema.ts",
+    "new": false,
+    "beforeSha256": "416dae53dfeb720b166402fa7d4da0e1ce113d4583636f8edfc6547b181f9de9",
+    "afterSha256": "a4989cb7bca48264d8eb039598310e612e7866c69aed1e5b478031fda3369ba0",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/shared/src/initiative-schema.ts",
+    "new": false,
+    "beforeSha256": "1dff91f74638795efa83a5d3635a550b37089c7ba3c9f952cbf0cffac2e5dc84",
+    "afterSha256": "747b7946fb21af9f589501f0b1ff09bcf2a1b371f4b22997b60ef517b0d0d10c",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/shared/src/timeline-schema.ts",
+    "new": false,
+    "beforeSha256": "8fc8f39c4e646ece77f624071ed42749fc5eade1412f23f7cef247e8a5c03106",
+    "afterSha256": "6c09d0928fdafe0eb01ecef5a141ebe0e2cf294870bfe0d60f4c4642f424c9bf",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/shared/src/prepared-publication-schema.test.ts",
+    "new": false,
+    "beforeSha256": "7bb6d4d679980ed5a9b0fd5816fa84ed9dab25511b33b8990965690224af63dc",
+    "afterSha256": "0309d87b0ed9130ce1af7e430fa20feb4e514d3d9e805d49a41569be49709018",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/shared/src/timeline-schema.test.ts",
+    "new": false,
+    "beforeSha256": "9195d08b5accff3897dca466cb15a76e47ffb7c8458b0a9db20c686a6383c36a",
+    "afterSha256": "23a9a870e8bebed2e473a001443df96b4a9dae8c06b7e85709f8288fe269dcc0",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/shared/src/index.md",
+    "new": false,
+    "beforeSha256": "75f847736502049f89860c2462918e8d419fdf28c68197166d3ebbd5fd0e726f",
+    "afterSha256": "1e4376857ce6509d45adcc0523b3871440e176331a6067a5c7ab14bdbe9e92cf",
+    "ownership": "named existing index lines only; Runtime additions are independent"
+  },
+  {
+    "path": "packages/core/src/db/timeline-repo.ts",
+    "new": false,
+    "beforeSha256": "9c3a54602f4230470a3988828854a7cfb1b637005a34935241b65bc32d51f1c0",
+    "afterSha256": "a849278620b6430f51273c4adbbb58242963e9f5882715c0b5044aef702ce8de",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/timeline-repo.test.ts",
+    "new": false,
+    "beforeSha256": "d756396146c17a04dcee3ba84891c48a538332c281d7bdf2ca36baf66426c0f7",
+    "afterSha256": "328a7e5d77dac9ed1000f7fa3acaa41d63a6a194bd04f1e827bbf2399b591bf3",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/run-delivery-repo.ts",
+    "new": false,
+    "beforeSha256": "a6d0a3073833ad445017f8a98351a2e35eccc99593ec440973f76f01ca954de8",
+    "afterSha256": "d0dc5ee66586ff911f37e36d0fb5e01d76d7b264245db1b5b084d29e2dd9f754",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/run-delivery-repo.test.ts",
+    "new": false,
+    "beforeSha256": "4d6940a6ae3ef298cbdab1305bd7b0fa7cb6e8ff696a24faf5da0872d83745d7",
+    "afterSha256": "6b3a131b9355d8d761764e215d6c53debad916cba70ba8dc5fe09243769ffc4a",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/index.md",
+    "new": false,
+    "beforeSha256": "71380255d1dc777119b733a8be44451066ffbcd24e0ed3833ad8f5649301b976",
+    "afterSha256": "67de1bb45a53a4daf546dff85f8d5f3f6b5286497d9223d57f1e48af469a054d",
+    "ownership": "named existing index lines only; Runtime additions are independent"
+  },
+  {
+    "path": "packages/core/src/db/migrations/057-source-context.ts",
+    "new": true,
+    "beforeSha256": null,
+    "afterSha256": "bdb3ec4bc29e87780beda96770a28f2482cb4b4afdacd2a0d7060ab3a30f523b",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/migrations/057-source-context.test.ts",
+    "new": true,
+    "beforeSha256": null,
+    "afterSha256": "42e7fd1f255b4ad7662aa6a9f8febf98bce49746b6ce9712b0195ab5375d98c6",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.ts",
+    "new": false,
+    "beforeSha256": "a9211b7250427018ca7fd8f76f5b513ab56539330cf8f97c438152c0320b7d06",
+    "afterSha256": "495f0b02ec51d4b531732221280618eb35e822dd0041278ddb56c8e117a0b911",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index-list.test.ts",
+    "new": false,
+    "beforeSha256": "793661c22b84ad68c8a1f2c25c86b2ba9671d9bca13caae5149bf60ecabebe44",
+    "afterSha256": "cefe83e483ee587c961c59a3a54ef6d705b7e45dcf33bb6f7ffae53f0c6ca074",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/migrations/index.md",
+    "new": false,
+    "beforeSha256": "a7a7553e226083d937da6c956585005f73297db06fcf41fe08b11b41c19b4520",
+    "afterSha256": "c23c9dd5c4e017f55a639b2b73bd4d0da4338a5b23b6a8804175dda3c09dbe79",
+    "ownership": "named existing index lines only; Runtime additions are independent"
+  },
+  {
+    "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+    "new": false,
+    "beforeSha256": "ed4dbb9936b29d0bc4bfbdb485c17a77410ddcc28d6b3d12323f0095b706a126",
+    "afterSha256": "801df1f93849158558f070ffee761d36b14e2e30726e4c51deec7577348e8ffe",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/pending-memory-repo.test.ts",
+    "new": false,
+    "beforeSha256": "56dae27ec12d520f4afc7aee6796bbb1a05cd05867f352df2b8dd3bffe6751db",
+    "afterSha256": "3143dca1f7e34ab5651d74406f6e2e87c82b45660380d76ebaa9512bfbd91d80",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/scheduled-task-repo.test.ts",
+    "new": false,
+    "beforeSha256": "03fd1308b9f6e1617e5d4dc23075192fbe6c94274e3c89144e8f962821ea1ef5",
+    "afterSha256": "4aeeab1a920d9acccab4451fc9f2e44528d22e9f08267b7c3e4ca4da45ecdf6e",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/migrations/048-memory-operations.test.ts",
+    "new": false,
+    "beforeSha256": "8dfe7eac24e6bc4ed1d61b1d5c211a0b5bd2d036462ac15c1fa4f73d7332a20c",
+    "afterSha256": "365ddd1ea2e47e7557c8ade6df9b3ec74672e296aa03d11437f45f8985977e9c",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+    "new": false,
+    "beforeSha256": "51c22fd7e5306d9eee0aaa7a64f53fbac9659041102d00e10eb3fa3ff77c1bc0",
+    "afterSha256": "2dd5b77b55ab3dc3119e0d955668d8633fde9ef2e7a02dee16334bb0f106d4cc",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/delivery/prepared-publication-source.ts",
+    "new": false,
+    "beforeSha256": "79ea38f05f580cae86ac294a32de25c8f66141cb7f5d793b3a342a1bb7e4ee86",
+    "afterSha256": "092a1381ac3c293e37166733b9a8311e00633168a08bd0cf71e8d310723eb780",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/delivery/prepared-publication.ts",
+    "new": false,
+    "beforeSha256": "579a975b0ca50f987dbbee5322230382c6f3ef60fd527dde0526a0264ab9d097",
+    "afterSha256": "afa5bd3668478c7bab4a10dd04b6876b177b0fac4f2ede8b85978dfd6c20319a",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/delivery/prepared-publication.test.ts",
+    "new": false,
+    "beforeSha256": "bb63320eb26d34e2f2e899f1d7824e1c1e38bad8e10fb2f0e268ae117e3d3eb9",
+    "afterSha256": "b1d1896f47374b5c3b42970c7b32cb38d9082f3750cbbdb11ea9d18845625268",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/delivery/index.md",
+    "new": false,
+    "beforeSha256": "a6400802055c9d59f26d694d310b664919985d147cd790e05a311b2ce63fa34e",
+    "afterSha256": "8a3e974f500e6da28c18bbb4fd2894f4bc23a2edb4bd1016e148d8dae9284bf1",
+    "ownership": "named existing index lines only; Runtime additions are independent"
+  },
+  {
+    "path": "packages/core/src/agents/conversation-store.ts",
+    "new": false,
+    "beforeSha256": "a55e50e61c17e6349ae64c3e5989744a4f63cc5968ed13157c5939423a54f81c",
+    "afterSha256": "c4602ac65a4e848886c1bec48aa58993051ef14e1ca45dca880b9ecee07a165d",
+    "ownership": "S4 subset"
+  },
+  {
+    "path": "packages/core/src/agents/index.md",
+    "new": false,
+    "beforeSha256": "f84ddcd5223f631a45f1e22b7e9c9b892568c4e4e3cd5a945962d3717889021d",
+    "afterSha256": "2cb51d0fee22f1c4bf28fc1103e6a232a0642eb5536883fd1e421dd0b37b0ea8",
+    "ownership": "named existing index lines only; Runtime additions are independent"
+  },
+  {
+    "path": "packages/core/src/db/migrations/056-subagent-conversations.test.ts",
+    "new": false,
+    "beforeSha256": "d7c7552a6147962ca219a38a88772fbe62162fe025f4fbdb21b7bdf7b499949c",
+    "afterSha256": "252f4782d92e9daed0a6a730ff38ea5575516aa61d88d11a39589ad6fcd36c39",
+    "ownership": "S4 subset"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "path": ".trellis/spec/backend/agent-runtime.md",
+    "preimage": "spec-preimages/agent-runtime.md.preimage",
+    "sha256": "204b80da3bbdc2b51f691959cf03e4c8987c7f45031f1101a6b94a88c13a323c"
+  },
+  {
+    "path": ".trellis/spec/backend/compaction-harness.md",
+    "preimage": "spec-preimages/compaction-harness.md.preimage",
+    "sha256": "9a4e14ee12e774c0d1ab2212a9e7f7a7ec1e0d28a6294fe6044f5876b17e4a9a"
+  },
+  {
+    "path": ".trellis/spec/backend/canonical-local-memory-runtime.md",
+    "preimage": "spec-preimages/canonical-local-memory-runtime.md.preimage",
+    "sha256": "bab02d2d26dfa08b2ae859fd58e7d2e817c2b613e3cc31c5d7a242fc56289051"
+  }
+]

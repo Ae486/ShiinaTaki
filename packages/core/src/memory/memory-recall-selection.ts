@@ -106,7 +106,7 @@ function sameNamespace(entry: RecallPendingOverlayEntry, record: CanonicalMemory
   return entry.authorityEpochId === record.unit.authorityEpochId && entry.bankId === record.unit.bankId;
 }
 
-function recordEligible(record: CanonicalMemoryRecord, input: PolicyInput): boolean {
+export function recordEligible(record: CanonicalMemoryRecord, input: PolicyInput): boolean {
   return record.unit.state === "valid" && policyEligible(record.policy, record.unit.updatedAt, input);
 }
 

@@ -3,6 +3,7 @@
  * OUTPUT: WRITE_GATE_RULE (T5-R15) + MEMORY_VOICE_RULE (T5-R10) — the two fragments every memory-write prompt shares
  * POS:    core/memory — one write-side wording owner for foreground retain and automatic memory writers
  */
+import { SOURCE_INTERPRETATION_RULE } from "../agents/source-interpretation.ts";
 
 /**
  * T5-R15. The gate is a BEHAVIOUR-CHANGE test, not a production quota: the old "extract 1 to 3 summaries" asked for
@@ -18,7 +19,7 @@ export const WRITE_GATE_RULE =
   "or summarize.\n" +
   "Override: when the user explicitly asked you to remember something, save it even if it looks trivial or already known.\n" +
   "Most stretches of conversation are worth nothing at all. Writing nothing is the normal, expected outcome — prefer " +
-  "it over reaching for something to say.";
+  "it over reaching for something to say.\n\n" + SOURCE_INTERPRETATION_RULE;
 
 /**
  * T5-R10. One person/wording convention across every write path. The second reason is the decisive one: with a single
@@ -35,4 +36,6 @@ export const MEMORY_VOICE_RULE =
   "Distinguish a one-off event or plan from a recurring habit, a completed action, or an enduring preference. " +
   "Preserve the source's degree of certainty and historical timing.\n" +
   "Use absolute dates and times (2026-07-28, 周五晚上), never 「今天」/「最近」 — the memory is kept indefinitely and " +
-  "will be read long after the relative word stops being true.";
+  "will be read long after the relative word stops being true.\n" +
+  "The first-person narrator is the Companion remembering. Keep the actual subject of the remembered event; " +
+  "a discussion of an external person's experience does not make it the user's biography.\n\n" + SOURCE_INTERPRETATION_RULE;

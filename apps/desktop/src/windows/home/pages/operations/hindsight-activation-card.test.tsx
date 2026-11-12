@@ -11,12 +11,13 @@ function card(patch: Partial<HindsightActivationView> = {}): string {
   const activation: HindsightActivationView = { ...initialActivationState(), loading: false, connectionReady: true, refresh: noop, execute: noop, ...patch };
   return renderToStaticMarkup(<HindsightActivationCard activation={activation} />);
 }
-const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((match) => match[1]);
+const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>(.*?)<\/button>/g)].map((match) => match[1]?.replace(/<[^>]*>/g, ""));
 const disabled = (markup: string) => markup.match(/disabled=""/g)?.length ?? 0;
 
 describe("Hindsight activation card", () => {
   it("renders loading, read failure with retry, and last-good stale content with locked actions", () => {
     expect(card({ loading: true })).toContain("animate-pulse");
+    expect(card({ loading: true, connectionReady: false })).not.toContain("animate-pulse");
     const failed = card({ error: "read timeout" });
     expect(failed).toContain("状态读取失败：read timeout");
     expect(failed).toContain("重试");

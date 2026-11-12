@@ -1,0 +1,151 @@
+{
+  "entries": [
+    {
+      "key": "TAKI_SUBAGENT_CHECKIN_STEPS",
+      "value": 50,
+      "origin": "default",
+      "application": {
+        "boundary": "immediate",
+        "state": "applied",
+        "activeValue": 50
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": 50,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "int",
+        "min": 1
+      },
+      "description": "Completed worker model steps between progress check-ins; captured for the next work/check-in interval."
+    },
+    {
+      "key": "TAKI_SUBAGENT_CHECKIN_PARENT_APPROVALS",
+      "value": 3,
+      "origin": "default",
+      "application": {
+        "boundary": "immediate",
+        "state": "applied",
+        "activeValue": 3
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": 3,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "int",
+        "min": 0
+      },
+      "description": "Consecutive main-Agent check-in approvals before user continuation is required; captured for the next interval. Existing user-required waits stay unchanged."
+    },
+    {
+      "key": "TAKI_PROVIDER_CONTEXT_TOKENS",
+      "value": 131072,
+      "origin": "default",
+      "application": {
+        "boundary": "next-run",
+        "state": "applied",
+        "activeValue": 131072
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": 131072,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "int",
+        "min": 1
+      },
+      "description": "Declared context window of the main slot."
+    },
+    {
+      "key": "TAKI_CONTEXT_HISTORY_RATIO",
+      "value": 0.7,
+      "origin": "default",
+      "application": {
+        "boundary": "next-run",
+        "state": "applied",
+        "activeValue": 0.7
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": 0.7,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "number",
+        "max": 1
+      },
+      "description": "Share of the window replayed as history."
+    },
+    {
+      "key": "TAKI_PROVIDER_INCLUDE_USAGE",
+      "value": true,
+      "origin": "env",
+      "application": {
+        "boundary": "next-run",
+        "state": "applied",
+        "activeValue": true
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": false,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "boolean"
+      },
+      "description": "Ask the provider for streaming usage numbers."
+    },
+    {
+      "key": "TAKI_COMPACT_KEEP_MESSAGES",
+      "value": 40,
+      "origin": "default",
+      "application": {
+        "boundary": "next-operation",
+        "state": "applied",
+        "activeValue": 40
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": 40,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "int",
+        "min": 1
+      },
+      "description": "Newest messages compaction keeps live."
+    },
+    {
+      "key": "TAKI_MAX_STEPS",
+      "value": 10,
+      "origin": "default",
+      "application": {
+        "boundary": "next-run",
+        "state": "applied",
+        "activeValue": 10
+      },
+      "stored": false,
+      "envLocked": false,
+      "default": 10,
+      "apply": "live",
+      "secret": false,
+      "secretSet": false,
+      "input": {
+        "kind": "int",
+        "min": 1,
+        "max": 50
+      },
+      "description": "Tool-loop step cap per turn."
+    }
+  ]
+}

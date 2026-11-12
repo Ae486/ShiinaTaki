@@ -1,0 +1,75 @@
+{
+  "initialization": {
+    "run_id": "090d6360-3a6e-4216-bda8-647fafb15e61",
+    "state": "EXITED",
+    "started_at_epoch": 1792302515.3054163,
+    "start_usage_id": 0,
+    "history_limit": 200,
+    "favorite_limit": 0,
+    "follow_limit": 0,
+    "native_pool_target": 15,
+    "native_pid": 904,
+    "exit_code": 0,
+    "finished_at_epoch": 1792302845.332592,
+    "api_auth_unchanged": true,
+    "scheduler_unchanged": true,
+    "network_unchanged": true,
+    "pool_available": 20,
+    "table_counts": {
+      "events": 200,
+      "recommendations": 0,
+      "content_cache": 20,
+      "llm_usage": 22
+    },
+    "usage": {
+      "calls": 22,
+      "successful_calls": 22,
+      "prompt_tokens": 209532,
+      "completion_tokens": 54854,
+      "total_tokens": 264386,
+      "native_estimated_cost_cny": 0.33531
+    },
+    "actual_billed_cost": null,
+    "enabled_sources": [
+      "bilibili"
+    ],
+    "latest_native_stage": 4
+  },
+  "http": {
+    "ping_status": 200,
+    "degraded": false,
+    "anonymous_peek_status": 401,
+    "authenticated_peek_status": 200,
+    "peek_item_count": 0,
+    "peek_total": 0,
+    "peek_has_more": false,
+    "peek_source": "existing_recommendations",
+    "profile_status": 200,
+    "profile_initialized": true
+  },
+  "config": {
+    "auth_enabled": true,
+    "trust_loopback": false,
+    "scheduler_enabled": false,
+    "source_incremental_enabled": false,
+    "profile_consolidation_enabled": false,
+    "auto_update_enabled": false,
+    "embedding_provider_set": false,
+    "default_chain": [
+      "campaign-flash"
+    ],
+    "models": {
+      "campaign-flash": "deepseek-flash"
+    }
+  },
+  "native_cookie_required_fields": {
+    "SESSDATA": true,
+    "bili_jct": true,
+    "DedeUserID": true
+  },
+  "login": {
+    "state": "AUTHENTICATED",
+    "user_id": 382115755,
+    "native_saved": true
+  }
+}

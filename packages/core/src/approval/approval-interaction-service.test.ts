@@ -10,10 +10,11 @@ import { createHash } from "node:crypto";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import type { Connection } from "../server/connection-registry.ts";
-import { approvalDecisionScopeDigest } from "./approval-binding.ts";
+import { approvalDecisionScopeDigest, storedApprovalBindingDigest } from "./approval-binding.ts";
 import { createApprovalDecisionService } from "./approval-decision-service.ts";
 import { createApprovalInteractionService } from "./approval-interaction-service.ts";
 import { createApprovalStateRepo } from "./approval-state-repo.ts";
+import type { ApprovalLabelResolver } from "./approval-labels.ts";
 
 const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
 const dbs: Database[] = [];
@@ -23,11 +24,12 @@ afterEach(() => {
   for (const db of dbs.splice(0)) db.close();
 });
 
-function service() {
+function service(resolveLabels?: ApprovalLabelResolver) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
-  const decisions = createApprovalDecisionService(createApprovalStateRepo(db));
-  return { decisions, interactions: createApprovalInteractionService(decisions) };
+  const repo = createApprovalStateRepo(db);
+  const decisions = createApprovalDecisionService(repo);
+  return { repo, decisions, interactions: createApprovalInteractionService(decisions, undefined, resolveLabels) };
 }
 
 function binding(subjectId = "mcp.subject"): ApprovalDecisionBinding {
@@ -80,6 +82,85 @@ function ask(
 }
 
 describe("ApprovalInteractionService", () => {
+  it("resolves one label batch without changing stored bindings, digests, usability or generations", () => {
+    const resolver = vi.fn<ApprovalLabelResolver>((rows) => new Map(rows.map((row, index) =>
+      [row.decisionId, { subject: `github · tool-${index}` }])));
+    const { decisions, interactions } = service(resolver);
+    decisions.grantAlways({ binding: { ...binding("mcp.first"), disclosureRevision: 1 }, expectedApprovalGeneration: 1 });
+    decisions.grantAlways({ binding: { ...binding("mcp.second"), disclosureRevision: 1 }, expectedApprovalGeneration: 2 });
+    const before = decisions.snapshot();
+    const authorityRows = decisions.list();
+
+    const listed = interactions.list();
+
+    expect(resolver).toHaveBeenCalledTimes(1);
+    expect(resolver).toHaveBeenCalledWith(before.decisions);
+    expect(listed.approvalGeneration).toBe(before.approvalGeneration);
+    expect(listed.decisions.map(({ labels, ...authority }) => {
+      expect(labels?.capability).toBe("调用 MCP 工具");
+      expect(labels?.subject).toMatch(/^github · tool-/u);
+      return authority;
+    })).toEqual(authorityRows);
+    expect(decisions.snapshot()).toEqual(before);
+    expect(interactions.revoke(listed.decisions[1]!.decisionId, listed.approvalGeneration))
+      .toEqual({ status: "revoked", approvalGeneration: before.approvalGeneration + 1 });
+    expect(interactions.list().decisions.map((row) => row.decisionId)).toEqual([listed.decisions[0]!.decisionId]);
+  });
+
+  it("keeps durable decisions readable and usable when the current-name source fails", () => {
+    const { decisions, interactions } = service(() => { throw new Error("catalog unavailable"); });
+    decisions.grantAlways({ binding: { ...binding(), disclosureRevision: 1 }, expectedApprovalGeneration: 1 });
+    const before = decisions.snapshot();
+    const listed = interactions.list();
+    expect(listed.decisions).toHaveLength(1);
+    expect(listed.decisions[0]).toMatchObject({
+      labels: { capability: "调用 MCP 工具", subject: "当前无法确认服务器与工具名称" },
+      usability: { usable: true },
+    });
+    expect(decisions.snapshot()).toEqual(before);
+  });
+
+  it.each(["", "x".repeat(241)])("isolates an invalid optional label from valid rows: %s", (invalid) => {
+    const { decisions, interactions } = service((rows) => new Map(rows.map((row, index) =>
+      [row.decisionId, { subject: index === 0 ? invalid : "github · search" }])));
+    decisions.grantAlways({ binding: { ...binding("mcp.first"), disclosureRevision: 1 }, expectedApprovalGeneration: 1 });
+    decisions.grantAlways({ binding: { ...binding("mcp.second"), disclosureRevision: 1 }, expectedApprovalGeneration: 2 });
+    const before = decisions.snapshot();
+    const listed = interactions.list();
+    expect(listed.decisions[0]?.labels?.subject).toBe("当前无法确认服务器与工具名称");
+    expect(listed.decisions[1]?.labels?.subject).toBe("github · search");
+    expect(listed.decisions.every((row) => row.usability.usable)).toBe(true);
+    expect(decisions.snapshot()).toEqual(before);
+  });
+
+  it("gives historical identities generic labels while preserving their inert state and revoke target", () => {
+    const { repo, decisions, interactions } = service();
+    const historicalBinding = {
+      ...binding(), disclosureRevision: 1,
+      identity: {
+        capabilityId: "Legacy/Unknown Capability", ownerHostId: "old opaque host",
+        subject: { subjectId: "old opaque subject", revision: "old revision" },
+      },
+      cellKey: "legacy/classification",
+    };
+    // Seed a valid stored row under the historical grammar, as an upgrade may encounter it.
+    repo.grant({
+      decisionId: "22222222-2222-4222-8222-222222222222",
+      binding: historicalBinding, bindingDigest: storedApprovalBindingDigest(historicalBinding),
+      provenance: "operator", createdAt: "2026-09-05T00:00:00.000Z", updatedAt: "2026-09-05T00:00:00.000Z",
+    }, 1);
+    const before = decisions.snapshot();
+    const listed = interactions.list();
+    expect(listed.decisions[0]).toMatchObject({
+      binding: historicalBinding,
+      labels: { capability: "未识别的操作", subject: "当前无法确认目标名称" },
+      usability: { usable: false },
+    });
+    expect(decisions.snapshot()).toEqual(before);
+    expect(interactions.revoke(listed.decisions[0]!.decisionId, listed.approvalGeneration))
+      .toEqual({ status: "revoked", approvalGeneration: 3 });
+  });
+
   it("targets one physical Connection and rejects a sibling socket with the same deviceId", async () => {
     const { decisions, interactions } = service();
     const owner = connection();

@@ -13,6 +13,12 @@ export default tseslint.config(
       // Non-source / third-party / git-ignored trees.
       "references/**",
       "models/**",
+      // Isolated validation fixtures and nested upstream worktrees have their own checks.
+      ".runtime/**",
+      ".worktrees/**",
+      ".backup-*/**",
+      // Captured source preimages and one-off evidence scripts are not the live application tree.
+      "artifacts/**",
       // Vendored proprietary Live2D runtimes (minified third-party; git-ignored, fetched by a script).
       "apps/desktop/public/vendor/**",
       ".trellis/**",
@@ -25,7 +31,8 @@ export default tseslint.config(
   {
     plugins: { unicorn },
     rules: {
-      // Anti-sprawl responsibility guard (CLAUDE.md): 300-line baseline, with ~20% tolerance before review pressure.
+      // Responsibility guard: keep production errors at 360/50 lines by default.
+      // Cohesive exceptions need a narrow, justified numeric override (CLAUDE.md).
       "max-lines": ["error", { max: 360, skipBlankLines: true, skipComments: true }],
       "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
       "max-params": ["error", 3],
@@ -36,11 +43,23 @@ export default tseslint.config(
     },
   },
   {
-    // Tests may exceed size caps.
-    files: ["**/*.test.ts", "**/*.test.tsx"],
+    // Keep related scenarios and test-only fixtures together without line caps.
+    // This includes native .mjs smoke scripts; all non-size rules still apply.
+    files: [
+      "**/*.{test,spec}.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
+      "**/{test,tests,__tests__,testing,e2e}/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
+    ],
     rules: {
       "max-lines": "off",
       "max-lines-per-function": "off",
+    },
+  },
+  {
+    // Exact generated SQL/schema snapshots intentionally retain readable object
+    // declarations. Runtime owners remain subject to the normal responsibility cap.
+    files: ["packages/core/src/db/migrations/073-convergence-schema.generated.ts"],
+    rules: {
+      "max-lines": ["error", { max: 4200, skipBlankLines: true, skipComments: true }],
     },
   },
   {
@@ -51,6 +70,7 @@ export default tseslint.config(
       "packages/core/src/memory/runtime-selector.ts",
       "packages/core/src/memory/runtime-composition.ts",
       "apps/desktop/src/windows/home/pages/operations/memory-transitions-controller.ts",
+      "packages/core/src/initiative/pattern-composition.ts",
     ],
     rules: {
       "max-lines-per-function": ["error", { max: 60, skipBlankLines: true, skipComments: true }],
@@ -61,6 +81,13 @@ export default tseslint.config(
     files: ["packages/core/src/memory/hindsight-runtime-binding.ts"],
     rules: {
       "max-lines-per-function": ["error", { max: 65, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    // One compaction owner captures policy, lease and cancellation for the retiring span.
+    files: ["packages/core/src/agents/compaction-coordinator.ts"],
+    rules: {
+      "max-lines-per-function": ["error", { max: 55, skipBlankLines: true, skipComments: true }],
     },
   },
   {
@@ -90,7 +117,7 @@ export default tseslint.config(
     // exports; this exact entry allowance still depends on the same strict AST boundary.
     files: ["packages/shared/src/index.ts"],
     rules: {
-      "max-lines": ["error", { max: 625, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 1100, skipBlankLines: true, skipComments: true }],
       "no-restricted-syntax": [
         "error",
         {

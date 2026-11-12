@@ -41,6 +41,32 @@ function startedLease(result: ReturnType<ReturnType<typeof open>["repo"]["begin"
 }
 
 describe("CompactionOperationRepo", () => {
+  it("renews the current lease without recording extraction and permits later summary settlement", () => {
+    const f = open();
+    const lease = startedLease(f.repo.begin(input()));
+    const renewed = f.repo.renewLease({ lease, now: "2026-08-30T00:09:00.000Z", expiresAt: "2026-08-30T00:19:00.000Z" });
+    expect(renewed).toEqual({ ...lease, expiresAt: "2026-08-30T00:19:00.000Z" });
+    expect(f.repo.events(lease.operationId).map((event) => event.kind)).toEqual(["started"]);
+    expect(f.repo.reconcileExpired("2026-08-30T00:11:00.000Z")).toBe(0);
+    expect(f.repo.recordSummaryGenerated({ lease: renewed!, outputChars: 10, now: "2026-08-30T00:11:00.000Z" })).toBe(true);
+    expect(f.repo.commitSummary({ lease: renewed!, text: "kept facts", sourceDigest: DIGEST,
+      now: "2026-08-30T00:12:00.000Z" })).toBe("committed");
+  });
+
+  it("refuses lease renewal for a wrong owner, Character, fence, cancelled state, or expired dispatch", () => {
+    const f = open();
+    const lease = startedLease(f.repo.begin(input()));
+    const renewal = { now: "2026-08-30T00:01:00.000Z", expiresAt: "2026-08-30T00:11:00.000Z" };
+    for (const stale of [{ ...lease, owner: "other" }, { ...lease, characterId: "yui" }, { ...lease, fence: 2 }]) {
+      expect(f.repo.renewLease({ ...renewal, lease: stale })).toBeNull();
+    }
+    expect(f.repo.renewLease({ ...renewal, lease, now: LATER })).toBeNull();
+    expect(f.repo.get(lease.operationId)?.leaseExpiresAt).toBe(LATER);
+    expect(f.repo.events(lease.operationId).map((event) => event.kind)).toEqual(["started"]);
+    f.repo.cancelActive({ characterId: "taki", now: renewal.now });
+    expect(f.repo.renewLease({ ...renewal, lease })).toBeNull();
+  });
+
   it("owns one durable open lease per Character and keeps other Characters isolated", () => {
     const f = open();
     const first = f.repo.begin(input());

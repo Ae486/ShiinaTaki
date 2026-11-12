@@ -1,0 +1,11 @@
+{
+  "devices": [
+    {
+      "deviceId": "a2ccc0e2-7b16-498d-95dd-a3c96d1e4553",
+      "deviceName": "Restart acceptance",
+      "role": "operator",
+      "tokenHash": "Z3dOVCdyy6gePU7A7TjozKGOMQWcxexVC2VjEKXl3J4=",
+      "pairedAt": "2026-11-11T16:54:08.662Z"
+    }
+  ]
+}

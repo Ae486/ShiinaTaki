@@ -1,7 +1,7 @@
 /**
  * INPUT:  canonical Approval requests, exact operator Connection objects, and the durable ApprovalDecisionService
- * OUTPUT: connection-owned pending/session lifecycle with targeted request/closed notifications and bounded responses
- * POS:    core/approval — transient Core authority for interactive Core/MCP asks; raw execution input never enters here
+ * OUTPUT: connection-owned Approval lifecycle, current durable-only lookup, targeted notifications and named lists
+ * POS:    core/approval — shared canonical authority facade; unattended reads never promote once/session decisions
  */
 import {
   type ApprovalDecisionBinding,
@@ -23,7 +23,8 @@ import {
   revokeDurableDecision,
   type ApprovalInteractionState,
 } from "./approval-interaction-state.ts";
-import { sameApprovalBinding } from "./approval-interaction-binding.ts";
+import { hasUsableDurableAuthority, sameApprovalBinding } from "./approval-interaction-binding.ts";
+import { approvalDecisionLabels, type ApprovalLabelResolver } from "./approval-labels.ts";
 
 export type ApprovalInteractionDecision =
   | { allowed: true; scope: "once" | "session" | "always"; approvalGeneration: number }
@@ -57,6 +58,8 @@ export interface ApprovalInteractionService {
   invalidatePolicy(policyGeneration: number): void;
   disconnect(connection: Connection): void;
   approvalGeneration(): number;
+  /** Read current durable authority only; connection-owned once/session decisions never apply to background Runs. */
+  hasDurableAuthority(binding: ApprovalDecisionBinding): boolean;
   onApprovalGenerationChanged(listener: (approvalGeneration: number) => void): void;
   onPolicyInvalidated(listener: (policyGeneration: number) => void): void;
   isCurrentAuthority(input: {
@@ -72,6 +75,7 @@ export interface ApprovalInteractionService {
 export function createApprovalInteractionService(
   authority: ApprovalDecisionService,
   record?: (event: Omit<RunEvent, "eventId" | "seq">) => void,
+  resolveLabels?: ApprovalLabelResolver,
 ): ApprovalInteractionService {
   const state: ApprovalInteractionState = createApprovalInteractionState();
   const generationListeners: Array<(approvalGeneration: number) => void> = [];
@@ -92,7 +96,7 @@ export function createApprovalInteractionService(
       notifyGeneration(before);
       return result;
     },
-    list: () => list(authority),
+    list: () => list(authority, resolveLabels),
     revoke(decisionId, expectedApprovalGeneration) {
       const before = authority.snapshot().approvalGeneration;
       const result = revokeDurableDecision({ state, authority, decisionId, expectedApprovalGeneration });
@@ -111,6 +115,7 @@ export function createApprovalInteractionService(
       notifyGeneration(before);
     },
     approvalGeneration: () => authority.snapshot().approvalGeneration,
+    hasDurableAuthority: (binding) => hasUsableDurableAuthority(authority, binding),
     onApprovalGenerationChanged: (listener) => generationListeners.push(listener),
     onPolicyInvalidated: (listener) => policyListeners.push(listener),
     isCurrentAuthority: (input) => isCurrentAuthority(state, authority, input),
@@ -186,12 +191,12 @@ function isCurrentAuthority(
     && sameApprovalBinding(session.binding, input.binding);
 }
 
-function list(authority: ApprovalDecisionService): ApprovalListResult {
+function list(authority: ApprovalDecisionService, resolveLabels?: ApprovalLabelResolver): ApprovalListResult {
   const snapshot = authority.snapshot();
   return {
     approvalGeneration: snapshot.approvalGeneration,
     governanceRegistryRevision: snapshot.governanceRegistryRevision,
     disclosureRevision: snapshot.disclosureRevision as 1,
-    decisions: authority.list(),
+    decisions: authority.list(approvalDecisionLabels(snapshot.decisions, resolveLabels)),
   };
 }

@@ -43,6 +43,11 @@ captured governed binding. It never performs path/name lookup, implicit Host sel
 Approval flow. Existing `load_skill`, `read_skill_resource`, direct MCP tools, and direct capability tools remain
 compatibility paths.
 
+Direct MCP compatibility bindings remain captured for execution, while their model schemas are deferred. A successful
+`extension_describe` of a current available captured MCP entry returns optional `toolName`; the next model step receives
+that existing direct schema. Internal `toolDisclosure` metadata travels with Run execution context and retains the
+existing 128-entry directory limit. See [tool disclosure](./tool-disclosure.md) for loading, overflow and validation.
+
 When multiple Hosts advertise one capability, an unqualified direct route fails with `TARGET_HOST_REQUIRED`. A call
 through the bridge must carry the explicit sealed `targetHostId`, and its result includes the actual owner and generation
 provenance. Skills, `allowed-tools`, trust, provenance, MCP descriptions, and discovery visibility never grant authority.

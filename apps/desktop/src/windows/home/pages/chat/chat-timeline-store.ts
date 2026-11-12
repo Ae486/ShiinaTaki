@@ -1,13 +1,17 @@
 /**
- * INPUT:  history pages (timeline.history), live timeline.appended/removed pushes, and chat.delta/complete from the hook.
- * OUTPUT: the chat page's timeline state (entries by seq + the in-flight assistant row) + reducers. Transient
- *         notices moved to components/toast (D34) — errors clearInflight here and pushToast there.
- * POS:    ui/windows/home/pages/chat (page-local store) — the depth-view conversation domain. One continuous timeline, NO
- *         session list. The hook wires the WS to these reducers; components read via the hook (hook-guidelines).
+ * INPUT:  canonical history/append/commit notifications, shared activity views and the legacy delta fallback
+ * OUTPUT: bounded canonical rows plus atomic live handoffs, history coverage and disposable recovery state
+ * POS:    ui/chat — one continuous Timeline view; Core remains the only persistence and execution authority
  */
 
-import { create } from "zustand";
-import type { TimelineEntry, TimelineHistoryResult } from "@taki/shared";
+import { create, type StoreApi } from "zustand";
+import type { TimelineCommitted, TimelineEntry, TimelineHistoryResult } from "@taki/shared";
+import type { ChatActivityView } from "@/lib/chat-activity-state.js";
+import {
+  applyTimelineActivity, commitTimelineActivity, emptyTimelineActivity, reconcileActivityHistory,
+  stageTimelineEntry, staleTimelineActivity, type TimelineActivityState,
+} from "./chat-timeline-activity.ts";
+import { mergeTimelineEntries } from "./timeline-batch.ts";
 
 // P1b: bounded mounted window. The entries array keeps the NEWEST windowLimit rows; when an insert pushes past the
 // limit the OLDEST rows slide out (they stay Core-readable — the trim re-points nextBefore at the new window edge)
@@ -16,7 +20,7 @@ export const TIMELINE_MOUNT_CAP = 300;
 // One restore click mounts one more window-step of history (~2 pages at the shared 200-row page max).
 export const TIMELINE_RESTORE_STEP = 300;
 
-// The in-flight assistant row: streamed text not yet persisted as a timeline entry. Keyed by the turn's messageId
+// The legacy in-flight assistant row: streamed text not yet persisted as a timeline entry. Keyed by the turn's messageId
 // (chat.delta/complete carry it). Dropped the moment the persisted assistant entry arrives via timeline.appended
 // (or, as a safety net, on chat.complete) — one visual stream, no duplicate flash (#17).
 export interface InflightRow {
@@ -29,6 +33,7 @@ type ChatTimelineStore = {
   nextBefore: number | null; // cursor for the next OLDER page; null = start of history reached
   loaded: boolean; // the first history page has settled
   inflight: InflightRow | null;
+  live: TimelineActivityState;
   windowLimit: number; // P1b: mounted-row window; raised by widenWindow, never shrinks
   truncated: boolean; // P1b: oldest rows were trimmed off — the jump control is up
   /** Initial newest-first page: reversed to chronological, merged with any live rows that raced in. */
@@ -37,8 +42,11 @@ type ChatTimelineStore = {
   reconcileLatest: (input: TimelineReconciliation) => void;
   /** An older page (scroll-to-top or jump-restore): merged in; the cursor moves further back. */
   prependOlder: (page: TimelineHistoryResult) => void;
-  /** A committed row (user/assistant/tool). An assistant row hands off the in-flight row (drops it). */
+  /** Legacy rows append immediately; modern batch rows remain staged until complete handoff. */
   appendLive: (entry: TimelineEntry) => void;
+  applyActivity: (view: ChatActivityView) => void;
+  commitBatch: (batch: TimelineCommitted) => void;
+  markActivityStale: () => void;
   /** A retracted row (cancel-before-reply): drop the entry with this seq from the live timeline. */
   removeEntry: (seq: number) => void;
   growInflight: (messageId: string, delta: string) => void;
@@ -63,13 +71,7 @@ export interface TimelineReconciliation {
   page: TimelineHistoryResult;
   baseline: TimelineRestoreBaseline;
   removedDuringRestore: ReadonlySet<number>;
-}
-
-// Dedup by seq (a live row can also arrive in a history page) and keep ascending — the single ordering invariant.
-function mergeBySeq(existing: TimelineEntry[], incoming: TimelineEntry[]): TimelineEntry[] {
-  const bySeq = new Map<number, TimelineEntry>();
-  for (const entry of [...existing, ...incoming]) bySeq.set(entry.seq, entry);
-  return [...bySeq.values()].sort((a, b) => a.seq - b.seq);
+  activity?: ChatActivityView;
 }
 
 // P1b: after any entries growth, slide the mounted window forward — drop the oldest rows, keep the newest, and make
@@ -98,7 +100,40 @@ function reconcileLatestEntries(state: ChatTimelineStore, input: TimelineReconci
     return coverageFloor !== null && entry.seq < coverageFloor;
   });
   const incoming = page.entries.filter((entry) => !removedDuringRestore.has(entry.seq));
-  return mergeBySeq(retained, incoming);
+  return mergeTimelineEntries(retained, incoming);
+}
+
+function reconcileHistory(state: ChatTimelineStore, entries: TimelineEntry[]): Partial<ChatTimelineStore> {
+  return reconcileActivityHistory(state.live, entries);
+}
+
+function reconciledCursor({ page, baseline }: TimelineReconciliation): number | null {
+  if (!baseline.loaded || page.nextBefore === null) return page.nextBefore;
+  const oldTail = baseline.seqs.size > 0 ? Math.max(...baseline.seqs) : 0;
+  // Keeping an exhausted old cursor across a disjoint newest page would make its missing middle unreachable.
+  return page.nextBefore > oldTail ? page.nextBefore : baseline.nextBefore;
+}
+
+function activityActions(set: StoreApi<ChatTimelineStore>["setState"]) {
+  return {
+    appendLive: (entry: TimelineEntry) => set((state) => withWindow(state, {
+      live: stageTimelineEntry(state.live, entry),
+      entries: entry.presentation ? state.entries : mergeTimelineEntries(state.entries, [entry]),
+      inflight: !entry.presentation && entry.role === "assistant" ? null : state.inflight,
+    })),
+    applyActivity: (view: ChatActivityView) => set((state) => {
+      const live = applyTimelineActivity({ state: state.live, view, entries: state.entries });
+      const terminal = view.snapshot.status === "terminal"
+        || (view.snapshot.status === "unavailable" && view.snapshot.terminal !== undefined);
+      return withWindow(state, { ...(terminal ? reconcileActivityHistory(live, state.entries) : { live }),
+        inflight: view.snapshot.status === "idle" ? state.inflight : null });
+    }),
+    commitBatch: (batch: TimelineCommitted) => set((state) => withWindow(state, {
+      entries: mergeTimelineEntries(state.entries, batch.entries), live: commitTimelineActivity(state.live, batch),
+      inflight: state.inflight?.messageId === batch.messageId ? null : state.inflight,
+    })),
+    markActivityStale: () => set((state) => ({ live: staleTimelineActivity(state.live) })),
+  };
 }
 
 export const useChatTimelineStore = create<ChatTimelineStore>()((set) => ({
@@ -106,28 +141,27 @@ export const useChatTimelineStore = create<ChatTimelineStore>()((set) => ({
   nextBefore: null,
   loaded: false,
   inflight: null,
+  live: emptyTimelineActivity(),
   windowLimit: TIMELINE_MOUNT_CAP,
   truncated: false,
   mergeHistory: (page) =>
     set((state) => withWindow(state, {
-      entries: mergeBySeq(state.entries, page.entries), nextBefore: page.nextBefore, loaded: true,
+      ...reconcileHistory(state, mergeTimelineEntries(state.entries, page.entries)), nextBefore: page.nextBefore, loaded: true,
     })),
   reconcileLatest: (input) =>
-    set((state) => withWindow(state, {
-      entries: reconcileLatestEntries(state, input),
-      nextBefore: input.baseline.loaded ? input.baseline.nextBefore : input.page.nextBefore,
-      loaded: true,
-    })),
+    set((state) => {
+      const entries = reconcileLatestEntries(state, input);
+      const live = input.activity ? applyTimelineActivity({ state: state.live, view: input.activity, entries }) : state.live;
+      return withWindow(state, { ...reconcileActivityHistory(live, entries),
+        nextBefore: reconciledCursor(input), loaded: true });
+    }),
   prependOlder: (page) =>
     set((state) => withWindow(state, {
-      entries: mergeBySeq(state.entries, page.entries), nextBefore: page.nextBefore,
+      ...reconcileHistory(state, mergeTimelineEntries(state.entries, page.entries)), nextBefore: page.nextBefore,
     })),
-  appendLive: (entry) =>
-    set((state) => withWindow(state, {
-      entries: mergeBySeq(state.entries, [entry]),
-      inflight: entry.role === "assistant" ? null : state.inflight,
-    })),
-  removeEntry: (seq) => set((state) => ({ entries: state.entries.filter((entry) => entry.seq !== seq) })),
+  ...activityActions(set),
+  removeEntry: (seq) => set((state) => ({ entries: state.entries.filter((entry) => entry.seq !== seq),
+    live: { ...state.live, pendingEntries: state.live.pendingEntries.filter((entry) => entry.seq !== seq) } })),
   growInflight: (messageId, delta) =>
     set((state) => ({
       inflight:
@@ -145,5 +179,6 @@ export const useChatTimelineStore = create<ChatTimelineStore>()((set) => ({
   settleRestore: (filled) =>
     set((state) => ({ truncated: !filled && state.nextBefore !== null })),
   reset: () =>
-    set({ entries: [], nextBefore: null, loaded: false, inflight: null, windowLimit: TIMELINE_MOUNT_CAP, truncated: false }),
+    set({ entries: [], nextBefore: null, loaded: false, inflight: null, live: emptyTimelineActivity(),
+      windowLimit: TIMELINE_MOUNT_CAP, truncated: false }),
 }));

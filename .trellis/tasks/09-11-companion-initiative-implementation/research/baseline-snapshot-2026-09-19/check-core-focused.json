@@ -1,0 +1,26 @@
+{
+  "label": "core-focused",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/core",
+    "exec",
+    "vitest",
+    "run",
+    "src/agents",
+    "src/harness",
+    "src/db/migrations",
+    "src/db/scheduled-task-repo.test.ts",
+    "src/db/timeline-repo.test.ts",
+    "src/memory/operations",
+    "src/avatar",
+    "src/server/methods/memory-operations.test.ts",
+    "src/server/methods/avatar-outcome.test.ts",
+    "src/config/knob-registry.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-19T11:37:47.898918+00:00",
+  "seconds": 26.922,
+  "exitCode": 0,
+  "log": "logs/core-focused.log"
+}

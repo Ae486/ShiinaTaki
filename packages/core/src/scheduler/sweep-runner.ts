@@ -1,6 +1,6 @@
 /**
  * INPUT:  a named sweep function + a Logger (+ an optional interval override)
- * OUTPUT: startSweeper(spec) -> stop handle; one boot sweep plus an unref'd 6h interval, with no overlapping pass
+ * OUTPUT: startSweeper(spec) -> stop/runNow handles; boot, interval and explicit demand share one non-overlapping pass
  * POS:    core/scheduler — the shape every retention arm shares (attachment bytes, ambient frames, memory entries),
  *         extracted at the third instance (T5-R8). Deliberately not the croner scheduler (D5): these are internal
  *         housekeeping timers, not user-visible schedules; unref() keeps them from holding the process open
@@ -28,7 +28,7 @@ export interface SweeperSpec {
   enabled?: () => boolean;
 }
 
-export function startSweeper(spec: SweeperSpec): { stop(): void } {
+export function startSweeper(spec: SweeperSpec): { stop(): void; runNow(): void } {
   const log = spec.logger.child({ mod: spec.name });
   let running = false;
   let stopped = false;
@@ -58,5 +58,5 @@ export function startSweeper(spec: SweeperSpec): { stop(): void } {
   run(); // the boot sweep covers what expired while the process was down
   const timer = setInterval(run, spec.intervalMs ?? SWEEP_INTERVAL_MS);
   timer.unref();
-  return { stop: () => { stopped = true; clearInterval(timer); } };
+  return { stop: () => { stopped = true; clearInterval(timer); }, runNow: run };
 }

@@ -1,5 +1,5 @@
 /**
- * INPUT:  one sensed string (a window title today, a VLM screen description next) — untrusted, possibly credential-bearing
+ * INPUT:  one sensed string (window titles and source metadata) — untrusted, possibly credential-bearing
  * OUTPUT: scrubPii(text) -> the same text with every deterministic PII/credential class masked
  * POS:    core/perception — the NON-BYPASSABLE content-minimization step at the sense seam: it runs BEFORE the A1 fence
  *         and before anything is stored (scrub-then-fence), so the prompt path and any future store inherit the SAME

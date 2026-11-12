@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
+import { createCanonicalIngestionSourceRepo } from "../db/canonical-ingestion-source-repo.ts";
+import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
@@ -13,37 +15,40 @@ import { scriptedGenerateModel, type ScriptStep } from "../testing/mock-language
 import { rmTempDir } from "../testing/rm-temp.ts";
 import * as canonicalSubsystem from "./canonical-local-subsystem.ts";
 import { composeMemoryRuntime } from "./runtime-composition.ts";
+import { activateLocalRuntimeFixture } from "./runtime-local-activation-test-fixture.ts";
 
 interface Opened {
   db: Database;
   dataDir: string;
+  runtime?: ReturnType<typeof composeMemoryRuntime>;
 }
 
 const opened: Opened[] = [];
-afterEach(() => {
-  vi.restoreAllMocks();
+afterEach(async () => {
   for (const item of opened.splice(0)) {
+    await item.runtime?.stop();
     item.db.close();
     rmTempDir(item.dataDir);
   }
+  vi.restoreAllMocks();
 });
 
-async function boot(canonical: boolean, beforeCompose?: (db: Database) => void, capture = true) {
+async function boot(canonical: boolean, beforeCompose?: (db: Database) => void, options: { capture?: boolean; steps?: ScriptStep[] } = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-runtime-composition-"));
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
-  opened.push({ db, dataDir });
+  const openedItem: Opened = { db, dataDir };
+  opened.push(openedItem);
   const timeline = createTimelineRepo(db);
   const summaries = createSummaryRepo(db);
   const script: ScriptStep[] = canonical ? [] : [
     { kind: "text", deltas: ["[]"] },
     { kind: "text", deltas: ["legacy rolling summary"] },
   ];
-  script.push({ kind: "text", deltas: ['{"decision":"skip"}'] },
-    { kind: "text", deltas: ["canonical rolling summary"] });
-  const model = scriptedGenerateModel(script);
+  script.push({ kind: "text", deltas: ["canonical rolling summary"] });
+  const model = scriptedGenerateModel(options.steps ?? script);
   const { logger, records } = createCaptureLogger();
   const epoch = createCanonicalMemoryAuthorityRepo(db).initializeLocalAuthority("2026-08-29T00:00:00.000Z");
-  if (canonical) activateMarker(db, epoch.epochId);
+  if (canonical) activateLocalRuntimeFixture(db, epoch.epochId);
   beforeCompose?.(db);
   const runtime = composeMemoryRuntime({
     db,
@@ -60,7 +65,8 @@ async function boot(canonical: boolean, beforeCompose?: (db: Database) => void, 
     env: {},
     logger,
   });
-  if (capture) await runtime.captureRun("taki");
+  openedItem.runtime = runtime;
+  if (options.capture !== false) await runtime.captureRun("taki");
   return { db, timeline, summaries, model, records, runtime, epochId: epoch.epochId };
 }
 
@@ -72,17 +78,6 @@ function seed(fixture: Awaited<ReturnType<typeof boot>>, from: number, through: 
   fixture.runtime.recordPrimaryCommitted({ characterId: "taki", entries });
 }
 
-function activateMarker(db: Database, epochId: string): void {
-  const at = "2026-08-29T00:00:00.000Z";
-  db.prepare(`INSERT INTO memory_migration_runs(run_id,snapshot_id,epoch_id,phase,status,requested_at,updated_at,lease_fence,activation_transaction_id)
-    VALUES ('local-run','snapshot',:epoch,'activated','completed',:at,:at,1,'activation')`).run({ epoch: epochId, at });
-  db.prepare(`INSERT INTO memory_migration_activation_receipts(run_id,transaction_id,snapshot_id,manifest_digest,readiness_digest,epoch_id,lease_fence,committed_at,marker_mode)
-    VALUES ('local-run','activation','snapshot',:digest,:digest,:epoch,1,:at,'canonical-local')`)
-    .run({ digest: "a".repeat(64), epoch: epochId, at });
-  db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
-    verified_snapshot_id='snapshot',activation_transaction_id='activation' WHERE singleton=1`).run({ epoch: epochId });
-}
-
 describe("provider-independent Compaction composition", () => {
   it("exposes a null operations() accessor outside the Hindsight runtime", async () => {
     const fixture = await boot(true);
@@ -91,6 +86,7 @@ describe("provider-independent Compaction composition", () => {
   });
   it("constructs Legacy Compaction in the shared maintenance chain and keeps it detached", async () => {
     const fixture = await boot(false);
+    const flush = vi.spyOn(fixture.runtime.selected.legacy!.memoryFlush, "prepareRetirement");
     seed(fixture, 1, 10);
 
     const completed = fixture.runtime.autoMemory.onTurnCompleted("taki");
@@ -99,9 +95,15 @@ describe("provider-independent Compaction composition", () => {
 
     expect(fixture.summaries.get("taki")?.throughSeq).toBe(6);
     expect(fixture.model.doGenerateCalls).toHaveLength(2);
+    expect(flush).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ characterId: "taki", fromSeq: 1, throughSeq: 6 }));
+    expect(createMemoryAutoRepo(fixture.db).get("taki").lastFlushSeq).toBe(6);
+    expect(fixture.db.prepare("SELECT kind,flush_status FROM conversation_compaction_events ORDER BY operation_seq").all())
+      .toEqual(["started", "flush_completed", "summary_generated", "committed"].map((kind) => ({
+        kind, flush_status: kind === "flush_completed" ? "success" : null,
+      })));
   });
 
-  it("constructs Canonical Local Compaction after one durable Write Gate shared with its retirement flush", async () => {
+  it("constructs Canonical Local Compaction before the ordinary ingestion threshold without forcing extraction", async () => {
     const fixture = await boot(true);
     seed(fixture, 1, 10);
 
@@ -109,6 +111,67 @@ describe("provider-independent Compaction composition", () => {
     await fixture.runtime.autoMemory.onTurnCompleted("taki");
 
     expect(fixture.summaries.get("taki")?.throughSeq).toBe(6);
+    expect(fixture.summaries.get("taki")?.text).toBe("canonical rolling summary");
+    expect(fixture.model.doGenerateCalls).toHaveLength(1);
+    const sources = createCanonicalIngestionSourceRepo(fixture.db);
+    const scope = { epochId: fixture.epochId, characterId: "taki" };
+    expect(sources.unprocessedCount(scope)).toBe(10);
+    expect(sources.cursor(scope)).toBe(0);
+    expect(fixture.db.prepare("SELECT kind FROM conversation_compaction_events ORDER BY operation_seq").all())
+      .toEqual(["started", "summary_generated", "committed"].map((kind) => ({ kind })));
+  });
+
+  it("commits canonical summaries while the real ingestion journal fails and retains all pending source rows", async () => {
+    const fixture = await boot(true);
+    seed(fixture, 1, 20);
+    fixture.db.exec(`CREATE TRIGGER unavailable_ingestion BEFORE INSERT ON canonical_memory_ingestion_spans
+      BEGIN SELECT RAISE(ABORT, 'fixture ingestion storage unavailable'); END;`);
+    const raw = fixture.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all();
+    await fixture.runtime.autoMemory.onTurnCompleted("taki");
+    expect(fixture.records).toContainEqual(expect.objectContaining({
+      obj: expect.objectContaining({ code: "MEMORY_INGESTION_FAILED" }),
+    }));
+    expect(fixture.summaries.get("taki")?.text).toBe("canonical rolling summary");
+    expect(fixture.model.doGenerateCalls).toHaveLength(1);
+    const sources = createCanonicalIngestionSourceRepo(fixture.db);
+    const scope = { epochId: fixture.epochId, characterId: "taki" };
+    expect(sources.unprocessedCount(scope)).toBe(20);
+    expect(sources.cursor(scope)).toBe(0);
+    expect(fixture.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all()).toEqual(raw);
+    expect(fixture.db.prepare("SELECT kind FROM conversation_compaction_events ORDER BY operation_seq").all())
+      .toEqual(["started", "summary_generated", "committed"].map((kind) => ({ kind })));
+  });
+
+  it("admits a summary while canonical Write Gate admission is pending outside the shared model slot", async () => {
+    const fixture = await boot(true, undefined, { steps: [
+      { kind: "text", deltas: ["canonical rolling summary"] },
+      { kind: "text", deltas: ['{"decision":"skip"}'] },
+    ] });
+    seed(fixture, 1, 20);
+    let release!: () => void;
+    const delayed = new Promise<void>((resolve) => { release = resolve; });
+    const capture = fixture.runtime.utility.capture!.bind(fixture.runtime.utility);
+    const scheduling: string[] = [];
+    vi.spyOn(fixture.runtime.utility, "capture").mockImplementation(() => {
+      const slot = capture();
+      return { ...slot, run: async <T>(label: string, task: () => Promise<T>) => {
+        scheduling.push(label);
+        if (label === "canonical-write-gate") await delayed;
+        return slot.run(label, task);
+      } };
+    });
+    const active = fixture.runtime.autoMemory.onTurnCompleted("taki");
+    try {
+      await vi.waitFor(() => expect(fixture.summaries.get("taki")?.text).toBe("canonical rolling summary"));
+      expect(scheduling).toEqual(["canonical-write-gate", "compact"]);
+      expect(fixture.model.doGenerateCalls).toHaveLength(1);
+      expect(fixture.db.prepare("SELECT state FROM canonical_memory_ingestion_spans").get()?.state).toBe("pending");
+      expect(createCanonicalIngestionSourceRepo(fixture.db).cursor({ epochId: fixture.epochId, characterId: "taki" })).toBe(0);
+    } finally {
+      release();
+      await active;
+    }
+    expect(fixture.db.prepare("SELECT state FROM canonical_memory_ingestion_spans").get()?.state).toBe("complete");
     expect(fixture.model.doGenerateCalls).toHaveLength(2);
   });
 
@@ -118,7 +181,7 @@ describe("provider-independent Compaction composition", () => {
     await fixture.runtime.autoMemory.onTurnCompleted("taki");
     expect(fixture.model.doGenerateCalls).toHaveLength(2);
 
-    activateMarker(fixture.db, fixture.epochId);
+    activateLocalRuntimeFixture(fixture.db, fixture.epochId);
     fixture.runtime.selected.bindCanonical(fixture.epochId);
     expect(fixture.runtime.selected.legacy).toBeNull();
     await fixture.runtime.captureRun("taki");
@@ -126,7 +189,13 @@ describe("provider-independent Compaction composition", () => {
     await fixture.runtime.autoMemory.onTurnCompleted("taki");
 
     expect(fixture.summaries.get("taki")?.throughSeq).toBeGreaterThan(6);
-    expect(fixture.model.doGenerateCalls).toHaveLength(4);
+    expect(fixture.model.doGenerateCalls).toHaveLength(3);
+    expect(fixture.summaries.get("taki")?.text).toBe("canonical rolling summary");
+    const sources = createCanonicalIngestionSourceRepo(fixture.db);
+    const scope = { epochId: fixture.epochId, characterId: "taki" };
+    expect(sources.cursor(scope)).toBe(0);
+    expect(sources.eligibilityStartSeq(scope)).toBe(11);
+    expect(sources.unprocessedCount(scope)).toBe(6);
   });
 
   it("serializes duplicate Canonical triggers so only one summary call runs", async () => {
@@ -138,7 +207,7 @@ describe("provider-independent Compaction composition", () => {
       fixture.runtime.autoMemory.onTurnCompleted("taki"),
     ]);
 
-    expect(fixture.model.doGenerateCalls).toHaveLength(2);
+    expect(fixture.model.doGenerateCalls).toHaveLength(1);
     expect(fixture.summaries.get("taki")?.throughSeq).toBe(6);
   });
 
@@ -173,7 +242,7 @@ describe("provider-independent Compaction composition", () => {
 
   it("boots with an observable unavailable Local binding and a failing flush when construction fails", async () => {
     vi.spyOn(canonicalSubsystem, "createCanonicalLocalSubsystem").mockImplementationOnce(() => { throw new Error("MEMORY_AUTHORITY_MISMATCH"); });
-    const fixture = await boot(true, undefined, false);
+    const fixture = await boot(true, undefined, { capture: false });
     expect(fixture.runtime.bindingSnapshot()).toMatchObject({ selection: "canonical-local", selectedEpochId: fixture.epochId,
       binding: { kind: "unavailable", epochId: fixture.epochId, code: "MEMORY_AUTHORITY_MISMATCH" }, lifetime: "running", flush: "failing" });
     await expect(fixture.runtime.captureRun("taki")).rejects.toThrow("MEMORY_INTEGRITY_ERROR");

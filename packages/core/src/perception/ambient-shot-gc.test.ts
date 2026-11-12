@@ -28,17 +28,20 @@ describe("startAmbientShotGc", () => {
 
   it("sweeps at boot and on a 6h interval", () => {
     const h = harness({ mode: "delete-after-days", days: 3, ttlMs: 3 * DAY_MS });
-    startAmbientShotGc({ store: h.store, retention: h.retention, logger: h.logger, now: () => NOW });
+    const gc = startAmbientShotGc({ store: h.store, retention: h.retention, logger: h.logger, now: () => NOW });
     expect(h.cutoffs).toEqual([NOW - 3 * DAY_MS]); // boot sweep, cutoff = now - TTL
     vi.advanceTimersByTime(SWEEP_INTERVAL_MS);
     expect(h.cutoffs).toHaveLength(2);
     expect(h.records.some((r) => r.msg?.includes("ambient frames swept"))).toBe(true);
+    gc.stop();
+    vi.advanceTimersByTime(SWEEP_INTERVAL_MS);
+    expect(h.cutoffs).toHaveLength(2);
   });
 
-  it("reclaims EVERY leftover frame under drop-after-describe (the crash backstop)", () => {
-    const h = harness({ mode: "drop-after-describe" });
+  it("reclaims EVERY leftover frame under drop-after-consumption (the crash backstop)", () => {
+    const h = harness({ mode: "drop-after-consumption" });
     startAmbientShotGc({ store: h.store, retention: h.retention, logger: h.logger, now: () => NOW });
-    expect(h.cutoffs).toEqual([NOW]); // everything already on disk predates now
+    expect(h.cutoffs).toEqual([Number.POSITIVE_INFINITY]); // reclaim all unprotected leftovers, including future mtimes
   });
 
   it("schedules nothing at all under keep — the user asked for those frames", () => {

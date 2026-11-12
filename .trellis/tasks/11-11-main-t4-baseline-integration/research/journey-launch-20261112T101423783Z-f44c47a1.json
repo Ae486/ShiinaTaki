@@ -1,0 +1,18 @@
+{
+  "runId": "20261112T101423783Z-f44c47a1",
+  "profile": "G:\\taki-codex-work\\integration-profile-304b5f63295b4797ace8d3136576c8fe",
+  "availableGiB": 5.6,
+  "minimumAvailableGiB": 5.5,
+  "repository": "G:/TakiAgent-integration",
+  "migrationHead": 77,
+  "provider": "controlled loopback",
+  "native": "real mock-model service",
+  "preflightOnly": false,
+  "log": "G:\\TakiAgent-integration\\.trellis\\tasks\\11-11-main-t4-baseline-integration\\research\\journey-20261112T101423783Z-f44c47a1.log",
+  "receipt": "G:\\TakiAgent-integration\\.trellis\\tasks\\11-11-main-t4-baseline-integration\\research\\journey-launch-20261112T101423783Z-f44c47a1.json",
+  "stage": "journey",
+  "status": "passed",
+  "browserPreflight": "passed",
+  "exitCode": 0,
+  "finishedAt": "2026-11-12T10:42:53.1774273Z"
+}

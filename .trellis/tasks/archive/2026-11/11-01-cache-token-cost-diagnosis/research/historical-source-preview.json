@@ -1,0 +1,138 @@
+{
+  "database": "C:\\Users\\55473\\.takiagent\\taki.db",
+  "generated_at_utc": "2026-11-01T10:25:34.573111+00:00",
+  "read_mode": "SQLite URI mode=ro; query_only=ON; one read transaction",
+  "source_table_present": false,
+  "scopes": [
+    {
+      "cursor": {
+        "authority_epoch_id": "b5d0b188-8b10-4847-b51a-41149f5b9dd2",
+        "character_id": "taki",
+        "through_seq": 3812,
+        "eligibility_start_seq": 3703,
+        "updated_at": "2026-10-25T08:13:20.625Z"
+      },
+      "historical_gaps": [
+        {
+          "seq": 3816,
+          "id": "55610f46-ce7c-4f8f-ab42-ae428f52a145",
+          "created_at": "2026-10-25T08:18:43.813Z",
+          "local_proofs": 0,
+          "hindsight_proofs": 0,
+          "classification": "unresolved_historical_origin",
+          "approved_mutations": [],
+          "candidate_runs_by_time_only": [
+            {
+              "run_id": "e0df11da-99c6-4889-a10a-58f0f02ae882",
+              "state": "recovering",
+              "recovery_classification": "reconciliation_required",
+              "started_at": "2026-10-25T08:18:43.806Z",
+              "terminal_at": null,
+              "cancel_requested_at": null,
+              "outcome": null,
+              "binding_evidence": "timestamp_association_only_not_an_exact_join",
+              "model_effects": [
+                {
+                  "state": "intent_committed",
+                  "count": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "seq": 3838,
+          "id": "204557ca-8dcd-4f95-9923-3e80f3b8e2b9",
+          "created_at": "2026-10-25T10:59:41.202Z",
+          "local_proofs": 0,
+          "hindsight_proofs": 0,
+          "classification": "unresolved_historical_origin",
+          "approved_mutations": [],
+          "candidate_runs_by_time_only": [
+            {
+              "run_id": "08304805-42b4-4f4f-9a80-13cc9eb6e50c",
+              "state": "recovering",
+              "recovery_classification": "reconciliation_required",
+              "started_at": "2026-10-25T10:59:41.194Z",
+              "terminal_at": null,
+              "cancel_requested_at": null,
+              "outcome": null,
+              "binding_evidence": "timestamp_association_only_not_an_exact_join",
+              "model_effects": [
+                {
+                  "state": "intent_committed",
+                  "count": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "seq": 3847,
+          "id": "7346765e-644a-4f3a-bc8d-de84b26cbf04",
+          "created_at": "2026-10-25T11:01:00.180Z",
+          "local_proofs": 0,
+          "hindsight_proofs": 0,
+          "classification": "unresolved_historical_origin",
+          "approved_mutations": [],
+          "candidate_runs_by_time_only": [
+            {
+              "run_id": "87a8dbda-9db8-4267-adba-bcbbc69b5075",
+              "state": "recovering",
+              "recovery_classification": "reconciliation_required",
+              "started_at": "2026-10-25T11:01:00.176Z",
+              "terminal_at": null,
+              "cancel_requested_at": null,
+              "outcome": null,
+              "binding_evidence": "timestamp_association_only_not_an_exact_join",
+              "model_effects": [
+                {
+                  "state": "intent_committed",
+                  "count": 1
+                },
+                {
+                  "state": "terminal",
+                  "count": 1
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pending_witness_rows": 417,
+      "independent_candidate_groups": [
+        {
+          "from_seq": 3813,
+          "through_seq": 3815,
+          "witness_rows": 3,
+          "eligibility": "existing_witness_candidates_require_runtime_digest_checks"
+        },
+        {
+          "from_seq": 3817,
+          "through_seq": 3837,
+          "witness_rows": 21,
+          "eligibility": "existing_witness_candidates_require_runtime_digest_checks"
+        },
+        {
+          "from_seq": 3839,
+          "through_seq": 3846,
+          "witness_rows": 8,
+          "eligibility": "existing_witness_candidates_require_runtime_digest_checks"
+        },
+        {
+          "from_seq": 3848,
+          "through_seq": 4232,
+          "witness_rows": 385,
+          "eligibility": "existing_witness_candidates_require_runtime_digest_checks"
+        }
+      ]
+    }
+  ],
+  "mutations_performed": 0,
+  "application_model_calls": 0,
+  "limits": [
+    "Old unknown rows are not classified by the additive migration.",
+    "Run time proximity does not prove Timeline membership or permit Run settlement.",
+    "Gate/extraction call counts and currency cost depend on batching, saved plans and model output; not inferred from witness count."
+  ]
+}

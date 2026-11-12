@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
 import { canonicalCapabilityChallenge, canonicalHostOperationControl, type CapabilityRequest, type CapabilityResume,
@@ -36,7 +36,12 @@ const roots: string[] = [];
 const closers: (() => Promise<void>)[] = [];
 afterEach(async () => {
   for (const close of closers.splice(0).reverse()) await close();
-  for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
+  for (const root of roots.splice(0)) {
+    if (dirname(resolve(root)) !== resolve(process.env.TAKI_C2A_TEMP ?? tmpdir()) || !basename(root).startsWith("taki-c2a-core-")) {
+      throw new Error("unsafe Core deployment fixture cleanup");
+    }
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 const capabilities = {
   "hindsight-custody": { classifierId: "hindsight-fixed-custody", execution: "read" as const, cancellation: "cooperative" as const },
@@ -50,7 +55,7 @@ const memoryCapabilities = { providerId: "legacy-markdown", contractVersion: 1 a
 async function harness(existing?: { fixture: DeploymentFixture; engine: FakeDeploymentEngine }) {
   const root = existing?.fixture.root ?? mkdtempSync(join(process.env.TAKI_C2A_TEMP ?? tmpdir(), "taki-c2a-core-"));
   if (!existing) roots.push(root);
-  const fixture = existing?.fixture ?? await deploymentFixture(root, process.env.TAKI_C2A_KEY_ADAPTER ?? "G:/Temp/taki-c2a-source-20261014-impl/fake-key-adapter.exe");
+  const fixture = existing?.fixture ?? await deploymentFixture(root, process.env.TAKI_C2A_KEY_ADAPTER);
   const engine = existing?.engine ?? new FakeDeploymentEngine(fixture);
   if (!existing) closers.push(() => engine.close());
   const db = openDatabase({ path: join(root, "runs.db"), migrations: MIGRATIONS });
@@ -62,7 +67,8 @@ async function harness(existing?: { fixture: DeploymentFixture; engine: FakeDepl
   const approval = createApprovalInteractionService(createApprovalDecisionService(createApprovalStateRepo(db)));
   const flags = { snapshotAvailable: true, hostCurrent: true, custodyAvailable: true, captures: 0, approve: true, automatic: true };
   const runs = createRunService<InteractiveOperator>({ repo, provider: "fixture", modelId: "never-called", snapshot: {
-    async capture(input, runId, operator) {
+    async capture(input, runId, options) {
+      const operator = options?.admission;
       if (operator) operator.runId = runId; // Match the real snapshot capture's enrichment.
       flags.captures++;
       if (!flags.snapshotAvailable) throw new Error("fixture snapshot unavailable");

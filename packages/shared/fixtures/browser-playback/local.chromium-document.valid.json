@@ -1,0 +1,25 @@
+{
+  "kind": "sample",
+  "sequence": 1,
+  "observedAgeMs": 11.899999999906868,
+  "source": {
+    "tabId": 1,
+    "frameId": 0,
+    "documentId": "65AC7F3F61AF6FF1EA1451137F00A91B",
+    "playerId": "22222222-2222-4222-8222-222222222222",
+    "media": {
+      "kind": "bilibili",
+      "bvid": "BV1UEaq6qEZt",
+      "cid": "42265479965",
+      "page": 1
+    }
+  },
+  "sample": {
+    "state": "playing",
+    "positionSeconds": 130.924848,
+    "durationSeconds": 300,
+    "playbackRate": 1,
+    "visible": true,
+    "pictureInPicture": false
+  }
+}

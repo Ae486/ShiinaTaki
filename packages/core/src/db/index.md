@@ -9,25 +9,40 @@
 - canonical-memory-source-references.ts — actual ordered Source snapshots/aliases and explicit Local edit association intent
 - canonical-memory-copy-sources.ts — distinct genuine copied Local Sources for different historical versions; duplicate references remain ordered
 - canonical-memory-policy-revision.ts — semantic policy changes advance versions; placement/bookkeeping/no-op edits do not
-- effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events
-- run-repo.ts — durable Run aggregate with atomic admission/context evidence, full internal admission manifests for safe context restoration, durable pre-admission idempotency lookup, CAS lifecycle/retry transitions, and bounded public Receipt/status references
-- run-event-repo.ts — immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
-- run-event-live.ts — post-commit best-effort observer bus with cursor isolation
+- effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS with authoritative usage and cache provenance
+- run-repo.ts — durable Run admission/context manifests and immutable snapshots, pre-admission idempotency, CAS lifecycle/retry transitions and bounded public Receipt/status references
+- run-event-repo.ts — immutable redaction-safe contiguous appends, bounded forward/tail/before pages, exact event reads and synchronous summary aggregation
+- run-event-live.ts — post-commit best-effort observer bus with bounded durable backfill/live queues and independent cursor isolation
+- memory-tidy-review-repo.ts — exact Local reviewed memory/Block revisions and persistent bounded automatic retry eligibility; no attempt ownership
+- cache-usage-repo.ts — regular-call cache statistics excluding tidy/compact against a matching durable primary-summary baseline
+- maintenance-monitor-repo.ts — read-only Character-scoped tidy/compaction operation pages and explicitly associated auxiliary calls
+- subagent-repo.ts — immutable private continuity and exact child stop/control CAS
+- subagent-input-repo.ts — idempotent addressed acceptance, separate work sequence and user-only latch continuation
+- subagent-execution-repo.ts — trusted atomic child/parent Run links, immutable proposals and completion outbox reads
+- subagent-terminal.ts — canonical terminal participation for private tails, final results and exact pointer release
+- subagent-readers.ts — validated conversation/input/result projections and exact work ownership reads
+- run-message-repo.ts — private native steps, partial staging and exact per-Effect addressed-input receipts
+- run-linked-state.ts — narrow trusted admission/terminal transaction participant contract
+- run-terminal-transition.ts — canonical adjusted terminal transaction, linked writes and outermost-commit notifications
+- run-work-transition.ts — same-ledger quiescent accepted-purpose wait/resume with exact Attempt/version and atomic v3 evidence
+- initiative-completion-source.ts — read-only bounded actual terminal background Runs and Class A publication exclusions
+- user-timezone-repo.ts — validated reads and CAS replacement of the existing singleton with mode, designated device and last confirmation provenance
+- run-observability-aggregate.ts — SQL event/usage/effect summary facts with complete-bucket unknown semantics and no full-ledger materialization
 - run-event-projection.ts — deterministic replay/projection anchor and readable summary mapper
 - run-event-factory.ts — bounded canonical lifecycle/recovery event construction and transition predicates
 - run-recovery-repo.ts — durable recovery classification writer with recovery-owned event source and queue projection
-- run-readers.ts — strict Run/Attempt/Receipt aggregate reads shared by the lifecycle writer
+- run-readers.ts — strict Run/Attempt/Receipt aggregate reads and original immutable snapshot lookup shared by the lifecycle writer
 - run-row-mappers.ts — strict Run/Attempt/Receipt row parsing and deterministic snapshot digests
 - scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
-- sqlite.ts — DatabaseSync wrapper with live read-only transaction state, commit-failure rollback, aborted-transaction SQL isolation and online `backupTo`; the only node:sqlite importer
-- migration-runner.ts — max-version migrations with conservative bare-TEXT guards, exact schema branches and atomic SQL/receipt tracking
-- timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary) + listTimelineCharacterIds (bounded distinct Characters)
+- sqlite.ts — single node:sqlite owner; live transaction state, commit-failure rollback/aborted-SQL isolation, failed-boot connection release and online backupTo
+- migration-runner.ts — max-version runner with exact table/index/trigger branches, conservative column guards and per-migration atomic SQL/receipt tracking
+- timeline-repo.ts — validated Timeline source/presentation/image-ref batches, raw-input scrubbing, canonical paging and bounded Character discovery
 - memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / listActiveInLayer / countActiveSince / search / resolvePath; the 4-column bm25 weights are baked in at construction from config; the retention + tidy-trigger reads anchor on COALESCE(updated_at, created_at)
 - memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush / setTidy (per-character auto-write + tidy watermarks)
 - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
 - privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
 - summary-repo.ts — conversation_summary SQL: get / upsert / getMeta (the per-character rolling compaction summary + its through_seq coverage — T5-R3, batch 7; getMeta returns the text LENGTH only, for the operator status read)
-- compaction-operation-repo.ts — fenced per-Character compaction cursor, immutable bounded lifecycle evidence, cancellation/restart reconciliation, and atomic summary CAS commit
+- compaction-operation-repo.ts — fenced compaction lifecycle and atomic summary CAS with optional cache baseline capture and post-commit notice
 - window-state-repo.ts — slot_window_state SQL: get / set / list (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6; list feeds memory.status)
 - config-repo.ts — config SQL: get / all / upsert / delete (the sparse operator-set settings store; a row that is not a JSON primitive throws at the boundary)
 - ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides
@@ -85,6 +100,8 @@
 - canonical-ingestion-repo.ts — durable fixed-span Write Gate/extraction state, per-Bank receipts and atomic completion
 - canonical-ingestion-source-repo.ts — exact primary commit evidence, epoch/span assignment, persistent eligibility baseline and guarded retirement coverage
 - primary-memory-custody-repo.ts — trusted primary group/member custody: candidate-attached group open (Local or Hindsight epoch by marker), atomic append+member enrolment, whole-group witness finalization routed by the assigned epoch's provider (closed-empty / header-only Legacy), silent retraction, dead/settled reconciliation and candidate adoption/relocation with consumption refusal
+- primary-memory-source-read.ts — exact Timeline witness to original provider ingestion span, preserving captured authority before asynchronous binding
+- primary-source-row.ts — validated optional Timeline source facts and conditional C3 digest preserving legacy-null bytes
 - canonical-memory-maintenance-copy.ts — same-Bank copies and complete cross-Bank support/source remapping with retirement
 - canonical-memory-maintenance-retention.ts — activity-only rolling deletion with source cleanup and historical identity retention
 - canonical-memory-maintenance-fixtures.ts — owned SQLite-only canonical test fixtures; no runtime wiring
@@ -109,8 +126,8 @@
 - hindsight-application-replica-repo.ts — durable paired publication and independent/scoped replica readers
 - hindsight-ingestion-durability.ts — verified source coverage or a refusal; queue promises alone never establish durability
 - hindsight-ingestion-guard.ts — synchronous authority/namespace fences for ingestion plans and durable coverage
-- hindsight-ingestion-repo.ts — restart-safe Hindsight source ingestion journal and receipt-verified retirement coverage
-- hindsight-ingestion-source-repo.ts — durable source witnesses (same-epoch replay checked before the Local prior), immutable eligibility baseline and claim/coverage checks
+- hindsight-ingestion-repo.ts — restart-safe Hindsight ingestion journal; revalidates original receipts before conservative coverage advancement
+- hindsight-ingestion-source-repo.ts — exact source-group witnesses/claims, immutable eligibility baseline and first-gap current coverage, including late pre-baseline custody
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
 - hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
 - memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent/latest-in-family reads, foreign-row listing for per-kind boot observation, restart reconciliation by owner boot id
@@ -154,3 +171,29 @@
 - hindsight-template-emergency-evidence.ts — complete hashed original template effect/reservation inventory and old-epoch quarantine candidates independent of generic terminal state.
 - hindsight-policy-review-repo.ts — durable per-Bank schedule progress and current-namespace status with live journal counts
 - hindsight-policy-work-progress.ts — all nonterminal/saved work counts and earliest claim/retry release
+- initiative-opportunity-repo.ts — Core-wide model admission reservation, exact Run linkage and first-intent charging independent of delivery; canonical UTC windows
+- run-delivery-repo.ts — immutable decision/source identity and held-slot lookup; final Attempt/Character/class/source guards, atomic speech/source/quota/evidence writes and civil-day-aware timezone charge carry
+- run-delivery-transition.ts — guarded Run/continuation hold/resume CAS preserving the original active Attempt and refusing unfinished Effects
+
+- subagent-context-summary-repo.ts — atomic private summary advance/rewrite captures, exact previous-source/owner/revision CAS and separate model-intent witnesses
+- subagent-tool-result-repo.ts — immutable full raw tool results keyed by Run/Attempt/step/call, with durable material reads
+
+- subagent-event-repo.ts — immutable accepted child events and exact durable input dependencies
+- subagent-inbox-repo.ts — bounded immutable claims, actual deliveries and transactional Core-derived action identity with original legacy receipt reuse
+- subagent-inbox-terminal.ts — canonical consumer terminal staging, safe release and reconciliation classification
+- subagent-inbox-recovery-repo.ts — atomic explicit successor admission links and discoverable historical action evidence
+- subagent-conversation-repo.ts — continuous canonical-source ordering, complete-step presentation and digest-fenced body pages
+- subagent-speech-repo.ts — canonical event publication source proof and real primary speech witnesses
+
+- subagent-progress-repo.ts — durable actual task-model intents and unique completed-step ordinals across Runs
+- subagent-checkin-repo.ts — atomic factual Core snapshot, exact input wait and immutable check-in sidecar
+- subagent-checkin-input.ts — exact continuation, parent approval counting and trusted work-scoped user reset
+- subagent-usage-repo.ts — cumulative child model usage with missing/in-flight completeness
+- subagent-attention-repo.ts — unresolved user/check-in/reconciliation/exhausted-retry attention pages
+- subagent-inbox-retry-repo.ts — durable pre-intent retry exhaustion without delivered-batch replay
+- subagent-action-evidence.ts — useful action-result projection without internal receipts
+- primary-conversation-source-repo.ts — provider-independent atomic source lifecycle, exact Timeline membership, authority capture and boot recovery
+- primary-ingestion-progress.ts — shared Local/Hindsight gap-separated source groups and truthful continuous-coverage queries
+- auxiliary-usage-repo.ts — auxiliary call lifecycle, optional durable operation association, bounded whole-filter usage and post-commit start/settlement hints
+- request-attribution-repo.ts — latest terminal primary request ordered by input/dispatch and joined by Effect lineage; preserves distinct requested/response model names, usage and bounded composition facts
+- search-projection-policy-repo.ts — Local/Legacy applied tokenizer policies scoped by index and authority epoch; unknown versions require rebuilding; historical upgrade tests retain the exact T4 071-to-072 boundary

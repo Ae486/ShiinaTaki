@@ -1,0 +1,17 @@
+{
+  "sourceSpecCurrentDocs": "passed",
+  "knownHistoricalArtifactCount": 112,
+  "rawCurrentLogCount": 8,
+  "rawCurrentLogPaths": [
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/final-continuation-lint-20261112.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/final-continuation-typecheck-20261112.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/journey-20261112.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/journey-20261112T092108256Z-7107d850.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/journey-20261112T094221475Z-0d5ff9c8.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/journey-20261112T101423783Z-f44c47a1.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/lint-progress.log",
+    ".trellis/tasks/11-11-main-t4-baseline-integration/research/recovered-desktop-build-20261112.log"
+  ],
+  "knownHistoricalReceipt": "final-independent-whitespace-20261112.json",
+  "policy": "Preserve frozen historical blobs and raw terminal reports; no application/spec/current-document whitespace issue remains"
+}

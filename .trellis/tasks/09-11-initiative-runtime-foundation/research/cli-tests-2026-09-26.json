@@ -1,0 +1,13 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/cli",
+    "test",
+    "--maxWorkers=4"
+  ],
+  "startedAt": "2026-09-26T11:13:09.996002+00:00",
+  "seconds": 6.969,
+  "exitCode": 0,
+  "log": "cli-tests-2026-09-26.log"
+}

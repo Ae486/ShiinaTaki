@@ -28,4 +28,11 @@ those producers persisted; nothing here runs a second scheduler, recovery loop, 
 - memory-authority-status.ts — current authority/binding/replica projection with distinct authority/evidence failure reasons; settlement outside snapshots; D108: read-only composite authority status, including durable review progress during unavailability
 - memory-status-observer.ts — current control identity and detached bindings with one read-only runtime/scheduler/Pending snapshot; no historical verifier/cache
 - memory-hindsight-lifecycle-status.ts — readHindsightLifecycleStatus: the pure `hindsight` section (live config vs runtime vs B3 fingerprint drift, stored admission time, per-scope Bank readiness from B3 rows, replica checkpoints, open lifecycle operations and Timeline Characters, Core-derived actions: revalidate on drift or a repairable unavailable runtime unless the revalidate blocker refuses, provision for unprovisioned/failed Characters while the runtime serves, none while an exclusive family is open; the backup block as read)
+The durable memory operation owner (Hindsight closure Stage 1, D-S1-1): one Core-owned table + service over the existing B3
+setup service and B5 replica scheduler. Outcomes are classified from what those producers persisted; nothing here runs a
+second scheduler, recovery loop, or authority write.
+- memory-operation-kind-tidy.ts — selected tidy producer, shared Global single flight, transaction-bound committed progress, and full settled outcome
+- tidy-operation-adapter.ts — automatic and legacy-RPC submit-or-join bridge; waits for the same operation without replay
+- memory-operation-kind-index.ts — selected Local/Legacy index producer, persisted admission and actual terminal rebuild result
+- index-operation-adapter.ts — join the existing index family and reconcile superseded desired policy without another queue
 - memory-operation-fixtures.ts — test support (not in the production path): fake scheduler/runtime/setup doubles and the legal Hindsight authority marker seed

@@ -1,0 +1,14 @@
+# core/memory/legacy-migration/
+- legacy-diagnostics.ts — closed durable diagnostic codes and privacy-safe bounded details
+- legacy-identities.ts — length-delimited domain-separated SHA-256 identities and canonical JSON hashes
+- legacy-migration-ledger-repo.ts — durable resumable source/results/exclusion state guarded by fenced leases
+- legacy-snapshot.ts — complete hash-addressed immutable backup/snapshot publication and dry-run manifest
+- legacy-canonical-converter.ts — migration-only entry/Block projection into provider-neutral canonical data
+- legacy-canonical-import-repo.ts — deterministic canonical/Block staging with exact replay and conflict refusal
+- memory-authority-fence.ts — bounded legacy admission drain and irrevocable retirement after durable authority commit
+- fenced-memory-engine.ts — invocation-time retirement fence for legacy engines, tools and captured initiative Block assembly
+- legacy-activation-repo.ts — strict marker reads and atomic canonical-local activation receipt transaction
+- legacy-migration-runner.ts — on-demand migration orchestration; post-commit callback failures never restore legacy authority
+- legacy-canonical-converter.test.ts — canonical lifecycle, zero-result, replay, Block isolation, and conflict coverage
+- legacy-retain-sanitizer.ts — frozen credential/hidden-envelope refusal reused by canonical staging and Pending Memory admission
+- legacy-source-normalizer.ts — strict Markdown/frontmatter and Memory Block compatibility normalization

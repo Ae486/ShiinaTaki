@@ -1,0 +1,35 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/e2e
+
+ ❯ src/initiative-pattern-real.e2e.test.ts (8 tests | 1 failed | 7 skipped) 5427ms
+     × real heartbeat selected context and decision sample 1 5425ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/initiative-pattern-real.e2e.test.ts > L2 C3 real model acceptance (explicit opt-in) > real heartbeat selected context and decision sample 1
+AssertionError: expected 'failed' to be 'completed' // Object.is equality
+
+Expected: "completed"
+Received: "failed"
+
+ ❯ src/initiative-pattern-real.e2e.test.ts:132:101
+    130|           String(readRows(s.dataDir, "SELECT state FROM runs WHERE ini…
+    131|         { timeout: 180_000, interval: 250 }).toBe(true);
+    132|         expect(readRows(s.dataDir, "SELECT state FROM runs WHERE initi…
+       |                                                                                                     ^
+    133|       } finally { clearInterval(outcomeTimer); }
+    134|       const rows = readRows(s.dataDir, "SELECT decision_json FROM run_…
+ ❯ withRealScenario src/initiative-pattern-real.e2e.test.ts:181:5
+ ❯ src/initiative-pattern-real.e2e.test.ts:107:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  18:49:54
+   Duration  7.46s (transform 1.11s, setup 0ms, import 1.67s, tests 5.43s, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\e2e:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/initiative-pattern-real.e2e.test.ts -t real heartbeat selected context and decision sample 1

@@ -1,0 +1,33 @@
+{
+  "phase": "after",
+  "root": "G:/taki-codex-work/integration-core-shutdown-Iw182a",
+  "node": "v24.18.0",
+  "helperSha256": "0d3d61785e8f293d094d9eb26b11db173e6a3aca91d3e93c53e56b8582cb151d",
+  "productionSha256": "0069ee2a0ddab4bdc4b88099af18742249b9a82f536c994866489ce0fbd0f52d",
+  "shutdownBudgetMs": 60000,
+  "resourcesAfterProductionClose": [],
+  "providerRequests": 0,
+  "status": "passed",
+  "corePid": 20664,
+  "corePort": 8431,
+  "authenticatedPeerOpenAtShutdown": true,
+  "shutdownMs": 83,
+  "exit": {
+    "code": 0,
+    "signal": null,
+    "egress": {
+      "allowed": {},
+      "refused": []
+    },
+    "forced": false
+  },
+  "operatorClosed": true,
+  "shutdownHandlerCalls": 1,
+  "mcpClosed": true,
+  "shutdownFailure": false,
+  "coreExited": true,
+  "providerClosed": true,
+  "productionUnchanged": true,
+  "helperUnchanged": true,
+  "durationMs": 4572
+}

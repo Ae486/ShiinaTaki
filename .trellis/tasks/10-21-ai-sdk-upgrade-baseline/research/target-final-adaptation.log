@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+
+ Test Files  4 passed (4)
+      Tests  29 passed (29)
+   Start at  21:49:33
+   Duration  5.91s (transform 7.33s, setup 0ms, import 10.94s, tests 6.74s, environment 1ms)
+

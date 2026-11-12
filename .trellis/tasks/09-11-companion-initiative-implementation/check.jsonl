@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend rules and mandatory owning-layer specifications for the combined baseline."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend authority, reactive continuity and connection/presentation contracts."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/baseline-snapshot-contract-2026-09-19.md", "reason": "Current owner-approved integration scope, frozen source, preservation and verification gates."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/memory-baseline-delta-2026-09-19.md", "reason": "Pinned B6/Memory operations contracts, shutdown order, current-versus-planned scope and D81/D84 limits."}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Installed durable Memory operation/authority facade; preserve actual producer, lifetime and UI contracts."}

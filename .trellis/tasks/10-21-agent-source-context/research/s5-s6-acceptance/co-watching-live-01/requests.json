@@ -1,0 +1,366 @@
+[
+  {
+    "tools": [
+      {
+        "name": "load_skill",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "memory_search",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_lookup",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_result",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_status",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_submit",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "read_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "write_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      }
+    ],
+    "requestNumber": 1,
+    "upstreamAttempted": true,
+    "status": 200
+  },
+  {
+    "tools": [
+      {
+        "name": "load_skill",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "memory_search",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_lookup",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_result",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_status",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_submit",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "read_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "write_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      }
+    ],
+    "requestNumber": 2,
+    "upstreamAttempted": true,
+    "status": 200
+  },
+  {
+    "tools": [
+      {
+        "name": "load_skill",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "memory_search",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_lookup",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_result",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_status",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_submit",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "read_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "write_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      }
+    ],
+    "requestNumber": 3,
+    "upstreamAttempted": true,
+    "status": 200
+  },
+  {
+    "tools": [
+      {
+        "name": "load_skill",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "memory_search",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_lookup",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_result",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_status",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "native_submit",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "read_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      },
+      {
+        "name": "write_file",
+        "rootType": "object",
+        "rootKeys": [
+          "$schema",
+          "type",
+          "properties",
+          "required",
+          "additionalProperties"
+        ]
+      }
+    ],
+    "requestNumber": 4,
+    "upstreamAttempted": true,
+    "status": 200
+  }
+]

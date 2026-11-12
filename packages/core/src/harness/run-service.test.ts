@@ -4,7 +4,7 @@ import { createRunRepo } from "../db/run-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createRunService } from "./run-service.ts";
-import type { RunEventRepo } from "../db/run-event-repo.ts";
+import { createRunEventRepo, type RunEventRepo } from "../db/run-event-repo.ts";
 
 const dbs: Database[] = [];
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
@@ -170,7 +170,7 @@ describe("RunService", () => {
 
   it("rolls back Run admission when the event ledger rejects the batch", async () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
-    const failingEvents: RunEventRepo = { append: () => { throw new Error("EVENT_WRITE_FAILED"); }, appendMany: () => { throw new Error("EVENT_WRITE_FAILED"); }, list: () => [], tail: (runId) => ({ runId, seq: 0 }) };
+    const failingEvents: RunEventRepo = { ...createRunEventRepo(db), append: () => { throw new Error("EVENT_WRITE_FAILED"); }, appendMany: () => { throw new Error("EVENT_WRITE_FAILED"); } };
     const repo = createRunRepo(db, failingEvents);
     expect(() => repo.admit({ runId: "run-failure", request, snapshot: { schemaVersion: "slice1.v1", characterId: "taki", initiator: request.initiator, provenance: request.provenance, deliveryClass: request.deliveryClass, contextMode: request.contextMode, modelProvider: "test-provider", modelId: "test-model", primaryHostId: "core-host", hosts: [], extensions: [], extensionSnapshotDigest: "a".repeat(64), governance: { policyGeneration: 1, registryRevision: 1, approvalGeneration: 1 }, memory: { providerId: "legacy-markdown", contractVersion: 1, capabilities: memoryCapabilities, capabilityDigest: "b".repeat(64) }, contextDecision: { sourceCategories: ["character"], tokenAccounting: "unknown" }, replayDecision: { status: "not_captured" }, budget: {}, implementation: { runtimeVersion: "slice1", schemaVersion: "slice1.v1" }, sourceRefs: [] }, provider: "test-provider", modelId: "test-model" })).toThrow("EVENT_WRITE_FAILED");
     expect(db.prepare("SELECT count(*) AS count FROM runs").get()?.count).toBe(0);

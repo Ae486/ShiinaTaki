@@ -1,0 +1,23 @@
+{
+  "sourceSha256": "973f100874a9f80716d71be96e2b8064e0aa7bf6c40d2e60ec02ff5a6304c023",
+  "copy": "G:\\taki-codex-work\\integration-governance-gKxL8M\\taki.db",
+  "migrationHead": 77,
+  "before": {
+    "governanceRegistry": 3,
+    "policyGeneration": 61,
+    "approvalRegistry": 1
+  },
+  "after": {
+    "level": "relaxed",
+    "policyGeneration": 62,
+    "registryRevision": 4
+  },
+  "approvalCount": 7,
+  "usableApprovals": 7,
+  "rowsPreserved": true,
+  "historicalUsabilityPreserved": true,
+  "originalHashUnchanged": true,
+  "durationMs": 265,
+  "providerCalls": 0,
+  "coreStarted": false
+}

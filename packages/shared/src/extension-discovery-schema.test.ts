@@ -3,6 +3,7 @@ import {
   ExtensionConvergenceResultSchema,
   ExtensionCallResultSchema,
   ExtensionDescriptorSchema,
+  ExtensionDescribeResultSchema,
   ExtensionRunSnapshotSchema,
   EXTENSION_DISCOVERY_BUDGET,
 } from "./extension-discovery-schema.ts";
@@ -26,6 +27,20 @@ const entry = {
 };
 
 describe("extension discovery schemas", () => {
+  it("accepts an optional bounded direct tool name only on describe results", () => {
+    const result = { runId: HOST, entry, toolName: "server_exact_echo" };
+    expect(ExtensionDescribeResultSchema.parse(result)).toEqual(result);
+    expect(ExtensionDescribeResultSchema.safeParse({ runId: HOST, entry: null }).success).toBe(true);
+    expect(ExtensionDescriptorSchema.safeParse({ ...entry, toolName: result.toolName }).success).toBe(false);
+    for (const toolName of ["", "../path", "name with spaces", "x".repeat(257)]) {
+      expect(ExtensionDescribeResultSchema.safeParse({ ...result, toolName }).success).toBe(false);
+    }
+    for (const extra of [{ inputSchema: { type: "object" } }, { parameters: {} }]) {
+      expect(ExtensionDescribeResultSchema.safeParse({ ...result, ...extra }).success).toBe(false);
+      expect(ExtensionDescriptorSchema.safeParse({ ...entry, ...extra }).success).toBe(false);
+    }
+  });
+
   it("accepts a bounded host-qualified run snapshot", () => {
     expect(ExtensionRunSnapshotSchema.safeParse({
       runId: HOST,

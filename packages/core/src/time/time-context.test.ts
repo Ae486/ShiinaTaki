@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRelativeAge, renderCurrentTime, renderDayDate, renderWallClock } from "./time-context.ts";
+import { formatRelativeAge, renderCurrentTime, renderDayDate, renderWallClock, startOfUserDay } from "./time-context.ts";
 
 // Synthetic clocks only — no Date.now(), no OS/provider deps. Timezone-portable: we assert format shape and internal
 // consistency, never a specific offset (the runtime's local tz is the source of truth per invariant 8).
@@ -80,5 +80,23 @@ describe("renderWallClock (T4-reserved)", () => {
   it("renders a full weekday + date + minute one-liner", () => {
     const at = new Date(2026, 6, 20, 23, 40, 12);
     expect(renderWallClock(at)).toBe("Monday, 2026-07-20 23:40");
+  });
+});
+
+describe("explicit User Timezone", () => {
+  it("uses the supplied user's wall calendar across UTC day boundaries", () => {
+    const at = new Date("2026-09-20T00:30:00.000Z");
+    expect(renderDayDate(at, "America/New_York")).toBe("Today is Saturday, 2026-09-19.");
+    expect(renderCurrentTime(at, "Asia/Kathmandu")).toBe("Current local time: 06:15.");
+    expect(renderWallClock(at, "Asia/Shanghai")).toBe("Sunday, 2026-09-20 08:30");
+    expect(startOfUserDay(at, "Asia/Shanghai")).toBe("2026-09-19T16:00:00.000Z");
+  });
+  it.each([
+    ["2026-03-08T20:00:00.000Z", "America/New_York", "2026-03-08T05:00:00.000Z"],
+    ["2026-11-01T20:00:00.000Z", "America/New_York", "2026-11-01T04:00:00.000Z"],
+    ["2018-11-04T12:00:00.000Z", "America/Sao_Paulo", "2018-11-04T03:00:00.000Z"],
+    ["2026-09-20T00:30:00.000Z", "Asia/Kathmandu", "2026-09-19T18:15:00.000Z"],
+  ])("finds the actual day start at %s in %s", (at, zone, expected) => {
+    expect(startOfUserDay(new Date(at), zone)).toBe(expected);
   });
 });

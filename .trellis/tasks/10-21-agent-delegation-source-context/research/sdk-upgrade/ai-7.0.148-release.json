@@ -1,0 +1,91 @@
+{
+  "ref": {
+    "ref": "refs/tags/ai@7.0.148",
+    "node_id": "REF_kwDOJmmzGbRyZWZzL3RhZ3MvYWlANy4wLjE0OA",
+    "url": "https://api.github.com/repos/vercel/ai/git/refs/tags/ai@7.0.148",
+    "object": {
+      "sha": "e6230e43ba9def164550eea562c457e23be9efa6",
+      "type": "commit",
+      "url": "https://api.github.com/repos/vercel/ai/git/commits/e6230e43ba9def164550eea562c457e23be9efa6"
+    }
+  },
+  "release": {
+    "url": "https://api.github.com/repos/vercel/ai/releases/419071831",
+    "assets_url": "https://api.github.com/repos/vercel/ai/releases/419071831/assets",
+    "upload_url": "https://uploads.github.com/repos/vercel/ai/releases/419071831/assets{?name,label}",
+    "html_url": "https://github.com/vercel/ai/releases/tag/ai%407.0.148",
+    "id": 419071831,
+    "author": {
+      "login": "github-actions[bot]",
+      "id": 41898282,
+      "node_id": "MDM6Qm90NDE4OTgyODI=",
+      "avatar_url": "https://avatars.githubusercontent.com/in/15368?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/github-actions%5Bbot%5D",
+      "html_url": "https://github.com/apps/github-actions",
+      "followers_url": "https://api.github.com/users/github-actions%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/github-actions%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/github-actions%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/github-actions%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/github-actions%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "node_id": "RE_kwDOJmmzGc4Y-odX",
+    "tag_name": "ai@7.0.148",
+    "target_commitish": "main",
+    "name": "ai@7.0.148",
+    "draft": false,
+    "immutable": false,
+    "prerelease": false,
+    "created_at": "2026-10-21T02:13:38Z",
+    "updated_at": "2026-10-21T02:24:05Z",
+    "published_at": "2026-10-21T02:19:45Z",
+    "assets": [
+      {
+        "url": "https://api.github.com/repos/vercel/ai/releases/assets/661110246",
+        "id": 661110246,
+        "node_id": "RA_kwDOJmmzGc4nZ73m",
+        "name": "ai-7.0.148.intoto.jsonl",
+        "label": "",
+        "uploader": {
+          "login": "github-actions[bot]",
+          "id": 41898282,
+          "node_id": "MDM6Qm90NDE4OTgyODI=",
+          "avatar_url": "https://avatars.githubusercontent.com/in/15368?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/github-actions%5Bbot%5D",
+          "html_url": "https://github.com/apps/github-actions",
+          "followers_url": "https://api.github.com/users/github-actions%5Bbot%5D/followers",
+          "following_url": "https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}",
+          "gists_url": "https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/github-actions%5Bbot%5D/subscriptions",
+          "organizations_url": "https://api.github.com/users/github-actions%5Bbot%5D/orgs",
+          "repos_url": "https://api.github.com/users/github-actions%5Bbot%5D/repos",
+          "events_url": "https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/github-actions%5Bbot%5D/received_events",
+          "type": "Bot",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "content_type": "application/jsonl",
+        "state": "uploaded",
+        "size": 2300,
+        "digest": "sha256:6a77bb00c9ab3fc9b730182ce1ea2682af2bb1b0f9bd6697e7e13ab80cabe3d8",
+        "download_count": 2,
+        "created_at": "2026-10-21T02:24:05Z",
+        "updated_at": "2026-10-21T02:24:05Z",
+        "browser_download_url": "https://github.com/vercel/ai/releases/download/ai%407.0.148/ai-7.0.148.intoto.jsonl"
+      }
+    ],
+    "tarball_url": "https://api.github.com/repos/vercel/ai/tarball/ai@7.0.148",
+    "zipball_url": "https://api.github.com/repos/vercel/ai/zipball/ai@7.0.148",
+    "body": "### Patch Changes\n\n- Updated dependencies [b089ce8]\n- Updated dependencies [39a776b]\n- Updated dependencies [f1b550e]\n  - @ai-sdk/provider-utils@5.0.65\n  - @ai-sdk/gateway@4.0.121"
+  }
+}

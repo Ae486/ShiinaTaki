@@ -1,0 +1,257 @@
+--- gate-preimages/packages/core/src/agents/turn-registry.ts
++++ packages/core/src/agents/turn-registry.ts
+@@ -8,63 +8,27 @@
+   /** Registers a fresh controller as the character's active turn; the caller must end() it in a finally. */
+   begin(characterId: string, controller?: AbortController, runId?: string): AbortController;
+   beginScoped(input: { characterId: string; scopeKey: string; runId: string; controller: AbortController }): AbortController;
+-  /** Unregisters — only if this controller is still the active one (a later begin wins). */
+-  end(characterId: string, controller: AbortController): void;
++  /** Unregisters the matching scope/controller only; late cleanup cannot evict a subsequent registration. */
++  end(scopeKey: string, controller: AbortController): void;
+   /** Aborts the active turn; false when the character has none (a queued-but-unstarted turn is not cancellable). */
+   cancel(characterId: string, runId?: string): boolean;
+   cancelExact(input: { characterId: string; runId: string; scopeKey?: string; reason?: string }): boolean;
+-  /** Waits for active turns to finish, aborting remaining turns at the bounded deadline. */
++  /** Aborts active turns immediately, then waits for their cleanup up to the bounded deadline. */
+   drain(timeoutMs?: number): Promise<void>;
+ }
+ 
+-export function createTurnRegistry(): TurnRegistry {
+-  const active = new Map<string, { characterId: string; controller: AbortController; runId?: string }>();
+-  const runs = new Map<string, string>();
++type ActiveTurn = { characterId: string; controller: AbortController; runId?: string };
++
++function createTurnDrain(active: ReadonlyMap<string, ActiveTurn>) {
+   const waiters = new Set<() => void>();
+   const resolveWaiters = (): void => {
+     if (active.size !== 0) return;
+     for (const resolve of [...waiters]) resolve();
+     waiters.clear();
+   };
+-
+-  const begin = (input: { characterId: string; scopeKey: string; runId?: string; controller: AbortController }) => {
+-    const current = active.get(input.scopeKey);
+-    if (current && (current.controller !== input.controller || current.runId !== input.runId)) throw new Error("TURN_SCOPE_OCCUPIED");
+-    if (input.runId && runs.has(input.runId) && runs.get(input.runId) !== input.scopeKey) throw new Error("TURN_RUN_OCCUPIED");
+-    active.set(input.scopeKey, input);
+-    if (input.runId) runs.set(input.runId, input.scopeKey);
+-    return input.controller;
+-  };
+-  const cancel = (key: string, reason: string): boolean => {
+-    const current = active.get(key);
+-    if (!current || current.controller.signal.aborted) return false;
+-    current.controller.abort(reason); return true;
+-  };
+   return {
+-    begin(characterId, prepared, runId) {
+-      const controller = prepared ?? new AbortController();
+-      return begin({ characterId, scopeKey: characterId, controller, runId });
+-    },
+-    beginScoped: begin,
+-    end(characterId, controller) {
+-      if (active.get(characterId)?.controller === controller) {
+-        const runId = active.get(characterId)?.runId;
+-        if (runId) runs.delete(runId);
+-        active.delete(characterId);
+-        resolveWaiters();
+-      }
+-    },
+-    cancel(characterId, runId) {
+-      const current = active.get(characterId);
+-      if (!current || (runId !== undefined && current.runId !== runId)) return false;
+-      return cancel(characterId, "turn cancelled by operator");
+-    },
+-    cancelExact(input) {
+-      const key = runs.get(input.runId);
+-      if (!key || active.get(key)?.characterId !== input.characterId || (input.scopeKey !== undefined && input.scopeKey !== key)) return false;
+-      return cancel(key, input.reason ?? "turn cancelled by operator");
+-    },
+-    drain(timeoutMs = 5_000) {
++    resolveWaiters,
++    drain(timeoutMs = 5_000): Promise<void> {
+       if (active.size === 0) return Promise.resolve();
+       for (const entry of active.values()) if (!entry.controller.signal.aborted) entry.controller.abort("core shutdown");
+       return new Promise<void>((resolve) => {
+@@ -83,3 +47,49 @@
+     },
+   };
+ }
++
++export function createTurnRegistry(): TurnRegistry {
++  const active = new Map<string, ActiveTurn>();
++  const runs = new Map<string, string>();
++  const { drain, resolveWaiters } = createTurnDrain(active);
++  const begin = (input: { characterId: string; scopeKey: string; runId?: string; controller: AbortController }) => {
++    const current = active.get(input.scopeKey);
++    if (current && (current.controller !== input.controller || current.runId !== input.runId)) throw new Error("TURN_SCOPE_OCCUPIED");
++    if (input.runId && runs.has(input.runId) && runs.get(input.runId) !== input.scopeKey) throw new Error("TURN_RUN_OCCUPIED");
++    active.set(input.scopeKey, input);
++    if (input.runId) runs.set(input.runId, input.scopeKey);
++    return input.controller;
++  };
++  const cancel = (key: string, reason: string): boolean => {
++    const current = active.get(key);
++    if (!current || current.controller.signal.aborted) return false;
++    current.controller.abort(reason);
++    return true;
++  };
++  return {
++    begin(characterId, prepared, runId) {
++      const controller = prepared ?? new AbortController();
++      return begin({ characterId, scopeKey: characterId, controller, runId });
++    },
++    beginScoped: begin,
++    end(scopeKey, controller) {
++      if (active.get(scopeKey)?.controller === controller) {
++        const runId = active.get(scopeKey)?.runId;
++        if (runId) runs.delete(runId);
++        active.delete(scopeKey);
++        resolveWaiters();
++      }
++    },
++    cancel(characterId, runId) {
++      const current = active.get(characterId);
++      if (!current || (runId !== undefined && current.runId !== runId)) return false;
++      return cancel(characterId, "turn cancelled by operator");
++    },
++    cancelExact(input) {
++      const key = runs.get(input.runId);
++      if (!key || active.get(key)?.characterId !== input.characterId || (input.scopeKey !== undefined && input.scopeKey !== key)) return false;
++      return cancel(key, input.reason ?? "turn cancelled by operator");
++    },
++    drain,
++  };
++}
+--- gate-preimages/packages/core/src/agents/turn-registry.test.ts
++++ packages/core/src/agents/turn-registry.test.ts
+@@ -1,4 +1,4 @@
+-import { describe, expect, it } from "vitest";
++import { describe, expect, it, vi } from "vitest";
+ import { createTurnRegistry } from "./turn-registry.ts";
+ 
+ describe("createTurnRegistry", () => {
+@@ -64,4 +64,47 @@
+     registry.end("taki", controller);
+     await expect(pending).resolves.toBeUndefined();
+   });
++
++  it("drains Character and private scopes together and clears every completed waiter", async () => {
++    vi.useFakeTimers();
++    try {
++      const registry = createTurnRegistry();
++      const parent = registry.begin("taki", undefined, "parent-run");
++      const child = registry.beginScoped({ characterId: "taki", scopeKey: "child-work", runId: "child-run", controller: new AbortController() });
++      const finished = vi.fn();
++      const first = registry.drain(25).then(finished);
++      const second = registry.drain(50).then(finished);
++      expect(parent.signal.reason).toBe("core shutdown");
++      expect(child.signal.reason).toBe("core shutdown");
++
++      registry.end("taki", parent);
++      await Promise.resolve();
++      expect(finished).not.toHaveBeenCalled();
++      registry.end("child-work", child);
++      await Promise.all([first, second]);
++      expect(finished).toHaveBeenCalledTimes(2);
++      expect(vi.getTimerCount()).toBe(0);
++    } finally {
++      vi.useRealTimers();
++    }
++  });
++
++  it("bounds a stuck scope without unregistering it before its own cleanup", async () => {
++    vi.useFakeTimers();
++    try {
++      const registry = createTurnRegistry();
++      const controller = registry.begin("taki", undefined, "stuck-run");
++      const pending = registry.drain(5);
++      await vi.advanceTimersByTimeAsync(5);
++      await expect(pending).resolves.toBeUndefined();
++      expect(vi.getTimerCount()).toBe(0);
++      expect(() => registry.begin("taki")).toThrow("TURN_SCOPE_OCCUPIED");
++      registry.end("taki", controller);
++      const next = registry.begin("taki", undefined, "next-run");
++      expect(next.signal.aborted).toBe(false);
++      registry.end("taki", next);
++    } finally {
++      vi.useRealTimers();
++    }
++  });
+ });
+--- gate-preimages/packages/core/src/agents/index.md
++++ packages/core/src/agents/index.md
+@@ -27,7 +27,7 @@
+ - turn-mapping.ts — privacy boundary between live AI SDK messages and TimelineEntry: tool calls persist/replay by name and call id only with empty replay inputs; raw arguments never enter timeline rows or reconstructed history; image parts replay as text projection
+ - turn-presentation.ts — enriches canonical turn entries only with captured/fixed tool labels; ignores provider metadata and preserves model-facing content and replay
+ - turn-queue.ts — per-Character priority/FIFO lane; async primary reservations, isolated reservation notifications for cooperative background yield, atomic background probes and true availability without stealing lane ownership
+-- turn-registry.ts — per-character active AbortController plus optional Run identity; exact cancellation cannot abort a different Run in the same Character lane
++- turn-registry.ts — non-replacing Character/private-work scope controllers and exact Run cancellation; a local drain owner aborts all scopes immediately and bounds their cleanup wait without unregistering live work
+ - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
+ - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
+ - model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
+--- gate-preimages/packages/shared/src/governance-presentation.test.ts
++++ packages/shared/src/governance-presentation.test.ts
+@@ -10,8 +10,8 @@
+   it("covers every canonical capability and cell without changing registry authority", () => {
+     const before = JSON.stringify(CANONICAL_GOVERNANCE_REGISTRY);
+     const { descriptors } = CANONICAL_GOVERNANCE_REGISTRY;
+-    expect(descriptors).toHaveLength(23);
+-    expect(descriptors.flatMap((descriptor) => descriptor.cells)).toHaveLength(35);
++    expect(descriptors).toHaveLength(26);
++    expect(descriptors.flatMap((descriptor) => descriptor.cells)).toHaveLength(38);
+     for (const descriptor of descriptors) {
+       expect(getCapabilityLabel(descriptor.capabilityId)).not.toBe(getCapabilityLabel("unknown"));
+       expect(getCapabilityLabel(descriptor.capabilityId)).not.toContain(descriptor.capabilityId);
+--- gate-preimages/packages/shared/src/governance-registry.test.ts
++++ packages/shared/src/governance-registry.test.ts
+@@ -9,7 +9,7 @@
+ describe("canonical governance registry", () => {
+   it("contains the complete factory inventory plus explicit extension adapters", () => {
+     const cells = CANONICAL_GOVERNANCE_REGISTRY.descriptors.flatMap((descriptor) => descriptor.cells);
+-    expect(cells).toHaveLength(35);
++    expect(cells).toHaveLength(38);
+     expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "core.co-watching.manage")?.cells).toMatchObject([
+       { key: "co-watching-manage", overrideMode: "immutable", levels: { strict: "auto", standard: "auto", relaxed: "auto" } },
+     ]);
+@@ -33,6 +33,26 @@
+     });
+   });
+ 
++  it("keeps delegation management, inspection and result collection in their fixed Core policy cells", () => {
++    const expected = [
++      ["core.subagent.manage", "subagent-manage"],
++      ["core.subagent.read", "subagent-read"],
++      ["core.subagent.result", "subagent-result"],
++    ] as const;
++    const delegation = CANONICAL_GOVERNANCE_REGISTRY.descriptors.filter((descriptor) => descriptor.capabilityId.startsWith("core.subagent."));
++    expect(delegation.map((descriptor) => descriptor.capabilityId).sort()).toEqual(expected.map(([capabilityId]) => capabilityId).sort());
++    for (const [capabilityId, key] of expected) {
++      expect(governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, capabilityId)).toEqual({
++        capabilityId,
++        descriptorRevision: 1,
++        subjectRequired: false,
++        classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
++        cells: [{ key, levels: { strict: "auto", standard: "auto", relaxed: "auto" },
++          approvalMemory: "once-only", overrideMode: "immutable" }],
++      });
++    }
++  });
++
+   it("requires exact canonical policy cells and never truncates target-qualified decision scope", () => {
+     const descriptor = governanceDescriptor(CANONICAL_GOVERNANCE_REGISTRY, "fs-write");
+     expect(descriptor && governanceCell(descriptor, "fs-write:dir-root")?.key).toBe("fs-write:dir-root");
+--- gate-preimages/packages/shared/src/index.md
++++ packages/shared/src/index.md
+@@ -36,10 +36,10 @@
+ - governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
+ - extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, optional exact MCP toolName disclosure, and call-result schemas
+ - extension-change-schema.ts — strict operator-only aggregate subscription, unique closed change targets and process-local invalidation revision; no source content or Rust mirror
+-- governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
++- governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers, including distinct fixed Core delegation management, inspection and result cells
+ - governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
+ - governance-api.ts — focused named public facade for governance and permission exports
+-- governance-presentation.ts — exact-key Chinese capability/cell descriptions, including analysis query/Co-Watching controls, and posture/override labels; separate from authority and safe for unknown historical keys
++- governance-presentation.ts — exact-key Chinese capability/cell descriptions, including delegation and analysis query/Co-Watching controls, and posture/override labels; separate from authority and safe for unknown historical keys
+ - tool-presentation.ts — fixed/MCP readable names including analysis, recommendation preparation and Co-Watching, bounded labels and frozen own-key snapshots; unknown routing keys stay unresolved
+ - perception-schema.ts — strict operator Privacy Pause/card reads and writer plus opt-in subscribe/changed schemas; changes carry only a process-local invalidation revision, with no Rust mirror
+ - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas

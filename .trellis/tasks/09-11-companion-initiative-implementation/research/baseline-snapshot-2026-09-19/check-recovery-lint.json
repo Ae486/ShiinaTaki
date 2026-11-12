@@ -1,0 +1,12 @@
+{
+  "label": "recovery-lint",
+  "command": [
+    "pnpm",
+    "lint"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T02:50:22.150536+00:00",
+  "seconds": 35.328,
+  "exitCode": 0,
+  "log": "logs/recovery-lint.log"
+}

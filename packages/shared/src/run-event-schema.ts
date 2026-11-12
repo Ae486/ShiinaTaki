@@ -4,6 +4,9 @@
  * POS:    shared/protocol — canonical observability vocabulary; protected raw payloads are unrepresentable
  */
 import { z } from "zod";
+import { RunEventV2Schema } from "./initiative-event-schema.ts";
+import { RunWorkEventSchema } from "./run-work-schema.ts";
+import { ContextRequestMeasuredEventSchema } from "./request-attribution-schema.ts";
 import {
   EffectSourceRefSchema,
   InputTokenDetailsSchema,
@@ -141,14 +144,18 @@ const ModelResponseSettledPayloadSchema = z.strictObject({
   durationMs: DURATION.optional(), timeToFirstOutputMs: DURATION.optional(), errorCode: ERROR_CODE.optional(),
 });
 const ToolCallStartedPayloadSchema = z.strictObject({
-  kind: z.literal("tool.call.started"), state: z.enum(["running", "validation_failed"]),
+  kind: z.literal("tool.call.started"), state: z.enum(["received", "processing", "running", "validation_failed"]),
   effectId: ID.optional(), callId: ID.optional(), toolName: ID, toolCallId: ID,
+  invocationId: ID.optional(), modelEffectId: ID.optional(),
+  displayName: z.string().min(1).max(240).refine((value) => value.trim().length > 0).optional(),
   validationState: z.enum(["accepted", "failed"]),
 });
 const ToolResultSettledPayloadSchema = z.strictObject({
   kind: z.literal("tool.result.settled"), state: TOOL_OUTCOME,
   effectId: ID.optional(), callId: ID.optional(), toolName: ID, toolCallId: ID,
-  outcome: TOOL_OUTCOME, durationMs: DURATION.optional(),
+  invocationId: ID.optional(), modelEffectId: ID.optional(),
+  displayName: z.string().min(1).max(240).refine((value) => value.trim().length > 0).optional(),
+  outcome: TOOL_OUTCOME, durationMs: DURATION.optional(), startedAt: TIMESTAMP.optional(),
   errorClass: z.enum(["validation", "execution", "governance", "stale", "unknown"]).optional(),
   errorCode: ERROR_CODE.optional(), summary: SAFE_BOUNDED.optional(),
 });
@@ -194,7 +201,7 @@ const ATTEMPT_EVENT_KINDS = new Set([
   "approval.requested", "approval.decided", "run.retry",
 ]);
 
-export const RunEventSchema = z.strictObject({
+export const RunEventV1Schema = z.strictObject({
   eventId: ID, runId: ID, attemptId: ID.optional(), seq: z.number().int().min(1).max(2_000_000_000),
   schemaVersion: z.literal(RUN_EVENT_SCHEMA_VERSION), category: RunEventCategorySchema, kind: RunEventKindSchema,
   occurredAt: TIMESTAMP, source: RunEventSourceSchema, correlation: CorrelationSchema.optional(),
@@ -229,6 +236,8 @@ function expectedCategoryAndSource(kind: z.infer<typeof RunEventKindSchema>): {
   return { category: "lifecycle", source: "core.run-repo" };
 }
 
+export const RunEventSchema = z.union([RunEventV1Schema, RunEventV2Schema, RunWorkEventSchema, ContextRequestMeasuredEventSchema]);
+export type RunEventV1 = z.infer<typeof RunEventV1Schema>;
 export type RunEvent = z.infer<typeof RunEventSchema>;
 export type RunEventPayload = z.infer<typeof RunEventPayloadSchema>;
 export type RunEventKind = z.infer<typeof RunEventKindSchema>;

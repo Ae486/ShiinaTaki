@@ -1,0 +1,62 @@
+
+> @taki/core@0.0.0 test H:\TakiAgent-worktrees\t4\packages\core
+> vitest run "--maxWorkers=4"
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/server/methods/perception-subscribe.test.ts (3 tests | 1 failed) 150ms
+     × reaches two opted-in operators, denies Node/pre-auth requests and cleans membership on close 132ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/server/methods/perception-subscribe.test.ts > Perception over authenticated WS connections > reaches two opted-in operators, denies Node/pre-auth requests and cleans membership on close
+AssertionError: expected [ { jsonrpc: '2.0', …(2) }, …(1) ] to deep equally contain { jsonrpc: '2.0', id: 'pause', …(1) }
+
+- Expected:
+{
+  "id": "pause",
+  "jsonrpc": "2.0",
+  "result": {
+    "paused": true,
+    "until": null,
+  },
+}
+
++ Received:
+[
+  {
+    "jsonrpc": "2.0",
+    "method": "perception.changed",
+    "params": {
+      "revision": 2,
+    },
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "perception.changed",
+    "params": {
+      "revision": 3,
+    },
+  },
+]
+
+ ❯ src/server/methods/perception-subscribe.test.ts:136:23
+    134|     one.send({ jsonrpc: "2.0", id: "pause", method: PERCEPTION_METHODS…
+    135|     const ownFrames = await one.take(2);
+    136|     expect(ownFrames).toContainEqual({ jsonrpc: "2.0", id: "pause", re…
+       |                       ^
+    137|     expect(ownFrames).toContainEqual({ jsonrpc: "2.0", method: PERCEPT…
+    138|     expect(notification((await two.take(1))[0])).toEqual({ method: PER…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 427 passed (428)
+      Tests  1 failed | 3448 passed | 1 skipped (3450)
+   Start at  10:13:30
+   Duration  196.25s (transform 35.03s, setup 0ms, import 273.82s, tests 326.83s, environment 69ms)
+
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

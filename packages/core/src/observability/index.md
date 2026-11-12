@@ -1,2 +1,15 @@
-- observability-query-service.ts — authorized deterministic Run list, real-field filters, semantic model/tool/context/retry projection, and mode-gated redacted Inspector
-- tool-effect-observer.ts — narrow in-memory tool-call to governed Effect correlation contract
+# core/observability/
+- Model dispatch attribution — existing Run usage ownership optionally carries its exact committed Effect to final native observation without changing auxiliary deduplication
+- cache-usage-service.ts — independent computed cache-window and latest-primary request subscriptions, post-commit burst coalescing, mode gating and isolated failures
+- primary-cache-usage.ts — raw-aware cache provenance for primary requests, reusing auxiliary normalization without retaining provider payloads
+- auxiliary-usage-meter.ts — non-interfering AI SDK v4 middleware recording one durable auxiliary row per provider invocation while skipping Run-owned calls
+- auxiliary-usage-normalization.ts — nullable safe-integer usage normalization with OpenAI-compatible raw-field presence recovery
+- model-usage-context.ts — immutable Run/Utility ownership and explicit durable maintenance association captured at dispatch
+- maintenance-monitor-service.ts — independent read-only operation subscriptions, committed hint coalescing, query echo and mode withdrawal
+- observability-query-service.ts — authorized bounded Run/event query composition, independent history cursors, exact Inspector lookup, and mode gating
+- observability-event-projection.ts — Chinese semantic trajectory rows with captured identities; v2 initiative and v3 work transitions preserve sequence without fabricating model/tool activity
+- presence-event-bridge.ts — transaction-bound presentation and response-opportunity facts published after commit into the existing Run stream
+- observability-inspector.ts — populated typed semantic sections for v1/v2/v3 durable events; task source references stay private and technical compatibility arrays stay empty
+- observability-run-summary.ts — durable Run summaries from SQL aggregates with omission-preserving usage/cache totals
+- observability-run-filters.ts — real-field Run/event filters over bounded keyset scans
+- tool-effect-observer.ts — narrow in-memory Effect correlation and optional confirmed Approval/dispatch phase callbacks; no authority or payload ownership

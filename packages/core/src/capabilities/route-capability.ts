@@ -1,6 +1,6 @@
 /**
  * INPUT:  explicit/legacy target Host resolution, validated live catalogs, connection registry, broker, logger
- * OUTPUT: routeCapability(deps, request) -> structured result; never selects first match
+ * OUTPUT: structured result with sealed dispatch provenance/currentness; never selects first match
  * POS:    core/capabilities — explicit Host-qualified router; legacy compatibility resolves only one routable Host
  */
 import type { HostCapabilityDescriptor, HostGovernanceProjection } from "@taki/shared";
@@ -33,8 +33,15 @@ export interface CapabilityRouteDeps {
 }
 
 export type RouteFailureCode = CapabilityFailureCode | "NO_NODE" | "TARGET_HOST_REQUIRED" | "CAPABILITY_MISSING";
+/** Internal binding captured before dispatch, never a caller-supplied or wire-visible identity. */
+export interface CapabilityRouteProvenance {
+  readonly hostId: string;
+  readonly connectionGeneration: number;
+  readonly catalogGeneration: number;
+  isCurrent(): boolean;
+}
 export type RouteResult =
-  | { ok: true; output: unknown }
+  | { ok: true; output: unknown; provenance?: CapabilityRouteProvenance }
   | { ok: false; code: RouteFailureCode; message: string; state?: "cancelled" | "outcome_unknown" };
 
 export interface CapabilityRouteRequest {
@@ -47,13 +54,15 @@ export interface CapabilityRouteRequest {
   operationId?: string;
   observers?: CapabilityRequestObservers;
   ownerCurrent?: () => boolean;
+  /** Process-local Run lifetime; it is not an operator connection or part of the Host wire identity. */
+  signal?: AbortSignal;
 }
 
 export async function routeCapability(
   deps: CapabilityRouteDeps,
   request: CapabilityRouteRequest,
 ): Promise<RouteResult> {
-  const { capabilityId, input, targetHostId } = request;
+  const { capabilityId, targetHostId } = request;
   const resolved = resolveTarget(deps, capabilityId, targetHostId);
   if (!resolved.ok) {
     deps.logger.child({ mod: "capability" }).warn({ capability: capabilityId, code: resolved.code }, "capability routing failed");
@@ -73,31 +82,46 @@ export async function routeCapability(
       message: `Host ${catalog.hostId} governance metadata is incompatible with ${capabilityId}`,
     };
   }
-  return deps.broker.request({
+  const sealed: SealedDispatch = {
     hostId: catalog.hostId,
     connectionGeneration: catalog.connectionGeneration,
     catalogGeneration: catalog.catalogGeneration,
+    capabilityId,
     descriptor,
+    policyGeneration: dispatchPolicy.policyGeneration,
+    projection: dispatchPolicy.projection,
+  };
+  return dispatch(deps, { connection, sealed }, request);
+}
+
+async function dispatch(
+  deps: CapabilityRouteDeps,
+  target: { connection: Connection; sealed: SealedDispatch },
+  request: CapabilityRouteRequest,
+): Promise<RouteResult> {
+  const { connection, sealed } = target;
+  if (!connection.notify) return { ok: false, code: "NO_NODE", message: "Host is unavailable" };
+  const provenance: CapabilityRouteProvenance = Object.freeze({
+    hostId: sealed.hostId,
+    connectionGeneration: sealed.connectionGeneration,
+    catalogGeneration: sealed.catalogGeneration,
+    isCurrent: () => deps.registry.isCurrentHost(connection) && isCurrentDispatch(deps, sealed),
+  });
+  const result = await deps.broker.request({
+    hostId: sealed.hostId,
+    connectionGeneration: sealed.connectionGeneration,
+    catalogGeneration: sealed.catalogGeneration,
+    descriptor: sealed.descriptor,
     connection,
     notify: connection.notify,
-    policyGeneration: dispatchPolicy.policyGeneration,
-    governanceProjection: dispatchPolicy.projection,
+    policyGeneration: sealed.policyGeneration,
+    governanceProjection: sealed.projection,
     operator: deps.interactive,
     ownerCurrent: request.ownerCurrent,
-    isCurrent: () => (request.ownerCurrent?.() ?? true) && isCurrentDispatch(deps, {
-      hostId: catalog.hostId,
-      connectionGeneration: catalog.connectionGeneration,
-      catalogGeneration: catalog.catalogGeneration,
-      capabilityId,
-      descriptor,
-      policyGeneration: dispatchPolicy.policyGeneration,
-      projection: dispatchPolicy.projection,
-    }),
-  }, input, {
-    runId: request.runId ?? deps.interactive?.runId, coreAttemptId: request.attemptId ?? deps.interactive?.attemptId,
-    effectId: request.effectId, operationId: request.operationId, observers: request.observers,
-    approvalGeneration: deps.approval.approvalGeneration(),
-  });
+    signal: request.signal,
+    isCurrent: () => (request.ownerCurrent?.() ?? true) && provenance.isCurrent(),
+  }, request.input, { runId: request.runId ?? deps.interactive?.runId, coreAttemptId: request.attemptId ?? deps.interactive?.attemptId, effectId: request.effectId, operationId: request.operationId, observers: request.observers, approvalGeneration: deps.approval.approvalGeneration() });
+  return result.ok ? { ...result, provenance } : result;
 }
 
 interface SealedDispatch {

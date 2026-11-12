@@ -34,14 +34,14 @@ describe("config-state", () => {
     expect(next[1]).toBe(entries[1]);
   });
 
-  it("treats a null pushed value as a reset back to the built-in default", () => {
+  it("retains the last value until reset is reconciled, because environment fallback may differ from default", () => {
     const next = applyChanged([entry({ value: 20, stored: true })], { key: "TAKI_MAX_STEPS", value: null });
 
-    expect(next[0]).toMatchObject({ value: 10, stored: false });
+    expect(next[0]).toMatchObject({ value: 20, stored: true });
   });
 
-  it("never lets a push move an env-locked or secret row (the server value still wins)", () => {
-    const locked = [entry({ envLocked: true }), entry({ key: "TAKI_PROVIDER_API_KEY", secret: true, value: null })];
+  it("never lets a push move a bootstrap-only or secret row", () => {
+    const locked = [entry({ apply: "env-only", envLocked: true }), entry({ key: "TAKI_PROVIDER_API_KEY", secret: true, value: null })];
 
     const next = applyChanged(locked, { key: "TAKI_MAX_STEPS", value: 20 });
     const secret = applyChanged(locked, { key: "TAKI_PROVIDER_API_KEY", value: "leaked" });
@@ -54,6 +54,12 @@ describe("config-state", () => {
     const next = applyStored([entry()], { status: "ok", key: "TAKI_MAX_STEPS", value: 25, apply: "restart" });
 
     expect(next[0]).toMatchObject({ value: 25, stored: true });
+  });
+
+  it("uses Core's reset fallback and application outcome instead of guessing the default", () => {
+    const next = applyStored([entry({ value: 25, stored: true })], { status: "ok", key: "TAKI_MAX_STEPS", value: null,
+      effectiveValue: 15, origin: "env", apply: "live", application: { state: "applied", boundary: "next-run", activeValue: 15 } });
+    expect(next[0]).toMatchObject({ value: 15, stored: false, origin: "env", application: { boundary: "next-run" } });
   });
 
   it("maps every refusal reason to its own readable message", () => {

@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality check section"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size/responsibility, header and test rules for core/shared"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Verify tool result contract and never-throw execute"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Verify role checks and subscription-bound reporting"}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Verify no run-event vocabulary change and truthful outcome classification"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend quality check section"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Size/responsibility, header and test rules for desktop"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Verify engine rule usage and teardown safety"}
+{"file": ".trellis/tasks/09-19-avatar-command-outcome/research/command-path-map-2026-09-19.md", "reason": "Cross-check every seam was updated consistently"}
+{"file": ".trellis/tasks/09-19-avatar-command-outcome/research/ai-sdk-invalid-tool-calls.md", "reason": "Verify the one-correction stop rule against SDK facts"}

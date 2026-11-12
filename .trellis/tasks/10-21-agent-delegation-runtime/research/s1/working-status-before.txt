@@ -1,0 +1,914 @@
+ M .gitignore
+ M .trellis/spec/backend/agent-runtime.md
+ M .trellis/spec/backend/database-guidelines.md
+ M .trellis/spec/backend/e2e-harness.md
+ M .trellis/spec/backend/error-handling.md
+ M .trellis/spec/backend/extension-discovery.md
+ M .trellis/spec/backend/foreground-chat-activity.md
+ M .trellis/spec/backend/index.md
+ M .trellis/spec/backend/logging-guidelines.md
+ M .trellis/spec/backend/memory-replica-sync.md
+ M .trellis/spec/backend/observability-projection.md
+ M .trellis/spec/backend/permission-authorization.md
+ M .trellis/spec/backend/quality-guidelines.md
+ M .trellis/spec/backend/skill-lifecycle.md
+ M .trellis/spec/backend/tool-design.md
+ M .trellis/spec/frontend/foreground-chat-feedback.md
+ M .trellis/spec/frontend/home-window.md
+ M .trellis/spec/frontend/index.md
+ M .trellis/spec/frontend/live2d-renderer.md
+ M .trellis/spec/frontend/operator-connection-recovery.md
+ M .trellis/spec/frontend/quality-guidelines.md
+ M .trellis/tasks/08-09-hindsight-initial-cutover/check.jsonl
+ M .trellis/tasks/08-09-hindsight-initial-cutover/design.md
+ M .trellis/tasks/08-09-hindsight-initial-cutover/implement.jsonl
+ M .trellis/tasks/08-09-hindsight-initial-cutover/implement.md
+ M .trellis/tasks/08-09-hindsight-initial-cutover/prd.md
+ M .trellis/tasks/08-09-hindsight-memory-provider/info.md
+ M .trellis/tasks/08-09-hindsight-memory-provider/prd.md
+ M .trellis/tasks/08-09-memory-operations-ui/check.jsonl
+ M .trellis/tasks/08-09-memory-operations-ui/implement.jsonl
+ M .trellis/tasks/08-09-memory-operations-ui/prd.md
+ M .trellis/tasks/08-09-memory-replica-sync-recovery/check.jsonl
+ M .trellis/tasks/08-09-memory-replica-sync-recovery/design.md
+ M .trellis/tasks/08-09-memory-replica-sync-recovery/implement.md
+ M .trellis/tasks/08-09-memory-replica-sync-recovery/prd.md
+ M .trellis/tasks/08-09-memory-runtime-integration/check.jsonl
+ M .trellis/tasks/08-09-memory-runtime-integration/design.md
+ M .trellis/tasks/08-09-memory-runtime-integration/implement.jsonl
+ M .trellis/tasks/08-09-memory-runtime-integration/implement.md
+ M .trellis/tasks/08-09-memory-runtime-integration/prd.md
+ M .trellis/tasks/08-10-skills-mcp-productization/task.json
+ M .trellis/workspace/pleia/index.md
+ M .trellis/workspace/pleia/journal-1.md
+ M CLAUDE.md
+ M CONTEXT.md
+ M apps/desktop/package.json
+ M apps/desktop/src-tauri/Cargo.lock
+ M apps/desktop/src-tauri/Cargo.toml
+ M apps/desktop/src-tauri/build.rs
+ M apps/desktop/src-tauri/capabilities/home.json
+ M apps/desktop/src-tauri/capabilities/pet.json
+ M apps/desktop/src-tauri/src/index.md
+ M apps/desktop/src-tauri/src/lib.rs
+ M apps/desktop/src-tauri/src/node.rs
+ M apps/desktop/src-tauri/src/secrets.rs
+ M apps/desktop/src-tauri/src/ws_client.rs
+ M apps/desktop/src/features/chat-bubble/bubble-transcript-row.tsx
+ M apps/desktop/src/features/chat-bubble/bubble-transcript.ts
+ M apps/desktop/src/features/chat-bubble/chat-bubble-store.ts
+ M apps/desktop/src/features/chat-bubble/index.md
+ M apps/desktop/src/features/chat-bubble/use-bubble-transcript.ts
+ M apps/desktop/src/features/index.md
+ M apps/desktop/src/lib/index.md
+ M apps/desktop/src/lib/rpc-deadline.test.ts
+ M apps/desktop/src/lib/rpc-deadline.ts
+ M apps/desktop/src/lib/ws-client-methods.ts
+ M apps/desktop/src/lib/ws-client-routes.ts
+ M apps/desktop/src/lib/ws-client.test.ts
+ M apps/desktop/src/lib/ws-client.ts
+ M apps/desktop/src/renderer/live2d/avatar-commands.test.ts
+ M apps/desktop/src/renderer/live2d/avatar-commands.ts
+ M apps/desktop/src/renderer/live2d/avatar-controller.ts
+ M apps/desktop/src/renderer/live2d/index.md
+ M apps/desktop/src/renderer/live2d/load-character-model.ts
+ M apps/desktop/src/renderer/pet-scene.ts
+ M apps/desktop/src/windows/home/home-client-context.ts
+ M apps/desktop/src/windows/home/home-navigation.test.ts
+ M apps/desktop/src/windows/home/home-shell.test.tsx
+ M apps/desktop/src/windows/home/home-shell.tsx
+ M apps/desktop/src/windows/home/index.md
+ M apps/desktop/src/windows/home/pages.ts
+ M apps/desktop/src/windows/home/pages/chat/chat-page.tsx
+ M apps/desktop/src/windows/home/pages/chat/chat-transcript.ts
+ M apps/desktop/src/windows/home/pages/chat/index.md
+ M apps/desktop/src/windows/home/pages/chat/markdown-view.tsx
+ M apps/desktop/src/windows/home/pages/chat/timeline-message.tsx
+ M apps/desktop/src/windows/home/pages/chat/timeline-projection.ts
+ M apps/desktop/src/windows/home/pages/chat/timeline-view.tsx
+ M apps/desktop/src/windows/home/pages/chat/tool-result-display.ts
+ M apps/desktop/src/windows/home/pages/index.md
+ M apps/desktop/src/windows/home/pages/monitor/index.md
+ M apps/desktop/src/windows/home/pages/monitor/monitor-page.tsx
+ M apps/desktop/src/windows/home/pages/operations/index.md
+ M apps/desktop/src/windows/home/pages/operations/operations-page.tsx
+ M apps/desktop/src/windows/home/pages/perception/index.md
+ M apps/desktop/src/windows/home/pages/perception/perception-page.tsx
+ M apps/desktop/src/windows/home/pages/settings/config-groups.ts
+ M apps/desktop/src/windows/home/pages/settings/index.md
+ M apps/desktop/src/windows/home/pages/settings/settings-page.tsx
+ M apps/desktop/src/windows/home/resource-state-pages.test.tsx
+ M apps/desktop/src/windows/home/use-home-connection.ts
+ M apps/desktop/src/windows/pet/index.md
+ M apps/desktop/src/windows/pet/pet-stage.tsx
+ M apps/desktop/src/windows/pet/restore-pet-connection.test.ts
+ M apps/desktop/src/windows/pet/restore-pet-connection.ts
+ M docs/ARCHITECTURE-ROADMAP.md
+ M docs/AVATAR-PRESENTATION.md
+ M docs/HANDOFF.md
+ M docs/PRODUCT.md
+ M docs/TECH-STACK.md
+ M docs/adr/0009-single-memory-authority-with-local-replica.md
+ M docs/deferred-decisions.md
+ M docs/index.md
+ M e2e/src/fixture/index.md
+ M e2e/src/fixture/seed-canonical-memory.ts
+ M e2e/src/index.md
+ M eslint.config.js
+ M packages/core/package.json
+ M packages/core/src/activity/activity-layer.ts
+ M packages/core/src/activity/activity-sampler.test.ts
+ M packages/core/src/activity/activity-sampler.ts
+ M packages/core/src/activity/activity-state.ts
+ M packages/core/src/activity/index.md
+ M packages/core/src/agents/chat-activity.test.ts
+ M packages/core/src/agents/chat-activity.ts
+ M packages/core/src/agents/chat-agent-non-primary.test.ts
+ M packages/core/src/agents/chat-agent-presentation.test.ts
+ M packages/core/src/agents/chat-agent-time.test.ts
+ M packages/core/src/agents/chat-agent-tool-names.test.ts
+ M packages/core/src/agents/chat-agent-usage.test.ts
+ M packages/core/src/agents/chat-agent.test.ts
+ M packages/core/src/agents/chat-agent.ts
+ M packages/core/src/agents/conversation-store.ts
+ M packages/core/src/agents/index.md
+ M packages/core/src/agents/model-effect-middleware.ts
+ M packages/core/src/agents/run-observability-telemetry.test.ts
+ M packages/core/src/agents/run-observability-telemetry.ts
+ M packages/core/src/agents/tool-outcome.test.ts
+ M packages/core/src/agents/turn-queue.test.ts
+ M packages/core/src/agents/turn-queue.ts
+ M packages/core/src/agents/turn-recording.ts
+ M packages/core/src/approval/approval-interaction-service.ts
+ M packages/core/src/approval/index.md
+ M packages/core/src/avatar/avatar-subscriptions.test.ts
+ M packages/core/src/avatar/avatar-subscriptions.ts
+ M packages/core/src/avatar/avatar-tools.test.ts
+ M packages/core/src/avatar/avatar-tools.ts
+ M packages/core/src/avatar/index.md
+ M packages/core/src/avatar/play-motion-tool.ts
+ M packages/core/src/avatar/presentation-stop.test.ts
+ M packages/core/src/avatar/presentation-stop.ts
+ M packages/core/src/avatar/set-expression-tool.ts
+ M packages/core/src/boot/core-bootstrap.test.ts
+ M packages/core/src/boot/core-bootstrap.ts
+ M packages/core/src/boot/hindsight-setup-boot.ts
+ M packages/core/src/capabilities/capability-broker-state.ts
+ M packages/core/src/capabilities/capability-broker.test.ts
+ M packages/core/src/capabilities/capability-broker.ts
+ M packages/core/src/capabilities/capability-challenge.test.ts
+ M packages/core/src/capabilities/index.md
+ M packages/core/src/capabilities/route-capability.test.ts
+ M packages/core/src/capabilities/route-capability.ts
+ M packages/core/src/capabilities/screenshot-describe.test.ts
+ M packages/core/src/capabilities/screenshot-describe.ts
+ M packages/core/src/config/config-writer.ts
+ M packages/core/src/config/index.md
+ M packages/core/src/config/knob-registry.test.ts
+ M packages/core/src/config/knob-registry.ts
+ M packages/core/src/db/canonical-memory-authority-repo.test.ts
+ M packages/core/src/db/canonical-memory-authority-repo.ts
+ M packages/core/src/db/canonical-memory-repo.test.ts
+ M packages/core/src/db/canonical-memory-repo.ts
+ M packages/core/src/db/canonical-memory-sparse-repo.test.ts
+ M packages/core/src/db/canonical-memory-sparse-repo.ts
+ M packages/core/src/db/effect-repo.ts
+ M packages/core/src/db/hindsight-authority-repo.test.ts
+ M packages/core/src/db/hindsight-authority-repo.ts
+ M packages/core/src/db/hindsight-cutover-run-repo.ts
+ M packages/core/src/db/hindsight-replica-lease-repo.ts
+ M packages/core/src/db/hindsight-replica-record-store.ts
+ M packages/core/src/db/hindsight-replica-scheduler-repo.test.ts
+ M packages/core/src/db/hindsight-replica-scheduler-repo.ts
+ M packages/core/src/db/hindsight-replica-sync-repo.ts
+ M packages/core/src/db/index.md
+ M packages/core/src/db/migration-runner.test.ts
+ M packages/core/src/db/migration-runner.ts
+ M packages/core/src/db/migrations/035-timeline-presentation.test.ts
+ M packages/core/src/db/migrations/index-list.test.ts
+ M packages/core/src/db/migrations/index-list.ts
+ M packages/core/src/db/migrations/index.md
+ M packages/core/src/db/migrations/lineage-reopen-matrix.test.ts
+ M packages/core/src/db/run-event-live.test.ts
+ M packages/core/src/db/run-event-live.ts
+ M packages/core/src/db/run-event-repo.ts
+ M packages/core/src/db/run-readers.ts
+ M packages/core/src/db/run-repo.ts
+ M packages/core/src/db/scheduled-task-repo.test.ts
+ M packages/core/src/db/sqlite.test.ts
+ M packages/core/src/db/sqlite.ts
+ M packages/core/src/db/structured-memory-block-repo.test.ts
+ M packages/core/src/db/structured-memory-block-repo.ts
+ M packages/core/src/extensions/extension-composition.ts
+ M packages/core/src/extensions/extension-effect-exactly-once.test.ts
+ M packages/core/src/extensions/extension-registry.test.ts
+ M packages/core/src/extensions/extension-registry.ts
+ M packages/core/src/extensions/extension-run-context.test.ts
+ M packages/core/src/extensions/extension-run-context.ts
+ M packages/core/src/extensions/extension-sources.ts
+ M packages/core/src/extensions/extension-tools.ts
+ M packages/core/src/extensions/index.md
+ M packages/core/src/governance/core-tool-governance-adapter.test.ts
+ M packages/core/src/governance/core-tool-governance-adapter.ts
+ M packages/core/src/governance/governed-tool.ts
+ M packages/core/src/governance/index.md
+ M packages/core/src/harness/index.md
+ M packages/core/src/harness/recovery-coordinator.ts
+ M packages/core/src/harness/run-service.ts
+ M packages/core/src/harness/run-snapshot-capture.test.ts
+ M packages/core/src/harness/run-snapshot-capture.ts
+ M packages/core/src/index.md
+ M packages/core/src/main.ts
+ M packages/core/src/mcp/index.md
+ M packages/core/src/mcp/mcp-http.test.ts
+ M packages/core/src/mcp/mcp-tool-identity.ts
+ M packages/core/src/mcp/mcp-turn-tools.ts
+ M packages/core/src/memory/assembler.ts
+ M packages/core/src/memory/auto-layer-policy.ts
+ M packages/core/src/memory/auto-memory.ts
+ M packages/core/src/memory/bootstrap.ts
+ M packages/core/src/memory/canonical-local-runtime.ts
+ M packages/core/src/memory/canonical-tools/canonical-memory-tools.ts
+ M packages/core/src/memory/canonical-tools/index.md
+ M packages/core/src/memory/canonical-tools/memory-effect-tool.ts
+ M packages/core/src/memory/canonical-tools/reflect-tool.ts
+ M packages/core/src/memory/episodic-writer.ts
+ M packages/core/src/memory/hindsight/hindsight-authority-promotion-service.test.ts
+ M packages/core/src/memory/hindsight/hindsight-client-transport.test.ts
+ M packages/core/src/memory/hindsight/hindsight-client.test.ts
+ M packages/core/src/memory/hindsight/hindsight-client.ts
+ M packages/core/src/memory/hindsight/hindsight-compatibility-service.test.ts
+ M packages/core/src/memory/hindsight/hindsight-compatibility-service.ts
+ M packages/core/src/memory/hindsight/hindsight-contracts.ts
+ M packages/core/src/memory/hindsight/hindsight-errors.ts
+ M packages/core/src/memory/hindsight/hindsight-import-contracts.ts
+ M packages/core/src/memory/hindsight/hindsight-import-identity.ts
+ M packages/core/src/memory/hindsight/hindsight-incremental-sync.ts
+ M packages/core/src/memory/hindsight/hindsight-replica-projection.ts
+ M packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts
+ M packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts
+ M packages/core/src/memory/hindsight/hindsight-replica-sync-runner.test.ts
+ M packages/core/src/memory/hindsight/hindsight-replica-sync-runner.ts
+ M packages/core/src/memory/hindsight/hindsight-setup-service.test.ts
+ M packages/core/src/memory/hindsight/hindsight-setup-service.ts
+ M packages/core/src/memory/hindsight/hindsight-snapshot-contracts.ts
+ M packages/core/src/memory/hindsight/hindsight-snapshot-validator.ts
+ M packages/core/src/memory/hindsight/index.md
+ M packages/core/src/memory/image-description-writer.ts
+ M packages/core/src/memory/index.md
+ M packages/core/src/memory/legacy-migration/fenced-memory-engine.ts
+ M packages/core/src/memory/legacy-migration/index.md
+ M packages/core/src/memory/legacy-migration/legacy-migration-runner.ts
+ M packages/core/src/memory/legacy-migration/legacy-retain-sanitizer.ts
+ M packages/core/src/memory/legacy-migration/memory-authority-fence.ts
+ M packages/core/src/memory/local-memory-provider.ts
+ M packages/core/src/memory/memory-coordinator-results.test.ts
+ M packages/core/src/memory/memory-coordinator.test.ts
+ M packages/core/src/memory/memory-coordinator.ts
+ M packages/core/src/memory/memory-engine.ts
+ M packages/core/src/memory/memory-flush-port.test.ts
+ M packages/core/src/memory/memory-flush-port.ts
+ M packages/core/src/memory/pinned-block.ts
+ M packages/core/src/memory/retention-sweeper.ts
+ M packages/core/src/memory/runtime-composition.test.ts
+ M packages/core/src/memory/runtime-composition.ts
+ M packages/core/src/memory/runtime-selector.test.ts
+ M packages/core/src/memory/runtime-selector.ts
+ M packages/core/src/memory/tidy-pass.ts
+ M packages/core/src/memory/utility-slot.ts
+ M packages/core/src/observability/index.md
+ M packages/core/src/observability/observability-event-projection.ts
+ M packages/core/src/observability/observability-inspector.ts
+ M packages/core/src/perception/ambient-screenshot-sampler.ts
+ M packages/core/src/perception/foreground-screen.ts
+ M packages/core/src/perception/index.md
+ M packages/core/src/perception/perception-changes.test.ts
+ M packages/core/src/perception/perception-changes.ts
+ M packages/core/src/perception/perception-layer.ts
+ M packages/core/src/perception/privacy-pause-writer.test.ts
+ M packages/core/src/perception/screen-context.ts
+ M packages/core/src/scheduler/index.md
+ M packages/core/src/scheduler/schedule-engine.ts
+ M packages/core/src/scheduler/scheduled-run-adapter.ts
+ M packages/core/src/scheduler/scheduled-task-service.ts
+ M packages/core/src/scheduler/sweep-runner.test.ts
+ M packages/core/src/scheduler/sweep-runner.ts
+ M packages/core/src/server/connection-registry.ts
+ M packages/core/src/server/index.md
+ M packages/core/src/server/methods/avatar-subscribe.test.ts
+ M packages/core/src/server/methods/chat-send.ts
+ M packages/core/src/server/methods/index.md
+ M packages/core/src/server/methods/perception-subscribe.test.ts
+ M packages/core/src/server/timeline-subscriptions.ts
+ M packages/core/src/server/ws-server.ts
+ M packages/core/src/testing/index.md
+ M packages/core/src/testing/mock-language-model.ts
+ M packages/core/src/testing/run-service-stub.ts
+ M packages/core/src/time/current-time-tool.test.ts
+ M packages/core/src/time/current-time-tool.ts
+ M packages/core/src/time/index.md
+ M packages/core/src/time/time-context.test.ts
+ M packages/core/src/time/time-context.ts
+ M packages/shared/src/avatar-schema.test.ts
+ M packages/shared/src/avatar-schema.ts
+ M packages/shared/src/error-code-schema.test.ts
+ M packages/shared/src/error-code-schema.ts
+ M packages/shared/src/extension-discovery-schema.test.ts
+ M packages/shared/src/extension-discovery-schema.ts
+ M packages/shared/src/governance-presentation.test.ts
+ M packages/shared/src/governance-presentation.ts
+ M packages/shared/src/governance-registry.test.ts
+ M packages/shared/src/governance-registry.ts
+ M packages/shared/src/harness-schema.ts
+ M packages/shared/src/hindsight-connection-schema.ts
+ M packages/shared/src/hindsight-cutover-schema.ts
+ M packages/shared/src/index.md
+ M packages/shared/src/index.ts
+ M packages/shared/src/memory-provider-operation-schema.ts
+ M packages/shared/src/memory-replica-schedule-schema.ts
+ M packages/shared/src/run-event-schema.ts
+ M packages/shared/src/tool-presentation.test.ts
+ M packages/shared/src/tool-presentation.ts
+ M pnpm-lock.yaml
+?? .runtime/
+?? .trellis/spec/backend/accepted-work-lifecycle.md
+?? .trellis/spec/backend/canonical-local-memory-runtime.md
+?? .trellis/spec/backend/co-watching.md
+?? .trellis/spec/backend/hindsight-application-runtime.md
+?? .trellis/spec/backend/hindsight-runtime-reads.md
+?? .trellis/spec/backend/initiative-backoff.md
+?? .trellis/spec/backend/initiative-intentions.md
+?? .trellis/spec/backend/initiative-runtime.md
+?? .trellis/spec/backend/interaction-patterns.md
+?? .trellis/spec/backend/media-recommendations.md
+?? .trellis/spec/backend/memory-current-state-cutover.md
+?? .trellis/spec/backend/memory-local-cutover-coverage.md
+?? .trellis/spec/backend/memory-native-result-recovery.md
+?? .trellis/spec/backend/memory-operations.md
+?? .trellis/spec/backend/perception-evidence.md
+?? .trellis/spec/backend/sqlite-migration-lineage.md
+?? .trellis/spec/backend/sqlite-transaction-isolation.md
+?? .trellis/spec/backend/tool-disclosure.md
+?? .trellis/spec/backend/user-presence.md
+?? .trellis/spec/backend/user-timezone.md
+?? .trellis/spec/frontend/interaction-patterns.md
+?? .trellis/spec/frontend/user-presence-feedback.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/current-local-first-slice.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-execution-contract.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-maintenance-coordination.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-native-preflight.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-real-data-execution.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-real-data-prior-runs-2026-09-09.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-real-data-validation-2026-09-09.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/d78-validation-2026-09-09.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/first-slice-execution-contract.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/first-slice-validation-2026-09-08.md
+?? .trellis/tasks/08-09-hindsight-initial-cutover/research/validation/
+?? .trellis/tasks/08-09-memory-operations-ui/design.md
+?? .trellis/tasks/08-09-memory-operations-ui/grill.md
+?? .trellis/tasks/08-09-memory-operations-ui/implement.md
+?? .trellis/tasks/08-09-memory-replica-sync-recovery/research/wave-3-implementation-2026-09-06.md
+?? .trellis/tasks/08-09-memory-replica-sync-recovery/research/wave-3-review-2026-09-07.md
+?? .trellis/tasks/08-09-memory-runtime-integration/grill.md
+?? .trellis/tasks/08-09-memory-runtime-integration/research/
+?? .trellis/tasks/09-01-openbiliclaw-integration/
+?? .trellis/tasks/09-07-hindsight-recovery-evidence/
+?? .trellis/tasks/09-08-t4-heartbeat/
+?? .trellis/tasks/09-11-companion-initiative-implementation/
+?? .trellis/tasks/09-11-initiative-intentions-acceptance/
+?? .trellis/tasks/09-11-initiative-pattern-authoring/
+?? .trellis/tasks/09-11-initiative-presence-feedback/
+?? .trellis/tasks/09-11-initiative-runtime-foundation/
+?? .trellis/tasks/09-14-hindsight-integration-completeness-audit/
+?? .trellis/tasks/09-19-avatar-command-outcome/
+?? .trellis/tasks/10-21-agent-context-acceptance/
+?? .trellis/tasks/10-21-agent-delegation-runtime/
+?? .trellis/tasks/10-21-agent-delegation-source-context/
+?? .trellis/tasks/10-21-agent-source-context/
+?? .trellis/tasks/10-21-ai-sdk-upgrade-baseline/
+?? .trellis/tasks/archive/2026-09/09-19-hindsight-durable-operations/
+?? apps/desktop/src-tauri/capabilities/legacy-app-commands.json
+?? apps/desktop/src-tauri/examples/
+?? apps/desktop/src-tauri/permissions/
+?? apps/desktop/src-tauri/src/browser_attachment.rs
+?? apps/desktop/src-tauri/src/browser_attachment/
+?? apps/desktop/src-tauri/src/browser_attachment_commands.rs
+?? apps/desktop/src-tauri/src/browser_playback_protocol.rs
+?? apps/desktop/src-tauri/src/qqmm.rs
+?? apps/desktop/src/features/chat-bubble/bubble-committed-timeline.ts
+?? apps/desktop/src/features/chat-bubble/bubble-timeline-binding.test.ts
+?? apps/desktop/src/features/chat-bubble/bubble-timeline-binding.ts
+?? apps/desktop/src/features/co-watching/
+?? apps/desktop/src/features/initiative-patterns/
+?? apps/desktop/src/features/presence/
+?? apps/desktop/src/lib/ws-client-co-watching.test.ts
+?? apps/desktop/src/lib/ws-client-co-watching.ts
+?? apps/desktop/src/lib/ws-client-initiative.test.ts
+?? apps/desktop/src/lib/ws-client-initiative.ts
+?? apps/desktop/src/lib/ws-client-memory-operations.ts
+?? apps/desktop/src/lib/ws-client-presence.ts
+?? apps/desktop/src/lib/ws-client-user-timezone.ts
+?? apps/desktop/src/renderer/live2d/legacy-mask-context.test.ts
+?? apps/desktop/src/renderer/live2d/legacy-mask-context.ts
+?? apps/desktop/src/renderer/live2d/load-character-model.test.ts
+?? apps/desktop/src/windows/home/pages/initiative/
+?? apps/desktop/src/windows/home/pages/monitor/pattern-tool-monitor.test.tsx
+?? apps/desktop/src/windows/home/pages/operations/memory-authority-card.test.tsx
+?? apps/desktop/src/windows/home/pages/operations/memory-authority-card.tsx
+?? apps/desktop/src/windows/home/pages/operations/memory-authority-fixtures.ts
+?? apps/desktop/src/windows/home/pages/operations/memory-authority-state.test.ts
+?? apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts
+?? apps/desktop/src/windows/home/pages/operations/memory-operations-controller.test.ts
+?? apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts
+?? apps/desktop/src/windows/home/pages/operations/use-memory-operations.ts
+?? apps/desktop/src/windows/home/pages/perception/browser-attachment-card.tsx
+?? apps/desktop/src/windows/home/pages/perception/co-watching-card.tsx
+?? apps/desktop/src/windows/home/pages/perception/co-watching-controller.test.ts
+?? apps/desktop/src/windows/home/pages/perception/co-watching-controller.ts
+?? apps/desktop/src/windows/home/pages/perception/use-browser-attachment.ts
+?? apps/desktop/src/windows/home/pages/perception/use-co-watching.ts
+?? apps/desktop/src/windows/home/pages/qqmm/
+?? apps/desktop/src/windows/home/pages/settings/user-timezone-section.tsx
+?? apps/desktop/test/
+?? docs/AGENT-CONTEXT-SOURCES.md
+?? docs/AGENT-DELEGATION-RESEARCH.md
+?? docs/MEDIA-AGENT-INTEGRATION-PLAN.md
+?? docs/MEDIA-ANALYSIS-READ-2026-10-17.md
+?? docs/MEDIA-CO-WATCHING-INVITATION-2026-10-16.md
+?? docs/MEDIA-CO-WATCHING-PRODUCTION-2026-10-16.md
+?? docs/MEDIA-CONTRACT-REVIEW-2026-10-10.md
+?? docs/MEDIA-ENTRY-IMPLEMENTATION-2026-10-17.md
+?? docs/MEDIA-IMPLEMENTATION-2026-10-10.md
+?? docs/MEDIA-INTEGRATION.md
+?? docs/MEDIA-LIVE-VALIDATION-2026-10-13.md
+?? docs/MEDIA-PLAYBACK-INTEGRATION-2026-10-15.md
+?? docs/MEDIA-PREPARED-PLAYBACK-VALIDATION-2026-10-16.md
+?? docs/MEDIA-RECOMMENDATIONS-IMPLEMENTATION-2026-10-18.md
+?? docs/MEDIA-VALIDATION-2026-10-09.md
+?? docs/SKILL-TOOL-DISCLOSURE-2026-10-17.md
+?? docs/research/
+?? e2e/src/avatar-command-outcome.e2e.test.ts
+?? e2e/src/fixture/initiative-interview-seed.ts
+?? e2e/src/fixture/initiative-process.ts
+?? e2e/src/fixture/initiative-test-entry.ts
+?? e2e/src/fixture/pattern-process-entry.ts
+?? e2e/src/fixture/real-provider-observer.e2e.test.ts
+?? e2e/src/fixture/real-provider-observer.ts
+?? e2e/src/fixture/scripted-provider.ts
+?? e2e/src/initiative-intention-real.e2e.test.ts
+?? e2e/src/initiative-pattern-real.e2e.test.ts
+?? e2e/src/initiative-pattern.e2e.test.ts
+?? e2e/src/initiative-recovery.e2e.test.ts
+?? e2e/src/initiative-runtime.e2e.test.ts
+?? integrations/
+?? packages/core/resources/
+?? packages/core/src/agents/chat-agent-baseline-integration.test.ts
+?? packages/core/src/agents/chat-agent-canonical-memory.test.ts
+?? packages/core/src/agents/chat-agent-memory-recall.test.ts
+?? packages/core/src/agents/chat-agent-primary-commit.test.ts
+?? packages/core/src/agents/heartbeat-respond-tool.test.ts
+?? packages/core/src/agents/heartbeat-respond-tool.ts
+?? packages/core/src/agents/initiative-context.ts
+?? packages/core/src/agents/sdk-wire-compatibility.test.ts
+?? packages/core/src/agents/tool-disclosure.test.ts
+?? packages/core/src/agents/tool-disclosure.ts
+?? packages/core/src/agents/turn-queue-availability.test.ts
+?? packages/core/src/avatar/avatar-outcomes.test.ts
+?? packages/core/src/avatar/avatar-outcomes.ts
+?? packages/core/src/avatar/avatar-tool-result.ts
+?? packages/core/src/co-watching/
+?? packages/core/src/config/avatar-config.test.ts
+?? packages/core/src/config/avatar-config.ts
+?? packages/core/src/config/hindsight-policy-config.ts
+?? packages/core/src/config/initiative-intention-config.ts
+?? packages/core/src/config/initiative-policy-config.test.ts
+?? packages/core/src/config/initiative-policy-config.ts
+?? packages/core/src/config/initiative-wake-config.ts
+?? packages/core/src/config/initiative-wake-knobs.test.ts
+?? packages/core/src/config/initiative-wake-knobs.ts
+?? packages/core/src/config/viewing-invitation-config.test.ts
+?? packages/core/src/config/viewing-invitation-config.ts
+?? packages/core/src/db/canonical-ingestion-repo.test.ts
+?? packages/core/src/db/canonical-ingestion-repo.ts
+?? packages/core/src/db/canonical-ingestion-source-repo.ts
+?? packages/core/src/db/canonical-memory-maintenance-contract.ts
+?? packages/core/src/db/canonical-memory-maintenance-copy.test.ts
+?? packages/core/src/db/canonical-memory-maintenance-copy.ts
+?? packages/core/src/db/canonical-memory-maintenance-evidence.ts
+?? packages/core/src/db/canonical-memory-maintenance-fixtures.ts
+?? packages/core/src/db/canonical-memory-maintenance-ingestion.test.ts
+?? packages/core/src/db/canonical-memory-maintenance-ingestion.ts
+?? packages/core/src/db/canonical-memory-maintenance-journal.ts
+?? packages/core/src/db/canonical-memory-maintenance-mutations.ts
+?? packages/core/src/db/canonical-memory-maintenance-query.ts
+?? packages/core/src/db/canonical-memory-maintenance-records.ts
+?? packages/core/src/db/canonical-memory-maintenance-repo.test.ts
+?? packages/core/src/db/canonical-memory-maintenance-repo.ts
+?? packages/core/src/db/canonical-memory-maintenance-retention.test.ts
+?? packages/core/src/db/canonical-memory-maintenance-retention.ts
+?? packages/core/src/db/canonical-memory-maintenance-storage.ts
+?? packages/core/src/db/canonical-memory-maintenance-visibility.test.ts
+?? packages/core/src/db/hindsight-application-bootstrap-evidence.ts
+?? packages/core/src/db/hindsight-application-command-contract.ts
+?? packages/core/src/db/hindsight-application-command-fixtures.ts
+?? packages/core/src/db/hindsight-application-command-repo.test.ts
+?? packages/core/src/db/hindsight-application-command-repo.ts
+?? packages/core/src/db/hindsight-application-command-storage.ts
+?? packages/core/src/db/hindsight-application-replica-blocks.ts
+?? packages/core/src/db/hindsight-application-replica-cache.ts
+?? packages/core/src/db/hindsight-application-replica-checkpoint.ts
+?? packages/core/src/db/hindsight-application-replica-codec.ts
+?? packages/core/src/db/hindsight-application-replica-contract.ts
+?? packages/core/src/db/hindsight-application-replica-evidence.ts
+?? packages/core/src/db/hindsight-application-replica-heads.ts
+?? packages/core/src/db/hindsight-application-replica-publication.ts
+?? packages/core/src/db/hindsight-application-replica-query.ts
+?? packages/core/src/db/hindsight-application-replica-records.ts
+?? packages/core/src/db/hindsight-application-replica-repo.test.ts
+?? packages/core/src/db/hindsight-application-replica-repo.ts
+?? packages/core/src/db/hindsight-current-candidate-repo.ts
+?? packages/core/src/db/hindsight-current-capture-json.ts
+?? packages/core/src/db/hindsight-current-capture-reader.ts
+?? packages/core/src/db/hindsight-current-capture-repo.ts
+?? packages/core/src/db/hindsight-current-cutover-guard.ts
+?? packages/core/src/db/hindsight-current-fixtures.ts
+?? packages/core/src/db/hindsight-current-import-repo.ts
+?? packages/core/src/db/hindsight-current-invalidation-repo.ts
+?? packages/core/src/db/hindsight-current-json.test.ts
+?? packages/core/src/db/hindsight-current-maintenance.test.ts
+?? packages/core/src/db/hindsight-current-preparation-repo.ts
+?? packages/core/src/db/hindsight-current-replica-publication.ts
+?? packages/core/src/db/hindsight-current-state-repo.test.ts
+?? packages/core/src/db/hindsight-current-status-repo.test.ts
+?? packages/core/src/db/hindsight-current-status-repo.ts
+?? packages/core/src/db/hindsight-current-verification-repo.ts
+?? packages/core/src/db/hindsight-cutover-run-repo.test.ts
+?? packages/core/src/db/hindsight-ingestion-durability.ts
+?? packages/core/src/db/hindsight-ingestion-guard.ts
+?? packages/core/src/db/hindsight-ingestion-repo.ts
+?? packages/core/src/db/hindsight-ingestion-source-repo.ts
+?? packages/core/src/db/hindsight-local-bank-binding.test.ts
+?? packages/core/src/db/hindsight-local-bank-binding.ts
+?? packages/core/src/db/hindsight-local-coverage-b2.ts
+?? packages/core/src/db/hindsight-local-coverage-fixtures.ts
+?? packages/core/src/db/hindsight-local-coverage-guard.ts
+?? packages/core/src/db/hindsight-local-coverage-reader.ts
+?? packages/core/src/db/hindsight-local-coverage-repo.test.ts
+?? packages/core/src/db/hindsight-local-coverage-repo.ts
+?? packages/core/src/db/hindsight-memory-write-contract.ts
+?? packages/core/src/db/hindsight-memory-write-repo.test.ts
+?? packages/core/src/db/hindsight-memory-write-repo.ts
+?? packages/core/src/db/hindsight-memory-write-storage.ts
+?? packages/core/src/db/hindsight-policy-work-contract.ts
+?? packages/core/src/db/hindsight-policy-work-repo.test.ts
+?? packages/core/src/db/hindsight-policy-work-repo.ts
+?? packages/core/src/db/hindsight-policy-work-storage.ts
+?? packages/core/src/db/hindsight-replica-lease-repo.test.ts
+?? packages/core/src/db/hindsight-replica-visibility.test.ts
+?? packages/core/src/db/hindsight-runtime-admission-repo.test.ts
+?? packages/core/src/db/hindsight-runtime-admission-repo.ts
+?? packages/core/src/db/hindsight-runtime-memory-view.ts
+?? packages/core/src/db/hindsight-source-evidence-repo.test.ts
+?? packages/core/src/db/hindsight-source-evidence-repo.ts
+?? packages/core/src/db/initiative-completion-source.test.ts
+?? packages/core/src/db/initiative-completion-source.ts
+?? packages/core/src/db/initiative-opportunity-repo.test.ts
+?? packages/core/src/db/initiative-opportunity-repo.ts
+?? packages/core/src/db/memory-operation-repo.test.ts
+?? packages/core/src/db/memory-operation-repo.ts
+?? packages/core/src/db/migrations/035-pending-memory.ts
+?? packages/core/src/db/migrations/036-memory-timeline-convergence.test.ts
+?? packages/core/src/db/migrations/036-memory-timeline-convergence.ts
+?? packages/core/src/db/migrations/037-hindsight-local-coverage.ts
+?? packages/core/src/db/migrations/038-hindsight-source-evidence.ts
+?? packages/core/src/db/migrations/039-hindsight-current-state.ts
+?? packages/core/src/db/migrations/040-hindsight-cutover-convergence-fixtures.ts
+?? packages/core/src/db/migrations/040-hindsight-cutover-convergence.test.ts
+?? packages/core/src/db/migrations/040-hindsight-cutover-convergence.ts
+?? packages/core/src/db/migrations/040-hindsight-cutover-schema.ts
+?? packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts
+?? packages/core/src/db/migrations/041-canonical-memory-maintenance.ts
+?? packages/core/src/db/migrations/042-hindsight-application-state.test.ts
+?? packages/core/src/db/migrations/042-hindsight-application-state.ts
+?? packages/core/src/db/migrations/043-hindsight-ingestion.test.ts
+?? packages/core/src/db/migrations/043-hindsight-ingestion.ts
+?? packages/core/src/db/migrations/044-hindsight-application-commands.test.ts
+?? packages/core/src/db/migrations/044-hindsight-application-commands.ts
+?? packages/core/src/db/migrations/045-hindsight-policy-work.test.ts
+?? packages/core/src/db/migrations/045-hindsight-policy-work.ts
+?? packages/core/src/db/migrations/046-hindsight-runtime-admission.ts
+?? packages/core/src/db/migrations/047-hindsight-memory-writes.ts
+?? packages/core/src/db/migrations/048-memory-operations.test.ts
+?? packages/core/src/db/migrations/048-memory-operations.ts
+?? packages/core/src/db/migrations/049-initiative-delivery.ts
+?? packages/core/src/db/migrations/050-initiative-model-opportunities.test.ts
+?? packages/core/src/db/migrations/050-initiative-model-opportunities.ts
+?? packages/core/src/db/migrations/051-initiative-feedback.test.ts
+?? packages/core/src/db/migrations/051-initiative-feedback.ts
+?? packages/core/src/db/migrations/052-interaction-patterns.test.ts
+?? packages/core/src/db/migrations/052-interaction-patterns.ts
+?? packages/core/src/db/migrations/053-initiative-wake-policy.test.ts
+?? packages/core/src/db/migrations/053-initiative-wake-policy.ts
+?? packages/core/src/db/migrations/054-initiative-intentions.test.ts
+?? packages/core/src/db/migrations/054-initiative-intentions.ts
+?? packages/core/src/db/migrations/055-initiative-backoff.test.ts
+?? packages/core/src/db/migrations/055-initiative-backoff.ts
+?? packages/core/src/db/pending-memory-repo.test.ts
+?? packages/core/src/db/pending-memory-repo.ts
+?? packages/core/src/db/pending-memory-store.ts
+?? packages/core/src/db/pending-memory-transition.ts
+?? packages/core/src/db/primary-memory-source-read.ts
+?? packages/core/src/db/run-delivery-repo.test.ts
+?? packages/core/src/db/run-delivery-repo.ts
+?? packages/core/src/db/run-delivery-transition.ts
+?? packages/core/src/db/run-work-transition.ts
+?? packages/core/src/db/user-timezone-repo.ts
+?? packages/core/src/delivery/
+?? packages/core/src/extensions/tool-disclosure-snapshot.test.ts
+?? packages/core/src/extensions/tool-disclosure-snapshot.ts
+?? packages/core/src/governance/captured-tool-execution.test.ts
+?? packages/core/src/governance/captured-tool-execution.ts
+?? packages/core/src/governance/governed-tool-unattended.test.ts
+?? packages/core/src/harness/initiative-recovery.test.ts
+?? packages/core/src/harness/initiative-recovery.ts
+?? packages/core/src/harness/prepared-publication-authorization.test.ts
+?? packages/core/src/harness/prepared-publication-authorization.ts
+?? packages/core/src/harness/run-prepared-publication.ts
+?? packages/core/src/harness/run-service-memory-restore.test.ts
+?? packages/core/src/harness/run-snapshot-capture-lifetime.test.ts
+?? packages/core/src/harness/run-work-binding.test.ts
+?? packages/core/src/harness/run-work-binding.ts
+?? packages/core/src/harness/run-work.test.ts
+?? packages/core/src/initiative/
+?? packages/core/src/memory/auto-memory-shutdown.test.ts
+?? packages/core/src/memory/automatic-memory-recall.test.ts
+?? packages/core/src/memory/automatic-memory-recall.ts
+?? packages/core/src/memory/canonical-ingestion-model.ts
+?? packages/core/src/memory/canonical-ingestion-plan.ts
+?? packages/core/src/memory/canonical-ingestion-source.ts
+?? packages/core/src/memory/canonical-layer-policy.ts
+?? packages/core/src/memory/canonical-local-banks.ts
+?? packages/core/src/memory/canonical-local-ingestion-batch.ts
+?? packages/core/src/memory/canonical-local-ingestion.test.ts
+?? packages/core/src/memory/canonical-local-ingestion.ts
+?? packages/core/src/memory/canonical-local-maintenance.test.ts
+?? packages/core/src/memory/canonical-local-retention.ts
+?? packages/core/src/memory/canonical-local-subsystem.ts
+?? packages/core/src/memory/canonical-local-tidy.ts
+?? packages/core/src/memory/canonical-memory-assembly.test.ts
+?? packages/core/src/memory/canonical-memory-assembly.ts
+?? packages/core/src/memory/canonical-memory-run.test.ts
+?? packages/core/src/memory/canonical-memory-run.ts
+?? packages/core/src/memory/canonical-memory-view.ts
+?? packages/core/src/memory/canonical-observed-write.ts
+?? packages/core/src/memory/hindsight-memory-consumer.test.ts
+?? packages/core/src/memory/hindsight-runtime-composition.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-binding-context.ts
+?? packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts
+?? packages/core/src/memory/hindsight/hindsight-application-body-transfer.ts
+?? packages/core/src/memory/hindsight/hindsight-application-bundle-loader.ts
+?? packages/core/src/memory/hindsight/hindsight-application-bundle.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-bundle.ts
+?? packages/core/src/memory/hindsight/hindsight-application-capability.ts
+?? packages/core/src/memory/hindsight/hindsight-application-client.ts
+?? packages/core/src/memory/hindsight/hindsight-application-cold-recovery.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-command-receipt.ts
+?? packages/core/src/memory/hindsight/hindsight-application-command-runner.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-command-runner.ts
+?? packages/core/src/memory/hindsight/hindsight-application-deadline.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-integrity.ts
+?? packages/core/src/memory/hindsight/hindsight-application-policy.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-policy.ts
+?? packages/core/src/memory/hindsight/hindsight-application-projection.ts
+?? packages/core/src/memory/hindsight/hindsight-application-recovery-replica.ts
+?? packages/core/src/memory/hindsight/hindsight-application-source-binding.ts
+?? packages/core/src/memory/hindsight/hindsight-application-source-write.ts
+?? packages/core/src/memory/hindsight/hindsight-application-sync-runner.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-sync-runner.ts
+?? packages/core/src/memory/hindsight/hindsight-application-transport.test.ts
+?? packages/core/src/memory/hindsight/hindsight-application-writer.ts
+?? packages/core/src/memory/hindsight/hindsight-current-baseline.test.ts
+?? packages/core/src/memory/hindsight/hindsight-current-baseline.ts
+?? packages/core/src/memory/hindsight/hindsight-current-client.ts
+?? packages/core/src/memory/hindsight/hindsight-current-import-proof.ts
+?? packages/core/src/memory/hindsight/hindsight-current-invalidation.test.ts
+?? packages/core/src/memory/hindsight/hindsight-current-local-source.test.ts
+?? packages/core/src/memory/hindsight/hindsight-current-local-source.ts
+?? packages/core/src/memory/hindsight/hindsight-current-maintenance-hash.ts
+?? packages/core/src/memory/hindsight/hindsight-current-maintenance-proof.ts
+?? packages/core/src/memory/hindsight/hindsight-current-maintenance-stream.ts
+?? packages/core/src/memory/hindsight/hindsight-current-orchestrator.test.ts
+?? packages/core/src/memory/hindsight/hindsight-current-orchestrator.ts
+?? packages/core/src/memory/hindsight/hindsight-current-request-preflight.ts
+?? packages/core/src/memory/hindsight/hindsight-current-request.ts
+?? packages/core/src/memory/hindsight/hindsight-current-state-hash.ts
+?? packages/core/src/memory/hindsight/hindsight-current-verification-identity.ts
+?? packages/core/src/memory/hindsight/hindsight-derived-completion.ts
+?? packages/core/src/memory/hindsight/hindsight-derived-input-admission.test.ts
+?? packages/core/src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts
+?? packages/core/src/memory/hindsight/hindsight-http-transport.test.ts
+?? packages/core/src/memory/hindsight/hindsight-http-transport.ts
+?? packages/core/src/memory/hindsight/hindsight-ingestion-contract.ts
+?? packages/core/src/memory/hindsight/hindsight-ingestion-lifetime.ts
+?? packages/core/src/memory/hindsight/hindsight-ingestion.test.ts
+?? packages/core/src/memory/hindsight/hindsight-ingestion.ts
+?? packages/core/src/memory/hindsight/hindsight-initiative-memory.test.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-pending-read.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-provider-context.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-provider.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-read-projection.test.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-read-projection.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-recall.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-reflect-deadline.test.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-reflect.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-runtime.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-admission.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-context.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-fixtures.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-mutation.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-native-fixtures.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-policy.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-recovery.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-result.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-write-retain.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-writes.test.ts
+?? packages/core/src/memory/hindsight/hindsight-memory-writes.ts
+?? packages/core/src/memory/hindsight/hindsight-native-proof.test.ts
+?? packages/core/src/memory/hindsight/hindsight-native-proof.ts
+?? packages/core/src/memory/hindsight/hindsight-native-result-client.ts
+?? packages/core/src/memory/hindsight/hindsight-observed-write.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-client.test.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-client.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-native-result.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-recovery-runner.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-recovery-stages.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-recovery.test.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-replay.ts
+?? packages/core/src/memory/hindsight/hindsight-pending-retain.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-admission.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-assessment.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-context.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-context.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-execution.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-fixtures.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-model.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-prompt.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-publication.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-targets.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator-tools.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator.test.ts
+?? packages/core/src/memory/hindsight/hindsight-policy-curator.ts
+?? packages/core/src/memory/hindsight/hindsight-recall-evidence.ts
+?? packages/core/src/memory/hindsight/hindsight-replica-projection.test.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-bank-service.test.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-client.test.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-client.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-connection.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-consumers.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-state.ts
+?? packages/core/src/memory/hindsight/hindsight-runtime-view.ts
+?? packages/core/src/memory/hindsight/hindsight-setup-recovery.test.ts
+?? packages/core/src/memory/hindsight/hindsight-setup-recovery.ts
+?? packages/core/src/memory/hindsight/hindsight-source-binding-proof.ts
+?? packages/core/src/memory/hindsight/hindsight-source-evidence-projection.ts
+?? packages/core/src/memory/hindsight/hindsight-source-lifetime.ts
+?? packages/core/src/memory/hindsight/hindsight-source-preparation.ts
+?? packages/core/src/memory/initiative-memory-assembly.test.ts
+?? packages/core/src/memory/initiative-memory-assembly.ts
+?? packages/core/src/memory/initiative-memory-recall.test.ts
+?? packages/core/src/memory/initiative-memory-recall.ts
+?? packages/core/src/memory/legacy-migration/fenced-memory-engine.test.ts
+?? packages/core/src/memory/legacy-migration/memory-authority-fence.test.ts
+?? packages/core/src/memory/local-memory-observed.test.ts
+?? packages/core/src/memory/memory-capability-snapshot.ts
+?? packages/core/src/memory/memory-recall-evidence.ts
+?? packages/core/src/memory/memory-recall-pending.test.ts
+?? packages/core/src/memory/memory-recall-selection.ts
+?? packages/core/src/memory/operations/
+?? packages/core/src/memory/pending-memory-safety.ts
+?? packages/core/src/memory/pending-memory-writer.ts
+?? packages/core/src/memory/primary-memory-source-state.ts
+?? packages/core/src/memory/runtime-activation-failure.test.ts
+?? packages/core/src/memory/utility-slot-shutdown.test.ts
+?? packages/core/src/observability/initiative-observability.test.ts
+?? packages/core/src/observability/presence-event-bridge.ts
+?? packages/core/src/perception/ambient-observation.ts
+?? packages/core/src/perception/browser-playback-sources.test.ts
+?? packages/core/src/perception/browser-playback-sources.ts
+?? packages/core/src/perception/foreground-continuity.test.ts
+?? packages/core/src/perception/foreground-continuity.ts
+?? packages/core/src/perception/perception-evidence.test.ts
+?? packages/core/src/perception/perception-evidence.ts
+?? packages/core/src/presence/
+?? packages/core/src/scheduler/scheduled-delivery.test.ts
+?? packages/core/src/server/memory-operation-subscriptions.ts
+?? packages/core/src/server/methods/avatar-outcome.test.ts
+?? packages/core/src/server/methods/avatar-outcome.ts
+?? packages/core/src/server/methods/browser-playback-methods.ts
+?? packages/core/src/server/methods/chat-send-sdk-transport.test.ts
+?? packages/core/src/server/methods/co-watching-methods.test.ts
+?? packages/core/src/server/methods/co-watching-methods.ts
+?? packages/core/src/server/methods/initiative-backoff-methods.ts
+?? packages/core/src/server/methods/initiative-setup-methods.ts
+?? packages/core/src/server/methods/interaction-pattern-methods.ts
+?? packages/core/src/server/methods/memory-authority-status.test.ts
+?? packages/core/src/server/methods/memory-authority-status.ts
+?? packages/core/src/server/methods/memory-operation-methods.test.ts
+?? packages/core/src/server/methods/memory-operation-methods.ts
+?? packages/core/src/server/methods/presence-methods.test.ts
+?? packages/core/src/server/methods/presence-methods.ts
+?? packages/core/src/server/methods/user-timezone-methods.test.ts
+?? packages/core/src/server/methods/user-timezone-methods.ts
+?? packages/core/src/testing/co-watching-fixture.ts
+?? packages/core/src/testing/hindsight-application-fixtures.ts
+?? packages/core/src/testing/hindsight-application-runtime-fixtures.ts
+?? packages/core/src/testing/hindsight-http-test-fixture.ts
+?? packages/core/src/testing/hindsight-runtime-composition-fixtures.ts
+?? packages/core/src/testing/initiative-fixture.ts
+?? packages/core/src/testing/prepared-publication-fixture.ts
+?? packages/core/src/testing/real-playback-client.ts
+?? packages/core/src/time/user-timezone-schedules.test.ts
+?? packages/core/src/time/user-timezone-service.test.ts
+?? packages/core/src/time/user-timezone-service.ts
+?? packages/shared/fixtures/browser-playback/
+?? packages/shared/src/browser-playback-schema.test.ts
+?? packages/shared/src/browser-playback-schema.ts
+?? packages/shared/src/co-watching-analysis-read-schema.test.ts
+?? packages/shared/src/co-watching-analysis-read-schema.ts
+?? packages/shared/src/co-watching-invitation-schema.test.ts
+?? packages/shared/src/co-watching-invitation-schema.ts
+?? packages/shared/src/co-watching-publication-schema.ts
+?? packages/shared/src/co-watching-schema.test.ts
+?? packages/shared/src/co-watching-schema.ts
+?? packages/shared/src/hindsight-application-artifact-schema.ts
+?? packages/shared/src/hindsight-application-body-schema.ts
+?? packages/shared/src/hindsight-application-content-schema.ts
+?? packages/shared/src/hindsight-application-encoding.test.ts
+?? packages/shared/src/hindsight-application-encoding.ts
+?? packages/shared/src/hindsight-application-json-reader.ts
+?? packages/shared/src/hindsight-application-json.ts
+?? packages/shared/src/hindsight-application-native-schema.ts
+?? packages/shared/src/hindsight-application-primitives-schema.ts
+?? packages/shared/src/hindsight-application-read-schema.ts
+?? packages/shared/src/hindsight-application-replica-schema.ts
+?? packages/shared/src/hindsight-current-canonical-schema.ts
+?? packages/shared/src/hindsight-current-capture-schema.ts
+?? packages/shared/src/hindsight-current-evidence-schema.ts
+?? packages/shared/src/hindsight-current-invalidation-schema.ts
+?? packages/shared/src/hindsight-current-state-encoding.test.ts
+?? packages/shared/src/hindsight-current-state-encoding.ts
+?? packages/shared/src/hindsight-current-state-schema.ts
+?? packages/shared/src/hindsight-current-status-schema.ts
+?? packages/shared/src/hindsight-cutover-verification-schema.ts
+?? packages/shared/src/hindsight-json-schema.test.ts
+?? packages/shared/src/hindsight-json-schema.ts
+?? packages/shared/src/hindsight-local-coverage-schema.test.ts
+?? packages/shared/src/hindsight-local-coverage-schema.ts
+?? packages/shared/src/hindsight-memory-consumer-schema.test.ts
+?? packages/shared/src/hindsight-memory-consumer-schema.ts
+?? packages/shared/src/hindsight-native-proof-encoding.test.ts
+?? packages/shared/src/hindsight-native-proof-encoding.ts
+?? packages/shared/src/hindsight-native-result-schema.ts
+?? packages/shared/src/hindsight-native-runtime-schema.ts
+?? packages/shared/src/hindsight-native-snapshot-schema.ts
+?? packages/shared/src/hindsight-source-evidence-schema.test.ts
+?? packages/shared/src/hindsight-source-evidence-schema.ts
+?? packages/shared/src/initiative-backoff-schema.test.ts
+?? packages/shared/src/initiative-backoff-schema.ts
+?? packages/shared/src/initiative-event-schema.ts
+?? packages/shared/src/initiative-feedback-event.test.ts
+?? packages/shared/src/initiative-intention-schema.test.ts
+?? packages/shared/src/initiative-intention-schema.ts
+?? packages/shared/src/initiative-schema.ts
+?? packages/shared/src/initiative-setup-schema.ts
+?? packages/shared/src/initiative-wake-schema.test.ts
+?? packages/shared/src/initiative-wake-schema.ts
+?? packages/shared/src/interaction-pattern-protocol.ts
+?? packages/shared/src/interaction-pattern-schema.test.ts
+?? packages/shared/src/interaction-pattern-schema.ts
+?? packages/shared/src/media-access-schema.test.ts
+?? packages/shared/src/media-access-schema.ts
+?? packages/shared/src/media-analysis-schema.test.ts
+?? packages/shared/src/media-analysis-schema.ts
+?? packages/shared/src/memory-authority-status-schema.test.ts
+?? packages/shared/src/memory-authority-status-schema.ts
+?? packages/shared/src/memory-operation-schema.test.ts
+?? packages/shared/src/memory-operation-schema.ts
+?? packages/shared/src/memory-policy-assessment-schema.test.ts
+?? packages/shared/src/memory-policy-assessment-schema.ts
+?? packages/shared/src/memory-provider-pending-results.test.ts
+?? packages/shared/src/pending-memory-schema.test.ts
+?? packages/shared/src/pending-memory-schema.ts
+?? packages/shared/src/prepared-publication-schema.test.ts
+?? packages/shared/src/prepared-publication-schema.ts
+?? packages/shared/src/presence-schema.test.ts
+?? packages/shared/src/presence-schema.ts
+?? packages/shared/src/run-work-schema.test.ts
+?? packages/shared/src/run-work-schema.ts
+?? packages/shared/src/timeline-presentation-report-schema.ts
+?? packages/shared/src/user-timezone-schema.test.ts
+?? packages/shared/src/user-timezone-schema.ts

@@ -1,4 +1,4 @@
-# Frontend UI/UX Program — Implementation Report (Pure-Frontend Phase Complete)
+# Frontend UI/UX Program — Delivery and Follow-up Report
 
 > Task `.trellis/tasks/08-30-frontend-uiux-optimization` (child of 08-22). Scope executed by the T4
 > Leader session 2026-08-30/31 under the owner mandate "implement the pure-frontend batches in order,
@@ -8,6 +8,37 @@
 > the gates (desktop typecheck, full desktop test suite, scoped ESLint, `git diff --check`, vite build).
 > Nothing outside `apps/desktop/**` (+ two spec files + task docs) was touched; the parallel compaction
 > session's tree content was never modified.
+
+## Owner feedback and scope refresh — 2026-09-05
+
+The owner reports that the non-Monitor visual baseline is broadly satisfactory, with its small UI/UX
+details deferred to a focused later pass. G5 explicitly excludes Monitor: its current page only proves
+traceability, and its information organization, Chinese coverage, interaction and visual quality are
+not accepted. D68-B must port/rebuild primarily from DSH Trajectory. The original batch evidence below
+is historical; the new G4 implementation has its own evidence and does not certify Monitor acceptance.
+
+The [G1 grill record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md)
+tracks the next stage: Monitor, Chat/Pet live tool feedback, and readable tool/capability/approval
+information. The existing task remains pure frontend. Cross-layer batches require their own reviewed
+artifacts; Live2D configuration and theme/font settings entries remain later work.
+
+Owner G4 clarification: hashes, internal revisions/generations and opaque identifiers must be removed
+from user-facing details as well as card faces. Batch 4's historical move into technical disclosures
+does not satisfy this requirement. The [current removal inventory](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md)
+covers MCP/Skills, shared extension status, Settings, Monitor and import feedback. Its first pure-frontend
+slice is now implemented; cross-layer labels and Monitor remain under their respective children.
+
+## G4 follow-up — useful-information cleanup (2026-09-05)
+
+Removed MCP/Skills internal bookkeeping and metadata dumps, shared Host identity copies, permission
+revision counters and raw import identity. Useful tools, package declarations/files, outcomes, counts,
+timing and actions remain. MCP service wording now follows actual connected state, and extension
+status explicitly distinguishes old snapshots from current availability.
+
+Independent review passed without fixes: workspace typecheck, root lint (one preexisting Core warning),
+Desktop 108 files / 594 tests, scoped ESLint and Vite build. No commit was made. Actual WebView2 and
+owner visual acceptance remain pending. Full scope and protection evidence:
+[G4 implementation evidence](../.trellis/tasks/08-30-frontend-uiux-optimization/implementation-evidence-g4-2026-09-05.md).
 
 ## Batch 1 — token foundation + four defect fixes (`266cad8`, 26 files)
 
@@ -83,16 +114,17 @@ filters, no premature primitive).
 {config-groups.ts (new), knob-field, settings-page}`; `pages/monitor/{monitor-labels.ts (new),
 monitor-page/-view}`; `components/connection-status/*`; `home-shell.tsx`; tests updated faithfully.
 
-**Expected changes**: no raw ids/hashes on card faces (inspect the 技术详情 disclosure for them);
-MCP/Skills browse as list + detail pane; settings grouped and searchable with Chinese labels; monitor
-fully Chinese (incl. 请求取消 filter); disconnect banner no longer shoves content down.
+**Historical result and current limitation**: internal fields were moved off card faces into technical
+disclosures. G4 now requires removing those fields from details too. MCP/Skills browse as list + detail
+pane; Settings are grouped/searchable; Monitor labels were localized; the connection banner reserves
+its presentation space. The new metadata-removal requirement remains to implement.
 
 ## Batch 5 — streaming, memory, visibility, DSH monitor scaffold, bundle (`865b896`, 29 files)
 
 **Implemented**: **P1a** chat deltas coalesced through a 40ms trailing-edge flusher (`chat-delta-
 coalescer.ts`; first delta immediate; rAF rejected — hidden windows pause it; no polling loop);
 atomic persisted-swap / clearInflight / scroll-follow contracts preserved and test-pinned. **P1b**
-timeline mount cap 300 with exact `nextBefore` re-point (trimmed rows refetchable, no holes) + 
+timeline mount cap 300 with exact `nextBefore` re-point (trimmed rows refetchable, no holes) +
 加载更早消息 jump restore + image data-URL LRU (40, failure eviction). **P1e** `page-visibility-store`
 (single writer: home-shell); hidden monitor tears down live subscription and suppresses publishing
 with visibility surviving dispose (reconnect-while-hidden stays gated — check-found major, repaired);
@@ -103,10 +135,14 @@ adopted byte-equivalently by mcp/skills. **P1f** react-markdown lazy chunk + `ta
 home entry **265.7 kB → 115.1 kB** (gzip 80.4 → 35.7 kB). **P1g** spike removed from production
 build (dev-only input; dist verified clean). Formal check: 1 major + 3 minors repaired.
 
-**Expected changes**: long streaming replies no longer stutter (O(n²) markdown re-parse gone);
-long chats stop growing DOM/memory without losing access to older rows; a hidden monitor page stops
-burning renders; the monitor page is now the DSH-shaped operator surface; home window loads ~57%
-less JS up front; production build carries no spike scaffolding.
+**Expected changes and limits**: coalescing reduces state updates and Markdown parse frequency, but
+the accumulated text is still reparsed on each flush; incremental parsing and stutter-free long replies
+are not proven. Mounted timeline rows and the image cache are bounded while older rows remain
+accessible; hidden Monitor rendering/subscriptions are gated. The three-zone component is implemented,
+but the 2026-09-05 source audit found its right pane unreachable inside the current PageBody width
+(about 45rem available versus the 48rem container breakpoint). Actual wide-window layout and resizing
+remain D68 work. Under G5, the whole Monitor presentation must follow the DSH source baseline; fixing
+the breakpoint alone is insufficient. The recorded build loaded ~57% less home-entry JS and excluded spike scaffolding.
 
 ## Batch 6-FE — pet overlay hot-path economy (`15c4111`, 11 files)
 
@@ -141,18 +177,22 @@ ledger behaves like the chat timeline at the bottom (follows when pinned, stops 
 when scrolled up, offers an honest way back); every disclosure in the app collapses; the D67
 contract is now written law for future pages.
 
-## Remaining work (all cross-layer by definition)
+## Remaining work and ownership — 2026-09-05
 
-| Item | Blocker | Frontend consumer |
+| Item | Ownership / dependency | Frontend consumer |
 |---|---|---|
-| N1/N2/I1 shared capability→Chinese label map | Core approval labels + shared schema | tool-card readable `server · tool` names, permission card titles, 持久审批 list |
-| N3/D64 exec command disclosure | Rust challenge presentation | approval dialog Target section |
-| D76 `chat.tool` live event | Core stream-loop forwarding | in-flight tool cards, "executing" gap, pet bubble tool line |
-| L4/P1h/D19/D38 config batch | Core config keys + pet application | costume 3-column page (L3), unified fps, idle-pool editor, render-throttle key |
-| Settings entry for theme/font-scale | Core config keys | the seams are ready (`--text-scale`, `[data-theme]`) |
+| Monitor DSH Trajectory UI port/rebuild | D68/G5; reference components/styles/interaction over proven Core facts, with missing producers identified separately | DSH-led layout and visual hierarchy, complete Chinese UI copy, correct selection/live/history behavior, useful metrics and G4 metadata removal |
+| G4/D65 information cleanup | Desktop presentation, with separate safe-label projection work where needed | Remove internal bookkeeping from MCP/Skills, Settings, shared status, Monitor and import feedback, including expanded details |
+| U8/U9/U10 live tool feedback | D67; Core/Shared/Desktop contracts (`chat.tool` is only a proposed event name) | In-flight tool entries, truthful activity feedback, separate Pet text segments and temporary tool bubbles |
+| Live/persisted tool outcome reconciliation | D67 tool-feedback batch; canonical call/result identity and outcome semantics | Completed calls stop looking active; structured failures do not look successful |
+| N1/N2/N5/N7/I1 readable names | Core approval labels + shared presentation contract | Tool names, permission titles, durable approval list and dialog copy |
+| N3/D64 exec command disclosure | Rust challenge presentation; existing safe-disclosure contract | Approval dialog command-specific context |
+| L4/P1h/D19/D38 config batch | Later work, outside G1; Core config keys + Pet application | Costume 3-column page (L3), unified fps, idle-pool editor, render-throttle key |
+| Settings entry for theme/font-scale | Later work, outside G1; Core config keys | Existing seams (`--text-scale`, `[data-theme]`) |
 
-Manual acceptance pending (owner, per operating rules): packaged-WebView behavior of every visual
-change above; pet overlay manual checks (batch 6-FE list); monitor pane resize at real window sizes.
+Owner visual feedback is recorded above. Keep specific unverified acceptance items open, including
+Pet overlay behavior, real Monitor pane sizing/resizing, asynchronous selection/reconnect behavior,
+and long-stream profiling. Broad visual approval does not automatically check every PRD criterion.
 
 ## Metrics
 

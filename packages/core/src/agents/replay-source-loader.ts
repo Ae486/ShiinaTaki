@@ -39,6 +39,7 @@ export interface ReplaySourceInput {
   minimumRows?: number;
   maxRows?: number;
   pageSize?: number;
+  entryCost?: (entry: TimelineEntry) => number;
 }
 
 export function loadReplaySource(input: ReplaySourceInput): ReplaySource {
@@ -63,7 +64,7 @@ export function loadReplaySource(input: ReplaySourceInput): ReplaySource {
         break;
       }
       newestFirst.push(entry);
-      estimated += entryCost(entry);
+      estimated += (input.entryCost ?? entryCost)(entry);
       if (!budgetReached && reachesBudget(estimated, input.candidateBudget)) {
         budgetReached = true;
         budgetReachedAt = newestFirst.length;

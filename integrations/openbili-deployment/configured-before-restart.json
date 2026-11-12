@@ -1,0 +1,47 @@
+{
+  "image_id": "sha256:f24e8519df02cee288cada771654064d8f133894ab2648fb0da1513d1238a7e6",
+  "ping_status": 200,
+  "degraded": false,
+  "anonymous_peek_status": 401,
+  "authenticated_peek": {
+    "items": [],
+    "source": "existing_recommendations",
+    "total": 0,
+    "has_more": false
+  },
+  "profile_initialized": false,
+  "invalid_feedback_status": 404,
+  "models_metadata_read": {
+    "http_status": 200,
+    "native_ok": true,
+    "exact_model_listed": true
+  },
+  "setup_html_status": 200,
+  "setup_html_present": true,
+  "native_login_status": 200,
+  "cookie_authenticated_config_status": 200,
+  "setup_after_login_status": 200,
+  "table_counts": {
+    "recommendations": 0,
+    "events": 0,
+    "content_cache": 0,
+    "llm_usage": 0
+  },
+  "scheduler_enabled": false,
+  "source_incremental_enabled": false,
+  "enabled_sources": [],
+  "instances": {
+    "campaign-flash": {
+      "model": "deepseek-flash",
+      "provider_type": "openai_compatible",
+      "enabled": true
+    }
+  },
+  "default_chain": [
+    "campaign-flash"
+  ],
+  "evaluation_inherits": true,
+  "embedding_provider_set": false,
+  "embedding_service_available": false,
+  "native_supports_image_input": false
+}

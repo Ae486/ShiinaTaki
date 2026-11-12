@@ -1,0 +1,262 @@
+{
+  "kind": "recovered-complete-connected-journey",
+  "sourceSession": "01a1cf03-3415-7d93-9028-6a82ce7dfee1",
+  "continuationSession": "01a1cf67-4df4-7c42-af1c-51885631386c",
+  "repository": "G:\\TakiAgent-integration",
+  "branch": "integration/main-t4-20261111",
+  "status": "passed",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Boot native + Core; Legacy/empty",
+      "status": "passed",
+      "durationMs": 26
+    },
+    {
+      "id": 2,
+      "title": "Local onboarding + retaining Run",
+      "status": "passed",
+      "durationMs": 18741
+    },
+    {
+      "id": 3,
+      "title": "Hindsight connection + setup.validate + setup.apply",
+      "status": "passed",
+      "durationMs": 10203
+    },
+    {
+      "id": 4,
+      "title": "hindsight.activate",
+      "status": "passed",
+      "durationMs": 11756
+    },
+    {
+      "id": 5,
+      "title": "Hindsight capture + replica.sync incremental/full + second connection",
+      "status": "passed",
+      "durationMs": 69132
+    },
+    {
+      "id": "settings",
+      "title": "Home per-Bank settings, manual sync and second Home update",
+      "status": "passed",
+      "durationMs": 6055
+    },
+    {
+      "id": "schedule",
+      "title": "Attributable interval sync and an equivalent manual-only window",
+      "status": "passed",
+      "durationMs": 123910
+    },
+    {
+      "id": 6,
+      "title": "New Character mika: degraded Run, provision, recall, ingestion",
+      "status": "passed",
+      "durationMs": 19847
+    },
+    {
+      "id": "6b",
+      "title": "Probe: chat turns right after ingestion (consolidation race)",
+      "status": "passed",
+      "durationMs": 50402
+    },
+    {
+      "id": "pending",
+      "title": "Interrupted retain remains pending then recovers against Native",
+      "status": "passed",
+      "durationMs": 23909
+    },
+    {
+      "id": 7,
+      "title": "Timeout change -> config_changed -> connection.revalidate",
+      "status": "passed",
+      "durationMs": 526
+    },
+    {
+      "id": 8,
+      "title": "Core restart: status stable, no redispatch",
+      "status": "passed",
+      "durationMs": 5017
+    },
+    {
+      "id": 9,
+      "title": "Home reopen and reconnect",
+      "status": "passed",
+      "durationMs": 3541
+    },
+    {
+      "id": "sync-during-home",
+      "title": "Home reads and saves settings while a real Bank sync remains running",
+      "status": "passed",
+      "durationMs": 4448
+    },
+    {
+      "id": "pending-restart",
+      "title": "Original Pending retain survives Core restart and recovers automatically once",
+      "status": "passed",
+      "durationMs": 376945
+    },
+    {
+      "id": 10,
+      "title": "Explicit v2 template/default handoff",
+      "status": "passed",
+      "durationMs": 11889
+    },
+    {
+      "id": "10b",
+      "title": "Apply latest template revision through registered operations",
+      "status": "passed",
+      "durationMs": 13023
+    },
+    {
+      "id": 11,
+      "title": "Home captures and verifies a backup-v2 pair with taki-bank-v3 at Core head077",
+      "status": "passed",
+      "durationMs": 7637
+    },
+    {
+      "id": 12,
+      "title": "Home healthy return; Local recall and a new retained memory",
+      "status": "passed",
+      "durationMs": 299253
+    },
+    {
+      "id": 13,
+      "title": "Home re-entry reuses Banks and preserves selected taki-bank-v3 templates",
+      "status": "passed",
+      "durationMs": 407085
+    },
+    {
+      "id": 14,
+      "title": "Capture the current pair before offline takeover",
+      "status": "passed",
+      "durationMs": 28308
+    },
+    {
+      "id": 15,
+      "title": "Home emergency takeover with Native stopped",
+      "status": "passed",
+      "durationMs": 79490
+    },
+    {
+      "id": 16,
+      "title": "Emergency Local authority survives Core restart",
+      "status": "passed",
+      "durationMs": 9461
+    },
+    {
+      "id": 17,
+      "title": "Offline paired restore and current authenticated pre-writer verification",
+      "status": "passed",
+      "durationMs": 46177
+    }
+  ],
+  "nativeBootMs": 41477,
+  "stepDurationSumMs": 1626781,
+  "launchAvailableGiB": 5.6,
+  "launchMinimumAvailableGiB": 5.5,
+  "provenance": {
+    "taki": {
+      "head": "9b98794a673efb561682b9fd451fe1da2db95086",
+      "manifestEntries": 1453,
+      "intentionalDeletedEntries": 7,
+      "manifestSha256": "90b667231121e26f35374eb42c30c3a25768e1183d5d899c8c4301cae2b99418",
+      "currentHashMatch": true
+    },
+    "native": {
+      "head": "eb6413a7f58c4f3f0adb88a33a99516f8707fef7",
+      "manifestEntries": 99,
+      "intentionalDeletedEntries": 0,
+      "manifestSha256": "e30db145be213a3f955e6dafb1832f310dc035bb8f8457dfb1b3b38d7ed830b8",
+      "currentHashMatch": true
+    }
+  },
+  "migration": {
+    "head": 77,
+    "count": 68
+  },
+  "nativeRequests": 3515,
+  "controlledProviderRequests": 37,
+  "coreCatalogConnectionsRefusedByIsolation": 3,
+  "teardown": {
+    "nativeStop": {
+      "code": 0,
+      "signal": null,
+      "forced": false
+    },
+    "coreExits": [
+      {
+        "code": 0,
+        "signal": null,
+        "forced": false
+      },
+      {
+        "code": 0,
+        "signal": null,
+        "forced": false
+      },
+      {
+        "code": 0,
+        "signal": null,
+        "forced": false
+      },
+      {
+        "code": 0,
+        "signal": null,
+        "forced": false
+      }
+    ],
+    "pg0Removal": {
+      "stopExit": 0,
+      "running": false,
+      "data": "removed",
+      "registry": "absent"
+    },
+    "listenersOnOurPorts": [],
+    "spawnedStillRunning": [],
+    "newProcessesStillRunningAfter5s": []
+  },
+  "resources": {
+    "samples": 273,
+    "from": "2026-11-12T10:15:28.6552062Z",
+    "to": "2026-11-12T10:42:58.2343755Z",
+    "minimumAvailableGiB": 2.071666717529297,
+    "maximumAvailableGiB": 5.8913116455078125,
+    "minimumAvailableAt": "2026-11-12T10:21:07.6964506Z",
+    "maximumSummedOwnedWorkingSetGiB": 4.338226318359375,
+    "maximumSummedOwnedPrivateCommitGiB": 7.419807434082031,
+    "maximumProcessCount": 35,
+    "familySampledPeaksGiB": {
+      "native": {
+        "ws": 1.9814186096191406,
+        "private": 4.7603607177734375
+      },
+      "core": {
+        "ws": 0.8077201843261719,
+        "private": 0.8372116088867188
+      },
+      "postgres": {
+        "ws": 0.6455078125,
+        "private": 0.19053268432617188
+      },
+      "harness-or-browser": {
+        "ws": 1.4380836486816406,
+        "private": 2.0041847229003906
+      }
+    }
+  },
+  "artifacts": {
+    "result": ".trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/results/2026-11-12T10-14-33.205Z/result.json",
+    "resultSha256": "12c4868ce1be76f73f363fa1fd1c39286b2304a2a98f52173e050f3da006d993",
+    "launch": "journey-launch-20261112T101423783Z-f44c47a1.json",
+    "log": "journey-20261112T101423783Z-f44c47a1.log",
+    "resourceSamples": "journey-resources-20261112T101423783Z-f44c47a1.jsonl",
+    "resourceSha256": "8320eb9c97b36ace591f7d987bfc916a593be6b300289cb5973feb5a028fd0ea"
+  },
+  "limits": [
+    "Controlled model responses with real Native/PostgreSQL/Home/Core; no real provider inference or billing",
+    "Working-set process sums double-count shared pages; private commit is not resident memory; family peaks occur at different samples",
+    "Offline model caches copied before startup; deferred embedding/reranking configuration remains open",
+    "No real-profile upgrade, actual QQ observations, WebGL/Pet owner acceptance, installed distribution or large-library acceptance"
+  ]
+}

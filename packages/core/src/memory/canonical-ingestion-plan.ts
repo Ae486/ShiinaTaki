@@ -73,8 +73,14 @@ export function assertIngestionBatchSource(state: CanonicalIngestionState, batch
   const gate = state.gate;
   if (gate?.decision !== "keep") throw new Error("MEMORY_INVALID_REQUEST");
   const selected = state.source.messages.filter((message) => message.seq >= gate.fromSeq && message.seq <= gate.throughSeq);
-  const content = retainedIngestionSource(selected).text;
+  const projection = retainedIngestionSource(selected);
+  const content = projection.text;
   const source = batch.source;
+  if (selected.some((message) => message.sourceContext)) {
+    const metadata = source.metadata["taki:conversation-source:v1"];
+    if (typeof metadata !== "object" || metadata === null || !("entries" in metadata)
+      || JSON.stringify(metadata.entries) !== JSON.stringify(projection.entries)) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");
+  }
   if (batch.epochId !== state.epochId || batch.characterId !== state.characterId
     || batch.requestId !== canonicalIngestionBankIdentity(state.spanId, batch.bankId)
     || source.authorityEpochId !== state.epochId || source.bankId !== batch.bankId

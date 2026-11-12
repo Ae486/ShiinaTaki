@@ -1,0 +1,136 @@
+{
+  "batches": [
+    {
+      "batch": "a1-a3-live-01",
+      "upstreamRequests": 5,
+      "observedRequests": 5,
+      "successfulHttpResponses": 5,
+      "physicalCap": 12,
+      "reportedGenerationUsages": 5,
+      "inputTokens": 6296,
+      "outputTokens": 1428,
+      "unknownTokenSamples": 0,
+      "requestedModel": "deepseek-v4-flash",
+      "returnedModels": [
+        "deepseek-flash"
+      ],
+      "sourceUnchanged": true,
+      "deadlineExceeded": false,
+      "observationFailures": [],
+      "completedStructuralStages": [
+        "a1-external"
+      ]
+    },
+    {
+      "batch": "a2-a3-live-02",
+      "upstreamRequests": 6,
+      "observedRequests": 6,
+      "successfulHttpResponses": 6,
+      "physicalCap": 7,
+      "reportedGenerationUsages": 6,
+      "inputTokens": 9155,
+      "outputTokens": 5940,
+      "unknownTokenSamples": 0,
+      "requestedModel": "deepseek-v4-flash",
+      "returnedModels": [
+        "deepseek-flash"
+      ],
+      "sourceUnchanged": true,
+      "deadlineExceeded": false,
+      "observationFailures": [],
+      "completedStructuralStages": [
+        "a2-self-report",
+        "a3-mixed-unknown"
+      ]
+    },
+    {
+      "batch": "co-watching-live-01",
+      "upstreamRequests": 4,
+      "observedRequests": 4,
+      "successfulHttpResponses": 4,
+      "physicalCap": 8,
+      "reportedGenerationUsages": 4,
+      "inputTokens": 22351,
+      "outputTokens": 1508,
+      "unknownTokenSamples": 0,
+      "requestedModel": "deepseek-v4-flash",
+      "returnedModels": [
+        "deepseek-flash"
+      ],
+      "sourceUnchanged": true,
+      "deadlineExceeded": false,
+      "observationFailures": [],
+      "completedStructuralStages": true
+    },
+    {
+      "batch": "local-memory-live-01",
+      "upstreamRequests": 2,
+      "observedRequests": 2,
+      "successfulHttpResponses": 2,
+      "physicalCap": 4,
+      "reportedGenerationUsages": 2,
+      "inputTokens": 1346,
+      "outputTokens": 496,
+      "unknownTokenSamples": 0,
+      "requestedModel": "deepseek-v4-flash",
+      "returnedModels": [
+        "deepseek-flash"
+      ],
+      "sourceUnchanged": true,
+      "deadlineExceeded": false,
+      "observationFailures": [],
+      "completedStructuralStages": true
+    },
+    {
+      "batch": "a3-compaction-fix-live-01",
+      "upstreamRequests": 3,
+      "observedRequests": 3,
+      "successfulHttpResponses": 3,
+      "physicalCap": 4,
+      "reportedGenerationUsages": 3,
+      "inputTokens": 4817,
+      "outputTokens": 3554,
+      "unknownTokenSamples": 0,
+      "requestedModel": "deepseek-v4-flash",
+      "returnedModels": [
+        "deepseek-flash"
+      ],
+      "sourceUnchanged": true,
+      "deadlineExceeded": false,
+      "observationFailures": [],
+      "completedStructuralStages": [
+        "a3-mixed-unknown"
+      ]
+    },
+    {
+      "batch": "a1-a2-final-prompt-live-01",
+      "upstreamRequests": 6,
+      "observedRequests": 6,
+      "successfulHttpResponses": 6,
+      "physicalCap": 7,
+      "reportedGenerationUsages": 6,
+      "inputTokens": 9103,
+      "outputTokens": 3381,
+      "unknownTokenSamples": 0,
+      "requestedModel": "deepseek-v4-flash",
+      "returnedModels": [
+        "deepseek-flash"
+      ],
+      "sourceUnchanged": true,
+      "deadlineExceeded": false,
+      "observationFailures": [],
+      "completedStructuralStages": [
+        "a1-external",
+        "a2-self-report"
+      ]
+    }
+  ],
+  "totals": {
+    "upstreamRequests": 26,
+    "reportedGenerationUsages": 26,
+    "inputTokens": 53068,
+    "outputTokens": 16307,
+    "unknownTokenSamples": 0
+  },
+  "interpretation": "Reported real-provider usage only; scripted primary/private generations are excluded. Structural completion does not establish semantic or human acceptance. The first failed campaign is included."
+}

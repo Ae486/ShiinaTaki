@@ -1,0 +1,39 @@
+{
+  "cwd": "G:/TakiAgent-integration/packages/core",
+  "branch": "integration/main-t4-20261111",
+  "node": "24.18.0",
+  "pnpm": "10.22.0",
+  "temp": "G:\\Temp",
+  "tmp": "G:\\Temp",
+  "command": "pnpm exec vitest run src/db/migrations/050-initiative-model-opportunities.test.ts src/db/migrations/051-initiative-feedback.test.ts src/db/migrations/052-interaction-patterns.test.ts src/db/migrations/053-initiative-wake-policy.test.ts src/db/migrations/054-initiative-intentions.test.ts src/db/migrations/055-initiative-backoff.test.ts src/db/migrations/056-subagent-conversations.test.ts src/db/migrations/057-source-context.test.ts src/db/migrations/058-agent-inbox.test.ts src/db/migrations/063-subagent-progress.test.ts src/db/migrations/064-primary-conversation-sources.test.ts src/db/migrations/065-auxiliary-model-usage.test.ts src/db/migrations/069-delegation-schema-convergence.test.ts src/db/cache-usage-repo.test.ts src/db/search-projection-policy-repo.test.ts src/db/primary-memory-custody-repo.test.ts --maxWorkers=1 --reporter=json --outputFile=../../.trellis/tasks/11-11-main-t4-baseline-integration/research/test-db-historical-final.json",
+  "files": [
+    "src/db/migrations/050-initiative-model-opportunities.test.ts",
+    "src/db/migrations/051-initiative-feedback.test.ts",
+    "src/db/migrations/052-interaction-patterns.test.ts",
+    "src/db/migrations/053-initiative-wake-policy.test.ts",
+    "src/db/migrations/054-initiative-intentions.test.ts",
+    "src/db/migrations/055-initiative-backoff.test.ts",
+    "src/db/migrations/056-subagent-conversations.test.ts",
+    "src/db/migrations/057-source-context.test.ts",
+    "src/db/migrations/058-agent-inbox.test.ts",
+    "src/db/migrations/063-subagent-progress.test.ts",
+    "src/db/migrations/064-primary-conversation-sources.test.ts",
+    "src/db/migrations/065-auxiliary-model-usage.test.ts",
+    "src/db/migrations/069-delegation-schema-convergence.test.ts",
+    "src/db/cache-usage-repo.test.ts",
+    "src/db/search-projection-policy-repo.test.ts",
+    "src/db/primary-memory-custody-repo.test.ts"
+  ],
+  "tests": 82,
+  "passed": 82,
+  "failed": 0,
+  "elapsedMs": 44661.107421875,
+  "coverage": "Deterministic SQLite and real SDK repository/service composition with scripted model; no live provider, original profile, frozen backup, or manual acceptance",
+  "resourceLimit": "No peak-memory instrumentation was added for this focused run",
+  "checks": {
+    "eslint": "Passed scoped pnpm exec eslint on all17 owned TS paths",
+    "diff": "Passed git diff --check on20 owned source/index paths",
+    "typecheck": "pnpm --filter @taki/core typecheck final rerun passed exit0",
+    "utf8": "22 owned source/index/final evidence files have no UTF-8 BOM"
+  }
+}

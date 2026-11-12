@@ -41,6 +41,17 @@ function request(): CanonicalApprovalRequest {
 }
 
 describe("canonical Approval prompt", () => {
+  it("prints the exact typed command join once without chunk labels or synthetic whitespace", () => {
+    const value = request();
+    const parts = ['  tool "a b" ', "x".repeat(500), "\\n", " 最后😀"];
+    value.presentation.commandDisclosure = { revision: 1, complete: true, encoding: "visible-escapes", reconstruction: "section-field-concat" };
+    value.presentation.sections = parts.map((part) => ({ title: "HIDDEN_SECTION", fields: [{ label: "HIDDEN_FIELD", value: part }] }));
+    const rendered = renderApprovalAsk(value);
+    expect(rendered).toContain(`\n${parts.join("")}\n`);
+    expect(rendered).not.toContain("HIDDEN_");
+    expect(rendered).not.toContain("commandDisclosure");
+    expect(renderApprovalDisclosure(value)).not.toContain("revision");
+  });
   it("parses only displayed explicit choices and has no implicit never shortcut", () => {
     const allowed = request().allowedChoices;
     expect(parseApprovalAnswer("y", allowed)).toBe("allow_once");
@@ -55,16 +66,16 @@ describe("canonical Approval prompt", () => {
     const prompt = renderApprovalAsk(request());
     expect(prompt).toContain("Allow MCP tool");
     expect(prompt).toContain("Server: files");
-    expect(prompt).toContain("future background use");
+    expect(prompt).toContain("含未来后台运行");
     expect(prompt).not.toContain("SENTINEL_RAW_INPUT");
     expect(prompt).not.toContain("JSON.stringify");
   });
 
   it("requires an explicit disclosure confirmation and maps bounded statuses", () => {
-    expect(renderApprovalDisclosure(request())).toContain("future background runs");
+    expect(renderApprovalDisclosure(request())).toContain("未来后台运行");
     expect(parseApprovalDisclosure("yes")).toBe(true);
     expect(parseApprovalDisclosure("a")).toBe(false);
-    expect(approvalStatusMessage("wrong_session")).toContain("another connection");
-    expect(approvalStatusMessage("unknown")).toContain("rejected");
+    expect(approvalStatusMessage("wrong_session")).toContain("其他连接");
+    expect(approvalStatusMessage("unknown")).toContain("未被接受");
   });
 });

@@ -28,7 +28,7 @@ describe("emergency background generation retirement", () => {
       for (let index = 0; index < 10; index++) timeline.append({ characterId: "taki", role: "user", content: `m${index}` });
       const pass = createCompactionPass({ timeline, summaries, slot, operations: createCompactionOperationRepo(db), logger,
         view: { estimatedTokens: () => 90, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 3 },
-        flush: { prepareRetirement: async () => ({ status: "not_required", reason: "canonical_local_records_are_authoritative" }) } });
+        legacyFlush: () => undefined });
       const old = pass.maybeRun("taki"); await vi.waitFor(() => expect(release).toBeDefined());
       pass.retirePending(); slot.retirePending();
       await pass.maybeRun("taki"); expect(calls).toBe(2);
@@ -52,7 +52,8 @@ describe("emergency background generation retirement", () => {
 
     let finish!: () => void; const compact = vi.fn(async () => undefined);
     const maintenance = vi.fn().mockImplementationOnce(() => new Promise<void>((resolve) => { finish = resolve; })).mockResolvedValue(undefined);
-    const auto = createMaintenanceAutoMemory({ maintenance: () => ({ run: maintenance }), compact: { maybeRun: compact }, logger });
+    const auto = createMaintenanceAutoMemory({ maintenance: () => ({ run: maintenance }), compact: { maybeRun: compact },
+      legacyMaintenanceBeforeCompact: () => true, logger });
     const inflight = auto.onTurnCompleted("taki"); const pending = auto.onTurnCompleted("taki");
     await new Promise<void>((resolve) => setImmediate(resolve));
     await new Promise<void>((resolve) => setImmediate(resolve));

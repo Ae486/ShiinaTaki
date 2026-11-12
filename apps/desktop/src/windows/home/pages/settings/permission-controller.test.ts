@@ -44,6 +44,62 @@ async function flush(): Promise<void> {
 }
 
 describe("permission controller generations", () => {
+  it("delivers saved feedback once from the action, never through subsequent list snapshots", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createPermissionController(sink);
+    controller.replace(client());
+    await controller.refresh();
+    await controller.setLevel("relaxed", 1);
+    await controller.refresh();
+    await controller.refresh();
+    expect(sink.feedback).toHaveBeenCalledTimes(1);
+    expect(sink.feedback).toHaveBeenCalledWith(expect.objectContaining({ kind: "saved" }));
+    expect(sink.loaded.mock.calls.every(([, feedback]) => feedback?.kind !== "saved")).toBe(true);
+  });
+
+  it("joins coincident pair reads and retires both old successes and failures while hidden", async () => {
+    const pending = deferred<PermissionLevelState>();
+    const active = client({ permissionLevelGet: vi.fn(() => pending.promise) });
+    const h = harness();
+    h.controller.replace(active);
+    const done = h.controller.refresh();
+    void h.controller.refresh();
+    expect(active.permissionLevelGet).toHaveBeenCalledTimes(1);
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(1);
+    h.controller.setVisible(false);
+    pending.reject(new Error("retired"));
+    await done;
+    expect(h.events.some((event) => event.kind === "loadFailed")).toBe(false);
+    vi.mocked(active.permissionLevelGet).mockResolvedValue({ level: "standard", policyGeneration: 1, registryRevision: 1 });
+    h.controller.setVisible(true);
+    await h.controller.refresh();
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(2);
+  });
+
+  it("restores a post-mutation read retired by hide/show without replaying the policy write", async () => {
+    const oldLevel = deferred<PermissionLevelState>();
+    const oldCells = deferred<PermissionCellsState>();
+    const active = client();
+    vi.mocked(active.permissionLevelGet).mockResolvedValueOnce({ level: "standard", policyGeneration: 1, registryRevision: 1 })
+      .mockReturnValueOnce(oldLevel.promise).mockResolvedValue({ level: "strict", policyGeneration: 3, registryRevision: 1 });
+    vi.mocked(active.permissionCellsGet).mockResolvedValueOnce(snapshot()).mockReturnValueOnce(oldCells.promise)
+      .mockResolvedValue({ ...snapshot(3), level: "strict" });
+    const h = harness();
+    h.controller.replace(active);
+    await h.controller.refresh();
+    const done = h.controller.setLevel("relaxed", 1);
+    await flush();
+    h.controller.setVisible(false);
+    h.controller.setVisible(true);
+    oldLevel.resolve({ level: "relaxed", policyGeneration: 2, registryRevision: 1 });
+    oldCells.resolve({ ...snapshot(2), level: "relaxed" });
+    await done;
+    expect(active.permissionLevelGet).toHaveBeenCalledTimes(3);
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(3);
+    expect(active.permissionLevelSet).toHaveBeenCalledTimes(1);
+    expect(h.events.at(-1)).toMatchObject({ kind: "loaded", value: { value: { cells: { policyGeneration: 3 } } } });
+  });
+
   it("refetches every replacement client and suppresses late retired-client results", async () => {
     const oldLevel = deferred<PermissionLevelState>();
     const oldCells = deferred<PermissionCellsState>();
@@ -131,6 +187,44 @@ describe("permission controller generations", () => {
     expect(active.permissionCellSet).toHaveBeenCalledTimes(1);
     expect(active.permissionCellsGet).toHaveBeenCalledTimes(2);
     expect(h.events.at(-1)).toMatchObject({ kind: "loaded", value: { feedback: { kind: "conflict" } } });
+  });
+
+  it("keeps conflict and failed-read evidence distinct without claiming a successful reconciliation", async () => {
+    const failure = new Error("permission read unavailable");
+    const active = client({ permissionCellSet: vi.fn(async () => {
+      throw Object.assign(new Error("conflict"), { data: { code: "POLICY_CONFLICT" } });
+    }) });
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createPermissionController(sink);
+    controller.replace(active);
+    await controller.refresh();
+    vi.mocked(active.permissionCellsGet).mockRejectedValueOnce(failure);
+    await controller.setCell({ key: "screenshot", level: "standard", posture: null }, 1);
+    expect(sink.feedback).toHaveBeenCalledExactlyOnceWith({ kind: "conflict", message: "权限策略已在别处修改；请核对当前状态后重试。" });
+    expect(sink.loadFailed).toHaveBeenCalledExactlyOnceWith(failure, snapshot());
+    expect(active.permissionCellSet).toHaveBeenCalledTimes(1);
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(2);
+    await controller.setLevel("relaxed", 1);
+    expect(active.permissionLevelSet).not.toHaveBeenCalled();
+    controller.dispose();
+  });
+
+  it("sends the exact cell, level, posture and confirmation with the captured policy generation", async () => {
+    const active = client({
+      permissionLevelGet: vi.fn(async (): Promise<PermissionLevelState> => ({ level: "standard", policyGeneration: 7, registryRevision: 1 })),
+      permissionCellsGet: vi.fn(async () => snapshot(7)),
+    });
+    const h = harness();
+    h.controller.replace(active);
+    await flush();
+    await h.controller.setCell({ key: "exec:blocked", level: "standard", posture: "auto", secondConfirm: true }, 7);
+    expect(active.permissionCellSet).toHaveBeenCalledWith({
+      key: "exec:blocked",
+      level: "standard",
+      posture: "auto",
+      secondConfirm: true,
+      expectedPolicyGeneration: 7,
+    });
   });
 
   it("does not replay a timed-out mutation whose remote outcome is unknown", async () => {

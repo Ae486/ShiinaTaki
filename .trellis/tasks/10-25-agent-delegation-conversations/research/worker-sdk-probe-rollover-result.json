@@ -1,0 +1,200 @@
+{
+  "timestamp": "2026-10-25T04:54:53.056Z",
+  "node": "v24.18.0",
+  "sdkVersion": "7.0.148",
+  "scope": "Mock SDK pressure rollover only. Run/Attempt/Effect IDs and checkpoints are assertions, not production ledger verification.",
+  "pressureBytes": 1800,
+  "requests": 25,
+  "executedTools": 24,
+  "globalSteps": 25,
+  "sdkEnds": 4,
+  "taskFinal": true,
+  "segments": [
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "baseStep": 0,
+      "responseBytes": 1960,
+      "completedSteps": 7,
+      "rolledOver": true
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "baseStep": 7,
+      "responseBytes": 1976,
+      "completedSteps": 7,
+      "rolledOver": true
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "baseStep": 14,
+      "responseBytes": 1988,
+      "completedSteps": 7,
+      "rolledOver": true
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "baseStep": 21,
+      "responseBytes": 920,
+      "completedSteps": 4,
+      "rolledOver": false
+    }
+  ],
+  "intents": [
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 0,
+      "effectId": "model-effect-0"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 1,
+      "effectId": "model-effect-1"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 2,
+      "effectId": "model-effect-2"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 3,
+      "effectId": "model-effect-3"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 4,
+      "effectId": "model-effect-4"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 5,
+      "effectId": "model-effect-5"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 6,
+      "effectId": "model-effect-6"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 7,
+      "effectId": "model-effect-7"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 8,
+      "effectId": "model-effect-8"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 9,
+      "effectId": "model-effect-9"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 10,
+      "effectId": "model-effect-10"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 11,
+      "effectId": "model-effect-11"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 12,
+      "effectId": "model-effect-12"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 13,
+      "effectId": "model-effect-13"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 14,
+      "effectId": "model-effect-14"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 15,
+      "effectId": "model-effect-15"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 16,
+      "effectId": "model-effect-16"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 17,
+      "effectId": "model-effect-17"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 18,
+      "effectId": "model-effect-18"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 19,
+      "effectId": "model-effect-19"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 20,
+      "effectId": "model-effect-20"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 21,
+      "effectId": "model-effect-21"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 22,
+      "effectId": "model-effect-22"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 23,
+      "effectId": "model-effect-23"
+    },
+    {
+      "runId": "same-run",
+      "attemptId": "same-attempt",
+      "stepNumber": 24,
+      "effectId": "model-effect-24"
+    }
+  ],
+  "maxSegmentSteps": 7,
+  "allAssertionsPassed": true
+}

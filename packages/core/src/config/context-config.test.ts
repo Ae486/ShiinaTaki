@@ -12,7 +12,6 @@ describe("loadContextConfig (T5-R1 tier 1 / R5 / R13)", () => {
     expect(loadContextConfig({})).toEqual({
       contextTokens: {
         main: DEFAULT_CONTEXT_TOKENS,
-        vision: DEFAULT_CONTEXT_TOKENS,
         utility: DEFAULT_CONTEXT_TOKENS,
       },
       historyRatio: DEFAULT_HISTORY_RATIO,
@@ -28,9 +27,9 @@ describe("loadContextConfig (T5-R1 tier 1 / R5 / R13)", () => {
   it("parses per-slot declared windows independently", () => {
     const config = loadContextConfig({
       TAKI_PROVIDER_CONTEXT_TOKENS: "262144",
-      TAKI_VLM_CONTEXT_TOKENS: "8192",
+      TAKI_UTILITY_CONTEXT_TOKENS: "8192",
     });
-    expect(config.contextTokens).toEqual({ main: 262144, vision: 8192, utility: DEFAULT_CONTEXT_TOKENS });
+    expect(config.contextTokens).toEqual({ main: 262144, utility: 8192 });
   });
 
   it("parses the history ratio and accepts the 1.0 boundary", () => {
@@ -64,7 +63,6 @@ describe("loadContextConfig (T5-R1 tier 1 / R5 / R13)", () => {
     ["TAKI_PROVIDER_CONTEXT_TOKENS", "0"],
     ["TAKI_PROVIDER_CONTEXT_TOKENS", "-1"],
     ["TAKI_PROVIDER_CONTEXT_TOKENS", "3.5"],
-    ["TAKI_VLM_CONTEXT_TOKENS", "garbage"],
     ["TAKI_UTILITY_CONTEXT_TOKENS", "-32768"],
     ["TAKI_CONTEXT_HISTORY_RATIO", "0"],
     ["TAKI_CONTEXT_HISTORY_RATIO", "1.5"],

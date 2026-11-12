@@ -1,0 +1,49 @@
+{
+  "name": "clarification-2",
+  "startedAt": "2026-09-28T10:43:14.797Z",
+  "passed": true,
+  "finishedAt": "2026-09-28T10:43:27.022Z",
+  "model": "deepseek-v4-flash",
+  "providerHost": "api.deepseek.com",
+  "turns": [
+    {
+      "scenario": "clarification-2",
+      "prompt": "当你检测到我压力很大或者已经疲劳时，就主动提醒我休息。请帮我设置这个互动习惯。",
+      "response": "哈？……等一下。\n\n\"压力很大\"和\"疲劳\"——这两个我测不出来。我只能看到你在用电脑多久、开了什么窗口、是活跃还是闲置、现在几点。这里面没有哪一项等于\"你很累\"。要是我硬把\"连续用了两小时\"当成你累了，那只是我在猜。\n\n想让我提醒你休息的话，得挑一个我确实能看见的东西当触发点：\n\n- **连续活动时长** —— 比如你连着敲代码超过 90 分钟没停\n- **时间段** —— 比如晚上 23:00 以后、或者凌晨还在电脑前\n- **特定窗口开着** —— 比如那个编辑器一直挂在前台\n- **闲置状态** —— 反过来，你长时间没动\n\n可以叠着用，比如\"晚上 22 点后 + 连续活动超 60 分钟\"。\n\n选哪个？还有——我是直接出声提醒你，还是只换个表情？频率也得说清楚，不然我会变成每隔十分钟烦你一次。……说吧。",
+      "status": "complete"
+    }
+  ],
+  "runs": [
+    {
+      "initiator": "primary",
+      "state": "completed",
+      "outcome": "completed"
+    }
+  ],
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 13188,
+      "output_tokens": 605,
+      "total_tokens": 13793,
+      "cache_read_tokens": 3712,
+      "reasoning_tokens": 463
+    },
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-v4-flash",
+      "quality": "reported",
+      "input_tokens": 13818,
+      "output_tokens": 489,
+      "total_tokens": 14307,
+      "cache_read_tokens": 13568,
+      "reasoning_tokens": 274
+    }
+  ],
+  "deliveries": [],
+  "tools": [
+    "manage_interaction_pattern"
+  ]
+}

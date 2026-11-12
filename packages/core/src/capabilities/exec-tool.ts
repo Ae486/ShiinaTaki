@@ -17,9 +17,14 @@ export function createExecTool(deps: ExecToolDeps): ToolSet {
   return {
     exec: tool({
       description:
-        "Run a shell command on the user's device. The Shell parses and governs it: an allowlisted simple command " +
-        "may run automatically, anything else asks the user to approve, and catastrophic commands are refused. " +
-        "A nonzero exitCode, a timeout, or truncated output are normal results you should read — not tool errors.",
+        "Run one executable with arguments on the selected Execution Host; command is one string, with no implicit shell. " +
+        "Bare program names use the trusted PATH (cwd excluded); if lookup fails, choose an installed program or its absolute path before retrying. " +
+        "Quote paths/arguments containing spaces; quotes group arguments and backslashes are literal. " +
+        "For chaining, pipes, redirection or expansion, invoke an installed interpreter with the script as one quoted argument. " +
+        "Examples when installed: `git --version`; on Windows, `powershell.exe -NoProfile -NonInteractive -Command \"Get-ChildItem -Name | Select-Object -First 5\"`. " +
+        "Each call starts a fresh process at the Host's configured cwd with a scrubbed environment; cwd/env changes do not persist. " +
+        "Prefer dedicated file tools for reads/edits when available. Current policy may allow, require approval or refuse execution; approval does not add a shell. " +
+        "ok:true alone is not command success: read exitCode, stdout and stderr; a nonzero exitCode, timedOut:true or truncated:true is an execution result, not a tool error.",
       inputSchema: z.object({ command: z.string().min(1) }),
       execute: async ({ command }) => {
         try {

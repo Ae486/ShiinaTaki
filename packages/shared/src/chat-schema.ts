@@ -1,6 +1,6 @@
 /**
  * INPUT:  candidate chat.* params/event payloads
- * OUTPUT: CHAT_METHODS + ChatSend/Cancel/Delta/Complete/Error schemas + ImageAttachment (in-flight image input, #17)
+ * OUTPUT: CHAT_METHODS + legacy chat schemas and image input; ordered activity schemas live beside this contract
  * POS:    shared/protocol — the chat conversation contract (invariants 3, 7); consumed by core server + CLI
  */
 import { z } from "zod";
@@ -12,6 +12,8 @@ export const CHAT_METHODS = {
   delta: "chat.delta",
   complete: "chat.complete",
   error: "chat.error",
+  activity: "chat.activity",
+  activityRead: "chat.activity.read",
 } as const;
 
 // The image formats a turn may attach; the vision slot receives them as AI SDK file parts (#17 decision 5).

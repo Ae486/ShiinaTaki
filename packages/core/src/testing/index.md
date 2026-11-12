@@ -1,10 +1,11 @@
 # testing/
 - memory-transition-candidate-fixtures.ts — complete synthetic W1/W2 candidate mechanics, explicitly separate from actual native proof acceptance
 - memory-transition-reentry-fixtures.ts — real W1 receipt/resolution storage plus isolated Local staging for re-entry tests; no W4 runtime/custody claim
-- memory-transition-final-fixtures.ts — all-Bank final result/evidence joins and isolated candidate validation
+- memory-transition-final-fixtures.ts — all-Bank final result/evidence joins, complete post-delta native/application envelopes, nested Source bodies and isolated candidate/final-mapping fixtures
 - memory-transition-source-fixtures.ts — original physical documents, appended Source versions/wrappers and awaiting-source evidence
+- run-service-stub.ts — in-memory transport-only RunService fixture with durable-key lookup and admission manifests; real repositories are required for linked persistence and accepted-purpose lifecycle authority
 
-- mock-language-model.ts — MockLanguageModelV4 factories: streaming / slow-streaming (abort-window) / failing / fail-then-stream + error-part-then-stream (the two R2 overflow transport endings) / mid-stream-error / scripted tool-loop (stream) + generating / failing-generate / scripted (non-streaming generate); test-only
+- mock-language-model.ts — MockLanguageModelV4 factories: streaming / slow-streaming (abort-window) / failing / fail-then-stream + error-part-then-stream (the two R2 overflow transport endings) / mid-stream-error / scripted tool-loop (stream) + generating / failing-generate / scripted (non-streaming generate); test-only; resolving/rejecting bodies are scripted fixtures, with real fetch behavior covered by the server transport regression
 - memory-store.ts — :memory:-SQLite conversation-store fixture (db + repo + store); test-only
 - memory-fixture.ts — memory store + repo + tokenizer + reconcile fixture with reopenDb (rebuild-equivalence) and overridable bm25 weights / stoplist; test-only
 - companion-fixture.ts — conversation store + memory engine over one db (timeline wired as in main.ts), with reopen (restart); test-only
@@ -15,12 +16,11 @@
 - ws-test-client.ts — WS integration-test client harness (makeClient/openClient + frame helpers); test-only
 - hindsight-http-test-fixture.ts — ephemeral loopback HTTP servers and observable unfinished-response cancellation for Hindsight clients; test-only
 - capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles, a REAL in-memory Approval service, and operator/Host Connection fakes for the Shell-backed capability tools; test-only
-- run-service-stub.ts — in-memory RunService contract including durable-key lookup and the internal admission manifest for transport tests that do not exercise SQLite lifecycle semantics; test-only
 - seed-timeline-cli.ts — pre-boot CLI seeding timeline rows into <dataDir>/taki.db via the real migrations + repo (e2e polluted-history); test-only
 - hindsight-application-fixtures.ts — complete hash-consistent D77 bundles/events and V1 baseline manifest fixtures
-- hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures, an admitted capability manifest and an isolated SQLite authority
+- hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures with explicit cursor overrides, an admitted capability manifest and isolated SQLite authority
 
-- hindsight-runtime-composition-fixtures.ts — isolated Local/Hindsight construction with valid receipts, exact Native selectors, migration caps, D77 evidence and a reusable authenticated Native recall client; optional committed review hint capture
+- hindsight-runtime-composition-fixtures.ts — isolated Local/Hindsight construction with valid receipts, exact Native selectors, migration caps and D77 history; reusable authenticated recall client and optional committed-review hints
 - memory-chat-turn-fixture.ts — one chat.send-level primary turn through Harness admission and the chat agent with a streaming mock model; test-only
 - hindsight-fixture-routes.ts — the health/version/compatibility bodies shared by every in-memory Hindsight transport double
 - hindsight-activation-transport.ts — in-memory D78 transport double for activation tests: Bank setup, snapshots, current-state transfers, cutover verifications computed from the POSTed request (a changed request under a used verification id is a request_conflict, as native), Bank stats with occupy(), per-route counts, one-shot/persistent faults and a pre-answer hook; the opt-in native backup routes answer as absent
@@ -29,12 +29,12 @@
 - memory-transition-outcome-fixtures.ts — correctly hashed deterministic native outcome shapes; no native execution is claimed
 - memory-transition-unused-fixtures.ts — complete deterministic empty native/application inventory and exact unused-scope proof
 - memory-transition-healthy-fixtures.ts — actual B2/B4 predecessor, operation owner, healthy service and started provider composition over SQLite
+- memory-historical-timeline-fixture.ts — frozen main Timeline columns/semantics and a test-only atomic batch adapter; historical archives stay unupgraded
 - memory-transition-healthy-transport.ts — history-preserving synthetic native responses and partial-maintenance/reply-loss faults; no native acceptance claim
 - memory-transition-healthy-journey-fixtures.ts — original Source-version inventory and new Character/empty Bank setup for actual Local copy/reinforcement journeys
 - memory-transition-delta-native-fixtures.ts — deterministic descriptor-driven native upserts/reuse/tombstones for composed Core tests
 - memory-transition-delta-artifact-fixtures.ts — immutable artifact revisions and ordered historical/delta Source references for composed Core tests
 - memory-transition-healthy-source-transport.ts — validated multipart Source bytes with exact sealed-body recovery and measurable ACK loss
-- memory-transition-final-fixtures.ts — complete post-delta native/application envelopes, nested Source bodies and final mapping result for Core journey tests
 - memory-transition-emergency-fixtures.ts — owned synthetic emergency capture/incident fixtures built on real healthy predecessors with live-clock publication work.
 - memory-transition-emergency-service-fixtures.ts — production offline service/operation owner and paired missing/rebinding Memory event fixtures for admission and restart boundaries.
 - memory-transition-operator-fixtures.ts — owned synthetic healthy/emergency producers with real authenticated WebSocket subscriptions, delayed replies and explicit binding release for observer lifetime tests; no live Native or private corpus.
@@ -50,3 +50,12 @@
 - memory-transition-template-fixtures.ts — actual B2 template operation history and healthy Native-session/candidate preparation; fixture work checks its lease and complete configured setup identity.
 - hindsight-template-backup-consumer-fixture.ts — real Core capture/staged/ZIP/verify/preflight consumers with independently held synthetic Native observations and explicit historical fixture versions.
 - memory-transition-template-healthy-fixture.ts — real selected/removed template history composed with complete Healthy drivers; post-delta Native fixture retains independent template receipts/results before proof observation.
+
+- initiative-fixture.ts — isolated real SQLite Run/Attempt/Effect/Timeline/delivery owners for lifecycle and transaction tests
+- prepared-publication-fixture.ts — explicit-report fixture with synthetic authorization, real SQLite/Character queue, optional linked-child participant and business adapter; test-only
+- direct-request-report-fixture.ts — real primary witness/report acceptance and canonical model-free child/parent proposals for validity/publication tests
+- real-playback-client.ts — explicit loopback Core/CDP connection for owner-authorized real-player controls and Shared-validated current playback; test-only, no credentials
+- co-watching-fixture.ts — synthetic native/browser producers over real ChatAgent/SubagentService/Run/SQLite/Delivery owners; optional actual model/Skill/file composition with explicit context policy and main-model Utility fallback, default scripted artifact producer
+- co-watching-tool-fixture.ts — actual shipped Co-Watching Skill loader and governed Workspace tools for isolated acceptance fixtures
+- source-live-evidence.ts — physically capped real-provider observation, synthetic request capture and immutable per-trial Source evidence directories
+- subagent-fixture.ts — synthetic real SQLite/Effect/ToolLoopAgent/child-service fixture with optional retained-image reader and isolated historical-upgrade dbPath, without external calls or user Memory

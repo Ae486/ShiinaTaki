@@ -1,0 +1,363 @@
+/* DSH views.module.css / TrajectoryTable layout adaptation; DeepSeek MIT, see third-party-notices.md. */
+.root {
+  --trajectory-bg: var(--color-surface);
+  --trajectory-muted: var(--color-surface-muted);
+  --trajectory-inset: var(--color-surface-sunken);
+  --trajectory-border: var(--color-border);
+  --trajectory-hairline: var(--color-border-subtle);
+  --trajectory-text: var(--color-text-strong);
+  --trajectory-secondary: var(--color-text-body);
+  --trajectory-caption: var(--color-text-secondary);
+  --trajectory-dimmed: var(--color-text-faint);
+  --trajectory-hover: var(--color-surface-sunken);
+  --trajectory-selected: var(--color-accent-soft);
+  --trajectory-accent: var(--color-accent);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--trajectory-text);
+  background: var(--trajectory-bg);
+  font: 12px/1.4 var(--font-sans);
+  container: monitor-workspace / inline-size;
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sections { display: flex; flex: none; gap: 4px; padding: 5px 8px; border-bottom: 1px solid var(--trajectory-border); }
+.sections button { padding: 5px 12px; border: 0; border-radius: 4px; font: inherit; color: var(--trajectory-caption); background: transparent; cursor: pointer; }
+.sections button[aria-pressed='true'] { color: var(--trajectory-text); background: var(--trajectory-selected); font-weight: 600; }
+
+.browser {
+  display: flex;
+  flex: 0 0 208px;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-right: 1px solid var(--trajectory-border);
+  background: var(--trajectory-muted);
+}
+
+.browserHeader {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--trajectory-border);
+  font-weight: 600;
+}
+
+.browserActions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.plainButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 3px;
+  color: var(--trajectory-caption);
+  background: transparent;
+  font: inherit;
+}
+
+.plainButton:hover:not(:disabled), .plainButton[aria-expanded='true'] {
+  color: var(--trajectory-text);
+  background: var(--trajectory-hover);
+}
+
+.plainButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.runList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+.runButton {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 72px;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--trajectory-border);
+  text-align: left;
+  background: transparent;
+  font: inherit;
+}
+
+.runButton:hover {
+  background: var(--trajectory-hover);
+}
+
+.runButton[aria-pressed='true'] {
+  background: var(--trajectory-selected);
+  box-shadow: inset 2px 0 var(--trajectory-accent);
+}
+
+.runTitle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.runName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runModel, .runCounts {
+  overflow: hidden;
+  color: var(--trajectory-caption);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runState {
+  flex: none;
+  color: var(--trajectory-caption);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.runState[data-state='failed'], .runState[data-state='outcome_unknown'] {
+  color: var(--color-danger);
+}
+
+.runTime {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 16px;
+  color: var(--trajectory-dimmed);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pinnedLabel {
+  padding: 4px 10px 0;
+  color: var(--trajectory-caption);
+  font-size: 10px;
+}
+
+.loadRuns {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 30px;
+  border: 0;
+  border-top: 1px solid var(--trajectory-border);
+  background: var(--trajectory-bg);
+  font: inherit;
+  color: var(--trajectory-secondary);
+}
+
+.loadRuns:hover:not(:disabled) {
+  background: var(--trajectory-hover);
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ledger {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.empty {
+  display: grid;
+  flex: 1;
+  min-height: 50px;
+  place-content: center;
+  gap: 5px;
+  padding: 20px;
+  color: var(--trajectory-caption);
+  text-align: center;
+}
+
+.notice {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-bottom: 1px solid var(--trajectory-border);
+  color: var(--color-danger);
+  background: var(--trajectory-bg);
+}
+
+.notice button {
+  flex: none;
+  margin-left: auto;
+  color: inherit;
+  text-decoration: underline;
+}
+
+.footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  min-height: 23px;
+  padding: 0 8px;
+  border-top: 1px solid var(--trajectory-border);
+  color: var(--trajectory-caption);
+  font-size: 10px;
+}
+
+.footer > span:last-child {
+  margin-left: auto;
+}
+
+.readStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filterPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--duration-base) ease-out, opacity var(--duration-fast) ease-out;
+}
+
+.filterPanel[data-open='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.filterInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.filterForm {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 1px solid var(--trajectory-border);
+}
+
+.filterForm label {
+  display: grid;
+  gap: 2px;
+  color: var(--trajectory-caption);
+  font-size: 11px;
+}
+
+.filterForm input, .filterForm select {
+  min-width: 0;
+  width: 100%;
+  height: 24px;
+  padding: 0 5px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 3px;
+  background: var(--trajectory-bg);
+  color: var(--trajectory-text);
+  font: inherit;
+}
+
+.filterForm button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 24px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 3px;
+  background: var(--trajectory-bg);
+  color: var(--trajectory-text);
+  font: inherit;
+}
+
+.filterPair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+@container monitor-workspace (max-width: 740px) {
+  .workspace {
+    flex-direction: column;
+  }
+  .browser {
+    flex: 0 0 auto;
+    max-height: 175px;
+    border-right: 0;
+    border-bottom: 1px solid var(--trajectory-border);
+  }
+  .runList {
+    display: flex;
+    flex: 0 1 auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-gutter: auto;
+  }
+  .runButton {
+    flex: 0 0 208px;
+    border-bottom: 0;
+    border-right: 1px solid var(--trajectory-border);
+  }
+  .filterForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 100px;
+    overflow: auto;
+  }
+  .pinnedLabel {
+    display: none;
+  }
+  .loadRuns {
+    min-height: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filterPanel {
+    transition: none;
+  }
+}

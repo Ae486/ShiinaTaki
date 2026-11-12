@@ -12,8 +12,8 @@ describe("loadServerConfig", () => {
     // The prompt-dir default resolves to the repo prompt/ library (OS-neutral, from import.meta.url).
     expect(config.promptDir.length).toBeGreaterThan(0);
     expect(config.promptDir.replace(/[/\\]$/, "").endsWith("prompt")).toBe(true);
-    // Loopback auto-trust defaults ON (P3): a local Pet UI connects without pairing.
-    expect(config.trustLoopbackOperator).toBe(true);
+    // Loopback reachability does not grant identity; native local admission is authenticated.
+    expect(config.trustLoopbackOperator).toBe(false);
   });
 
   it("reads provided values and coerces the port", () => {
@@ -31,7 +31,7 @@ describe("loadServerConfig", () => {
       logLevel: "debug",
       dataDir: "/tmp/taki",
       promptDir: "/tmp/prompt",
-      trustLoopbackOperator: true,
+      trustLoopbackOperator: false,
     });
   });
 
@@ -62,8 +62,8 @@ describe("loadServerConfig", () => {
     expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "False" }).trustLoopbackOperator).toBe(false);
     expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "true" }).trustLoopbackOperator).toBe(true);
     expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "1" }).trustLoopbackOperator).toBe(true);
-    // Set-but-empty behaves as unset (default on) — a stray `VAR=` must not brick the boot.
-    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "" }).trustLoopbackOperator).toBe(true);
+    // Set-but-empty behaves as unset (default off) — a stray `VAR=` must not brick the boot.
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "" }).trustLoopbackOperator).toBe(false);
   });
 
   it("rejects an unrecognized auto-trust value — a typo'd disable must fail the boot, never silently mean ON", () => {

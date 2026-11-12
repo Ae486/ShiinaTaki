@@ -8,6 +8,36 @@ accessibility, and stream/scroll honestly — without touching `packages/core`, 
 `src-tauri` production code. Cross-layer seams (shared label maps, Core approval labels, the `chat.tool`
 live event, Live2D config keys) are consumed by later batches and are explicitly out of scope here.
 
+## Status and follow-up boundary — 2026-09-05
+
+G4's first pure-frontend cleanup slice is implemented and independently checked. See
+[the slice evidence](implementation-evidence-g4-2026-09-05.md): 19 files, all required automated gates
+passed, Desktop 108 files / 594 tests at that checkpoint. Subsequent isolated WebView2 QA passed
+12/12 groups and G4 was committed with A1/A2 as `a771496`. This is engineering evidence, not personal
+owner inspection; no historical task-wide acceptance or lifecycle closeout is implied.
+
+The owner considers the non-Monitor visual baseline broadly satisfactory and defers its small UI/UX
+details to a later focused pass. G5 excludes Monitor: the current page is only a functional prototype,
+and D68 owns its DSH-led presentation rebuild. No broad feedback certifies all asynchronous-state or
+performance criteria.
+
+The [G1 grill record](../08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md)
+coordinates the next Monitor, Chat/Pet tool-feedback, and readable naming/approval work. This task
+keeps its pure-frontend boundary. Monitor follow-up belongs to D68; cross-layer tool/name/approval
+work needs separately reviewed batches. Live2D configuration and theme/font settings remain later work.
+The initial checklist below records the original requirements, not a fresh list of wholly unimplemented
+features; see [the delivery report](../../../docs/UIUX-FRONTEND-REPORT.md) for shipped batches and limitations.
+
+Owner follow-up: applicable frontend changes must preserve layout stability, reading position, and
+control/focus continuity during insertion/removal, disclosure, refresh, and feedback. Use the shared
+[motion continuity design](../08-22-t4-agent-architecture-observability/research/uiux-motion-continuity-2026-09-05.md)
+when planning the relevant batch; it does not add cross-layer work to this task or certify old batches.
+
+G4 also requires removal of meaningless internal information from all user-facing details, not merely
+moving it off card faces. Follow the [reference study and field inventory](../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
+Pure Desktop removals remain within this task's boundary; missing Core label projections belong to
+their separately planned workstream. Preserve canonical identities, CAS and generation guards.
+
 ## Scope boundary
 
 - In: `apps/desktop/src/**`, `apps/desktop/vite.config.ts`, `apps/desktop/index.html` family,
@@ -53,16 +83,16 @@ live event, Live2D config keys) are consumed by later batches and are explicitly
     timeline; mouse-neutral "查看更早" wording.
 13. **U1** Collapse affordances: monitor inspector close button + click-again-to-deselect
     (`monitor-page.tsx:85,92`); any disclosure added in this task collapses both ways.
-14. **U4** CopyableRow adoption where LabeledRows carries hashes/ids; `min-w-0` fix in
-    `monitor-view.tsx:33-34`.
+14. **U4** CopyableRow adoption for useful values; `min-w-0` fix in `monitor-view.tsx:33-34`.
+    G4 supersedes the historical adoption for internal hashes/ids: remove those rows and their copy controls.
 15. **U5** Skeleton/EmptyState/ErrorState adopted by all 8 pages; every failed read gets a retry.
 16. **C5** font-size collapse executed via the token layer.
 
 ### Batch 4 — page-level UX (frontend-only parts)
 
 17. **U2/U3** MCP/Skills card redesign: display name primary, status + tool count only, transport line,
-    primary action + grouped secondary actions, dismissible diagnostics banner; 修订/代次/哈希/Owner move to
-    a detail disclosure with copy (data already present in the views — presentation only, N6 UI side).
+    primary action + grouped secondary actions, dismissible diagnostics banner. Under G4, remove internal
+    修订/代次/哈希/opaque Owner from expanded details as well; retain useful selected-tool/package information.
 18. **L2** MCP/Skills master-detail layout (list pane + detail/editor pane).
 19. **U7** Settings regrouping via a client-side key→group map (权限与审批 / 模型与上下文 / 感知与隐私 /
     存储与缓存 / 高级), Chinese primary label with key as secondary `code`, search box. Coordinate with D54
@@ -73,7 +103,8 @@ live event, Live2D config keys) are consumed by later batches and are explicitly
 ### Batch 5 — frontend performance and layout
 
 22. **L1** Monitor three-zone scaffold (Run browser / ledger / closable inspector) against existing
-    projections; D68 producer events enhance it later.
+    projections. This historical delivery is traceability/test evidence; G5's product UI rebuild belongs
+    to D68 and must follow DSH components/styles/interaction rather than preserve this scaffold.
 23. **P1a** Coalesce `growInflight` to a 30-60ms flush; move the scroll-follow effect onto the coalesced
     update (`use-chat-timeline.ts:32`, `use-timeline-scroll.ts:45-56`).
 24. **P1b** Cap mounted timeline rows with a "加载更早" jump point; LRU + failure eviction for the image
@@ -85,7 +116,7 @@ live event, Live2D config keys) are consumed by later batches and are explicitly
 
 ## Non-goals
 
-- N1/N2/N7/I1 shared label maps, N3/D64 exec command disclosure, U8/U9/U10 live tool events (D76),
+- N1/N2/N7/I1 shared label maps, N3/D64 exec command disclosure, U8/U9/U10 live tool events (D67 follow-up),
   L3/L4 costume page + Live2D config keys, P1h fps config, D19/D38 closure — all cross-layer, later.
 - No dark mode implementation; no third-party component library; no pet interaction-model changes.
 
@@ -97,6 +128,27 @@ live event, Live2D config keys) are consumed by later batches and are explicitly
       allow/deny tones match the rest of the app.
 - [ ] Streaming a long CJK reply shows no per-delta full markdown re-parse (profiling note in implement.md).
 - [ ] Monitor inspector and every new disclosure can be closed/collapsed.
+- [ ] G4 cleanup excludes internal bookkeeping from primary and expanded UI, tooltips and copy controls;
+      useful names/configuration/results and correctly bound mutation/selection behavior remain intact.
 - [ ] All 8 home pages render the shared Loading/Empty/ErrorState primitives (no hand-rolled placeholder
       paragraphs left).
 - [ ] Owner manual acceptance for anything visual before closeout (per operating rules).
+
+The 40ms coalescer alone does not satisfy the streaming/performance acceptance criterion: accumulated
+Markdown is still reparsed on a flush. Likewise, a three-zone component alone does not prove that the
+right Inspector is reachable within PageBody. Retain targeted verification rather than marking these
+criteria passed from implementation presence or broad visual feedback.
+
+## Engineering acceptance crosswalk — 2026-09-08
+
+The [triggered-refresh follow-up](../09-08-uiux-triggered-refresh/implementation-evidence-2026-09-08.md)
+completed the identified resource-state, demand/event refresh, disclosure and editing-continuity gaps.
+Its independent review covers 171 paths and its final WebView2 matrix passed 20/20, including first/stale
+errors, successful empty state, retry, real changed-data delivery, retained drafts/selection and reconnect.
+The source-backed policy covers all eight registered pages; existing Monitor and Chat/Pet acceptance is
+reused only within its recorded scope.
+
+The later approved DSH Monitor composition supersedes a literal requirement to use the same placeholder
+component on every page. Correct loading/empty/error semantics and useful retry are the current contract.
+This follow-up does not mark the historical whole-task checklist complete: long-CJK Markdown profiling
+remains separate, and engineering window evidence does not constitute personal owner or real OS IME acceptance.

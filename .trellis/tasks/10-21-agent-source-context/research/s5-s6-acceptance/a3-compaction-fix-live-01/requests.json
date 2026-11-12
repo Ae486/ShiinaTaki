@@ -1,0 +1,20 @@
+[
+  {
+    "tools": [],
+    "requestNumber": 1,
+    "upstreamAttempted": true,
+    "status": 200
+  },
+  {
+    "tools": [],
+    "requestNumber": 2,
+    "upstreamAttempted": true,
+    "status": 200
+  },
+  {
+    "tools": [],
+    "requestNumber": 3,
+    "upstreamAttempted": true,
+    "status": 200
+  }
+]

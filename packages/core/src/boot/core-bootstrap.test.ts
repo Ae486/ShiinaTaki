@@ -1,14 +1,14 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createConfigRepo } from "../db/config-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase } from "../db/sqlite.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { bootstrapCore, type CoreBootstrap } from "./core-bootstrap.ts";
 
-// The provider slot is required at boot; these are construction-time values only (no request is ever made).
+// Construction-time values only; no request is made and missing model fields must preserve basic startup.
 const PROVIDER_ENV = {
   TAKI_PROVIDER_BASE_URL: "http://127.0.0.1:1/v1",
   TAKI_PROVIDER_API_KEY: "test-key",
@@ -44,6 +44,40 @@ function boot(env: Record<string, string | undefined>): CoreBootstrap {
 }
 
 describe("bootstrapCore", () => {
+  it("ignores retired vision settings while keeping their historical stored values", () => {
+    const dataDir = tempDataDir();
+    storeKnob(dataDir, "TAKI_VLM_MODEL", "old-vision");
+    const result = boot({ TAKI_DATA_DIR: dataDir, TAKI_VLM_BASE_URL: "partial-old-config", TAKI_VLM_CONTEXT_TOKENS: "obsolete" });
+    expect(result.model).toMatchObject({ modelId: PROVIDER_ENV.TAKI_PROVIDER_MODEL });
+    expect(result).not.toHaveProperty("visionModel");
+    expect(result.config.source.resolve("TAKI_VLM_MODEL")).toBeUndefined();
+    expect(result.config.repo.get("TAKI_VLM_MODEL")).toBe("old-vision");
+    expect(result.contextConfig.contextTokens).not.toHaveProperty("vision");
+  });
+  it("reports committed callback failures with a bounded code and preserves later cleanup", () => {
+    const result = boot({ TAKI_DATA_DIR: tempDataDir() });
+    const warning = vi.spyOn(result.logger, "warn").mockImplementation(() => {});
+    let cleaned = false;
+    expect(() => result.db.transaction(() => {
+      result.db.afterCommit(() => { throw new Error("private callback text must not enter logs"); });
+      result.db.afterCommit(() => { cleaned = true; });
+    })).not.toThrow();
+    expect(cleaned).toBe(true);
+    expect(warning).toHaveBeenCalledExactlyOnceWith({ code: "SQLITE_AFTER_COMMIT_FAILED" }, "Committed database callback failed");
+    warning.mockRestore();
+  });
+  it("notifies local policy after commit despite a failed socket or local observer", () => {
+    const seen: unknown[] = [];
+    const result = bootstrapCore({ ...PROVIDER_ENV, TAKI_DATA_DIR: tempDataDir() }, { onConfigChanged(key) {
+      seen.push(result.config.source.resolve(key)?.value); throw new Error("local observer failed");
+    } });
+    booted.push(result);
+    result.config.subscriptions.subscribe({ state: { status: "awaiting" } }, () => { throw new Error("socket failed"); });
+    expect(result.config.writer.set({ key: "TAKI_INITIATIVE_ENABLED", value: true })).toMatchObject({ ok: true });
+    expect(seen).toEqual([true]);
+    expect(result.config.repo.get("TAKI_INITIATIVE_ENABLED")).toBe(true);
+  });
+
   it("boots on defaults when neither env nor store says otherwise", () => {
     const result = boot({ TAKI_DATA_DIR: tempDataDir() });
 
@@ -63,11 +97,31 @@ describe("bootstrapCore", () => {
     expect(result.env.TAKI_MAX_STEPS).toBe("27");
   });
 
-  it("an env var still outranks the stored value", () => {
+  it("a stored value outranks the environment fallback", () => {
     const dataDir = tempDataDir();
     storeKnob(dataDir, "TAKI_MAX_STEPS", 27);
 
-    expect(boot({ TAKI_DATA_DIR: dataDir, TAKI_MAX_STEPS: "5" }).agentConfig.maxSteps).toBe(5);
+    expect(boot({ TAKI_DATA_DIR: dataDir, TAKI_MAX_STEPS: "5" }).agentConfig.maxSteps).toBe(27);
+  });
+
+  it("starts a usable configuration plane with no model fields", () => {
+    const result = boot({ TAKI_DATA_DIR: tempDataDir(), TAKI_PROVIDER_BASE_URL: undefined,
+      TAKI_PROVIDER_API_KEY: undefined, TAKI_PROVIDER_MODEL: undefined });
+    expect(result.model).toBeUndefined();
+    expect(result.config.source.effectiveAll().length).toBeGreaterThan(0);
+    expect(result.config.writer.set({ key: "TAKI_MAX_STEPS", value: 12 }).ok).toBe(true);
+  });
+
+  it("isolates invalid feature policy while preserving raw configuration for recovery", () => {
+    const result = boot({ TAKI_DATA_DIR: tempDataDir(), TAKI_MAX_STEPS: "broken",
+      TAKI_AMBIENT_SCREENSHOT: "yes", TAKI_ATTACHMENT_TTL_DAYS: "broken", TAKI_LOG_LEVEL: "verbose" });
+    expect(result.ambientConfig).toEqual({ enabled: false, retention: { mode: "keep" } });
+    expect(result.attachmentConfig.ttlMs).toBe(Number.POSITIVE_INFINITY);
+    expect(result.env.TAKI_ATTACHMENT_TTL_DAYS).toBe("broken");
+    for (const key of ["TAKI_MAX_STEPS", "TAKI_AMBIENT_SCREENSHOT", "TAKI_ATTACHMENT_TTL_DAYS", "TAKI_LOG_LEVEL"]) {
+      expect(result.config.application.read(key)).toMatchObject({ state: "unavailable" });
+    }
+    expect(result.config.writer.set({ key: "TAKI_AMBIENT_SCREENSHOT", value: false }).ok).toBe(true);
   });
 
   it("the data root itself is never taken from the store (env-only bootstrap knob)", () => {

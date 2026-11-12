@@ -1,5 +1,6 @@
 import type { ToolExecutionOptions } from "ai";
 import { describe, expect, it, vi } from "vitest";
+import { ExtensionDescribeResultSchema } from "@taki/shared";
 import { createExtensionRegistry, type ExtensionCandidate } from "./extension-registry.ts";
 import { createExtensionTools } from "./extension-tools.ts";
 
@@ -38,6 +39,89 @@ function registry(candidates: ExtensionCandidate[], budget = { maxEntries: 8, ma
 }
 
 describe("extension registry", () => {
+  it("describes the exact captured direct MCP name without including schemas in metadata", () => {
+    const built = registry([mcpCandidate()]);
+    const extensionId = built.snapshot.entries[0]!.identity.extensionId;
+    const result = built.describe({ extensionId });
+
+    expect(ExtensionDescribeResultSchema.parse(result)).toEqual({
+      runId: RUN, entry: built.snapshot.entries[0], toolName: "server_exact_echo",
+    });
+    expect(Object.keys(result).sort()).toEqual(["entry", "runId", "toolName"]);
+    expect(Object.keys(built.discover({}).entries[0]!).sort())
+      .toEqual(["available", "callMode", "displayName", "identity", "modelKey", "summary"]);
+    expect(built.renderContext()).not.toContain("server_exact_echo");
+    expect(built.describe({ extensionId: "ext:missing" })).toEqual({ runId: RUN, entry: null });
+  });
+
+  it("discloses no direct name after the captured MCP generation retires", () => {
+    let current = true;
+    const built = registry([mcpCandidate({ isCurrent: () => current })]);
+    const extensionId = built.snapshot.entries[0]!.identity.extensionId;
+    expect(built.describe({ extensionId }).toolName).toBe("server_exact_echo");
+
+    current = false;
+    expect(built.describe({ extensionId })).toEqual({ runId: RUN, entry: built.snapshot.entries[0] });
+  });
+
+  it.each([
+    { available: false },
+    { call: undefined },
+    { isCurrent: undefined },
+    { callMode: "capability" as const },
+    { modelToolName: "../invalid" },
+    { modelToolName: "x".repeat(257) },
+  ])("does not disclose an unbound or invalid MCP name: %j", (overrides) => {
+    const built = registry([mcpCandidate(overrides)]);
+    expect(built.describe({ extensionId: built.snapshot.entries[0]!.identity.extensionId }).toolName).toBeUndefined();
+  });
+
+  it("detaches model names and governed callbacks from mutable caller candidates", async () => {
+    const call = vi.fn(async () => ({ binding: "captured" }));
+    const replacement = vi.fn(async () => ({ binding: "replacement" }));
+    let current = true;
+    const input = { ...mcpCandidate({ call, isCurrent: () => current }) };
+    const built = registry([input]);
+    const extensionId = built.snapshot.entries[0]!.identity.extensionId;
+    input.modelToolName = "unrelated_tool";
+    input.call = replacement;
+    input.isCurrent = () => true;
+
+    expect(built.describe({ extensionId }).toolName).toBe("server_exact_echo");
+    await expect(built.call({ extensionId, input: {} }, options))
+      .resolves.toMatchObject({ ok: true, output: { binding: "captured" } });
+    current = false;
+    expect(built.describe({ extensionId }).toolName).toBeUndefined();
+    expect(call).toHaveBeenCalledOnce();
+    expect(replacement).not.toHaveBeenCalled();
+  });
+
+  it("reads the caller-owned direct name only once during capture", () => {
+    const name = vi.fn(() => "server_exact_echo");
+    const input = mcpCandidate();
+    Object.defineProperty(input, "modelToolName", { enumerable: true, get: name });
+    const built = registry([input]);
+    const extensionId = built.snapshot.entries[0]!.identity.extensionId;
+    name.mockReturnValue("replacement");
+
+    expect(built.describe({ extensionId }).toolName).toBe("server_exact_echo");
+    expect(built.describe({ extensionId }).toolName).toBe("server_exact_echo");
+    expect(name).toHaveBeenCalledOnce();
+  });
+
+  it("refuses every descriptor that collides on an exact direct MCP name", () => {
+    const first = mcpCandidate();
+    const second = mcpCandidate({ identity: { ...first.identity, subjectId: "mcp.other" } });
+    const built = registry([first, second]);
+
+    expect(built.snapshot.entries).toEqual([]);
+    expect(built.snapshot.collisions).toHaveLength(1);
+    for (const input of [first, second]) {
+      const extensionId = registry([input]).snapshot.entries[0]!.identity.extensionId;
+      expect(built.describe({ extensionId })).toEqual({ runId: RUN, entry: null });
+    }
+  });
+
   it("keeps model context stable across Runs while preserving each captured authority", async () => {
     const firstCall = vi.fn(async () => ({ binding: "first" }));
     const secondCall = vi.fn(async () => ({ binding: "second" }));
@@ -116,3 +200,13 @@ describe("extension registry", () => {
     expect(Object.keys(createExtensionTools(built))).toEqual(["extension_discover", "extension_describe", "extension_call"]);
   });
 });
+
+function mcpCandidate(overrides: Partial<ExtensionCandidate> = {}): ExtensionCandidate {
+  return candidate({
+    identity: { ...candidate().identity, kind: "mcp-tool", subjectId: "mcp.echo" },
+    callMode: "mcp-tool",
+    modelToolName: "server_exact_echo",
+    isCurrent: () => true,
+    ...overrides,
+  });
+}

@@ -1,12 +1,9 @@
 /**
- * INPUT:  an optional injected epoch-ms clock (tests pass a synthetic one; production falls back to Date.now) and an
- *         optional PrivacyPauseStore — the boot snapshot it hydrates from + the sink every change is written to
- * OUTPUT: createPrivacyPause(deps) -> { isPaused, pauseUntilResumed, pauseUntil, resume, state }
- * POS:    core/perception — the ONE Core-owned flag every AMBIENT sampler consults before it observes (the T3a
- *         foreground poll today, the ambient screenshot loop next). On-demand chat captures are deliberately NOT
- *         gated here: those stay explicit in-the-moment consent through the Gate. Pure + OS-neutral; state() is the
- *         serializable shape the perception WS surface / #26 pause badge will read.
+ * INPUT:  optional clock, durable pause store and data-free successful-write observer
+ * OUTPUT: ambient consent state, operator-only mutators and lazy absolute-deadline projection
+ * POS:    core/perception — sole pause state owner; timer-free hydration/reads never persist or gate on-demand captures
  */
+import { notifyPerceptionChange } from "./notify-perception-change.ts";
 
 /** Serializable pause snapshot. `until` is an epoch-ms auto-resume deadline; null = manual resume (or not paused). */
 export interface PrivacyPauseState {
@@ -36,7 +33,11 @@ export interface PrivacyPause {
   state(at?: number): PrivacyPauseState;
 }
 
-export function createPrivacyPause(deps: { now?: () => number; store?: PrivacyPauseStore } = {}): PrivacyPause {
+export function createPrivacyPause(deps: {
+  now?: () => number;
+  store?: PrivacyPauseStore;
+  onChange?: () => void;
+} = {}): PrivacyPause {
   const now = deps.now ?? Date.now;
   // Restored verbatim: a stored deadline already in the past needs no boot-time special case — settle() reads it as
   // lapsed on the first query, exactly as it would have within one session.
@@ -44,9 +45,8 @@ export function createPrivacyPause(deps: { now?: () => number; store?: PrivacyPa
   let paused = restored?.paused ?? false;
   let until = restored?.until ?? null;
 
-  // A lapsed deadline self-clears on the next READ rather than on a timer: a paused core must stay silent, and the
-  // samplers already poll, so there is nothing to wake up. Keeps this module timer-free and deterministic under a
-  // synthetic clock. No write here: the stored deadline settles the same way on every boot.
+  // A lapsed deadline self-clears on READ. Samplers and the interested-operator projection deadline use this same
+  // timer-free operation; neither becomes a writer. The stored absolute deadline settles identically on every boot.
   function settle(at: number): boolean {
     if (paused && until !== null && at >= until) {
       paused = false;
@@ -57,9 +57,13 @@ export function createPrivacyPause(deps: { now?: () => number; store?: PrivacyPa
 
   // Every change is persisted HERE, in the one module that owns the flag, so no call site can forget to.
   function set(next: PrivacyPauseState): void {
+    // Failed persistence must not publish or alter the consent state observed by samplers. Observer failures after
+    // this commit are isolated: they cannot change the already confirmed operator result.
+    deps.store?.save(next);
+    const changed = paused !== next.paused || until !== next.until;
     paused = next.paused;
     until = next.until;
-    deps.store?.save(next);
+    if (changed) notifyPerceptionChange(deps.onChange);
   }
 
   return {

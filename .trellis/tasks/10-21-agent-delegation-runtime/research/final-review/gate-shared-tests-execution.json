@@ -1,0 +1,7 @@
+{
+  "command": "pnpm --filter @taki/shared exec vitest run src/governance-registry.test.ts src/governance-presentation.test.ts --reporter=default --reporter=json --outputFile.json=../../.trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-shared-tests.json",
+  "startedAt": "2026-10-23T03:40:04.4037681Z",
+  "exitCode": 0,
+  "cwd": "H:/TakiAgent-worktrees/t4",
+  "finishedAt": "2026-10-23T03:40:07.0441090Z"
+}

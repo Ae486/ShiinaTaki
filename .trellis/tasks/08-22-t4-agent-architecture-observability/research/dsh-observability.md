@@ -4,6 +4,11 @@
 - Scope: mixed (local reference source plus TakiAgent source and T4 documents)
 - Date: 2026-08-22
 
+Presentation update, 2026-09-05: this report records the reference architecture and its original adaptation.
+For current user-facing field selection, [G4 and the reference comparison](uiux-useful-information-2026-09-05.md)
+supersede generic technical-inspector/raw-structured-view suggestions below. Canonical evidence remains intact;
+reference diagnostic capabilities are not a requirement to display internal metadata in TakiAgent pages.
+
 ## Findings
 
 ### 1. Architectural fact source: one canonical append-only session ledger

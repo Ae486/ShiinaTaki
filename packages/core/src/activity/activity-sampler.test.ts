@@ -20,6 +20,7 @@ function fakeState() {
   const state: ActivityState = {
     push: (sample, at) => void pushed.push({ sample, at }),
     seal: () => void seals.push(clock),
+    clear: () => { pushed.length = 0; },
     entries: () => [],
     current: () => undefined,
   };
@@ -30,6 +31,7 @@ let clock = 0;
 const now = (): number => clock;
 
 interface HarnessOptions {
+  onChange?: () => void;
   hasNode?: () => boolean;
   isPaused?: () => boolean;
   isSensitive?: (processName: string | null) => boolean;
@@ -46,6 +48,7 @@ function harness(route: (capability: string, input: unknown) => Promise<RouteRes
     state,
     logger,
     now,
+    onChange: opts.onChange,
     config: { pollMs: POLL_MS, errorBackoffThreshold: 3, maxBackoffMs: 10 * 60 * 1000 },
   });
   return { sampler, pushed, records, seals };
@@ -64,6 +67,31 @@ describe("createActivitySampler", () => {
   });
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("notifies actual scheduling changes, including denial, but not duplicate start/stop", async () => {
+    const onChange = vi.fn();
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: false, code: "DENIED", message: "denied" }));
+    const { sampler } = harness(route, { onChange });
+    sampler.start();
+    sampler.start();
+    expect(sampler.running()).toBe(true);
+    expect(onChange).toHaveBeenCalledExactlyOnceWith();
+    await step();
+    expect(sampler.running()).toBe(false);
+    expect(onChange).toHaveBeenCalledTimes(2);
+    sampler.stop();
+    sampler.start();
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("observer failures leave the sampler scheduled/stopped as committed", () => {
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: OK_SAMPLE }));
+    const { sampler } = harness(route, { onChange: () => { throw new Error("observer retired"); } });
+    expect(() => sampler.start()).not.toThrow();
+    expect(sampler.running()).toBe(true);
+    expect(() => sampler.stop()).not.toThrow();
+    expect(sampler.running()).toBe(false);
   });
 
   it("pushes a parsed sample into the state on a normal tick", async () => {

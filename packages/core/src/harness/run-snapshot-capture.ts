@@ -1,11 +1,13 @@
 /**
  * INPUT:  live Extension/Host, Governance, Memory, and model-route authorities at Run admission
- * OUTPUT: cancellable immutable RunSnapshot draft and exact execution context under any explicit admission deadline
+ * OUTPUT: cancellable immutable RunSnapshot plus exact Memory/tool bindings and captured presentation names
  * POS:    core/harness — provider-neutral admission adapter; raw prompts, tools, secrets, and payloads never persist
  */
 import { createHash } from "node:crypto";
+import { appException } from "../server/app-error.ts";
+import type { AgentRuntimeBinding } from "../agents/agent-runtime-binding.ts";
 import type { ToolSet } from "ai";
-import type { TriggerRequest } from "@taki/shared";
+import { captureToolDisplayNames, InitiativeSelectedContextSchema, type InitiativeSelectedContext, type TriggerRequest, type SubagentWorkScope } from "@taki/shared";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
@@ -14,28 +16,35 @@ import type { EffectLifecycleService } from "./effect-lifecycle-service.ts";
 import type { CapturedRunSnapshot, RunSnapshotCapture } from "./run-service.ts";
 import type { CapturedMemoryRun } from "../memory/canonical-memory-run.ts";
 import { createMemoryRunReference } from "../memory/memory-capability-snapshot.ts";
+import { createInitiativeMemoryRecall } from "../memory/initiative-memory-recall.ts";
+import { childMemoryExclusions, projectChildMemory } from "./delegation-tools.ts";
+import { attributedContextText, copyContentOrigin, retainContextText } from "../agents/context-attribution.ts";
 
 interface CaptureDeps {
   extensions: { runContext(interactive?: TurnInteractive, runId?: string): ExtensionRunContext };
   governance: Pick<GovernancePolicyService, "level">;
   approval?: Pick<ApprovalInteractionService, "approvalGeneration">;
   memory: { captureRun(characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun> };
+  runtime?: () => AgentRuntimeBinding | undefined;
   provider: string;
   modelId: string;
   effects?: EffectLifecycleService;
 }
 interface CaptureInput {
   input: CaptureDeps; request: TriggerRequest; runId: string; interactive?: TurnInteractive; signal?: AbortSignal;
+  selectedContext?: InitiativeSelectedContext;
+  workScope?: SubagentWorkScope;
 }
 
 export function createRunSnapshotCapture(input: CaptureDeps): RunSnapshotCapture<TurnInteractive> {
   return {
-    capture: (request, runId, interactive) => captureWithLifetime({ input, request, runId, interactive }),
+    capture: (request, runId, options) => captureWithLifetime({ input, request, runId,
+      interactive: options?.admission, selectedContext: options?.selectedContext, workScope: options?.workScope, signal: options?.signal }),
   };
 }
 
 async function captureWithLifetime(args: CaptureInput): Promise<CapturedRunSnapshot> {
-  const lifetime = captureLifetime(args.request.deadlineAt, args.interactive?.signal);
+  const lifetime = captureLifetime(args.request.deadlineAt, args.signal ?? args.interactive?.signal);
   try {
     lifetime.assert();
     const captured = await captureSnapshot({ ...args, signal: lifetime.signal });
@@ -44,8 +53,12 @@ async function captureWithLifetime(args: CaptureInput): Promise<CapturedRunSnaps
   finally { lifetime.dispose(); }
 }
 
+/* eslint max-lines-per-function: ["error", { "max": 55, "skipBlankLines": true, "skipComments": true }] -- Admission seals authority, captured closures and their nonserialized descriptors together. */
 async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot> {
   const { input, request } = args;
+  const runtime = captureModel(input, request);
+  if (request.initiator === "heartbeat" && !args.selectedContext) throw new Error("INITIATIVE_CONTEXT_REQUIRED");
+  const selected = captureSelectedContext(args.selectedContext);
   if (args.interactive) {
     args.interactive.runId = args.runId;
     args.interactive.effects ??= input.effects;
@@ -62,28 +75,73 @@ async function captureSnapshot(args: CaptureInput): Promise<CapturedRunSnapshot>
   if (args.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
   const memorySnapshot = Object.isFrozen(memory.snapshot) && Object.isFrozen(memory.snapshot.capabilities)
     ? memory.snapshot : createMemoryRunReference(memory.snapshot);
+  const selectedRecall = selected?.relatedMemory ? createInitiativeMemoryRecall(memory, selected.relatedMemory) : undefined;
   const executionContext = Object.freeze({
+    runtime,
+    authorityCurrent: () => input.governance.level().policyGeneration === governance.policyGeneration
+      && memory.isCurrent?.() !== false && selectedRecall?.isCurrent() !== false,
+    selectedContext: selected ? freezeSelection(selected) : undefined,
     tools: captureTools(context.tools),
-    memoryTools: captureTools(memory.tools),
+    toolDisclosure: context.toolDisclosure,
+    ...captureMemoryTools(memory.tools, args.workScope, selectedRecall?.tools),
     memorySnapshot,
     automaticMemoryRecall: memory.automaticRecall,
     memoryPrompt: memory.prompt,
     assembleMemory: memory.assemble,
+      toolDisplayNames: captureToolDisplayNames(context.toolDisplayNames),
     instructions: context.instructions,
+    instructionsAttribution: context.instructionsAttribution,
   });
   return { context: executionContext, snapshot: { schemaVersion: "slice1.v1", characterId: request.characterId,
     initiator: request.initiator, provenance: request.provenance, deliveryClass: request.deliveryClass,
-    contextMode: request.contextMode, modelProvider: input.provider, modelId: input.modelId,
+    contextMode: request.contextMode, modelProvider: runtime?.provider ?? input.provider, modelId: runtime?.modelId ?? input.modelId,
+    ...(runtime ? { modelRevision: runtime.revision } : {}),
     primaryHostId: context.snapshot.primaryHostId, hosts, extensions,
     extensionSnapshotDigest: digest({ primaryHostId: context.snapshot.primaryHostId, hosts, extensions }),
     governance: { policyGeneration: governance.policyGeneration, registryRevision: governance.registryRevision,
       approvalGeneration: input.approval?.approvalGeneration() ?? 1 },
     memory: memorySnapshot,
-    contextDecision: { sourceCategories: ["character", "memory", "extensions"], tokenAccounting: "unknown" as const },
+    contextDecision: { sourceCategories: selected ? [...new Set(selected.manifest.sources.map((source) => source.category))] : ["character", "memory", "extensions"], tokenAccounting: selected?.manifest.accountingQuality ?? "unknown" as const },
+    ...(selected ? { initiativeContext: selected.manifest } : {}),
     replayDecision: { status: "not_captured" as const },
     budget: { deadlineAt: request.deadlineAt, budgetHint: request.budgetHint },
     implementation: { runtimeVersion: "slice1", schemaVersion: "slice1.v1" },
     sourceRefs: [] } };
+}
+
+function captureSelectedContext(input?: InitiativeSelectedContext): InitiativeSelectedContext | undefined {
+  if (!input) return undefined;
+  const selected = InitiativeSelectedContextSchema.parse(input);
+  const descriptor = attributedContextText(input);
+  if (descriptor) retainContextText(selected, descriptor);
+  return selected;
+}
+
+function captureModel(input: CaptureDeps, request: TriggerRequest): AgentRuntimeBinding | undefined {
+  if (request.provenance.provider === "dev-trigger") return undefined;
+  const runtime = input.runtime?.();
+  if (input.runtime && !runtime) {
+    throw appException("CONFIG_REFUSED", "请先在设置中配置主模型。", { reason: "MODEL_UNAVAILABLE", slot: "main" });
+  }
+  return runtime;
+}
+
+function captureMemoryTools(tools: ToolSet, scope: SubagentWorkScope | undefined, selected: ToolSet | undefined) {
+  const child = scope?.kind === "subagent";
+  return { memoryTools: captureTools(child ? projectChildMemory(tools) : selected ?? tools),
+    memoryToolExclusions: child ? childMemoryExclusions(tools) : undefined };
+}
+
+function freezeSelection(selected: InitiativeSelectedContext): InitiativeSelectedContext {
+  for (const source of selected.manifest.sources) Object.freeze(source);
+  Object.freeze(selected.manifest.sources); Object.freeze(selected.manifest);
+  Object.freeze(selected.allowedToolNames); Object.freeze(selected.candidateIds);
+  if (selected.candidatePolicies) {
+    for (const policy of selected.candidatePolicies) { Object.freeze(policy.allowedOutcomes); Object.freeze(policy); }
+    Object.freeze(selected.candidatePolicies);
+  }
+  if (selected.relatedMemory) { Object.freeze(selected.relatedMemory.scopes); Object.freeze(selected.relatedMemory); }
+  return Object.freeze(selected);
 }
 
 function captureLifetime(deadlineAt?: string, caller?: AbortSignal) {
@@ -118,6 +176,6 @@ function captureTools(tools: ToolSet): ToolSet {
   if (Object.isFrozen(tools) && Object.values(tools).every(Object.isFrozen)) return tools;
   // Preserve non-enumerable governance sidecars while detaching replaceable tool descriptors from the source.
   const entries = Object.entries(tools).map(([name, value]) => [name,
-    Object.freeze(Object.create(Object.getPrototypeOf(value), Object.getOwnPropertyDescriptors(value))) as ToolSet[string]]);
+    copyContentOrigin(value, Object.freeze(Object.create(Object.getPrototypeOf(value), Object.getOwnPropertyDescriptors(value)))) as ToolSet[string]]);
   return Object.freeze(Object.fromEntries(entries));
 }

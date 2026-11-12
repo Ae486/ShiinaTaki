@@ -235,10 +235,37 @@ and discard that reader when the callback returns or throws. No TTL or process-w
 
 ### Ingestion, curator and lifetime
 
+- Source-dependent C4 initiative keeps the original primary witness and exact confirmed ingestion Source/Bank/epoch
+  chain. Whole-write retain completion now optionally stores bounded immutable native Source/unit heads and exact
+  policy baselines; ingestion acknowledgment reuses that original completion evidence. A formerly Pending source may
+  use its exact recovered parent receipt, never a newly observed policy baseline. Historical receipts without these
+  bindings remain unavailable; no replay, backfill, expiry renewal or authority promotion is implied.
+- Selected-topic recall consumes the original captured tool once per applicable Bank and retains exact current
+  native heads, bound artifacts, direct Source original witness and unit policy. Known edits, deletion, hidden/expiry,
+  namespace/route drift and unbound evidence close dependent output. Verified replica fallback keeps Hindsight and
+  truthful partial/degraded status. Remote changes cannot be known before verified synchronization.
+- C4 omits record bodies without an available direct Source or with an unsupported derived-input closure; the model
+  receives a bounded partial result. This conservative consumer restriction does not change ordinary Recall or
+  represent a solution to D81's provider-wide opaque-derived exclusion problem.
+
 - Hindsight ingestion consumes exact committed Primary source witnesses, one eligibility/ownership gate and the existing
   20-message cadence. It does not perform Local fact extraction. Persist stable per-Bank requests before asynchronous work.
-- Pre-retirement flush requires complete confirmed or actual durable Pending source coverage in every selected Bank.
+- Primary Timeline capture uses the shared provider-independent source lifecycle described in
+  [Canonical Local Memory Runtime](canonical-local-memory-runtime.md). Import retained sources from local authority
+  identity without provider/capability I/O, reuse existing Hindsight witnesses, and isolate unresolved gaps from later groups.
+- Pre-retirement flush and explicit ingestion coverage require complete confirmed or actual durable Pending source coverage in every selected Bank.
   A queued promise, guessed timeline interval or one successful Bank is insufficient. Late witnesses remain recoverable.
+- Nonretiring rolling-summary Compaction may proceed under an effective published Local runtime or a published
+  Hindsight binding whose complete bound identity matches current authority. It preserves all raw Timeline/source
+  bytes and does not advance ingestion, `lastFlushSeq` or invent flush events. Connection drift may delay extraction
+  while that local summary still proceeds. Unpublished, withdrawn, mismatched or unreadable identities retain a
+  failing factual flush. Real retirement always requires confirmed/actual durable Pending coverage in every selected
+  Bank; a guessed range or one successful Bank remains insufficient.
+- Known exact source groups on both sides of an unresolved hole may complete independently. Claims prove every
+  selected witness and every user occurrence within the claimed interval. Completion revalidates original receipts
+  and cannot advance coverage across the first gap. Stored cursors retain their historical monotone high-water mark;
+  returned current coverage may be lower after a late exact witness. Explicit coverage gaps always refuse retirement,
+  including below the eligibility baseline, and never authorize rewriting earlier positive receipt history.
 - The curator is limited to Taki policy and authorized Block work, with separate Global/Character model inputs. Keep
   user-card ownership, filter hidden/expired/ineligible-mood input before each submission, and persist claims, prompts,
   results, command identities and retries. Restart resumes saved proposals without rerunning a completed model call.
@@ -310,8 +337,9 @@ and discard that reader when the callback returns or throws. No TTL or process-w
 
 ### D108 scheduled curator review and durable resume
 
-- Ordinary post-turn maintenance performs ingestion only. The unchanged ingestion owner batches 20 messages or
-  flushes before compaction. `tidy.maybeRun` is inert under Hindsight; the full tidy diagnostic report is reserved for
+- Ordinary post-turn maintenance performs ingestion only. The unchanged ingestion owner batches 20 messages;
+  source retirement uses its explicit flush, while nonretiring Compaction follows the published-binding boundary above.
+  `tidy.maybeRun` is inert under Hindsight; the full tidy diagnostic report is reserved for
   explicit operator `runNow`, which retains its existing response contract. Neither automatic chat path enumerates it.
 - `hindsight-policy-config.ts` and the existing config registry own live `TAKI_HINDSIGHT_POLICY_REVIEW_MODE`
   (`daily`/`interval`), `_TIME` (`03:00`), `_INTERVAL_MS` (`86400000`) and `_THRESHOLD` (`100`). Daily time uses

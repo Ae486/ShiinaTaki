@@ -34,6 +34,55 @@ app.destroy(true);
 Required regression points: two `dispose()` calls do not throw; model removal/destruction occur exactly once before
 application destruction; a real Tauri development reload has exactly one canvas and no teardown exception.
 
+## Cubism 2 mask context ownership (verified 2026-10-16)
+
+Engine 1.3.1's `Live2DModel.generateUID()` counts per model, starting at 1, while the vendored Cubism 2 SDK stores
+`frameBuffers[glno]` and `fTexture[glno]` in realm-global arrays. Two asynchronous StrictMode scenes therefore overwrite
+the same slot. After the late probe is disposed, the live context rejects the foreign framebuffer and keeps its
+previous target (often the main canvas) bound. Colored mask-channel shapes and failed pupil clipping are the visible
+symptoms; one remaining canvas does not prove mask ownership is correct.
+
+`renderer/live2d/legacy-mask-context.ts` wraps the legacy internal model's `updateWebGLContext` before the loader adds
+the model to the stage. This must precede even the first forced click-through RenderTexture capture. Each initialization
+gets a unique realm slot; `Symbol.for` keeps allocation and duplicate-install guards stable across Vite HMR. Cubism 3+
+continues through its own engine path. Keep the locked engine/runtime and model assets unchanged for this workaround.
+
+On context reinitialization or internal-model destruction, release only the captured framebuffer, renderbuffer and
+textures. Remove cache references only when identities still match; validate handles against their owning GL context
+and delete a shared texture once. Never call the SDK's realm-wide cache disposal for one scene or costume. This adapter
+owns mask allocations only, not all SDK GPU resources or the renderer's context-restoration policy.
+
+Regression coverage: `legacy-mask-context.test.ts` reproduces the original rejected-binding leak, then covers multiple
+contexts, shared-context costumes, late StrictMode teardown, reinitialization, lost contexts, foreign replacements,
+failed initialization, duplicate installation and HMR. `load-character-model.test.ts` covers attachment ordering, a late
+async model and the Cubism 3+ branch. Live evidence must check `gl.isFramebuffer` / `gl.isTexture` from the visible
+canvas's context as well as a screenshot; screenshots alone cannot establish that mask draws target the right buffer.
+
+## Avatar Command outcome classification (established D80, 2026-09-19)
+
+`renderer/live2d/avatar-commands.ts` resolves every Avatar Command to a Presentation Outcome report and never throws.
+The engine promise decides `applied`; a `false` is classified best-effort from state read BEFORE the call, mirroring
+the engine 1.3.1 rules verified in `dist/index.js`:
+
+- **Motion** (`MotionManager.startMotion`): `state.reserve(group, index, priority)` refuses a non-FORCE priority that is
+  `<= state.currentPriority` or `<= state.reservePriority` (and an already playing/reserved same motion); after a
+  successful reserve, `currentAudio.isPlaying && priority != FORCE` refuses too. Classification order: `speaking`
+  (audio playing, non-FORCE) → `motion_busy` (priority at/below current or reserved) → `superseded` (a newer motion
+  command for this model started before this one resolved) → `unavailable`.
+- **Expression** (`ExpressionManager.setExpression`): an index equal to the current expression returns `false` before
+  the reserve slot is touched; a pending load whose `reserveExpressionIndex` moved on returns `false`. Classification:
+  `already_active` (target index === pre-call current index) → `superseded` (newer expression command started) →
+  `unavailable`. `already_active` is checked first because it is deterministic; a back-to-back pair would otherwise
+  mislabel it.
+- Unknown name → `rejected/unknown_name` plus the vocabulary drift re-report (1b). A throw → `rejected/unavailable`.
+- Agent motions keep NORMAL by default: never escalate to FORCE or queue to turn a rejection into an apply — the
+  rejection is the truthful outcome and the tool description tells the model not to retry.
+- The report leaves the window only while the connection generation is current (`restore-pet-connection.ts`); a
+  retired generation reports nothing and Core resolves `unknown` at its deadline.
+
+Regression fixtures: `avatar-commands.test.ts` reproduces the Lab table (same expression twice, NORMAL over NORMAL,
+two un-awaited expressions, speaking, unknown name, throw) with a fake model.
+
 ## Generation split — raw parameter access (the gotcha)
 
 The API differs by model generation; any param-driven feature (head tracking, lip-sync, click feedback) MUST branch:
@@ -50,6 +99,11 @@ modern.coreModel.setParameterValueById(modern.idParamAngleX, v);
 
 Reference implementation: `apps/desktop/src/renderer/spike/param-probe.ts`.
 
+Per-frame order (engine 1.3.1, lab-verified 2026-09-18): `internalModel.update()` emits `beforeMotionUpdate` →
+motion/expression update → `afterMotionUpdate` → `beforeModelUpdate` → `coreModel.update()` → `loadParam()`
+(restores the saved snapshot). Any parameter written or read for a frame must happen synchronously inside one of
+those events; a deferred read (microtask/timeout) after `beforeModelUpdate` sees the restored values, not the frame's.
+
 ## BanG Dream model facts (verified on taki assets)
 
 - Manifests define NO standard SDK hit areas (`hitTest` returns `[]`); Cubism 2 files carry a BandoriPet-custom `hit_areas_custom` field instead → click reactions need the custom hit-area increment (#16).
@@ -63,7 +117,18 @@ Reference implementation: `apps/desktop/src/renderer/spike/param-probe.ts`.
 
 - The governor OWNS the ticker: create the PixiJS app with `autoStart:false` and let the governor call `ticker.start()/stop()` + set `maxFPS`. Never let a Live2D model update on an unstarted `Ticker.shared` while the app runs a different ticker — that was the spike's "blink doesn't run" bug. Bind the model explicitly to the governed ticker.
 - Tiers: full fps while active/interacting; throttle on window blur (`getCurrentWindow().onFocusChanged`); STOP on `visibilitychange` hidden (minimize) — provable via a frame-count assertion (0 frames while hidden, resumes on unhide). "Paused when covered by another window" is NOT achievable (no verified Tauri/DOM occlusion API) — scope it out, don't fake it.
-- Gate the whole thing on a `renderThrottling` flag (default true); off ⇒ always full-rate, never paused. The flag's real config wiring is deferred (D19 → M5 #24); #14-era code reads a local default.
+- Bind native focus events before reading `getCurrentWindow().isFocused()` on each governor lifetime. A Pet that
+  starts/reloads unfocused must enter the existing blur tier without waiting for another focus event. Events after
+  the read starts supersede that seed; disposed reads/callbacks cannot update the governor, and a registration
+  resolving after disposal must immediately unlisten exactly once. A failed native read leaves a breadcrumb and
+  uses current DOM focus only if no newer native event exists. Add no focus polling or duplicate observers.
+- Renderable content is an independent prerequisite: construct a model-less Pet governor with `renderable=false`
+  before its first apply. No focus/activity/visibility/throttling change may start that empty ticker. Successful
+  attachment refreshes the alpha mask before `setRenderable(true)`; disposal pauses it again. Loading a replacement
+  preserves the old attached model and its renderability until the new one succeeds.
+- Gate loaded-model tiers on `renderThrottling` (default true); off keeps attached content full-rate, including
+  hidden/asleep states, but never starts an empty scene. The flag's real config wiring is deferred
+  (D19 → M5 #24); #14-era code reads a local default.
 
 ## Window geometry persistence (decided #14)
 

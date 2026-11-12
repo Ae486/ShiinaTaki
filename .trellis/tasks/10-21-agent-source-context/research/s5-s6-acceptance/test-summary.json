@@ -1,0 +1,48 @@
+{
+  "reports": [
+    {
+      "report": "tests-initial.json",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "report": "tests-regression.json",
+      "passed": 21,
+      "failed": 0
+    },
+    {
+      "report": "tests-final.json",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "report": "tests-ready.json",
+      "passed": 27,
+      "failed": 0
+    },
+    {
+      "report": "tests-quality-retry-ready.json",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "report": "tests-a3-repair-ready.json",
+      "passed": 38,
+      "failed": 0
+    },
+    {
+      "report": "tests-deadline.json",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "report": "tests-final-delivery.json",
+      "passed": 65,
+      "failed": 0
+    }
+  ],
+  "latestPassed": 65,
+  "latestFailed": 0,
+  "latestSkipped": 3,
+  "interpretation": "Acceptance supplement only; previous 290 scoped results remain historical evidence."
+}

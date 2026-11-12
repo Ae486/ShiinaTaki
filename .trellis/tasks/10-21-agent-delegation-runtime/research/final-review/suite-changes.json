@@ -1,0 +1,44 @@
+[
+  {
+    "path": "packages/core/src/initiative/backoff/initiative-backoff.test.ts",
+    "preimageSha256": "a89908b38ea4d4390e925864c4394d1eb82f848cd15cfc7afdabb1ea44a017cc",
+    "sha256": "d37aabf53e1be9c5e2d8e1dd771463283bef1605330883e6737c837eaed69cf0",
+    "utf8NoBom": true,
+    "noTrailingWhitespace": true
+  },
+  {
+    "path": "packages/core/src/initiative/backoff/index.md",
+    "preimageSha256": "105c9a444afbc8ef014bd9baf1373a8f83e30551e5afba6c9cf9bf76cc0cdff6",
+    "sha256": "d0cb7e39a552711ad05b36363e2dcb26ba2ff5378d39ee5f674578d34f5212e7",
+    "utf8NoBom": true,
+    "noTrailingWhitespace": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/035-timeline-presentation.test.ts",
+    "preimageSha256": "c528c579f713275d7bfb8d74276b75c5da537a9c339892586fa5530b66c952bc",
+    "sha256": "2dbd3987a27a2f93410a67b6ea0ae392e464b5d879783d242f63ba91d11346d7",
+    "utf8NoBom": true,
+    "noTrailingWhitespace": true
+  },
+  {
+    "path": "packages/core/src/db/migrations/index.md",
+    "preimageSha256": "c23c9dd5c4e017f55a639b2b73bd4d0da4338a5b23b6a8804175dda3c09dbe79",
+    "sha256": "2e1d3766b96393a3b069d0e217f615e4566b0e40fa6ce73416d146779e3e27e8",
+    "utf8NoBom": true,
+    "noTrailingWhitespace": true
+  },
+  {
+    "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.test.ts",
+    "preimageSha256": "02589f21c343a690c60e7e7f644938891e1f34d79044bcca770c0f9efe89c680",
+    "sha256": "0c5f6d042164b0c05ec41f59213c5af961e0453ba79000e578355a0be20a58a9",
+    "utf8NoBom": true,
+    "noTrailingWhitespace": true
+  },
+  {
+    "path": "packages/core/src/memory/hindsight/index.md",
+    "preimageSha256": "0dfccf6b1fff49e330e6cf98f9bb7d52c2bdcd2458fe38bc62750e552c79522e",
+    "sha256": "562f1c54cfb2debc5dafbd6e81f79e06eb8a351f313ce37b1a8af2f7d664baa1",
+    "utf8NoBom": true,
+    "noTrailingWhitespace": true
+  }
+]

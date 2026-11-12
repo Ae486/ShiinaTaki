@@ -152,6 +152,7 @@ describe("local activate — unknown commitment classification", () => {
     const ctx: MemoryOperationContext = { live: () => null, setup: fakeSetup(), local: local as LocalOnboardingService, lookup: () => undefined,
       activeInFamily: () => undefined, latestInFamily: () => undefined, now: () => "2026-09-22T00:00:00.000Z" };
     return { operationId: "11111111-1111-4111-8111-111111111111", request: { kind: "local.onboard.activate", runId: "run" }, ctx, running: () => undefined, tryClaim: () => true, checkpoint: vi.fn(),
+      updateProducer: () => { throw new Error("Unexpected activation producer update; use checkpoint"); },
       producer: { kind: "local", runId: "run", previewId: null, snapshotId: "s", activationTransactionId: "tx", progress: reserved } };
   }
   const base = { stopRequested: () => false, activate: vi.fn(async () => { throw new Error("EPIPE"); }) };

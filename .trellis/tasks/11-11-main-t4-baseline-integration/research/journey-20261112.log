@@ -1,0 +1,21 @@
+[smoke] temp root G:/taki-first-use-qTPkID
+[smoke] step 1: Boot native + Core; Legacy/empty
+[smoke] step 2: Local onboarding + retaining Run
+[smoke] step 2 FAILED: Home onboard failed (1): Traceback (most recent call last):
+  File "G:\TakiAgent-integration\.trellis\tasks\08-09-memory-operations-ui\research\first-use-runtime\home-check.py", line 7, in <module>
+    from playwright.sync_api import sync_playwright, expect
+ModuleNotFoundError: No module named 'playwright'
+
+[smoke] FATAL Journey stopped at 2: Home onboard failed (1): Traceback (most recent call last):
+  File "G:\TakiAgent-integration\.trellis\tasks\08-09-memory-operations-ui\research\first-use-runtime\home-check.py", line 7, in <module>
+    from playwright.sync_api import sync_playwright, expect
+ModuleNotFoundError: No module named 'playwright'
+
+[smoke] result fatal; evidence G:\TakiAgent-integration\.trellis\tasks\08-09-memory-operations-ui\research\first-use-runtime\results\2026-11-12T07-51-08.211Z\
+[smoke]   1 passed 
+[smoke]   2 failed Home onboard failed (1): Traceback (most recent call last):
+  File "G:\TakiAgent-integration\.trellis\tasks\08-09-memory-operations-ui\research\first-use-runtime\home-check.py", line 7, in <module>
+    from playwright.sync_api import sync_playwright, expect
+ModuleNotFoundError: No module named 'playwright'
+
+exit=1

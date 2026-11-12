@@ -95,6 +95,13 @@ desired mutation increments only that row's revision.
   candidate, generation, and shutdown races.
 - Forced close while a lease is in flight returns `OUTCOME_UNKNOWN`; it must not report ordinary failure or fabricate
   rollback after dispatch.
+- Settled standard MCP `image` blocks and embedded image-resource blobs enter the normal main request as native
+  image/file parts associated with their exact completed result. The compatible adapter's JSON tool fallback must
+  never receive those pixels as text. Preserve text, non-image/unknown blocks, `structuredContent` and `isError`;
+  arbitrary screenshot-shaped JSON is not explicit media and must not be promoted.
+- Existing PNG/JPEG/WebP/GIF attachment refs support selected replay within normal TTL. Other declared image MIME
+  types remain native current-Attempt evidence with an explicit not-retained marker. A local retention failure may
+  also leave native evidence transient; it never repeats an already completed remote call or changes its outcome.
 - Shutdown stops publication, aborts candidates, retires active generations, waits only within its budget, and is
   idempotent. Restart reconstructs runtime state from desired rows and never replays calls.
 

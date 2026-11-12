@@ -122,6 +122,7 @@ function dispatchRequest(args: {
     && (!state.effects || !identity.runId || !identity.coreAttemptId || !target.ownerCurrent)) {
     return Promise.resolve({ ok: false, code: "DENIED", message: "Deployment requires current Run and Effect authority" });
   }
+  if (target.signal?.aborted) return Promise.resolve({ ok: false, code: "CANCELLED", message: "Run execution was cancelled", state: "cancelled" });
   const requestId = randomUUID();
   const control = makeControl({ target, input, identity, dispatchedMs: state.now(), timeoutMs });
   return new Promise<CapabilityOutcome>((resolve) => {
@@ -136,8 +137,11 @@ function dispatchRequest(args: {
       observers: identity.observers,
     };
     state.pending.set(requestId, entry);
+    const onAbort = () => cancelExecution(state, requestId);
+    target.signal?.addEventListener("abort", onAbort, { once: true });
+    entry.executionAbortListener = () => target.signal?.removeEventListener("abort", onAbort);
     try {
-      if (!target.isCurrent() || target.operator?.signal?.aborted) throw new Error("stale Host dispatch");
+      if (target.signal?.aborted || !target.isCurrent() || target.operator?.signal?.aborted) throw new Error("stale Host dispatch");
       identity.observers?.onIssued?.({ requestId, control: structuredClone(control) });
       target.notify(CAPABILITY_METHODS.request, { requestId, control, input } satisfies CapabilityRequest);
     } catch {
@@ -148,6 +152,18 @@ function dispatchRequest(args: {
     }
     args.log.info({ requestId, attemptId: control.attemptId, capability: control.capabilityId }, "capability requested");
   });
+}
+
+function cancelExecution(state: CapabilityBrokerState, requestId: string): void {
+  const entry = state.pending.get(requestId);
+  if (!entry) return;
+  const outcome = entry.targetDispatched && entry.execution === "effect"
+    ? { ok: false as const, code: "OUTCOME_UNKNOWN" as const, message: "Run cancelled after Host dispatch", state: "outcome_unknown" as const }
+    : { ok: false as const, code: "CANCELLED" as const, message: "Run execution was cancelled", state: "cancelled" as const };
+  // Retire first: a synchronous cancellation acknowledgement cannot settle the same invocation twice.
+  if (settlePending(state, requestId, { outcome, terminalReason: "late" })) {
+    if (!entry.targetDispatched || entry.cancellation === "cooperative") notifyHostCancel(entry, requestId, "caller_cancelled");
+  }
 }
 
 function resolveResponse(

@@ -4,7 +4,8 @@
 
 Use this contract when adding or changing Run monitoring, lifecycle event producers, trajectory projection, operator
 observability methods, monitor modes, metrics/totals, or post-commit Run Event subscriptions. `runs` and the immutable
-`run_events` ledger remain the only execution authorities. Every monitor response is a disposable read projection and
+`run_events` ledger remain the only Run execution authorities. Maintenance uses its existing operation ledgers below.
+Every monitor response is a disposable read projection and
 must never settle, retry, reopen, or otherwise mutate a Run.
 
 ## 2. Signatures
@@ -24,6 +25,15 @@ const OBSERVABILITY_METHODS = {
 
 type MonitorMode = "DISABLED" | "FEEDBACK_ONLY" | "FULL_LOCAL";
 type RunMonitorCursor = { queuedAt: string; key: string };
+
+type TrajectoryWindow = {
+  afterSeq?: number; // forward, default 0
+  tail?: true;
+  beforeSeq?: number; // exclusive positive sequence
+  limit?: number; // 1..200
+};
+// tail/beforeSeq/nonzero afterSeq are mutually exclusive. Responses retain forward cursor/hasMore,
+// plus optional hasOlder/olderCursor for backward history without rewinding the client's live cursor.
 
 type RunObservabilitySession = {
   middleware: LanguageModelMiddleware; // commits Effect intent before provider dispatch
@@ -47,8 +57,11 @@ applied, and defaults to `DISABLED`.
 - Projection filters that require Runs, Attempts, Receipts, or Events may scan keyset batches up to a bounded budget.
   If the budget is reached before durable exhaustion, return the last scanned Run as `nextCursor` even when the page
   is empty or shorter than requested. Never report false exhaustion after an early SQL `LIMIT`.
-- Ordinary rows expose semantic labels, timing, state/outcome, counts, bounded summaries, and effect context. Opaque
-  IDs, digests, revisions, generations, and correlation values are inspector-only.
+- User-facing rows and Inspector details expose semantic labels, timing, state/outcome, counts, bounded summaries,
+  useful input/output and effect context. Under the 2026-09-05 G4 owner clarification, opaque IDs, digests, internal
+  revisions/generations and correlation bookkeeping are not rendered even in expanded details or `FULL_LOCAL`.
+  Existing wire/internal identity fields remain valid for queries, authorization, selection and replay; this display
+  rule neither deletes canonical evidence nor changes API schemas. Follow the frontend field-selection contract.
 - Monitoring is producer-first. A token, tool, timing, provider/model, approval, delivery, recovery, or cache field may
   enter Shared contracts/UI only after a fixed Core lifecycle boundary emits a versioned, bounded fact that can rebuild
   the same projection after restart. Missing/unknown facts remain absent or explicitly unknown; the UI never infers
@@ -66,6 +79,102 @@ applied, and defaults to `DISABLED`.
   subscription closes the prior membership; explicit unsubscribe and `ctx.onClose` both dispose it. Overflow or mode
   disable emits an invalidation and cannot block Run execution.
 
+### D68-B exact identity, query and timing contract
+
+- A model request is identified by its model Effect, not the SDK generation `callId`, which can span several
+  requests. Optional projection correlation (`eventKind`, `effectId`, `callId`, `toolCallId`, `modelEffectId`,
+  `invocationId`) is machine-only. Group or enrich records only from proved identities; legacy, conflicting or
+  missing associations remain independent.
+- The per-attempt `tool-invocation.ts` bridge captures immutable IDs and the A2 display name through actual SDK
+  object identity. Late callbacks retain that snapshot; never use a newest-toolCallId map or copy raw inputs.
+  Captured names retain the 240-unit contract. An already frozen ambiguous association is not silently upgraded.
+- `tool-outcome.ts` classifies actual pre-conversion terminal results. Preliminary output never settles;
+  `ok:false` and MCP `isError:true` cannot become successful results after model-output conversion. Legacy stored
+  content without captured outcome evidence is not proof of success.
+- Canonical governed Effect settlement and tool observations reuse `classifyToolOutcome({ type, output,
+  preliminary?, invalid? })`. Error codes come only from existing closed Shared vocabularies and verified broker
+  codes; arbitrary `output.code` text maps to `tool_failed`, even if it already resembles a valid identifier.
+  Canonical nested Memory `error.code` preserves unknown/cancelled outcomes. Never classify by substring or
+  retain private text by replacing characters/truncating it. The original tool result and execution/Approval/CAS
+  behavior remain unchanged by this diagnostic projection.
+- Tool receipt is not execution. SDK wrapper start proves processing and can precede Approval waiting. Optional
+  `startedAt` and duration from that interval must be labeled processing, including waiting, rather than confirmed
+  underlying execution. Missing durations stay absent; the UI may show a start marker, never a fabricated live span.
+- Repository pages use indexed bounded reads. Forward pages ascend; tail/before reads select backward and return
+  chronological rows. `beforeSeq=1` is a valid empty window. Character/Run authorization precedes cursor errors.
+  Inspector reads the exact event; summaries aggregate existing tables with complete-only sums that distinguish
+  unknown constituents from observed zero. No second store or full-ledger materialization is introduced.
+- Backward `olderCursor` is independent of forward live progress. Reconnect drains bounded forward pages before
+  subscribing; subscription backfill itself is bounded. Recovery must work beyond one bus/window capacity without
+  silent gaps or endless overflow loops.
+- Inspector returns populated typed semantic sections and an empty compatibility `technical` array in all modes.
+  No producer exists here for raw prompt/full tool input/output/definitions/diff panels; do not invent those tabs.
+
+### Primary-summary-bounded cache rate
+
+- `CACHE_USAGE_METHODS` defines operator-only cacheUsageSubscribe/cacheUsageUnsubscribe and cacheUsageChanged under
+  observability. Subscribe returns `CacheUsageUpdate { revision, snapshot }`; changes deliver complete computed snapshots.
+  The selected Character identifies the primary-summary boundary. The current `regular-model-requests` population
+  includes observed Core calls except auxiliary rows with `source='utility' AND label IN ('tidy','compact')`.
+  Other auxiliary producers retain their prior treatment. Run selection/list filters do not change it. Do not invent
+  per-Character auxiliary ownership. The old `all-observed-model-requests` wire scope remains readable with its old caption.
+- `run_usage.cache_read_observed` preserves new provider field presence. Reuse raw-aware normalization; explicit zero
+  counts, absent/invalid/conflicting cache is unknown. The verified old adapter's positive cache values remain usable;
+  ambiguous legacy zero is unpaired. Ratio is sum(cache-read)/sum(input) over identical valid pairs, with positive input,
+  bounded cache and safe counts. Count failed/cancelled metered calls once; do not sum the usage event again.
+- Migration066 adds `cache_usage_baselines`. A successful `commitSummary` captures cumulative observed/pair counts and
+  paired input/cache sums in its transaction; the current window subtracts that exact revision/operation baseline.
+  The compact call is already settled; calls settling later belong to the new window even if they started earlier.
+  Same-millisecond timestamps cannot change forward membership. Duplicate/failed/private summaries and tidy do not reset.
+- Optional baseline errors use a nested savepoint and cannot invalidate an otherwise valid summary. A missing/mismatched
+  baseline, malformed totals or unsupported ledger rewriting yields unavailable, never plausible zeroes. Historical
+  initialization uses original recorded_at/finished_at, never auxiliary updated_at; unassignable ties/nulls are unavailable.
+  Any future explicit usage import/retention must preserve or rebase this meaning; normal terminal ledgers are immutable.
+- Migration068 adds a nullable baseline `population` and reconstructs only provable regular-call historical boundaries.
+  It preserves explicit-zero provenance and original usage bytes; excluded maintenance timestamp ties do not invalidate
+  a normal baseline. Included ties/unknown times remain unavailable until a natural successful summary captures a new
+  exact baseline. Never subtract an old all-call baseline from regular-call totals.
+- Primary usage, auxiliary settlement and summary-baseline notifications wait for the outermost commit. Rollback and
+  duplicate settlement cannot publish a fresh observation. The service computes SQL aggregates only for subscribers,
+  coalesces synchronous hints by microtask and isolates reader/logger/socket failures. No polling or UI running counters.
+- Empty has zero eligible sums and null ratio; unavailable has null counts and a closed reason. Both differ from a
+  reported zero hit rate. Server snapshots are strictly validated and have monotonically increasing process revisions;
+  reconnect fetches the durable window rather than replaying work. Mode disable withdraws counts and prevents reads.
+- Required regressions: explicit zero/missing/conflicting raw fields; unequal-size request weighting; same-ms/cross-reset
+  completion; outer rollback/duplicate commit; failed baseline save; historical bootstrap/import timestamps; SQLite reopen;
+  actual Core main/WS production wiring and rendered client refresh/reconnect behavior.
+
+### Background maintenance Monitor
+
+1. **Scope / trigger:** Memory tidy and conversation compaction use their existing durable operation ledgers, alongside
+   ordinary Runs. Do not create synthetic Runs, copy execution state, or perform reconciliation from a Monitor read.
+2. **Signatures:** `observability.maintenanceSubscribe(MaintenanceMonitorParams)` returns `{revision,snapshot}`;
+   `maintenanceUnsubscribe({})` returns `{status:'ok'}`; `maintenanceChanged` carries the same update shape.
+   Params contain `characterId`, optional operation cursor, `selected:{kind,operationId,characterId}`, and optional call
+   cursor. Snapshot echoes the query, has `ready|unavailable|disabled`, up to 25 operations and a selected call page of 100.
+   Migration068 adds nullable `auxiliary_model_calls.operation_json` with an association index.
+3. **Contracts:** The durable tidy owner covers manual and automatic Local/Legacy triggers. Utility task UUIDs remain
+   distinct from the operation reference; the SDK meter captures association at actual dispatch. Compaction supplies
+   its captured lease identity around summary generation. Legacy pre-summary `flush` remains a separate auxiliary call.
+   Aggregate only explicitly associated calls. Never use tidy outcome's process-wide Utility usage as operation usage.
+   Missing historical association or token fields remains unknown; show known-count coverage. Legacy checked-memory
+   counts remain nullable. Normal cache excludes only the two labels; latest-primary attribution stays on primary
+   request receipts. A successful primary summary still resets the normal cache window.
+4. **Validation / errors:** Character mismatch and foreign selected operations are refused. Operation cursors must match
+   an existing scoped immutable anchor; compaction uses its first event (`operation_seq=1`), since retry rewrites the
+   attempt start. A reader failure returns unavailable, never empty success. Mode disable withdraws all data. Every
+   start/progress/failure/cancel/recovery hint follows the outermost commit, is coalesced, and cannot affect execution.
+5. **Good / base / bad cases:** A multi-batch tidy has one operation and several proved calls; an old completed tidy
+   can have unknown usage; guessing links by timestamps or reporting a Legacy unknown count as zero is invalid.
+   Total elapsed time spans first admission to terminal, including waits/retries. No measured token compression ratio
+   exists here; do not divide `beforeTokens` by `outputChars` or fabricate input occupancy.
+6. **Required tests:** Actual owner/Utility/SDK/SQLite associations, unrelated queued tasks, cross-Character selection,
+   operation/call paging, stable retry ordering, rollback, start and failed settlement pushes, disabled/hidden/closed
+   subscriptions, old generation/query replies, normal-metric invariance, and actual Core/WS/MonitorPage rendering.
+7. **Wrong vs correct:** `operationUsage = tidy.outcome.usage` is wrong; aggregate the operation-filtered auxiliary ledger.
+   A captured compaction retry timestamp is not the operation cursor; the immutable first event is. A UI subscription
+   must install its handler before the initial request and reject updates for a different echoed query or generation.
+
 ## 4. Validation & Error Matrix
 
 | Condition | Required result |
@@ -82,6 +191,9 @@ applied, and defaults to `DISABLED`.
 | Connection closes or client unsubscribes | Remove the exact connection-scoped subscription idempotently |
 | Projection requests a field with no durable producer | Omit/mark unknown; do not fabricate or derive from Pino/UI state |
 | Provider exposes no authoritative cache signal | Cache status is unavailable, never a synthetic miss |
+| Tool output contains an unrecognized/private error code | Emit `tool_failed`; do not persist the text or infer cancellation/governance from a substring |
+| MCP returns `isError: true`, or canonical Memory returns nested unknown/cancelled evidence | Governed Effect and observation use the same closed outcome classification |
+| A response contains technical identity/bookkeeping fields | Preserve the contract internally; user-facing views render useful semantic fields and omit those bookkeeping values, including expanded Inspector views |
 
 ## 5. Good / Base / Bad Cases
 
@@ -95,7 +207,7 @@ applied, and defaults to `DISABLED`.
 - Base: a provider reports token usage but no cache information. The trajectory shows the token fact and omits cache
   totals without degrading the Run.
 - Bad: filter only the newest 500 Runs in memory and omit `nextCursor` when none match; this silently hides older
-  matches. Also bad: expose raw event JSON as the primary UI, keep a subscription after socket close, or calculate a
+  matches. Also bad: dump internal event metadata into primary or expanded UI, keep a subscription after socket close, or calculate a
   "cache miss" from the absence of a cache field.
 - Bad: perform authoritative settlement only inside `onLanguageModelCallEnd` and assume throwing will fail the turn;
   AI SDK telemetry notification catches that exception.
@@ -113,12 +225,34 @@ applied, and defaults to `DISABLED`.
   observed by `assertHealthy()` and rejects the owning stream.
 - Core methods/live: operator role, backfill-before-live order, one membership per connection, explicit unsubscribe,
   close cleanup, overflow/mode invalidation, and observer isolation.
+- Desktop projection: expanded Inspector and every enabled mode retain useful semantic facts without technical
+  bookkeeping rows/copy controls; hidden presentation must not break the original query, selection or cursor identity.
+- D68-B: repeated generation/tool IDs across requests, immutable late/duplicate callback association, pre-conversion
+  failure/preliminary handling, page edges and authorization, aggregate unknown/zero parity, and recovery beyond
+  328 missed events. Verify same-record settlement enrichment without changing the selected logical identity.
 - Integration: isolated real Core boot in default-disabled and enabled modes plus an authenticated operator
   `observability.state/list` smoke.
 - Cross-layer changes also require Shared/Core/Desktop typechecks and tests, Desktop build, root lint, and
   `git diff --check`.
+- Outcome regressions exercise the actual governed wrapper and SQLite Effect settlement as well as the pure
+  classifier: unchanged return value, one execution, MCP failure, nested Memory uncertainty/cancellation and
+  private/unrecognized-code exclusion. Browser-only projection fixtures cannot establish this producer contract.
 
 ## 7. Wrong vs Correct
+
+### Initiative mixed-version facts
+
+Initiative/delivery facts use `run-event.v2` while existing producers and the v1 decoder remain unchanged. Mixed
+repository pages retain every original sequence. Existing client projections use valid semantic lifecycle rows
+and omit optional unsupported closed `eventKind` values; canonical facts are never dropped for cursor compatibility.
+See [Initiative Runtime and Delivery](./initiative-runtime.md) for the concrete decision/publication/recovery producers.
+
+`delivery.presented` and `delivery.feedback_settled` use the same versioned delivery stream. Their required events
+commit in the same transaction as the presentation/feedback state; the event bridge publishes only the exact
+successfully committed facts. A rolled-back fact cannot enter the live stream. Feedback settlement includes its
+recorded overlap duration and closed disposition; presentation of Class A or non-inviting speech does not manufacture
+an opportunity duration of zero. Inspector labels distinguish recorded opportunity (capped at the qualification
+threshold), subsequent interaction and insufficient evidence. No state claims human reading or topic resolution.
 
 ```typescript
 // Wrong: the early limit becomes a false end-of-history boundary for sparse filters.
@@ -150,3 +284,74 @@ telemetry.onLanguageModelCallEnd = (event) => observer.settleOrCapture(event);
 for await (const part of result.stream) consume(part);
 observer.assertHealthy();
 ```
+
+```typescript
+// Wrong: a syntactically valid provider code may contain private text and is not a trusted vocabulary.
+const errorCode = output.code.toLowerCase().slice(0, 100);
+
+// Correct: the same closed pre-conversion classifier supplies observed and governed settlement facts.
+const outcome = classifyToolOutcome({ type: "tool-result", output });
+```
+
+
+## Per-dispatch request attribution (2026-11-02)
+
+- `context-request.v1` adds only `context.request.measured` to the existing Run Event union. Strict v1
+  `context.snapshot` remains admission/pressure evidence. A request is keyed solely by its committed model Effect;
+  measurement follows the native final post-filter envelope for each physical dispatch.
+- The closed nine-category/four-supplier matrix conserves estimator units within each row and across the whole
+  request. Provider totals stay exclusively in `run_usage`. Supplier is `builtin | mcp | skill | unknown`;
+  Skill-enabled Core tools retain built-in supplier ownership. Optional tool-part `contextOrigin` survives Timeline
+  input scrubbing without changing original output or raw execution semantics. Old parts remain absent/unknown.
+- Dispatch-window snapshots carry declared/effective real tokens independently from estimator window units and
+  calibration factor. Actual occupancy uses reported input/effective real tokens. Composition remains heuristic;
+  `hasHeuristicMedia` exposes multimodal estimator uncertainty without an image token category or meter.
+  Complete accounting permits known `other/builtin` framing; unknown-origin units or unestimated content require
+  partial coverage. Estimator units are never scaled into claimed per-component provider tokens.
+- `createRequestAttributionRepo(db).read(characterId)` selects the latest terminal primary request by captured
+  `primary_conversation_sources.original_user_seq`, then committed model Effect intent order within that source's
+  exact Run. Completion callback times, successful measurement and successful usage never determine selection.
+  Retracted/failed sources remain eligible. Background/worker calls and summary revisions do not replace this fact.
+  Missing measurement or reported usage stays attached to the selected current request, without fallback to old success.
+- Read at most 257 newest source rows and examine at most 256 sources; sparse exhaustion is `scan-exhausted`,
+  distinct from empty history. Intent/event lookups are scoped to an indexed exact Run, avoiding whole-history
+  per-Effect JSON sorting. Exact measurement lookup accepts at most two identical duplicates once; conflicting,
+  malformed or measurement source/model/attempt mismatched facts are unavailable. Canonical usage joins exactly once
+  by Effect and agrees on Run/Attempt/provider; its response model ID may differ from the requested model ID. Expose
+  optional `responseModelId` separately, without catalog lookup or rewriting stored identities. Only `quality=reported`
+  exposes actual input, preserving reported zero and failed/cancelled outcomes. See request-attribution.md for regression contracts.
+- `CacheUsageUpdate.latestPrimaryRequest` is an optional independent sibling of the unchanged cache snapshot.
+  The subscription's initial response and explicit flush payload both preserve it. Each reader/observer fails
+  independently; no second counter or polling exists. Existing coalesced after-commit usage and terminal model-Effect
+  hints refresh both projections, including terminal calls with no usage or measurement. Mode disable withdraws both.
+
+Required checks cover matrix conservation and old strict events, origin sanitizer fidelity, source/dispatch versus
+completion ordering, missing/zero/estimated/failed usage, duplicate/conflicting/exhausted records, summary independence,
+real SQLite reopen, indexed bounded read plans, and initial/pushed failure-isolated subscription payloads.
+
+## Observed auxiliary model usage (2026-11-01)
+
+`auxiliary_model_calls` (migration 065) records actual Utility provider-model invocations outside existing Run
+ownership. It is independent of authoritative `run_usage`: no synthetic Run, inferred historic cost, or merged task/request
+total. Core wraps the resolved Utility model; the native-image migration removed detached image/shared screenshot
+describers while preserving their historical usage rows. Foreground Run observers retain ownership. AsyncLocalStorage
+captures the immutable Utility task at invocation and suppresses auxiliary recording
+inside `createModelEffectMiddleware` dispatch; stream consumption never consults a later task context.
+
+One invocation, including an SDK retry, is one row. `started` becomes completed/failed/cancelled/interrupted from observed
+provider/consumer behavior. Explicit boot reconciliation marks old started rows interrupted without an invented finish
+time. Optional observer failure reports a fixed diagnostic and preserves provider return/exception identity; it must never
+induce model replay or change authoritative Run settlement. Streams retain backpressure, do not drain for accounting, and
+preserve failed status plus any usage returned after an error. Missing/malformed counts are null; reported zero remains zero.
+Reasoning is part of output, not an additional output charge. Recognized raw field presence overrides adapter default zeros.
+No prompts, text, reasoning, tool output, image bytes, exceptions or whole raw objects enter this ledger.
+
+`observability.auxiliaryUsage` is operator-only and refuses `DISABLED` with `OBSERVABILITY_DISABLED`; recording continues.
+Its strict Shared schema requires a `[from,to)` time interval, optional source/label/provider/model filters and a 1..100 row
+page. `(startedAt,callId)` descending keysets paginate rows. Whole-filter totals remain independent of pagination, exposing
+knownCount per nullable sum; cache ratio uses only rows where both input and cache-read counts are known. This scope is
+`observed-auxiliary`, not a provider invoice. No new UI, subscription, pricing engine or replay/recovery queue is implied.
+
+Required regression evidence covers actual multiple/zero-call tasks, retries, Run deduplication, raw unknown/zero counts,
+metadata/storage/logger failures, consumed-stream terminal orders, restart persistence, timezones, page-independent
+aggregates and operator/mode authorization. Real model quality and invoice savings remain separate acceptance evidence.

@@ -3,6 +3,9 @@ import {
   APPROVAL_DISCLOSURE_REVISION,
   APPROVAL_METHODS,
   APPROVAL_PRESENTATION_REVISION,
+  ApprovalCommandDisclosureSchema,
+  ApprovalPresentationSchema,
+  reconstructApprovalCommand,
   ApprovalClosedSchema,
   ApprovalListParamsSchema,
   ApprovalListResultSchema,
@@ -112,5 +115,47 @@ describe("canonical Approval operator schemas", () => {
     expect(ApprovalRevokeResultSchema.parse({ status: "not_found", approvalGeneration: 7 })).toBeDefined();
     expect(ApprovalRevokeResultSchema.parse({ status: "stale_generation", approvalGeneration: 7 })).toBeDefined();
     expect(ApprovalRevokeResultSchema.safeParse({ status: "not_found", approvalGeneration: 7, input: "leak" }).success).toBe(false);
+  });
+});
+
+describe("complete command presentation", () => {
+  const marker = { revision: 1, complete: true, encoding: "visible-escapes", reconstruction: "section-field-concat" } as const;
+  const marked = (value: string) => ({
+    ...request.presentation, commandDisclosure: marker,
+    sections: [{ title: "命令", fields: [{ label: "命令", value }] }],
+  });
+
+  it("requires every marker literal, rejects extensions, and never injects a legacy default", () => {
+    const legacy = ApprovalPresentationSchema.parse(request.presentation);
+    expect(legacy).not.toHaveProperty("commandDisclosure");
+    expect(reconstructApprovalCommand(legacy)).toBeUndefined();
+    for (const bad of [{ ...marker, revision: 2 }, { ...marker, complete: false }, { ...marker, encoding: "raw" },
+      { ...marker, reconstruction: "newline-join" }, { ...marker, input: "extra" }, {}]) {
+      expect(ApprovalCommandDisclosureSchema.safeParse(bad).success).toBe(false);
+    }
+    expect(ApprovalPresentationSchema.safeParse({ ...marked("x"), commandDisclosure: null }).success).toBe(false);
+  });
+
+  it("checks UTF-8 bytes as well as UTF-16 units and rejects lone surrogates without normalization", () => {
+    for (const value of ["x".repeat(500), "中".repeat(166), "😀".repeat(125), "e\u0301é"]) {
+      expect(reconstructApprovalCommand(ApprovalPresentationSchema.parse(marked(value)))).toBe(value);
+    }
+    for (const value of ["x".repeat(501), "中".repeat(167), "😀".repeat(126), "😀".repeat(250), "\uD800", "\uDC00"]) {
+      expect(ApprovalPresentationSchema.safeParse(marked(value)).success).toBe(false);
+    }
+    expect(ApprovalPresentationSchema.safeParse({ ...request.presentation,
+      sections: [{ title: "legacy", fields: [{ label: "legacy", value: "中".repeat(500) }] }],
+    }).success).toBe(true);
+  });
+
+  it("reconstructs every field across all sections with no delimiter, label or tail loss", () => {
+    const fields = ["  tool ", '"a b"', "\\n", " ", "最后😀"];
+    const presentation = ApprovalPresentationSchema.parse({
+      ...marked("unused"), sections: [
+        { title: "NOT_COMMAND_A", fields: fields.slice(0, 3).map((value) => ({ label: "NOT_COMMAND_B", value })) },
+        { title: "NOT_COMMAND_C", fields: fields.slice(3).map((value) => ({ label: "NOT_COMMAND_D", value })) },
+      ],
+    });
+    expect(reconstructApprovalCommand(presentation)).toBe(fields.join(""));
   });
 });

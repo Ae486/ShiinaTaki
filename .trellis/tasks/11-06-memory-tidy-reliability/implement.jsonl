@@ -1,0 +1,13 @@
+{"file": ".trellis/spec/backend/canonical-local-memory-runtime.md", "reason": "Local authority, maintenance transactions, source and completion boundaries; task design supersedes narrow sticky-error behavior"}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Reuse durable operation lifecycle, subscription and restart semantics"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Single writer and transaction persistence"}
+{"file": ".trellis/spec/backend/sqlite-migration-lineage.md", "reason": "Additive migration and historical compatibility"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured safe failures and cancellation"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Required checks and responsibility boundaries"}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Disposable UI, event-driven refresh and reconnect"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/design.md", "reason": "Task-specific approved design and material tradeoffs"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/backlog-optimization.md", "reason": "Owner-authorized backlog throughput and per-batch budget follow-up"}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Normal metric exclusion and independent background operation contracts"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/maintenance-monitor-plan.md", "reason": "Approved background monitor implementation and compatibility plan"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/maintenance-monitor-advisor.md", "reason": "Independent pre-implementation producer and metric challenge"}
+{"file": ".trellis/tasks/11-06-memory-tidy-reliability/research/maintenance-monitor-final-review.md", "reason": "Final independent review and verified Legacy compatibility corrections"}

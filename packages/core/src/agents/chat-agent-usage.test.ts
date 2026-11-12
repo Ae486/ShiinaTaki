@@ -4,9 +4,15 @@ import { abortRejectingModel, scriptedModel, slowStreamingModel, streamingMockMo
 import type { Connection } from "../server/connection-registry.ts";
 import { createChatAgent, type TurnContext, type TurnUsageReport } from "./chat-agent.ts";
 import { digestForModelRequest } from "./model-effect-middleware.ts";
-import { simulateReadableStream, tool } from "ai";
+import { simulateReadableStream, tool, type ModelMessage } from "ai";
+import { MockLanguageModelV4 } from "ai/test";
 import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
+import { estimatePreparedToolSchemaTokens } from "./request-measurement.ts";
+import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
+import { createWindowCalibrator } from "./window-calibrator.ts";
+import { createWindowStateRepo } from "../db/window-state-repo.ts";
 import { z } from "zod";
+import { currentModelUsageOwner } from "../observability/model-usage-context.ts";
 
 const fixtures: CompanionFixture[] = [];
 const TEST_CONNECTION: Connection = {
@@ -75,6 +81,32 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     expect(providerCalls).toBe(0);
   });
 
+  it("marks only the actual provider dispatch as Run-owned", async () => {
+    const owners: unknown[] = [];
+    const lifecycle = {
+      prepare: (input: { runId: string; attemptId: string }) => ({ schemaVersion: "effect.v1" as const,
+        effectId: "effect", runId: input.runId, attemptId: input.attemptId, kind: "model" as const,
+        state: "intent_committed" as const, version: 0, sourceRef: { type: "model" as const,
+          provider: "test", modelId: "test" }, replayPosture: "never" as const }),
+      settle: () => ({ effect: undefined as never, duplicate: false, stale: false }),
+      get: () => undefined, unfinished: () => [],
+    };
+    const middleware = createModelEffectMiddleware({ lifecycle, runId: "run", attemptId: "attempt" });
+    expect(currentModelUsageOwner()).toBeUndefined();
+    await middleware.wrapGenerate?.({
+      doGenerate: async () => { owners.push(currentModelUsageOwner()); return {
+        content: [], finishReason: { unified: "stop", raw: undefined },
+        usage: { inputTokens: { total: 1 }, outputTokens: { total: 1 } },
+      }; },
+      doStream: async () => { throw new Error("unused"); }, params: { prompt: [] },
+      model: { provider: "test", modelId: "test" },
+    } as never);
+    expect(owners).toEqual([expect.objectContaining({ owner: "run", effect: expect.objectContaining({
+      effectId: "effect", runId: "run", attemptId: "attempt", kind: "model", state: "intent_committed",
+    }) })]);
+    expect(currentModelUsageOwner()).toBeUndefined();
+  });
+
   it("creates one Core effect per internal ToolLoopAgent provider request", async () => {
     const f = fresh();
     const prepared: string[] = [];
@@ -124,24 +156,69 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     );
   });
 
-  it("reports the ALL-STEPS usage sum on a multi-step tool turn (4b-verified result.usage semantics)", async () => {
+  it("pairs final-step usage with that request's changed messages, instructions and disclosed tools", async () => {
     const f = fresh();
     const reports: TurnUsageReport[] = [];
+    const repo = createWindowStateRepo(f.db);
+    const calibrator = createWindowCalibrator({ repo, slot: "main", declared: 24000 });
+    const scripted = scriptedModel([
+      { kind: "tool", toolCallId: "c1", toolName: "extension_describe", input: { extensionId: "ext:probe" } },
+      { kind: "text", deltas: ["done"] },
+    ]);
+    const requests: Array<{ input: number; messages: number; instructions: number; tools: number }> = [];
+    const model = new MockLanguageModelV4({ doStream: async (options) => {
+      // This fixture uses text and ordinary local tool parts, whose provider/message estimator shapes agree.
+      const messages = estimateMessagesTokens(options.prompt.filter((part) => part.role !== "system") as ModelMessage[]);
+      const instructions = options.prompt.filter((part) => part.role === "system")
+        .reduce((sum, part) => sum + estimateTokens(part.content), 0);
+      const tools = estimatePreparedToolSchemaTokens(options.tools ?? []);
+      const input = messages + instructions + tools;
+      requests.push({ input, messages, instructions, tools });
+      const response = await scripted.doStream(options);
+      return { ...response, stream: response.stream.pipeThrough(new TransformStream({ transform(part, controller) {
+        controller.enqueue(part.type !== "finish" ? part : { ...part, usage: {
+          inputTokens: { total: input, noCache: input - 7, cacheRead: 7, cacheWrite: undefined },
+          outputTokens: { total: 11, text: 11, reasoning: undefined },
+        } });
+      } })) };
+    } });
+    let step = 0;
     const agent = createChatAgent({
-      model: scriptedModel([
-        { kind: "tool", toolCallId: "c1", toolName: "memory_search", input: { query: "面" } },
-        { kind: "text", deltas: ["done"] },
-      ]),
-      store: f.conversation,
-      memory: f.memory,
-      onUsage: (report) => reports.push(report),
+      model, store: f.conversation, memory: f.memory, useProviderUsage: true,
+      extraTools: { extension_describe: tool({ inputSchema: z.object({ extensionId: z.string() }), execute: () => ({
+        entry: { identity: { extensionId: "ext:probe" }, available: true }, toolName: "native_probe",
+      }) }) },
+      runContext: () => ({ tools: { native_probe: tool({ description: "Newly disclosed schema. ".repeat(100),
+        inputSchema: z.object({}), execute: () => "observed" }) },
+      toolDisclosure: { deferredToolNames: ["native_probe"], describedTools: { "ext:probe": "native_probe" }, skills: {} } }),
+      foregroundInbox: () => ({
+        get instructions() { return step < 2 ? "" : "New private inbox instructions. ".repeat(100); },
+        tools: {}, sourceContext: { generatedBy: { runId: "usage-run", attemptId: "usage-attempt" } },
+        prepareStep: () => { step += 1; }, commitModelIntent: () => undefined, hasIntent: () => false,
+        recordCompletedStep: () => undefined, onPublicCommitted: () => undefined, dispose: () => undefined,
+      }),
+      onUsage: (report) => {
+        reports.push(report);
+        calibrator.onUsage(report.inputTokens ?? 0, report.estimatedInput);
+      },
     });
 
-    await drain(agent.stream({ characterId: "taki", message: "还记得吗" }));
+    await drain(agent.stream({ characterId: "taki", message: "Inspect the probe" }, {
+      runId: "usage-run", attemptId: "usage-attempt",
+    }));
     await vi.waitFor(() => expect(reports).toHaveLength(1));
 
-    // Two steps at 3/5 each -> the sum, exactly what the calibrator must consume.
-    expect(reports[0]).toMatchObject({ inputTokens: 6, outputTokens: 10 });
+    expect(requests).toHaveLength(2);
+    const first = requests[0]!;
+    const last = requests[1]!;
+    expect(last.messages).toBeGreaterThan(first.messages);
+    expect(last.instructions).toBeGreaterThan(first.instructions);
+    expect(last.tools).toBeGreaterThan(first.tools);
+    expect(reports[0]).toMatchObject({ inputTokens: last.input, outputTokens: 11, estimatedInput: last.input,
+      measurement: { requestMessageTokens: last.messages, instructionTokens: last.instructions,
+        toolSchemaTokens: last.tools, cacheReadTokens: 7, projectedInputTokens: last.input, accountingQuality: "provider" } });
+    // Equal per-request observed/estimated costs keep factor 1 regardless of the number/size of earlier requests.
+    expect(repo.get("main")).toEqual({ effectiveWindow: 24000, factor: 1 });
   });
 
   it("fires nothing without the dep (absent = byte-identical turn)", async () => {
@@ -190,7 +267,7 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     expect(reports).toEqual([]);
   });
 
-  it("fires nothing on a THROW-ending stop (partial text persisted, but the committed tail is never reached)", async () => {
+  it("fires nothing on a cancelled stop when the SDK closes a rejecting provider gracefully", async () => {
     const f = fresh();
     const reports: TurnUsageReport[] = [];
     const controller = new AbortController();
@@ -213,8 +290,9 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     }
     await flushDetached();
 
-    expect(String(threw)).toContain("turn cancelled by operator");
+    // Owner-approved policy now uses Core cancellation, not a transport-dependent throw, to gate callbacks.
+    expect(threw).toBeNull();
     expect(deltas).toEqual(["par"]); // the partial the user saw is kept (D1 #5) ...
-    expect(reports).toEqual([]); // ... but a thrown ending fires no usage report
+    expect(reports).toEqual([]); // ... but a cancelled turn fires no post-turn usage report
   });
 });

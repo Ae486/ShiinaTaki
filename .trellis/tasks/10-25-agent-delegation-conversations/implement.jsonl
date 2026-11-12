@@ -1,0 +1,11 @@
+{"file":".trellis/tasks/10-25-agent-delegation-conversations/research/planning-brief.md","reason":"Recovered authority and slice-specific evidence/spec loading; read linked full topic before implementation"}
+{"file":".trellis/spec/backend/shared-agent-delegation.md","reason":"Existing private execution, exact controls, policy, evidence and recovery boundaries; planned expiry/inbox changes are explicit"}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Preserve immutable applied migrations and historical receipts; T4 convergence boundary"}
+{"file":".trellis/spec/backend/foreground-chat-activity.md","reason":"Real activity producers, complete commit handoff and primary behavior isolation"}
+{"file":".trellis/spec/frontend/foreground-chat-feedback.md","reason":"Shared Chat presentation, stable row identity and actual UI verification"}
+{"file": ".trellis/spec/backend/private-agent-inbox.md", "reason": "Delivered event, wait, actual-intent, recovery, presentation and no-expiry contracts"}
+{"file": ".trellis/spec/backend/private-worker-context.md", "reason": "Delivered child context, actual input witnesses, segmentation and checkpoint failure fences"}
+{"file":".trellis/tasks/10-25-agent-delegation-conversations/research/checkin-advisor-20261030.md","reason":"Reviewed S8-S10 implementation contract, durable check-in, configured intervals, trusted user reset and truthful usage"}
+{"file":".trellis/spec/backend/config-store.md","reason":"N/K use existing operator registry, precedence and truthful next-interval application"}
+{"file":".trellis/spec/backend/private-worker-checkin.md","reason":"Delivered uniform N/K, per-execution source-owner pause, exact user authority and usage contracts"}
+{"file": ".trellis/tasks/10-25-agent-delegation-conversations/design.md", "reason": "November 4 owner-authorized flat private event interface and compatibility contract"}

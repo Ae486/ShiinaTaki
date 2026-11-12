@@ -1,11 +1,12 @@
 /**
  * INPUT:  captured compaction snapshots, fenced lifecycle transitions, cancellation, and summary replacement CAS
- * OUTPUT: one typed repository over the mutable operation cursor and immutable conversation_compaction_events
+ * OUTPUT: fenced summary commits, immutable lifecycle events and optional cache baselines/post-commit notifications
  * POS:    core/db — sole durable coordination/evidence writer for conversation compaction; never a Run/Timeline authority
  */
 import { CharacterIdSchema } from "@taki/shared";
 import { z } from "zod";
 import type { Database, SqlRow } from "./sqlite.ts";
+import { captureCacheUsageBaseline } from "./cache-usage-repo.ts";
 
 const OperationStateSchema = z.enum(["open", "committed", "failed", "cancelled", "abandoned"]);
 const FailureCodeSchema = z.enum([
@@ -61,6 +62,8 @@ export type BeginCompactionResult =
 
 export interface CompactionOperationRepo {
   begin(input: BeginCompactionInput): BeginCompactionResult;
+  /** Renew a still-current dispatch lease without claiming that memory extraction happened. */
+  renewLease(input: { lease: CompactionLease; now: string; expiresAt: string }): CompactionLease | null;
   recordFlush(input: { lease: CompactionLease; status: "success" | "not_required"; writes: number; now: string; expiresAt: string }): CompactionLease | null;
   recordSummaryGenerated(input: { lease: CompactionLease; outputChars: number; now: string }): boolean;
   fail(input: { lease: CompactionLease; code: CompactionFailureCode; now: string }): boolean;
@@ -100,15 +103,23 @@ const EventRowSchema = z.object({
   flush_status: z.enum(["success", "not_required"]).nullable(), writes: z.int().nonnegative().nullable(), output_chars: z.int().nonnegative().nullable(),
 });
 
-export function createCompactionOperationRepo(db: Database): CompactionOperationRepo {
+export function createCompactionOperationRepo(db: Database, options: { onSummaryCommitted?: () => void; onChanged?: () => void } = {}): CompactionOperationRepo {
+  const observe = <T>(write: () => T): T => {
+    const result = write();
+    if (options.onChanged) db.afterCommit(() => {
+      try { options.onChanged?.(); } catch { /* Monitor hints never alter compaction settlement. */ }
+    });
+    return result;
+  };
   return {
-    begin: (input) => begin(db, BeginSchema.parse(input)),
-    recordFlush: (input) => recordFlush(db, input),
-    recordSummaryGenerated: (input) => recordGenerated(db, input),
-    fail: (input) => fail(db, input),
-    cancelActive: (input) => cancelActive(db, input),
-    commitSummary: (input) => commitSummary(db, input),
-    reconcileExpired: (now) => reconcileExpired(db, Timestamp.parse(now)),
+    begin: (input) => observe(() => begin(db, BeginSchema.parse(input))),
+    renewLease: (input) => observe(() => renewLease(db, input)),
+    recordFlush: (input) => observe(() => recordFlush(db, input)),
+    recordSummaryGenerated: (input) => observe(() => recordGenerated(db, input)),
+    fail: (input) => observe(() => fail(db, input)),
+    cancelActive: (input) => observe(() => cancelActive(db, input)),
+    commitSummary: (input) => observe(() => commitSummary(db, input, options.onSummaryCommitted)),
+    reconcileExpired: (now) => observe(() => reconcileExpired(db, Timestamp.parse(now))),
     get: (operationId) => readOperation(db, operationId),
     active: (characterId) => readActive(db, CharacterIdSchema.parse(characterId)),
     latestFailure: (characterId) => readLatestFailure(db, CharacterIdSchema.parse(characterId)),
@@ -177,12 +188,20 @@ function recordFlush(db: Database, input: { lease: CompactionLease; status: "suc
     if (!leaseIsCurrent(db, input.lease, input.now)) return;
     appendEvent(db, { operationId: input.lease.operationId, kind: "flush_completed", now: input.now,
       detail: { flushStatus: input.status, writes: input.writes } });
-    const changed = db.prepare(`UPDATE conversation_compaction_operations SET lease_expires_at=:expires,updated_at=:now
-      WHERE operation_id=:id AND state='open' AND lease_owner=:owner AND lease_fence=:fence AND lease_expires_at>:now`)
-      .run({ id: input.lease.operationId, owner: input.lease.owner, fence: input.lease.fence, now: input.now, expires: input.expiresAt });
-    if (changed.changes === 1) renewed = { ...input.lease, expiresAt: input.expiresAt };
+    renewed = renewLease(db, input);
   });
   return renewed;
+}
+
+function renewLease(db: Database, input: { lease: CompactionLease; now: string; expiresAt: string }): CompactionLease | null {
+  const now = Timestamp.parse(input.now);
+  const expiresAt = Timestamp.parse(input.expiresAt);
+  const changed = db.prepare(`UPDATE conversation_compaction_operations SET lease_expires_at=:expires,updated_at=:now
+    WHERE operation_id=:id AND character_id=:characterId AND state='open' AND lease_owner=:owner
+    AND lease_fence=:fence AND lease_expires_at>:now`)
+    .run({ id: input.lease.operationId, characterId: input.lease.characterId, owner: input.lease.owner,
+      fence: input.lease.fence, now, expires: expiresAt });
+  return changed.changes === 1 ? { ...input.lease, expiresAt } : null;
 }
 
 function recordGenerated(db: Database, input: { lease: CompactionLease; outputChars: number; now: string }): boolean {
@@ -209,7 +228,7 @@ function cancelActive(db: Database, input: { characterId: string; now: string })
   return operationId === null ? null : { operationId };
 }
 
-function commitSummary(db: Database, input: { lease: CompactionLease; text: string; sourceDigest: string; now: string }): "committed" | "duplicate" | "conflict" | "stale" {
+function commitSummary(db: Database, input: { lease: CompactionLease; text: string; sourceDigest: string; now: string }, onCommitted?: () => void): "committed" | "duplicate" | "conflict" | "stale" {
   let result: "committed" | "duplicate" | "conflict" | "stale" = "stale";
   db.transaction(() => {
     const operation = readOperation(db, input.lease.operationId);
@@ -242,6 +261,9 @@ function commitSummary(db: Database, input: { lease: CompactionLease; text: stri
     if (terminal.changes !== 1) throw new Error("COMPACTION_LEASE_LOST");
     appendEvent(db, { operationId: operation.operationId, kind: "committed", now: input.now,
       detail: { summaryRevision: revision } }); result = "committed";
+    try { captureCacheUsageBaseline(db, operation.characterId); }
+    catch { /* Missing exact metadata makes the metric unavailable; a valid summary must remain durable. */ }
+    if (onCommitted) db.afterCommit(onCommitted);
   });
   return result;
 }

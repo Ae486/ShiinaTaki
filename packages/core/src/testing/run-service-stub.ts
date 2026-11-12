@@ -19,6 +19,13 @@ export function createRunServiceStub(): RunService {
   };
   return {
     findByIdempotency: (key) => [...statuses.values()].find((status) => status.run.idempotencyKey === key)?.run,
+    admitLinked: () => Promise.reject(new Error("RUN_LINKED_STATE_REQUIRED")),
+    admitAcceptedWork: () => Promise.reject(new Error("RUN_WORK_BINDING_REQUIRED")),
+    admitPreparedPublication: () => { throw new Error("PREPARED_ROOT_UNAVAILABLE"); },
+    holdWork: () => ({ changed: false, reason: "binding_lost" }),
+    resumeWork: () => ({ changed: false, reason: "binding_lost" }),
+    holdDelivery: () => false,
+    resumeDelivery: () => false,
     async admit(request: TriggerRequest) {
       const runId = randomUUID();
       const snapshot = { snapshotId: randomUUID(), manifestDigest: DIGEST, schemaVersion: "slice1.v1" };

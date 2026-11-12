@@ -19,6 +19,7 @@ export type PermissionFeedback =
   | { kind: "error"; message: string };
 
 export type PermissionViewState =
+  | { kind: "idle"; token: number; previous: PermissionCellsState | null }
   | { kind: "loading"; token: number; previous: PermissionCellsState | null }
   | { kind: "ready"; token: number; data: PermissionCellsState; feedback: PermissionFeedback | null; pending: string | null }
   | { kind: "failure"; token: number; previous: PermissionCellsState | null; failureKind: "read" | "validation"; message: string };
@@ -108,6 +109,10 @@ export function validateCellMutationSnapshot(
 
 export function failPermissionMutation(state: PermissionViewState, token: number, cause: unknown): PermissionViewState {
   if (state.kind !== "ready" || state.token !== token) return state;
+  return { ...state, feedback: permissionMutationFeedback(cause), pending: null };
+}
+
+export function permissionMutationFeedback(cause: unknown): PermissionFeedback {
   const app = permissionAppError(cause);
   const feedback: PermissionFeedback =
     app.code === ErrorCodeSchema.enum.POLICY_CONFLICT
@@ -115,7 +120,7 @@ export function failPermissionMutation(state: PermissionViewState, token: number
       : app.code === ErrorCodeSchema.enum.GOVERNANCE_REFUSED
         ? { kind: "refused", reason: app.reason, message: refusalMessage(app.reason, errorMessage(cause)) }
         : { kind: "error", message: errorMessage(cause) };
-  return { ...state, feedback, pending: null };
+  return feedback;
 }
 
 export function permissionAppError(cause: unknown): { code: string | null; reason: string | null } {

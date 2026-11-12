@@ -21,6 +21,7 @@
 - 032-conversation-compaction-lifecycle.ts — migration 32: revisioned summary checkpoint, fenced per-Character operation cursor, and immutable bounded compaction events
 - 033-hindsight-replica-sync.ts — migration 33: canonical incremental replica records, FTS projection, checkpoints, and Bank leases
 - 034-hindsight-replica-scheduler.ts — migration 34: durable scheduler/run state and the current verified single-record snapshot cache
+- 035-timeline-presentation.ts — historical T4 declaration: migration 35: additive nullable Timeline display metadata; historical-schema SQL regressions preserve canonical bytes and migration receipts without invoking newer repositories
 - 035-pending-memory.ts — migration 35: idempotent Pending Memory intents, persisted recovery phases, retry state, and safe terminal diagnostics
 - 036-memory-timeline-convergence.ts — preserves applied 035 histories while converging Pending Memory and nullable Timeline presentation
 - 037-hindsight-local-coverage.ts — immutable current Local manifest versions and lease-owned B4 run selection
@@ -41,7 +42,7 @@
 - 022-hindsight-connection-setup.ts — additive sanitized Hindsight connection and per-Bank setup evidence; no authority mutation
 - 023-hindsight-initial-cutover.ts — B4 cutover lifecycle lease, import mappings, logical replica/checkpoints, Hindsight marker, and activation receipts
 - 024-harness-runs.ts — Slice 1 additive Run, Attempt, immutable snapshot, and bounded Receipt current-state tables
-- index-list.ts — the explicit ordered immutable MIGRATIONS registry through 063 (no fs/glob discovery)
+- index-list.ts — explicit main001–063 canonical registry plus guarded073–077; historical T4 versions remain separate
 - 041-canonical-memory-maintenance.ts — deletion-independent canonical snapshots, shared maintenance request receipts, and durable ingestion plans
 - 042-hindsight-application-state.ts — immutable body/artifact/publication history, exact native heads and paired application checkpoint storage
 - 043-hindsight-ingestion.ts — independent Hindsight source witnesses, ingestion plans and source-coverage receipts
@@ -65,3 +66,38 @@
 - 061-hindsight-runtime-identity.ts — random current-identity change stamps across template/authority/checkpoint tables and exact trigger-verification SQL; no permission or historical-proof cache.
 - 062-hindsight-policy-review-schedule.ts — additive per-epoch/Bank-namespace D108 schedule progress; preserves migration 061 and the item journal
 - 063-hindsight-replica-waiting.ts — terminal manual waiting; preserves request/quarantine bytes, incoming FK, admission/immutability guards and old migration receipts
+- 049-initiative-delivery.ts — historical T4 declaration: same-Run delivery identities, bounded policy facts and User Timezone authority metadata
+- 050-initiative-model-opportunities.ts — historical T4 declaration: Core-wide model-hour reservations and exactly-once first-intent charges, independent of utterance quotas
+- 051-initiative-feedback.ts — historical T4 declaration: once-only delivery presentation, bounded response opportunity and terminal feedback; live source leases remain process-local
+- 052-interaction-patterns.ts — historical T4 declaration: immutable Pattern revisions/reviews, exact primary source bindings and idempotent lifecycle commands
+- 053-initiative-wake-policy.ts — historical T4 declaration: source-occurrence claims tied to canonical Runs and bounded policy diagnostics
+- 054-initiative-intentions.ts — historical T4 declaration: finite source-bound plans, immutable source opportunities and exact canonical Run claim bindings
+- 055-initiative-backoff.ts — historical T4 declaration: reset fences and canonical Run admission-time timezone metadata; no duplicate quota ledger
+- 056-subagent-conversations.ts — historical T4 declaration: four private delegation record families with exact work, completion and input-receipt identities
+- 057-source-context.ts — historical T4 declaration: guarded immutable nullable source sidecars on Timeline and Delivery, preserving original text and legacy rows
+
+- 058-agent-inbox.ts — historical T4 declaration: exact legacy private table preservation, continuing validity and durable inbox/context records
+- 060-agent-conversation-order.ts — historical T4 declaration: private source commit ordering, control history and immutable event frontiers
+- 061-subagent-presentation.ts — historical T4 declaration: immutable native private message presentation references
+- 062-subagent-inbox-resume.ts — historical T4 declaration: explicit operation-keyed successor consumer identity without automatic replay
+
+- 063-subagent-progress.ts — historical T4 declaration: additive tracked work intervals, actual model-step witnesses, check-in sidecars and attention
+- 064-primary-conversation-sources.ts — historical T4 declaration: additive primary source lifecycle and exact Timeline membership; historical proofs remain unchanged
+- 065-auxiliary-model-usage.ts — historical T4 declaration: observed auxiliary provider-call lifecycle and nullable token counters, separate from Run usage
+- 066-cache-usage-window.ts — historical T4 declaration: primary cache provenance and durable summary-window baselines with conservative historical initialization
+- 067-memory-tidy-reviews.ts — historical T4 declaration: additive exact Local reviewed revisions, Block review evidence and automatic retry state without invented historical coverage
+- 068-maintenance-monitor.ts — historical T4 declaration: optional operation-call association and conservative regular-call cache baseline convergence
+- 069-delegation-schema-convergence.ts — historical T4 declaration: exact early/current 058/060 compatibility branches and conservative event-frontier backfill
+- 069-delegation-schema.ts — historical T4 declaration: frozen canonical delegation signatures and CREATE-only definitions for migration 069
+- 072-search-projection-policy.ts — historical T4 declaration: additive Local/Legacy derived tokenizer policy records without guessing existing index state
+
+- historical-main.ts / historical-t4.ts — exact separate historical migration exports and explicitly selected migration-test boundaries; no invented receipts for skipped versions
+- 073-main-baseline-convergence.ts — main/T4/frozen schema recognition and missing main groups; exact historical Timeline variants
+- 073-frozen-source-phase.ts — lossless six-table frozen source-phase CHECK repair with preserved rowids/foreign keys/indexes
+- 074-initiative-convergence.ts — guarded absent/current initiative, Timezone and source-context compatibility
+- 075-delegation-convergence.ts — exact private-context/frontier convergence and creation-only absent delegation groups; 069 tests also cover file-backed early T4 upgrade before current runtime recovery
+- 076-memory-observation-convergence.ts — additive primary sources, usage, Tidy and monitoring without resetting historical clocks
+- 077-model-configuration-convergence.ts — additive model profile/secret-reference/search-policy metadata
+- convergence-schema.ts / convergence-sql.ts — exact owned group signatures and absent-only historical SQL assembly
+- 073-convergence-schema.generated.ts — generated reviewed schema snapshots for exact lineage recognition, not runtime authority
+- 073-convergence-gate.test.ts — nonempty lineages, stopped-freeze copy/hash, old rows/receipts/counters, reopen and SQL/receipt/COMMIT failures

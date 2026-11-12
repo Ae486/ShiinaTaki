@@ -1,0 +1,20 @@
+{
+  "kind": "post-validation-formatting-only",
+  "changes": [
+    {
+      "path": "packages/core/src/memory/runtime-lifetime.ts",
+      "beforeSha256": "a782d88c2e76ca9a7771573ae081d862ffa9a658d2904eae31d174cdaa93c011",
+      "afterSha256": "a4660a95337ca1ca983ec5dfa30b9e92ad00d25636042e50270b90dc6f9f157d",
+      "change": "Remove redundant terminal blank lines; nonterminal bytes unchanged",
+      "nonterminalContentUnchanged": true
+    },
+    {
+      "path": "packages/core/src/testing/memory-historical-timeline-fixture.ts",
+      "beforeSha256": "0b6533387e59e52c5958f08428e8468d2375c77d29455b6c29b7c2ab16637208",
+      "afterSha256": "9470a591ebedc79b3070516350aa71668f228ea2eaca2db147cd83ebee981e5e",
+      "change": "Remove redundant terminal blank lines; nonterminal bytes unchanged",
+      "nonterminalContentUnchanged": true
+    }
+  ],
+  "functionalTestRerun": "Not required for terminal newline-only cleanup; existing runtime and failure assertions remain unchanged"
+}

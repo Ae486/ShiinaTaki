@@ -10,6 +10,7 @@ import {
   ApprovalSafeLabelsSchema,
   ApprovalDurableDecisionSchema,
   CANONICAL_GOVERNANCE_REGISTRY,
+  resolveHistoricalGovernanceRegistry,
   type ApprovalDecisionListItem,
   type ApprovalDurableDecision,
   type ApprovalDurableDecisionBinding,
@@ -48,7 +49,8 @@ export type ApprovalRegistryResolver = (registryRevision: number) => GovernanceR
 export function createApprovalDecisionService(
   repo: ApprovalStateRepo,
   registry: GovernanceRegistry = CANONICAL_GOVERNANCE_REGISTRY,
-  resolveRegistry: ApprovalRegistryResolver = (revision) => revision === registry.registryRevision ? registry : undefined,
+  resolveRegistry: ApprovalRegistryResolver = (revision) => revision === registry.registryRevision ? registry
+    : registry === CANONICAL_GOVERNANCE_REGISTRY ? resolveHistoricalGovernanceRegistry(revision) : undefined,
 ): ApprovalDecisionService {
   reconcile(repo, registry, resolveRegistry);
   return {

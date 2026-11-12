@@ -1,0 +1,55 @@
+{
+  "id": "a2-self-report",
+  "stage": "initial-completed",
+  "question": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+  "initial": "我理解的：**这是你的事**——你被裁员了，你手上的项目也随之停了。不是别人的事，也不是我这边的事。\n\n抱歉听到这个。需要的话，你想说说具体情况，我听着。",
+  "summary": null,
+  "followup": "仅根据当前提供的对话记录，回顾一下：谁失业了、谁的项目停了？",
+  "sourceRows": [
+    {
+      "seq": 1,
+      "id": "d12a453a-7b00-44bd-b76b-141665e86538",
+      "characterId": "taki",
+      "role": "user",
+      "content": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+      "createdAt": "2026-10-23T03:17:54.682Z"
+    },
+    {
+      "seq": 2,
+      "id": "3089f6ab-9fbd-4a73-9291-e3e2710772d4",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "我理解的：**这是你的事**——你被裁员了，你手上的项目也随之停了。不是别人的事，也不是我这边的事。\n\n抱歉听到这个。需要的话，你想说说具体情况，我听着。",
+      "createdAt": "2026-10-23T03:17:56.760Z"
+    }
+  ],
+  "finalReplay": [
+    {
+      "role": "user",
+      "content": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。"
+    },
+    {
+      "role": "assistant",
+      "content": "我理解的：**这是你的事**——你被裁员了，你手上的项目也随之停了。不是别人的事，也不是我这边的事。\n\n抱歉听到这个。需要的话，你想说说具体情况，我听着。"
+    }
+  ],
+  "utilityUsage": {
+    "calls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "usageUnknown": 0
+  },
+  "usage": [
+    {
+      "provider": "taki-provider.chat",
+      "model_id": "deepseek-flash",
+      "quality": "reported",
+      "input_tokens": 1225,
+      "output_tokens": 195,
+      "total_tokens": 1420
+    }
+  ],
+  "compaction": [],
+  "memoryFlush": "unexercised: no canonical witness callbacks installed; test-controlled flush seam",
+  "primaryWitnessCount": 0
+}

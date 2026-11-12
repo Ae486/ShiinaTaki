@@ -1,0 +1,95 @@
+{
+  "phase": "memory-before",
+  "detail": {
+    "memoryId": "interview-memory-753a10d9-4a06-4b83-9412-dcdf2aeda44d"
+  },
+  "state": {
+    "available": true,
+    "runs": [],
+    "attempts": [],
+    "effects": [],
+    "deliveries": [],
+    "subagent_conversations": [],
+    "subagent_inputs": [],
+    "subagent_executions": [],
+    "run_messages": [],
+    "timeline_messages": [],
+    "run_usage": [],
+    "canonical_memory_sources": [
+      {
+        "authority_epoch_id": "2f389176-497b-4569-9f10-ccfddbcbd27f",
+        "bank_id": "e2e-character",
+        "document_id": "interview-source-f65e5b41-3a11-4e7f-9744-236ae5c7592b",
+        "content_hash": "6edcdf91717169244b2c685130e49953ca260ea4cf72b177b0d472a304d65eac",
+        "retained_text": "The user reported an interview for a research role. The interview outcome is unknown. Recall-only reference: interview-probe-e9bcd885-18a6-4b39-a8b0-6865859674df.",
+        "context": null,
+        "tags_json": "[]",
+        "metadata_json": "{}",
+        "observation_scopes_json": null,
+        "provenance_json": "{\"actor\":\"user\",\"origin\":\"explicit-user\",\"characterId\":\"taki\",\"timelineFromSeq\":null,\"timelineToSeq\":null,\"capturedAt\":\"2026-10-23T02:14:03.042Z\",\"sanitized\":true,\"sourceRef\":\"operator-retained-interview\"}",
+        "revision": 1,
+        "created_at": "2026-10-23T02:14:03.042Z",
+        "updated_at": "2026-10-23T02:14:03.042Z"
+      }
+    ],
+    "canonical_memory_units": [
+      {
+        "authority_epoch_id": "2f389176-497b-4569-9f10-ccfddbcbd27f",
+        "bank_id": "e2e-character",
+        "memory_id": "interview-memory-753a10d9-4a06-4b83-9412-dcdf2aeda44d",
+        "document_id": "interview-source-f65e5b41-3a11-4e7f-9744-236ae5c7592b",
+        "chunk_id": null,
+        "text": "The user reported an interview for a research role. The interview outcome is unknown. Recall-only reference: interview-probe-e9bcd885-18a6-4b39-a8b0-6865859674df.",
+        "context": null,
+        "fact_type": "experience",
+        "state": "valid",
+        "revision": 1,
+        "tags_json": "[\"taki-layer:episodes\"]",
+        "metadata_json": "{}",
+        "entities_json": "[]",
+        "observation_scopes_json": null,
+        "event_date": null,
+        "occurred_start": null,
+        "occurred_end": null,
+        "mentioned_at": "2026-10-23T02:14:03.042Z",
+        "created_at": "2026-10-23T02:14:03.042Z",
+        "updated_at": "2026-10-23T02:14:03.042Z",
+        "edited_at": null,
+        "consolidated_at": null,
+        "consolidation_failed_at": null,
+        "invalidation_reason": null,
+        "invalidated_at": null,
+        "proof_count": 1
+      }
+    ],
+    "canonical_memory_policy": [
+      {
+        "authority_epoch_id": "2f389176-497b-4569-9f10-ccfddbcbd27f",
+        "bank_id": "e2e-character",
+        "memory_id": "interview-memory-753a10d9-4a06-4b83-9412-dcdf2aeda44d",
+        "layer_id": "episodes",
+        "importance": 5,
+        "visibility": "retrieved",
+        "disclosure": null,
+        "origin": "self",
+        "emotional_weight": null,
+        "retention_json": "{\"kind\":\"permanent\"}",
+        "policy_version": 1,
+        "updated_at": "2026-10-23T02:14:03.042Z"
+      }
+    ],
+    "canonical_memory_operation_receipts": [
+      {
+        "authority_epoch_id": "2f389176-497b-4569-9f10-ccfddbcbd27f",
+        "request_id": "seed-interview-memory-753a10d9-4a06-4b83-9412-dcdf2aeda44d",
+        "operation": "retain",
+        "request_hash": "2def124c2605ae59640f9056d59b5fa111d9e81379cb7b14f349e586f7f05507",
+        "result_json": "{\"status\":\"completed\",\"documentId\":\"interview-source-f65e5b41-3a11-4e7f-9744-236ae5c7592b\",\"sourceRevision\":1,\"memories\":[{\"memoryId\":\"interview-memory-753a10d9-4a06-4b83-9412-dcdf2aeda44d\",\"revision\":1}]}",
+        "created_at": "2026-10-23T02:14:03.042Z"
+      }
+    ],
+    "canonical_memory_primary_commits": []
+  },
+  "requests": [],
+  "turns": []
+}

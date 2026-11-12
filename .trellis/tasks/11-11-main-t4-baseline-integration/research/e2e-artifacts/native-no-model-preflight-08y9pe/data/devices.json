@@ -1,0 +1,18 @@
+{
+  "devices": [
+    {
+      "deviceId": "504a2c6b-67d6-43ee-8b1c-6bf70d6436de",
+      "deviceName": "Agent context acceptance",
+      "role": "operator",
+      "tokenHash": "l2dxoNp3DPKmQ2Vh9/Zlll3QMVNF8zBRgMMV37sDYpo=",
+      "pairedAt": "2026-11-11T16:58:15.425Z"
+    },
+    {
+      "deviceId": "65a00317-afbe-41f4-8440-b5c7c7926a28",
+      "deviceName": "Agent interface native 537de9d6-b40e-4cf7-b5ce-75358a886e14",
+      "role": "node",
+      "tokenHash": "79CHfWYjj1HE43c8x2xg+2EkPFuI8wPj3w4NQL1hvnM=",
+      "pairedAt": "2026-11-11T16:58:15.756Z"
+    }
+  ]
+}

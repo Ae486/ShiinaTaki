@@ -1,0 +1,45 @@
+{
+  "files": [
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/research/acceptance-before-human-20261023.md",
+      "sha256": "401bc2c3fcf29af64a0d880111316354156b250d7afaedef50c7ddeaf706dd72"
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/implement.md",
+      "sha256": "6ac748a7d5bd3b159d932daf0e48512aea2624a3ac79eecfd4b017952026ef3f"
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-source-context/implement.md",
+      "sha256": "25fef18d72427d87ea55a773a6d58a965810c0f626ca601904af0200dc393c97"
+    },
+    {
+      "path": "docs/AGENT-CONTEXT-SOURCES.md",
+      "sha256": "db6181ce019c8c5f03520d99365a55670121a3656a485cf04c91de821266ae8d"
+    },
+    {
+      "path": "docs/AGENT-DELEGATION-RESEARCH.md",
+      "sha256": "27873f9468aa80af0f87d9eba2ed8102f583fb0c4f9a028f93e5dcd8974d8f26"
+    },
+    {
+      "path": "docs/index.md",
+      "sha256": "900ddaf55367d576e7ca6b9571f7d034f980f04efa6457b32834158282013152"
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-source-context/task.json",
+      "sha256": "bf1bc81712af4268124c1bd3f967b30a8d37c196e83228f328877ba8eccdaf7d"
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/task.json",
+      "sha256": "26e09e7b4ec11728bee523ee04d19e802058ffdd0eec1f4a46ad7b47b7f8d9c9"
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/task.json",
+      "sha256": "9e3050a1a35379d1487e9fe6c206e2892313fd0ecba95faea4b51245856ebe9e"
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/task.json",
+      "sha256": "c17ef227937552af3f762365f8a51de2f51a6c24a60cdcd5c12723b491c8ee6a"
+    }
+  ],
+  "issues": []
+}

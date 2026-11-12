@@ -1,0 +1,12 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-development rules and mandatory layer-specific reading."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend authority, component and connection/presentation contracts."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve missing details from named sources and installed APIs; never invent behavior."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/domain-and-presence.md", "reason": "Domain/presence index; follow the linked domain-contracts report for source-bound finite Intention and expiry/Memory rules."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/presence-contracts.md", "reason": "Authenticated source evidence, device association, exposure, feedback and calibration."}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Current Memory authority/pending/derived-state boundaries; reconcile after incoming integration."}
+{"file": ".trellis/tasks/09-11-companion-initiative-implementation/research/decision-register.md", "reason": "Effective owner decisions, source precedence and superseded assumptions."}
+{"file": ".trellis/spec/backend/initiative-intentions.md", "reason": "Current finite source-bound Intention and claim/expiry contracts."}
+{"file": ".trellis/spec/backend/initiative-backoff.md", "reason": "Current qualified-feedback stages, real reset and canonical admission accounting."}
+{"file": ".trellis/spec/backend/initiative-runtime.md", "reason": "Current C1 same-Run execution and source/Memory/currentness boundaries."}
+{"file": ".trellis/spec/backend/interaction-patterns.md", "reason": "Current finite Wake composition and source authority."}
+{"file": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/c4-memory-integration-seams.md", "reason": "Verified Local/Hindsight source receipts, bounded recall and per-record/policy lifetime seams."}

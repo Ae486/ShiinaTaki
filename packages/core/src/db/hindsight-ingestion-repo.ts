@@ -42,7 +42,7 @@ function pending(db: Database, scope: HindsightIngestionScope): HindsightIngesti
   assertScope(db, scope);
   const row = db.prepare(`SELECT * FROM hindsight_ingestion_spans WHERE authority_epoch_id=:epoch
     AND character_id=:character AND state='pending'`).get({ epoch: scope.epochId, character: scope.characterId });
-  return row ? parseState(row) : undefined;
+  return row ? parseHindsightIngestionState(row) : undefined;
 }
 
 function start(ctx: RepoContext, input: HindsightIngestionScope & { source: SanitizedCommittedSpan; now: string }): HindsightIngestionState {
@@ -113,22 +113,18 @@ function complete(ctx: RepoContext, input: Update): HindsightIngestionState {
     if (state.gate === null || state.receipts.length !== state.batches.length
       || state.gate.decision === "keep" && state.batches.length !== (state.gate.route === "both" ? 2 : 1)) throw new Error("MEMORY_INGESTION_INCOMPLETE");
     const completed = update(ctx.db, { ...state, state: "complete", updatedAt: input.now });
-    const changed = ctx.db.prepare(`UPDATE hindsight_ingestion_cursors SET through_seq=MAX(through_seq,:through),updated_at=:at
-      WHERE authority_epoch_id=:epoch AND character_id=:character`)
-      .run({ epoch: state.epochId, character: state.characterId, through: state.source.throughSeq, at: input.now });
-    if (changed.changes !== 1) throw new Error("MEMORY_INGESTION_BASELINE_MISSING");
+    advanceCoverage(ctx, { epochId: state.epochId, characterId: state.characterId, throughSeq: state.source.throughSeq, now: input.now });
     return completed;
   });
 }
 
 function advanceCoverage(ctx: RepoContext, input: HindsightIngestionScope & { throughSeq: number; now: string }): number {
   return atomic(ctx.db, input, () => {
-    ctx.sources.assertCovered(input);
     const rows = ctx.db.prepare(`SELECT * FROM hindsight_ingestion_spans WHERE authority_epoch_id=:epoch
       AND character_id=:character AND from_seq<:through AND state='complete'`)
       .all({ epoch: input.epochId, character: input.characterId, through: input.throughSeq });
     for (const row of rows) {
-      const state = parseState(row);
+      const state = parseHindsightIngestionState(row);
       ctx.sources.assertClaimed(state); assertReceipts(ctx, state);
     }
     return ctx.sources.advanceCoverage(input);
@@ -155,7 +151,7 @@ function requireState(db: Database, input: HindsightIngestionScope & { spanId: s
   const row = db.prepare(`SELECT * FROM hindsight_ingestion_spans WHERE authority_epoch_id=:epoch
     AND character_id=:character AND span_id=:span`).get({ epoch: input.epochId, character: input.characterId, span: input.spanId });
   if (!row) throw new Error("MEMORY_INGESTION_NOT_FOUND");
-  const state = parseState(row);
+  const state = parseHindsightIngestionState(row);
   if (state.providerLineageId !== epoch.providerLineageId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
   return state;
 }
@@ -175,7 +171,7 @@ function update(db: Database, raw: HindsightIngestionState): HindsightIngestionS
   if (changed.changes !== 1) throw new Error("MEMORY_INGESTION_STALE_REVISION");
   return requireState(db, state);
 }
-function parseState(row: SqlRow): HindsightIngestionState {
+export function parseHindsightIngestionState(row: SqlRow): HindsightIngestionState {
   try {
     const state = HindsightIngestionStateSchema.parse({ epochId: row.authority_epoch_id, providerLineageId: row.provider_lineage_id,
       characterId: row.character_id, spanId: row.span_id, sourceHash: row.source_hash, source: JSON.parse(String(row.source_json)),

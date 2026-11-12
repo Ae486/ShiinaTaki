@@ -1,0 +1,10 @@
+{
+  "ref": "refs/tags/@ai-sdk/openai-compatible@3.0.75",
+  "node_id": "REF_kwDOJmmzGdoAKnJlZnMvdGFncy9AYWktc2RrL29wZW5haS1jb21wYXRpYmxlQDMuMC43NQ",
+  "url": "https://api.github.com/repos/vercel/ai/git/refs/tags/@ai-sdk/openai-compatible@3.0.75",
+  "object": {
+    "sha": "e6230e43ba9def164550eea562c457e23be9efa6",
+    "type": "commit",
+    "url": "https://api.github.com/repos/vercel/ai/git/commits/e6230e43ba9def164550eea562c457e23be9efa6"
+  }
+}

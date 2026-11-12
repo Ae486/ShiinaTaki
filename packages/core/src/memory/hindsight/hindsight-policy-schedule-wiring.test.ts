@@ -58,7 +58,10 @@ describe("policy review production wiring", () => {
     const first = turns.begin("taki"); expect(turns.idleSince("taki")).toBeNull(); expect(turns.idleSince(null)).toBeNull();
     expect(turns.idleSince("saki")).toEqual(expect.any(Number));
     turns.cancel("taki"); expect(turns.idleSince("taki")).toBeNull();
+    expect(() => turns.begin("taki")).toThrow("TURN_SCOPE_OCCUPIED");
+    turns.end("taki", first); expect(idle).toHaveBeenCalledOnce(); idle.mockClear();
     const second = turns.begin("taki"); turns.end("taki", first); expect(idle).not.toHaveBeenCalled();
+    expect(turns.idleSince("taki")).toBeNull();
     turns.end("taki", second); expect(idle).toHaveBeenCalledOnce(); expect(turns.idleSince(null)).toEqual(expect.any(Number));
     unsubscribe();
   });

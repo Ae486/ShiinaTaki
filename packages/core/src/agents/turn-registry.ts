@@ -1,7 +1,7 @@
 /**
- * INPUT:  begin/end from the chat.send pump (one active turn per characterId) + cancel from chat.cancel
- * OUTPUT: turn cancellation/drain and read-only live activity/idle notification for background admission
- * POS:    core/agents — the cancellation seam (D1 #4); the queue guarantees at most one active turn per character
+ * INPUT: exact Character/private-work execution registrations and targeted cancellation
+ * OUTPUT: non-replacing scope controllers, exact Run lookup and complete shutdown drain
+ * POS: core/agents — process-local cancellation handles; durable Run/control state remains Core-owned
  */
 
 export interface TurnRegistry {
@@ -9,67 +9,111 @@ export interface TurnRegistry {
   observe(listener: () => void): () => void;
   /** Registers a fresh controller as the character's active turn; the caller must end() it in a finally. */
   begin(characterId: string, controller?: AbortController, runId?: string): AbortController;
-  /** Unregisters — only if this controller is still the active one (a later begin wins). */
-  end(characterId: string, controller: AbortController): void;
+  beginScoped(input: { characterId: string; scopeKey: string; runId: string; controller: AbortController }): AbortController;
+  /** Unregisters the matching scope/controller only; late cleanup cannot evict a subsequent registration. */
+  end(scopeKey: string, controller: AbortController): void;
   /** Aborts the active turn; false when the character has none (a queued-but-unstarted turn is not cancellable). */
   cancel(characterId: string, runId?: string): boolean;
-  /** Waits for active turns to finish, aborting remaining turns at the bounded deadline. */
+  cancelExact(input: { characterId: string; runId: string; scopeKey?: string; reason?: string }): boolean;
+  /** Aborts active turns immediately, then waits for their cleanup up to the bounded deadline. */
   drain(timeoutMs?: number): Promise<void>;
 }
 
-export function createTurnRegistry(): TurnRegistry {
-  const active = new Map<string, { controller: AbortController; runId?: string }>();
+type ActiveTurn = { characterId: string; controller: AbortController; runId?: string };
+
+function createTurnDrain(active: ReadonlyMap<string, ActiveTurn>) {
   const waiters = new Set<() => void>();
-  const listeners = new Set<() => void>();
-  const ended = new Map<string, number>();
-  const createdAt = Date.now(); let lastEndedAt = createdAt;
   const resolveWaiters = (): void => {
     if (active.size !== 0) return;
     for (const resolve of [...waiters]) resolve();
     waiters.clear();
   };
-
   return {
-    idleSince: (characterId) => characterId === null ? active.size ? null : lastEndedAt
-      : active.has(characterId) ? null : ended.get(characterId) ?? createdAt,
-    observe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
-    begin(characterId, prepared, runId) {
-      const controller = prepared ?? new AbortController();
-      active.set(characterId, { controller, runId });
-      return controller;
-    },
-    end(characterId, controller) {
-      if (active.get(characterId)?.controller === controller) {
-        active.delete(characterId);
-        lastEndedAt = Date.now(); ended.set(characterId, lastEndedAt);
+    resolveWaiters,
+    drain(timeoutMs = 5_000): Promise<void> {
+      if (active.size === 0) return Promise.resolve();
+      for (const entry of active.values()) if (!entry.controller.signal.aborted) entry.controller.abort("core shutdown");
+      return new Promise<void>((resolve) => {
+        let settled = false;
+        const finish = (): void => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          waiters.delete(finish);
+          resolve();
+        };
+        const timer = setTimeout(finish, Math.max(0, timeoutMs));
+        waiters.add(finish);
         resolveWaiters();
-        for (const listener of listeners) listener();
+      });
+    },
+  };
+}
+
+export function createTurnRegistry(): TurnRegistry {
+  const active = new Map<string, ActiveTurn>();
+  const runs = new Map<string, string>();
+  const { drain, resolveWaiters } = createTurnDrain(active);
+  const activity = createIdleTracker(active);
+  const begin = (input: { characterId: string; scopeKey: string; runId?: string; controller: AbortController }) => {
+    const current = active.get(input.scopeKey);
+    if (current && (current.controller !== input.controller || current.runId !== input.runId)) throw new Error("TURN_SCOPE_OCCUPIED");
+    if (input.runId && runs.has(input.runId) && runs.get(input.runId) !== input.scopeKey) throw new Error("TURN_RUN_OCCUPIED");
+    active.set(input.scopeKey, input);
+    if (input.runId) runs.set(input.runId, input.scopeKey);
+    return input.controller;
+  };
+  const cancel = (key: string, reason: string): boolean => {
+    const current = active.get(key);
+    if (!current || current.controller.signal.aborted) return false;
+    current.controller.abort(reason);
+    return true;
+  };
+  return {
+    idleSince: activity.idleSince,
+    observe: activity.observe,
+    begin(characterId, controller = new AbortController(), runId) {
+      return begin({ characterId, scopeKey: characterId, controller, runId });
+    },
+    beginScoped: begin,
+    end(scopeKey, controller) {
+      if (active.get(scopeKey)?.controller === controller) {
+        const ending = active.get(scopeKey);
+        const runId = ending?.runId;
+        if (runId) runs.delete(runId);
+        active.delete(scopeKey);
+        activity.recordEnd(ending?.characterId);
+        resolveWaiters();
+        activity.notify();
       }
     },
     cancel(characterId, runId) {
       const current = active.get(characterId);
-      if (!current || (runId !== undefined && current.runId !== runId) || current.controller.signal.aborted) return false;
-      current.controller.abort("turn cancelled by operator");
-      return true;
+      if (!current || (runId !== undefined && current.runId !== runId)) return false;
+      return cancel(characterId, "turn cancelled by operator");
     },
-    drain: (timeoutMs = 5_000) => drainTurns(active, waiters, timeoutMs),
+    cancelExact(input) {
+      const key = runs.get(input.runId);
+      if (!key || active.get(key)?.characterId !== input.characterId || (input.scopeKey !== undefined && input.scopeKey !== key)) return false;
+      return cancel(key, input.reason ?? "turn cancelled by operator");
+    },
+    drain,
   };
 }
 
-function drainTurns(active: ReadonlyMap<string, { controller: AbortController }>, waiters: Set<() => void>, timeoutMs: number): Promise<void> {
-  if (active.size === 0) return Promise.resolve();
-  for (const entry of active.values()) if (!entry.controller.signal.aborted) entry.controller.abort("core shutdown");
-  if (active.size === 0) return Promise.resolve();
-  return new Promise<void>((resolve) => {
-    let settled = false;
-    const finish = (): void => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      waiters.delete(finish);
-      resolve();
-    };
-    const timer = setTimeout(finish, Math.max(0, timeoutMs));
-    waiters.add(finish);
-  });
+/** Read-only idle observations share registrations without owning cancellation or durable Run state. */
+function createIdleTracker(active: ReadonlyMap<string, ActiveTurn>) {
+  const listeners = new Set<() => void>();
+  const ended = new Map<string, number>();
+  const createdAt = Date.now(); let lastEndedAt = createdAt;
+  return {
+    idleSince: (characterId: string | null) => characterId === null ? active.size ? null : lastEndedAt
+      : [...active.values()].some((turn) => turn.characterId === characterId) ? null : ended.get(characterId) ?? createdAt,
+    observe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    recordEnd(characterId?: string) {
+      lastEndedAt = Date.now();
+      if (characterId !== undefined) ended.set(characterId, lastEndedAt);
+    },
+    notify: () => { for (const listener of listeners) listener(); },
+  };
 }

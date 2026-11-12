@@ -1,0 +1,1550 @@
+{
+  "phase": "chat-ended",
+  "detail": {
+    "status": "complete",
+    "timeline": [
+      {
+        "seq": 1,
+        "id": "fd7f1ac9-714a-4d26-8277-a7f6776eb926",
+        "characterId": "taki",
+        "role": "user",
+        "content": "创建一个隔离的子代理工作，用于检查私有会话界面。",
+        "createdAt": "2026-10-25T14:09:59.994Z"
+      },
+      {
+        "seq": 2,
+        "id": "b0a4d1a6-875e-462c-8616-63d414b5ec39",
+        "characterId": "taki",
+        "role": "assistant",
+        "content": "[tool-call: delegate_subagent]\n[tool-call: delegate_subagent]",
+        "parts": [
+          {
+            "type": "tool-call",
+            "toolCallId": "call-2f4849b3-1a5f-4f85-8c0f-f3fe35ed498e",
+            "toolName": "delegate_subagent",
+            "displayName": "委派助手工作"
+          },
+          {
+            "type": "tool-call",
+            "toolCallId": "call-84b37c3d-b835-4bd9-b299-c81cba8a758f",
+            "toolName": "delegate_subagent",
+            "displayName": "委派助手工作"
+          }
+        ],
+        "createdAt": "2026-10-25T14:10:00.592Z",
+        "presentation": {
+          "schemaVersion": "timeline-presentation.v1",
+          "messageId": "ed543a71-eb9f-49f5-a6c1-7e437ec0a33a",
+          "entryIndex": 0,
+          "entryCount": 3,
+          "activitySeq": 10,
+          "references": [
+            {
+              "itemId": "59e263bb-1d77-4f6e-aae7-b1b16016e7f9",
+              "order": 0,
+              "kind": "tool",
+              "partIndex": 0,
+              "outcome": "completed",
+              "durationMs": 95
+            },
+            {
+              "itemId": "06669a13-f802-4a90-a4f2-73a1bc390313",
+              "order": 1,
+              "kind": "tool",
+              "partIndex": 1,
+              "outcome": "completed",
+              "durationMs": 73
+            }
+          ]
+        }
+      },
+      {
+        "seq": 3,
+        "id": "39570dff-40a0-4cab-afab-b9305f7bc5ff",
+        "characterId": "taki",
+        "role": "tool",
+        "content": "[tool-result: delegate_subagent -> text]\n[tool-result: delegate_subagent -> text]",
+        "parts": [
+          {
+            "type": "tool-result",
+            "toolCallId": "call-2f4849b3-1a5f-4f85-8c0f-f3fe35ed498e",
+            "toolName": "delegate_subagent",
+            "displayName": "委派助手工作",
+            "output": {
+              "type": "text",
+              "value": "{\"worker\":\"实际运行时界面验收\",\"state\":\"queued\",\"acceptedInputId\":\"82ede886-5f1c-4812-a765-eabe66c180f1\",\"cancellationRequested\":false,\"pendingRequest\":null,\"target\":{\"subagentId\":\"69a82299-c4ef-405e-863b-6b98afcfab4d\",\"workInputId\":\"82ede886-5f1c-4812-a765-eabe66c180f1\",\"expectedRunId\":null,\"expectedControlVersion\":0}}"
+            }
+          },
+          {
+            "type": "tool-result",
+            "toolCallId": "call-84b37c3d-b835-4bd9-b299-c81cba8a758f",
+            "toolName": "delegate_subagent",
+            "displayName": "委派助手工作",
+            "output": {
+              "type": "text",
+              "value": "{\"worker\":\"长会话与来源验收\",\"state\":\"queued\",\"acceptedInputId\":\"415bf0ec-a3f2-4d06-8c60-e754d9134235\",\"cancellationRequested\":false,\"pendingRequest\":null,\"target\":{\"subagentId\":\"61de81e3-ab65-44c5-923c-cb1bef08ebf3\",\"workInputId\":\"415bf0ec-a3f2-4d06-8c60-e754d9134235\",\"expectedRunId\":null,\"expectedControlVersion\":0}}"
+            }
+          }
+        ],
+        "createdAt": "2026-10-25T14:10:00.592Z",
+        "presentation": {
+          "schemaVersion": "timeline-presentation.v1",
+          "messageId": "ed543a71-eb9f-49f5-a6c1-7e437ec0a33a",
+          "entryIndex": 1,
+          "entryCount": 3,
+          "activitySeq": 10,
+          "references": [
+            {
+              "itemId": "59e263bb-1d77-4f6e-aae7-b1b16016e7f9",
+              "order": 0,
+              "kind": "tool",
+              "partIndex": 0,
+              "outcome": "completed",
+              "durationMs": 95
+            },
+            {
+              "itemId": "06669a13-f802-4a90-a4f2-73a1bc390313",
+              "order": 1,
+              "kind": "tool",
+              "partIndex": 1,
+              "outcome": "completed",
+              "durationMs": 73
+            }
+          ]
+        }
+      },
+      {
+        "seq": 4,
+        "id": "81454098-91d6-4560-9529-0955d02e8fb6",
+        "characterId": "taki",
+        "role": "assistant",
+        "content": "主会话仍能正常响应。",
+        "createdAt": "2026-10-25T14:10:00.592Z",
+        "presentation": {
+          "schemaVersion": "timeline-presentation.v1",
+          "messageId": "ed543a71-eb9f-49f5-a6c1-7e437ec0a33a",
+          "entryIndex": 2,
+          "entryCount": 3,
+          "activitySeq": 10,
+          "references": [
+            {
+              "itemId": "191981dc-f011-4279-83f8-95bfffac4a33",
+              "order": 2,
+              "kind": "text",
+              "start": 0,
+              "end": 10
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "state": {
+    "available": true,
+    "runs": [
+      {
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "parent_run_id": null,
+        "initiator": "primary",
+        "state": "completed",
+        "outcome": "completed",
+        "active_attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "queued_at": "2026-10-25T14:09:59.971Z",
+        "terminal_at": "2026-10-25T14:10:00.611Z"
+      },
+      {
+        "run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "parent_run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "initiator": "subagent",
+        "state": "running",
+        "outcome": null,
+        "active_attempt_id": "752cb588-9690-4a5b-9633-426e1b7e1ed9",
+        "queued_at": "2026-10-25T14:10:00.310Z",
+        "terminal_at": null
+      },
+      {
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "parent_run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "initiator": "subagent",
+        "state": "running",
+        "outcome": null,
+        "active_attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "queued_at": "2026-10-25T14:10:00.318Z",
+        "terminal_at": null
+      }
+    ],
+    "attempts": [
+      {
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "ordinal": 1,
+        "state": "completed",
+        "outcome": "completed",
+        "provider": "openai-compatible",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "attempt_id": "752cb588-9690-4a5b-9633-426e1b7e1ed9",
+        "ordinal": 1,
+        "state": "effect_running",
+        "outcome": null,
+        "provider": "openai-compatible",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      },
+      {
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "ordinal": 1,
+        "state": "effect_running",
+        "outcome": null,
+        "provider": "openai-compatible",
+        "model_id": "scripted-context-fixture",
+        "error_code": null
+      }
+    ],
+    "effects": [
+      {
+        "effect_id": "92064153-f945-444a-a36c-adb7a271ce9f",
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "a3d6705e557f2e582aea9f740afad75bf949c91c92f9d6027b28b8761473b61c",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-10-25T14:10:00.075Z",
+        "settled_at": "2026-10-25T14:10:00.223Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "37070075-8c14-4b91-95a3-6455f469eafc",
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.manage\"}",
+        "started_at": "2026-10-25T14:10:00.246Z",
+        "settled_at": "2026-10-25T14:10:00.300Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "83f14270-d6e0-4039-838d-97a1fc51b84e",
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.manage\"}",
+        "started_at": "2026-10-25T14:10:00.265Z",
+        "settled_at": "2026-10-25T14:10:00.305Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "7893e3e6-33ec-44a9-897c-2c90b623f5f6",
+        "run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "attempt_id": "752cb588-9690-4a5b-9633-426e1b7e1ed9",
+        "kind": "model",
+        "state": "intent_committed",
+        "input_digest": "355969b6efe714aa6b8dc4610973ff4b615e102fa22fe326d46dafa34476d741",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-10-25T14:10:00.391Z",
+        "settled_at": null,
+        "outcome": null,
+        "error_code": null
+      },
+      {
+        "effect_id": "2b7677f5-377a-4383-8ffe-6348bce67502",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "26a7b3f07fa5520b9f2475085155aa4dcb737b4b7e1bacc332599b56ddc7725c",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-10-25T14:10:00.403Z",
+        "settled_at": "2026-10-25T14:10:00.509Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "f229a2f7-9a01-42b9-b392-566cd2849a4e",
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "55bde9a805d9617e9329c9b395362d0bc36de2411cd10aa8f27263d30e4fd778",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-10-25T14:10:00.425Z",
+        "settled_at": "2026-10-25T14:10:00.579Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "2426c7c5-57eb-4f06-9758-62007790c784",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.result\"}",
+        "started_at": "2026-10-25T14:10:00.517Z",
+        "settled_at": "2026-10-25T14:10:00.521Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "3f8cfccf-d189-486b-be6d-ab95b7dab71f",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "kind": "model",
+        "state": "terminal",
+        "input_digest": "363f6a0909e62fd2a311f4195f1b42d47961a451d3af84107135011b0d3669e2",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-10-25T14:10:00.560Z",
+        "settled_at": "2026-10-25T14:10:00.642Z",
+        "outcome": "outcome_unknown",
+        "error_code": "provider_usage_missing"
+      },
+      {
+        "effect_id": "42c40da8-1327-481e-a98d-d875bdcc475d",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "kind": "tool",
+        "state": "terminal",
+        "input_digest": null,
+        "source_ref_json": "{\"type\":\"tool\",\"toolName\":\"core.subagent.result\"}",
+        "started_at": "2026-10-25T14:10:00.652Z",
+        "settled_at": "2026-10-25T14:10:00.656Z",
+        "outcome": "completed",
+        "error_code": null
+      },
+      {
+        "effect_id": "9fad45f4-b3db-45db-a939-f9031494bbdc",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "kind": "model",
+        "state": "intent_committed",
+        "input_digest": "51e039f4a61f6c30c96f76d84d5c11e81fe3267839d8b7e1129417f54f0b88b8",
+        "source_ref_json": "{\"type\":\"model\",\"provider\":\"taki-provider.chat\",\"modelId\":\"scripted-context-fixture\"}",
+        "started_at": "2026-10-25T14:10:00.681Z",
+        "settled_at": null,
+        "outcome": null,
+        "error_code": null
+      }
+    ],
+    "deliveries": [],
+    "subagent_conversations": [
+      {
+        "subagent_id": "69a82299-c4ef-405e-863b-6b98afcfab4d",
+        "character_id": "taki",
+        "created_by_run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "label": "实际运行时界面验收",
+        "initial_context_json": "{\"kind\":\"fresh\"}",
+        "initial_context_digest": "37bd51ee2f097ec864985df00a5985f142be519681f761408cc963a4da7936c3",
+        "stop_origin": null,
+        "control_version": 1,
+        "next_input_seq": 2,
+        "active_run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "created_at": "2026-10-25T14:10:00.251Z"
+      },
+      {
+        "subagent_id": "61de81e3-ab65-44c5-923c-cb1bef08ebf3",
+        "character_id": "taki",
+        "created_by_run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "label": "长会话与来源验收",
+        "initial_context_json": "{\"kind\":\"fresh\"}",
+        "initial_context_digest": "37bd51ee2f097ec864985df00a5985f142be519681f761408cc963a4da7936c3",
+        "stop_origin": null,
+        "control_version": 1,
+        "next_input_seq": 2,
+        "active_run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "created_at": "2026-10-25T14:10:00.269Z"
+      }
+    ],
+    "subagent_inputs": [
+      {
+        "input_id": "82ede886-5f1c-4812-a765-eabe66c180f1",
+        "subagent_id": "69a82299-c4ef-405e-863b-6b98afcfab4d",
+        "input_seq": 1,
+        "work_input_id": "82ede886-5f1c-4812-a765-eabe66c180f1",
+        "work_seq": 1,
+        "operation_key": "delegate:5a4fb3f87cb612a6cc3b50ecb80efa81a7d6c4404620de0162813672afa3effa",
+        "request_digest": "78ffc65e79a61fae5d0e4c95e4b426a7fe5eb1a0ee6a9566d637c020f7d07e9b",
+        "input_kind": "work",
+        "sender_kind": "parent",
+        "sender_run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "sender_owner_ref": null,
+        "direction_text": "Wait for addressed input, then return it with complete_subagent.",
+        "materials_json": "[]",
+        "tool_selection_json": "{\"mode\":\"allow\",\"names\":[\"complete_subagent\"]}",
+        "completion_policy": "record_only",
+        "work_expires_at": null,
+        "consumed_run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "consumed_attempt_id": "752cb588-9690-4a5b-9633-426e1b7e1ed9",
+        "consumed_step": 0,
+        "consumed_effect_id": "7893e3e6-33ec-44a9-897c-2c90b623f5f6",
+        "reply_acceptance_json": null,
+        "created_at": "2026-10-25T14:10:00.257Z",
+        "validity_json": "{\"kind\":\"until_cancelled\"}",
+        "reply_to_event_id": null
+      },
+      {
+        "input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "subagent_id": "61de81e3-ab65-44c5-923c-cb1bef08ebf3",
+        "input_seq": 1,
+        "work_input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "work_seq": 1,
+        "operation_key": "delegate:d8a2b273b63899e6f86928ae7f3f738d31b4ff05f75a4b67e9d7d7175d5efb80",
+        "request_digest": "8cdb9c4a62bc452454d8ca3c8d7fca3bc588abf25c980a270e8c9de5687aa52d",
+        "input_kind": "work",
+        "sender_kind": "parent",
+        "sender_run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "sender_owner_ref": null,
+        "direction_text": "SECOND_NATIVE_WORKER: report progress and preserve the original source.",
+        "materials_json": "[]",
+        "tool_selection_json": "{\"mode\":\"allow\",\"names\":[\"complete_subagent\"]}",
+        "completion_policy": "record_only",
+        "work_expires_at": null,
+        "consumed_run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "consumed_attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "consumed_step": 0,
+        "consumed_effect_id": "2b7677f5-377a-4383-8ffe-6348bce67502",
+        "reply_acceptance_json": null,
+        "created_at": "2026-10-25T14:10:00.271Z",
+        "validity_json": "{\"kind\":\"until_cancelled\"}",
+        "reply_to_event_id": null
+      }
+    ],
+    "subagent_executions": [
+      {
+        "run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "subagent_id": "69a82299-c4ef-405e-863b-6b98afcfab4d",
+        "work_input_id": "82ede886-5f1c-4812-a765-eabe66c180f1",
+        "trigger_input_id": "82ede886-5f1c-4812-a765-eabe66c180f1",
+        "admission_digest": "76b1cdd3b1221d60eabbb07c39a0bec599a87e4ec0447da41c4517cd8b14b434",
+        "completion_policy": "record_only",
+        "through_work_seq": 1,
+        "work_token_json": "{\"subagentId\":\"69a82299-c4ef-405e-863b-6b98afcfab4d\",\"workInputId\":\"82ede886-5f1c-4812-a765-eabe66c180f1\",\"throughWorkSeq\":1,\"controlVersion\":1}",
+        "proposal_json": null,
+        "proposal_attempt_id": null,
+        "proposal_digest": null,
+        "proposal_token_digest": null,
+        "terminal_messages_json": null,
+        "terminal_messages_attempt_id": null,
+        "result_json": null,
+        "result_digest": null,
+        "settled_at": null,
+        "completion_state": "not_requested",
+        "completion_reason": null,
+        "parent_run_id": null,
+        "parent_admission_digest": null,
+        "parent_proposal_json": null,
+        "parent_proposal_attempt_id": null,
+        "parent_proposal_digest": null,
+        "parent_terminal_messages_json": null,
+        "parent_terminal_messages_attempt_id": null,
+        "parent_result_json": null,
+        "parent_result_digest": null,
+        "parent_settled_at": null,
+        "publication_json": null
+      },
+      {
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "subagent_id": "61de81e3-ab65-44c5-923c-cb1bef08ebf3",
+        "work_input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "trigger_input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "admission_digest": "9cad7f3c8b18583e33f0c99a6901fafd5a731ad85090140d1ac78dda6cfe2126",
+        "completion_policy": "record_only",
+        "through_work_seq": 1,
+        "work_token_json": "{\"subagentId\":\"61de81e3-ab65-44c5-923c-cb1bef08ebf3\",\"workInputId\":\"415bf0ec-a3f2-4d06-8c60-e754d9134235\",\"throughWorkSeq\":1,\"controlVersion\":1}",
+        "proposal_json": null,
+        "proposal_attempt_id": null,
+        "proposal_digest": null,
+        "proposal_token_digest": null,
+        "terminal_messages_json": null,
+        "terminal_messages_attempt_id": null,
+        "result_json": null,
+        "result_digest": null,
+        "settled_at": null,
+        "completion_state": "not_requested",
+        "completion_reason": null,
+        "parent_run_id": null,
+        "parent_admission_digest": null,
+        "parent_proposal_json": null,
+        "parent_proposal_attempt_id": null,
+        "parent_proposal_digest": null,
+        "parent_terminal_messages_json": null,
+        "parent_terminal_messages_attempt_id": null,
+        "parent_result_json": null,
+        "parent_result_digest": null,
+        "parent_settled_at": null,
+        "publication_json": null
+      }
+    ],
+    "run_messages": [
+      {
+        "seq": 1,
+        "run_id": "47e74bb4-eadb-4379-b45b-ee2836375822",
+        "attempt_id": "752cb588-9690-4a5b-9633-426e1b7e1ed9",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "Wait for addressed input, then return it with complete_subagent.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "82ede886-5f1c-4812-a765-eabe66c180f1",
+        "model_effect_id": "7893e3e6-33ec-44a9-897c-2c90b623f5f6",
+        "model_input_digest": "355969b6efe714aa6b8dc4610973ff4b615e102fa22fe326d46dafa34476d741",
+        "batch_digest": "d433e2fdd139da442799d2dd5fcae7227099165cab1b41e1454367c9e28d2b19",
+        "created_at": "2026-10-25T14:10:00.398Z"
+      },
+      {
+        "seq": 2,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "SECOND_NATIVE_WORKER: report progress and preserve the original source.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "model_effect_id": "2b7677f5-377a-4383-8ffe-6348bce67502",
+        "model_input_digest": "26a7b3f07fa5520b9f2475085155aa4dcb737b4b7e1bacc332599b56ddc7725c",
+        "batch_digest": "e88f1b5ba792c004b42653bd4c89b038c5432420f748294bb7e5134ff66af6e9",
+        "created_at": "2026-10-25T14:10:00.405Z"
+      },
+      {
+        "seq": 3,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 0,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "第 1 个完整工作回合。\n[tool-call: interact_parent]",
+        "parts_json": "[{\"type\":\"text\",\"text\":\"第 1 个完整工作回合。\"},{\"type\":\"tool-call\",\"toolCallId\":\"call-e7d8aa58-da0e-4e8a-9806-fdc2b9793793\",\"toolName\":\"interact_parent\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "d7c42a51f1be7a713b9bc3fa1fe5e02846a87145c2b68516ba2bbf5eb5358112",
+        "created_at": "2026-10-25T14:10:00.532Z"
+      },
+      {
+        "seq": 4,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 0,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: interact_parent -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-e7d8aa58-da0e-4e8a-9806-fdc2b9793793\",\"toolName\":\"interact_parent\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"proposed\":true,\"accepted\":false}},\"sourceMaterials\":[{\"key\":\"result\"}]}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "d7c42a51f1be7a713b9bc3fa1fe5e02846a87145c2b68516ba2bbf5eb5358112",
+        "created_at": "2026-10-25T14:10:00.532Z"
+      },
+      {
+        "seq": 5,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 1,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "SECOND_NATIVE_WORKER: report progress and preserve the original source.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "model_effect_id": "3f8cfccf-d189-486b-be6d-ab95b7dab71f",
+        "model_input_digest": "363f6a0909e62fd2a311f4195f1b42d47961a451d3af84107135011b0d3669e2",
+        "batch_digest": "e88f1b5ba792c004b42653bd4c89b038c5432420f748294bb7e5134ff66af6e9",
+        "created_at": "2026-10-25T14:10:00.564Z"
+      },
+      {
+        "seq": 6,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 1,
+        "message_index": 0,
+        "entry_kind": "output",
+        "role": "assistant",
+        "content": "第 2 个完整工作回合。\n[tool-call: interact_parent]",
+        "parts_json": "[{\"type\":\"text\",\"text\":\"第 2 个完整工作回合。\"},{\"type\":\"tool-call\",\"toolCallId\":\"call-4503023f-7e2d-4172-b61d-b981aba1120b\",\"toolName\":\"interact_parent\"}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "54ee6ef6ba0030146adca8cc913138e5fd3d104a2a3cf83fe22fde0885694f8e",
+        "created_at": "2026-10-25T14:10:00.665Z"
+      },
+      {
+        "seq": 7,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 1,
+        "message_index": 1,
+        "entry_kind": "output",
+        "role": "tool",
+        "content": "[tool-result: interact_parent -> json]",
+        "parts_json": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-4503023f-7e2d-4172-b61d-b981aba1120b\",\"toolName\":\"interact_parent\",\"output\":{\"type\":\"json\",\"value\":{\"ok\":true,\"proposed\":true,\"accepted\":false}},\"sourceMaterials\":[{\"key\":\"result\"}]}]",
+        "source_context_json": null,
+        "input_id": null,
+        "model_effect_id": null,
+        "model_input_digest": null,
+        "batch_digest": "54ee6ef6ba0030146adca8cc913138e5fd3d104a2a3cf83fe22fde0885694f8e",
+        "created_at": "2026-10-25T14:10:00.665Z"
+      },
+      {
+        "seq": 8,
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "step_number": 2,
+        "message_index": 0,
+        "entry_kind": "input",
+        "role": "user",
+        "content": "SECOND_NATIVE_WORKER: report progress and preserve the original source.",
+        "parts_json": null,
+        "source_context_json": "{}",
+        "input_id": "415bf0ec-a3f2-4d06-8c60-e754d9134235",
+        "model_effect_id": "9fad45f4-b3db-45db-a939-f9031494bbdc",
+        "model_input_digest": "51e039f4a61f6c30c96f76d84d5c11e81fe3267839d8b7e1129417f54f0b88b8",
+        "batch_digest": "e88f1b5ba792c004b42653bd4c89b038c5432420f748294bb7e5134ff66af6e9",
+        "created_at": "2026-10-25T14:10:00.683Z"
+      }
+    ],
+    "timeline_messages": [
+      {
+        "seq": 1,
+        "id": "fd7f1ac9-714a-4d26-8277-a7f6776eb926",
+        "character_id": "taki",
+        "role": "user",
+        "content": "创建一个隔离的子代理工作，用于检查私有会话界面。",
+        "parts": null,
+        "created_at": "2026-10-25T14:09:59.994Z",
+        "presentation": null,
+        "source_context_json": null
+      },
+      {
+        "seq": 2,
+        "id": "b0a4d1a6-875e-462c-8616-63d414b5ec39",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "[tool-call: delegate_subagent]\n[tool-call: delegate_subagent]",
+        "parts": "[{\"type\":\"tool-call\",\"toolCallId\":\"call-2f4849b3-1a5f-4f85-8c0f-f3fe35ed498e\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\"},{\"type\":\"tool-call\",\"toolCallId\":\"call-84b37c3d-b835-4bd9-b299-c81cba8a758f\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\"}]",
+        "created_at": "2026-10-25T14:10:00.592Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"ed543a71-eb9f-49f5-a6c1-7e437ec0a33a\",\"entryIndex\":0,\"entryCount\":3,\"activitySeq\":10,\"references\":[{\"itemId\":\"59e263bb-1d77-4f6e-aae7-b1b16016e7f9\",\"order\":0,\"kind\":\"tool\",\"partIndex\":0,\"outcome\":\"completed\",\"durationMs\":95},{\"itemId\":\"06669a13-f802-4a90-a4f2-73a1bc390313\",\"order\":1,\"kind\":\"tool\",\"partIndex\":1,\"outcome\":\"completed\",\"durationMs\":73}]}",
+        "source_context_json": null
+      },
+      {
+        "seq": 3,
+        "id": "39570dff-40a0-4cab-afab-b9305f7bc5ff",
+        "character_id": "taki",
+        "role": "tool",
+        "content": "[tool-result: delegate_subagent -> text]\n[tool-result: delegate_subagent -> text]",
+        "parts": "[{\"type\":\"tool-result\",\"toolCallId\":\"call-2f4849b3-1a5f-4f85-8c0f-f3fe35ed498e\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\",\"output\":{\"type\":\"text\",\"value\":\"{\\\"worker\\\":\\\"实际运行时界面验收\\\",\\\"state\\\":\\\"queued\\\",\\\"acceptedInputId\\\":\\\"82ede886-5f1c-4812-a765-eabe66c180f1\\\",\\\"cancellationRequested\\\":false,\\\"pendingRequest\\\":null,\\\"target\\\":{\\\"subagentId\\\":\\\"69a82299-c4ef-405e-863b-6b98afcfab4d\\\",\\\"workInputId\\\":\\\"82ede886-5f1c-4812-a765-eabe66c180f1\\\",\\\"expectedRunId\\\":null,\\\"expectedControlVersion\\\":0}}\"}},{\"type\":\"tool-result\",\"toolCallId\":\"call-84b37c3d-b835-4bd9-b299-c81cba8a758f\",\"toolName\":\"delegate_subagent\",\"displayName\":\"委派助手工作\",\"output\":{\"type\":\"text\",\"value\":\"{\\\"worker\\\":\\\"长会话与来源验收\\\",\\\"state\\\":\\\"queued\\\",\\\"acceptedInputId\\\":\\\"415bf0ec-a3f2-4d06-8c60-e754d9134235\\\",\\\"cancellationRequested\\\":false,\\\"pendingRequest\\\":null,\\\"target\\\":{\\\"subagentId\\\":\\\"61de81e3-ab65-44c5-923c-cb1bef08ebf3\\\",\\\"workInputId\\\":\\\"415bf0ec-a3f2-4d06-8c60-e754d9134235\\\",\\\"expectedRunId\\\":null,\\\"expectedControlVersion\\\":0}}\"}}]",
+        "created_at": "2026-10-25T14:10:00.592Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"ed543a71-eb9f-49f5-a6c1-7e437ec0a33a\",\"entryIndex\":1,\"entryCount\":3,\"activitySeq\":10,\"references\":[{\"itemId\":\"59e263bb-1d77-4f6e-aae7-b1b16016e7f9\",\"order\":0,\"kind\":\"tool\",\"partIndex\":0,\"outcome\":\"completed\",\"durationMs\":95},{\"itemId\":\"06669a13-f802-4a90-a4f2-73a1bc390313\",\"order\":1,\"kind\":\"tool\",\"partIndex\":1,\"outcome\":\"completed\",\"durationMs\":73}]}",
+        "source_context_json": null
+      },
+      {
+        "seq": 4,
+        "id": "81454098-91d6-4560-9529-0955d02e8fb6",
+        "character_id": "taki",
+        "role": "assistant",
+        "content": "主会话仍能正常响应。",
+        "parts": null,
+        "created_at": "2026-10-25T14:10:00.592Z",
+        "presentation": "{\"schemaVersion\":\"timeline-presentation.v1\",\"messageId\":\"ed543a71-eb9f-49f5-a6c1-7e437ec0a33a\",\"entryIndex\":2,\"entryCount\":3,\"activitySeq\":10,\"references\":[{\"itemId\":\"191981dc-f011-4279-83f8-95bfffac4a33\",\"order\":2,\"kind\":\"text\",\"start\":0,\"end\":10}]}",
+        "source_context_json": null
+      }
+    ],
+    "run_usage": [
+      {
+        "usage_id": "a55840b1-1500-4ada-b562-9246bcf703e0",
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "effect_id": "92064153-f945-444a-a36c-adb7a271ce9f",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-10-25T14:10:00.223Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null
+      },
+      {
+        "usage_id": "1365cb57-d08c-468c-9668-4ce7adf45a5f",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "effect_id": "2b7677f5-377a-4383-8ffe-6348bce67502",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-10-25T14:10:00.509Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null
+      },
+      {
+        "usage_id": "3b0675ce-32fb-40a5-a2af-74944611575c",
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "attempt_id": "4b636ecd-4b44-488a-9e5d-7f3e1d93ffdb",
+        "effect_id": "f229a2f7-9a01-42b9-b392-566cd2849a4e",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-10-25T14:10:00.579Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null
+      },
+      {
+        "usage_id": "6271092e-e5f1-41e4-b60b-655c06b63d3a",
+        "run_id": "f707550a-214e-47eb-8162-0f331bd4e469",
+        "attempt_id": "8ff4409d-b388-40e5-b06b-a9c7495c83fd",
+        "effect_id": "3f8cfccf-d189-486b-be6d-ab95b7dab71f",
+        "schema_version": "effect.v1",
+        "provider": "taki-provider.chat",
+        "model_id": "scripted-context-fixture",
+        "quality": "unknown",
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null,
+        "recorded_at": "2026-10-25T14:10:00.642Z",
+        "input_no_cache_tokens": null,
+        "cache_read_tokens": null,
+        "cache_write_tokens": null,
+        "output_text_tokens": null,
+        "reasoning_tokens": null
+      }
+    ],
+    "canonical_memory_sources": [],
+    "canonical_memory_units": [],
+    "canonical_memory_policy": [],
+    "canonical_memory_operation_receipts": [],
+    "canonical_memory_primary_commits": [
+      {
+        "timeline_seq": 1,
+        "authority_epoch_id": "08eb4003-14b7-4f71-812a-21f22b82172a",
+        "character_id": "taki",
+        "entry_id": "fd7f1ac9-714a-4d26-8277-a7f6776eb926",
+        "entry_digest": "512aa06cd327c413d43fc265da32945629b1b4ab27ef9a3a0a311e3dc35cf54f",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "committed_at": "2026-10-25T14:10:00.598Z"
+      },
+      {
+        "timeline_seq": 2,
+        "authority_epoch_id": "08eb4003-14b7-4f71-812a-21f22b82172a",
+        "character_id": "taki",
+        "entry_id": "b0a4d1a6-875e-462c-8616-63d414b5ec39",
+        "entry_digest": "958523740d1c68de0692c8aca4acd7985e71f96885a01a7ef0eabe16374f3560",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "committed_at": "2026-10-25T14:10:00.599Z"
+      },
+      {
+        "timeline_seq": 3,
+        "authority_epoch_id": "08eb4003-14b7-4f71-812a-21f22b82172a",
+        "character_id": "taki",
+        "entry_id": "39570dff-40a0-4cab-afab-b9305f7bc5ff",
+        "entry_digest": "fc9274ac275a2cc5a735caa78dbd5e52c7707a7e4dce79bbd1d2e25710ac06e8",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "committed_at": "2026-10-25T14:10:00.600Z"
+      },
+      {
+        "timeline_seq": 4,
+        "authority_epoch_id": "08eb4003-14b7-4f71-812a-21f22b82172a",
+        "character_id": "taki",
+        "entry_id": "81454098-91d6-4560-9529-0955d02e8fb6",
+        "entry_digest": "6dda018c73753bd10cbcc2555cb536e718e289e0a27fbfc1fa636949f1c828d5",
+        "committed_through_seq": 4,
+        "ingestion_span_id": null,
+        "run_id": "3c299374-f763-4784-9f71-c00abc2f8bd6",
+        "committed_at": "2026-10-25T14:10:00.601Z"
+      }
+    ]
+  },
+  "requests": [
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "delegate_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 1,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 2,
+      "upstreamAttempted": true
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 3,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "avatar_play_motion",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "avatar_set_expression",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_read",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "clipboard_write",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "delegate_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "exec",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_call",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_describe",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "extension_discover",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "get_current_time",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "inspect_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "invalidate_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "load_skill",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "manage_interaction_pattern",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "plan_follow_up",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "process_list",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_skill_resource",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "recall",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "restore_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "retain",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "schedule_task",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "screenshot",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "send_subagent_message",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "shell_open",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "stop_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "update_memory",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "write_file",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 4,
+      "upstreamAttempted": true,
+      "status": 200
+    },
+    {
+      "tools": [
+        {
+          "name": "complete_subagent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "interact_parent",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        },
+        {
+          "name": "read_self_history",
+          "rootType": "object",
+          "rootKeys": [
+            "$schema",
+            "type",
+            "properties",
+            "required",
+            "additionalProperties"
+          ]
+        }
+      ],
+      "requestNumber": 5,
+      "upstreamAttempted": true,
+      "status": 200
+    }
+  ],
+  "turns": [
+    {
+      "prompt": "创建一个隔离的子代理工作，用于检查私有会话界面。",
+      "status": "complete",
+      "text": "主会话仍能正常响应。"
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 /**
  * INPUT:  CLI args (--url, --character, --call/--params, `secret` positionals) + a device identity file + stdin lines
- * OUTPUT: authenticates (pairing on first run, token reuse after), then a chat REPL, one non-secret operator call,
+ * OUTPUT: authenticates with command-display negotiation, then a chat REPL, one non-secret operator call,
  *         or one stdin-fed secret subcommand (set/clear/presence/list — the value never enters argv)
  * POS:    cli — the process entry; thin glue over device-identity + chat-client + repl + operator-call (manual smoke)
  */
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, ErrorCodeSchema } from "@taki/shared";
+import { APPROVAL_COMMAND_DISCLOSURE_REVISION, DEFAULT_WS_HOST, DEFAULT_WS_PORT, ErrorCodeSchema, type ConnectParams } from "@taki/shared";
 import { createCliApprovalController } from "./approval-controller.ts";
 import { connectChatClient, type ChatClient } from "./chat-client.ts";
 import { loadOrCreateIdentity, saveToken } from "./device-identity.ts";
@@ -65,7 +65,10 @@ function parseCliArgs() {
 const dataDir = process.env.TAKI_DATA_DIR ?? join(homedir(), ".takiagent");
 const identityPath = join(dataDir, "cli-device.json");
 const identity = loadOrCreateIdentity(identityPath);
-const baseParams = { deviceId: identity.deviceId, deviceName: DEVICE_NAME, role: "operator" as const, capabilities: [] };
+const baseParams = {
+  deviceId: identity.deviceId, deviceName: DEVICE_NAME, role: "operator" as const, capabilities: [],
+  approvalCommandDisclosureRevision: APPROVAL_COMMAND_DISCLOSURE_REVISION,
+} satisfies ConnectParams;
 
 // A dead core must read as one friendly line, not a top-level-await unhandled rejection stack.
 const client = await connectChatClient(url).catch((error: unknown) => {

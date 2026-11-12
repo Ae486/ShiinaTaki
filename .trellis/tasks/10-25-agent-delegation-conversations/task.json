@@ -1,0 +1,38 @@
+{
+  "id": "agent-delegation-conversations",
+  "name": "agent-delegation-conversations",
+  "title": "Interactive agent delegation follow-up",
+  "description": "Plan companion-first asynchronous child messaging, durable delivery, retained child conversations, task-worker compaction and shared Chat UI from the October 24 owner decisions.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-10-25",
+  "completedAt": null,
+  "branch": "task/t4-skills-mcp-productization",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "2026-11-10 owner freeze: remaining valid work is checkpointed; execution is paused pending the main worktree stage and later integration. See docs/T4-FREEZE-HANDOFF.md for backups, verification, unfinished acceptance and migration/governance gates. This supersedes older continue/restart and uncommitted-state notes. No merge, push, archive or real-data migration.",
+  "meta": {
+    "scope": "implementation_authorized",
+    "owner_authorization": "01a16d1d-191d-7070-a7e5-3181605428e8",
+    "baseline_task": "10-21-agent-delegation-source-context",
+    "implementation_authorization": "01a17186-8409-7073-b737-845377a5e84f",
+    "worktree_freeze": {
+      "date": "2026-11-10",
+      "state": "frozen_waiting_for_main_stage",
+      "handoff": "docs/T4-FREEZE-HANDOFF.md",
+      "integration_authorized": false,
+      "manual_acceptance_complete": false
+    }
+  }
+}

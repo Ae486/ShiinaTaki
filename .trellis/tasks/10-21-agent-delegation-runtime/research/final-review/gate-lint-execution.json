@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "cwd": "H:/TakiAgent-worktrees/t4",
+  "startedAt": "2026-10-23T03:40:04.4170114Z",
+  "command": "pnpm exec eslint packages/core/src/agents/turn-registry.ts packages/core/src/agents/turn-registry.test.ts packages/shared/src/governance-presentation.test.ts packages/shared/src/governance-registry.test.ts",
+  "finishedAt": "2026-10-23T03:40:08.5086548Z"
+}

@@ -21,25 +21,42 @@ const ASSISTANT_LAYER_FALLBACK =
   "You are the user's capable desktop companion. Your tools are part of who you are; when asked for real help, help genuinely — in character.";
 const PERSONA_FALLBACK = "You are the user's companion.";
 
-export function createPersonaProvider(deps: { promptDir: string; logger?: Logger }): PersonaProvider {
+export function createPersonaProvider(deps: { promptDir: string | (() => string); logger?: Logger }): PersonaProvider {
   const log = deps.logger?.child({ mod: "persona" });
   // The assistant layer is global (one file, every character shares it) — read once at boot; a turn never touches disk.
-  const assistantLayer = readCard(join(deps.promptDir, "system", "assistant-layer.md"), ASSISTANT_LAYER_FALLBACK, log);
+  const directory = () => typeof deps.promptDir === "function" ? deps.promptDir() : deps.promptDir;
+  let currentDirectory = directory();
+  let assistantLayer = readCard(join(currentDirectory, "system", "assistant-layer.md"), ASSISTANT_LAYER_FALLBACK, log);
   // Persona cards are loaded on first use for a character and cached (files don't change until a restart / soul-swap);
   // the readFileSync is sync so it never breaks the assembler's sync contract, and it happens at most once per character.
   const personaCache = new Map<string, string>();
+  const refresh = () => {
+    const next = directory();
+    if (next === currentDirectory) return;
+    currentDirectory = next;
+    assistantLayer = readCard(join(next, "system", "assistant-layer.md"), ASSISTANT_LAYER_FALLBACK, log);
+    personaCache.clear();
+  };
 
   return {
-    assistantLayer: () => assistantLayer,
+    assistantLayer: () => { refresh(); return assistantLayer; },
     persona(characterId) {
+      refresh();
       let card = personaCache.get(characterId);
       if (card === undefined) {
-        card = readCard(join(deps.promptDir, "characters", characterId, "persona.md"), PERSONA_FALLBACK, log);
+        card = readCard(join(currentDirectory, "characters", characterId, "persona.md"), PERSONA_FALLBACK, log);
         personaCache.set(characterId, card);
       }
       return card;
     },
   };
+}
+
+/** Admission retains card contents while later work can use a different configured directory. */
+export function capturePersona(provider: PersonaProvider, characterId: string): PersonaProvider {
+  const assistant = provider.assistantLayer();
+  const persona = provider.persona(characterId);
+  return { assistantLayer: () => assistant, persona: () => persona };
 }
 
 /** The fallback-only provider (no prompt dir): used by tests + as the memory engine's default when none is injected. */

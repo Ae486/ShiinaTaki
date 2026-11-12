@@ -1,0 +1,283 @@
+/* DSH TrajectoryTable Inspector styles adapted under DeepSeek MIT; see third-party-notices.md. */
+.slot {
+  position: relative;
+  display: flex;
+  flex: 0 0 0;
+  width: 0;
+  min-width: 0;
+  min-height: 0;
+  max-width: calc(100% - 280px);
+  overflow: hidden;
+  transition: flex-basis 180ms ease-out;
+}
+
+.slot[data-open='true'] {
+  flex-basis: var(--inspector-width);
+  width: var(--inspector-width);
+}
+
+.slot[data-open='false'] {
+  pointer-events: none;
+}
+
+.slot[data-resizing='true'] {
+  transition: none;
+}
+
+.details {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  border-left: 1px solid var(--trajectory-border);
+  background: var(--trajectory-bg);
+}
+
+.resize {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.resize:hover, .resize:focus-visible {
+  background: color-mix(in srgb, var(--trajectory-accent) 16%, transparent);
+  outline: none;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 42px;
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid var(--trajectory-border);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--trajectory-text);
+  font-size: 12px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--trajectory-caption);
+  background: transparent;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.close:hover {
+  color: var(--trajectory-text);
+  background: var(--trajectory-hover);
+}
+
+.fields {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.tabs {
+  display: flex;
+  flex: none;
+  height: 34px;
+  min-width: 0;
+  gap: 1px;
+  padding: 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--trajectory-border);
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.tabs button {
+  position: relative;
+  flex: none;
+  padding: 0 9px;
+  border: 0;
+  color: var(--trajectory-caption);
+  background: transparent;
+  font: 13px/1 var(--font-sans);
+}
+
+.tabs button:hover {
+  color: var(--trajectory-text);
+  background: var(--trajectory-hover);
+}
+
+.tabs button[aria-selected='true'] {
+  color: var(--trajectory-accent);
+}
+
+.tabs button[aria-selected='true']::after {
+  position: absolute;
+  right: 9px;
+  bottom: 0;
+  left: 9px;
+  height: 2px;
+  border-radius: 1px 1px 0 0;
+  background: var(--trajectory-accent);
+  content: '';
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-bottom: 12px;
+  scrollbar-color: transparent transparent;
+}
+
+.body:hover, .body:focus-within {
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.section {
+  border-bottom: 1px solid var(--trajectory-hairline);
+}
+
+.sectionButton {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 14px;
+  border: 0;
+  color: var(--trajectory-secondary);
+  background: transparent;
+  font: 500 11px/1 var(--font-sans);
+  text-align: left;
+}
+
+.sectionButton:hover {
+  background: var(--trajectory-hover);
+}
+
+.sectionBody {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows var(--duration-base) ease-out, opacity var(--duration-fast) ease-out;
+}
+
+.sectionBody[data-open='false'] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.sectionInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.overview {
+  margin: 0;
+  padding: 4px 0 8px;
+  font: 13px/1.4 var(--font-sans);
+}
+
+.overview > div {
+  display: grid;
+  grid-template-columns: 94px minmax(0, 1fr);
+  min-height: 22px;
+  padding: 0 14px;
+  align-items: baseline;
+}
+
+.overview dt {
+  color: var(--trajectory-caption);
+  font-size: 11px;
+}
+
+.overview dd {
+  min-width: 0;
+  color: var(--trajectory-text);
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  flex: none;
+  padding: 8px 14px;
+  border-top: 1px solid var(--trajectory-hairline);
+  color: var(--trajectory-caption);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.pending, .error {
+  padding: 12px 14px;
+  color: var(--trajectory-caption);
+  font-size: 12px;
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+@container monitor-workspace (max-width: 960px) {
+  .slot {
+    position: absolute;
+    z-index: 7;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    height: 0;
+    flex: none;
+    transition: height 180ms ease-out;
+  }
+  .slot[data-open='true'] {
+    width: 100%;
+    height: min(55%, 420px);
+    flex-basis: auto;
+  }
+  .details {
+    border-left: 0;
+    border-top: 1px solid var(--trajectory-border);
+    box-shadow: var(--shadow-overlay);
+  }
+  .resize {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot, .sectionBody {
+    transition: none;
+  }
+}

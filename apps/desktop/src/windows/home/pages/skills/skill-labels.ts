@@ -1,8 +1,7 @@
 /**
  * INPUT:  raw Core Skill wire values (lifecycle/runtime state, scan verdict, source kind, trust)
  * OUTPUT: Simplified Chinese skills labels + badge tones with a raw-string fallback for unknown values
- * POS:    ui/windows/home/pages/skills — U3 presentation labels; opaque package ids/hashes/revisions/owners never
- *         render here (they ride the detail disclosure's CopyableRows).
+ * POS:    ui/windows/home/pages/skills — presentation vocabulary; package bookkeeping stays internal to actions
  */
 import type { BadgeTone } from "../../badge.tsx";
 

@@ -7,7 +7,7 @@
 import { useEffect, useMemo } from "react";
 import type { CharacterCostumesResult } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
-import { resolveSettingsFile } from "@/lib/character-asset-url.js";
+import { notifyCostumeSceneChanged } from "@/lib/costume-scene-event.js";
 import { startCostumeSwitchAttempt } from "@/lib/costume-switch-attempt.js";
 import { loadLastCostume, saveLastCostume } from "@/lib/last-costume.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
@@ -25,18 +25,16 @@ function pickCostume(costumes: CharacterCostumesResult): string {
 }
 
 function startPromotionAttempt(input: InitialPromotionAttemptInput) {
-  const settingsFile = resolveSettingsFile(input.costumes, input.costume);
-  if (!settingsFile) throw new Error(`no settings file for costume ${input.costume}`);
   return startCostumeSwitchAttempt({
     client: input.client,
     scene: input.scene,
     costume: input.costume,
-    settingsFile,
     onCommit: input.onCommit,
   });
 }
 
 function saveCommittedPromotion(costumeId: string): void {
+  notifyCostumeSceneChanged();
   try {
     saveLastCostume(ACTIVE_CHARACTER_ID, costumeId, localStorage);
   } catch (cause) {

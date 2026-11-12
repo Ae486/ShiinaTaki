@@ -5,6 +5,17 @@
 > Batch-4 page redesigns (MCP/Skills cards, master-detail, settings regroup) and batch-5 monitor
 > three-zone layout are OUT — batch 2 delivers the primitives + tokens + adoption + a11y closures.
 
+**Document status, 2026-09-05:** this is the Batch 2 design with Batch 2.5 and Batch 7 appendices,
+not a complete design for the next UI/UX stage. Follow the
+[G1 grill record](../08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md)
+for confirmed scope and current evidence. Later cross-layer work requires its own complete planning
+artifacts; this task remains pure frontend.
+
+G4 supersedes this historical design's suggestions to move hash/Owner/revision/generation fields into
+technical disclosures. Remove meaningless fields from user-facing details entirely. Keep CopyableRow
+and other primitives for useful values; follow the [current field inventory](../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md)
+and the updated frontend field-selection contract for further implementation.
+
 ## 1. Token additions (`src/styles.css` `@theme`)
 
 - Neutral steps: `surface`(white) / `surface-muted`(slate-50) / `surface-sunken`(slate-100) /
@@ -102,8 +113,9 @@ TypingDots, DateDivider, Brand all stay bespoke.
 ## 7. Verification
 
 - `pnpm --filter @taki/desktop typecheck` and `test` green; `pnpm exec eslint apps/desktop/src` clean.
-  Do NOT run workspace `pnpm typecheck`/`pnpm lint` as gates — packages/core is currently red from the
-  PARALLEL compaction session's uncommitted files; do not touch or fix those, report their presence.
+  Historical Batch 2 scope: workspace gates were excluded because the parallel compaction session
+  then had uncommitted Core failures. This is not a current failure claim or a standing waiver for
+  future batches; use current task/spec gates and preserve other contributors' changes.
 - `git diff --check`; `pnpm --filter @taki/desktop exec vite build` to confirm token emission.
 - Each primitive: at least one behavior test (selected state attr, escape policy, copy feedback,
   toast cap/pause). Spec §home-window "Streaming timeline" and markdown XSS tests must stay green.
@@ -132,7 +144,7 @@ Owner ruling: no settings entry yet, but the layer must accept one at any time. 
 
 Owner framing: after batches 1-6-FE most of D67's acceptance already exists piecemeal. This batch
 consolidates it into ONE contract and closes the remaining cheap gaps; it explicitly does NOT wait
-for D76 Core events (tool-arrival order stays out of scope — cross-layer residual).
+for U8/U9/U10 live tool events (D67 follow-up; tool-arrival order stays out of scope here).
 
 1. **Contract doc** (new `.trellis/spec/frontend/reactive-read-models.md`, linked from home-window.md):
    codify the rules the app now actually follows — (a) push-driven pages update from WS events with
@@ -153,4 +165,30 @@ for D76 Core events (tool-arrival order stays out of scope — cross-layer resid
    (no fake "live" pill when nothing pushes).
 4. **Expandable audit**: re-verify every disclosure/details added across batches collapses both ways
    (batch-2 U1 rule) — report as a checklist, no new UI.
-5. Out of scope: any Core/shared change; tool-arrival ordering (D76); polling; invented stale states.
+5. Out of scope: any Core/shared change; tool-arrival ordering (U8/U9/U10, D67 follow-up); polling;
+   invented stale states.
+
+## 10. G4 follow-up — useful information cleanup (2026-09-05)
+
+This is the first batch of the owner-approved next UI/UX sequence. It changes presentation only,
+using the existing snapshot/controller contracts. The [execution plan](implement.md) owns dispatch,
+file boundaries, gates and evidence; sections 1–9 above remain historical batch designs.
+
+| Surface | Presentation change | Retained behavior/data |
+|---|---|---|
+| MCP detail | Remove config revision, runtime generation, Owner and enumeration page count. Show selected tools only when useful; no empty technical disclosure. Use service/outcome wording the operator understands. | Transport/configuration, tool count, actual duration/result, diagnostics dismissal, test/reconnect/edit/enable/remove; last-good availability only when actually supported by the snapshot |
+| Skills detail/inspection | Remove the technical disclosure and catch-all custom metadata. Show declared license, compatibility and allowed tools when present, with Chinese labels; name/description already belong to the card. Retain bounded relative files. | Trust, source, validation/runtime state, inspect, replace/enable/remove, confirmation and inspection collapse |
+| Extension status | Remove shortened/full Core Host identity and its copy control. Label availability, extensions and name conflicts in Chinese. | Real counts and refresh/failure state; no invented availability |
+| Permission settings | Remove policy-generation badge and registry-revision suffix; explain operator-relevant safety limits in ordinary Chinese. | Actual policy snapshot, levels, cell identity, second-confirm/hard limits, generation guards and callbacks |
+| Costume import feedback | Use a real supplied name if available, otherwise a generic import-success message with costume count. Never derive a display name from an opaque ID. | Import outcome, warnings, errors, list refresh and costume selection |
+
+Known source anchors and reference rationale are in the parent
+[field inventory](../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
+Do not add a metadata sanitizer: select known useful fields at the render site, preserving all
+canonical objects for existing actions. A tool result containing a requested checksum or version is
+business content and is not removed by substring filtering.
+
+No new state store, event, polling, animation framework or dependency is needed. Keep existing
+disclosures collapsible and loading/error/confirmation behavior stable. Meaningful capability and
+permission-cell labels require the separately planned shared/Core work; Monitor's G4 cleanup ships
+with its DSH presentation rebuild rather than modifying the rejected scaffold in this batch.

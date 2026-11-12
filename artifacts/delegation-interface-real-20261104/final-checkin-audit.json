@@ -1,0 +1,570 @@
+{
+  "auditVersion": 1,
+  "auditedAtUtc": "2026-11-04T12:12:52.490619+00:00",
+  "reviewer": "interface_review",
+  "mode": "Read-only artifact and SQLite audit; only this new audit file was written.",
+  "artifactRoot": "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an",
+  "artifactSha256": {
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/baseline.json": "dc12fd48fefed39e0bf60aec0d2e67e892e73921e837495a54d6c8504eb3492a",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/taki.db": "57f086aaa1f0cd7e4cf9845f6173d7f795abe6a481acc9ac8b675d3664fac7e9",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/taki.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/taki.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/chain-1.json": "05aafb63fa06208995ef35d0ab389eea6cd1de6e466169a5e10cfbebec01354b",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/evidence-165f1f76-12fd-4b66-92cc-04e4138c7332.json": "e18fff52a89d206e462990e9df36e10bcf43d859b6b7e92dbb678d4858fe01f7",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/evidence-2bc6b4cf-a188-42bf-9fcd-9563940754c8.json": "c1db154c8136ee5f82923755712d5620022145510f3daefaeecc3642cc68a790",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/evidence-44fdfa45-b5ef-4378-9825-805997eab9cc.json": "23067d72b48a4e6964817043e8c89b9a093b32913b37d9eebc33c834b50be7f0",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/evidence-aa6d5263-8b9a-4c79-8fdb-01ccafa61e83.json": "2794d5e84d78a48d04d1a759a766806fc596d0f200221dd4aeb18b6c68821209",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/evidence-c1f19555-9c77-4847-923a-e49932bf1567.json": "7ebd4a8aed49ad645ae7e201bde99c6d30724e5d806e4e4a64b2e469a2b3c561",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/data/workspace/evidence-e3d236fd-a99f-4136-8ae1-5e920769df13.json": "21c3b838d5ad5d54782a90f0d5b144d9f6575dcbe8d5c5442969710c6fd8c0ee",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/effective-settings.json": "1b5e324b92c3d9fa3a12fbe06248d3d1f6f440bb29f44b985ad2f97320f55da0",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/interface-evidence.json": "cba0e0eba4076f321046d838cef4b525b5903975a9d060f53f686520d0ce4a87",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-1.json": "ce05c66093206550ed7989fda5af9cab9810ba08e614da15cc3b227c73f1baa8",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-2.json": "99cd7857b886f2a78df029a5752f24aaadb10e25ce74564ebc43bbb640a88696",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-3.json": "5ae9db878bef8a75c844c1c798a0e668dccce1050f3b8fb98686abe2efce606e",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-4.json": "8ff4547b3d2492910e99ab396fbcef5ca2833b5ee21a661e99f233bab7361c94",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-5.json": "db425714403525af22ec2b73af70aa1651c0d455efc0decc5d92e1a50e49ef60",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-6.json": "dad017ce540d78b805644ea59cae3167d57385d579135e4cafd180fbbead96c5",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-7.json": "652ac2918c23b668d759f13a3e7ce2ee59884711eaf8990b6ee8c5f78f62ff47",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-8.json": "652ac2918c23b668d759f13a3e7ce2ee59884711eaf8990b6ee8c5f78f62ff47",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/phase-9.json": "059c55e1bbf5550d4513de189cd2100c09d73a4f4b428e59e182884ab4615f0c",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-1.json": "603466d4b0fc6f74c6a5f80d1e466bc82644634afcd391112a10388cc20fde64",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-10.json": "f85c62120ee251e0537dc63d41d399a7fbb57f995641643d13f62b97f34c8a28",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-11.json": "feb11ac05162e5d4900fe161cab42b824241c63ce92f2042498adad962e378fd",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-12.json": "6b3ace52a41308bb7e84a4de920d05a4d34f0130284565c74d90d6e65d6f2795",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-13.json": "3dfa3212d4d53f67eab8e79cad02f5c705e25dc2c8e1d574ddd7bd4f8cd2b8d1",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-14.json": "0340073f22c97ab2debb5ba5fc02d27e28d40271d75860fd82c677c85f2f88cf",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-15.json": "be29da04033e7d289ea1ed4b7d67a5fb2366e214916d2e8797e84e6ece90c745",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-16.json": "126bef22b41e0d59696711165cb5f0c650d0b4bae479a9589c26fb7228ee6568",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-17.json": "e9185851dcfcec34e0eb27da6ebeabc651f6c898997a0bcd4047d0d30ff77e17",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-18.json": "d3db9fb8b8cfba1d30b1080f8128a4e4f773d72f1fd5e8c41833dff6dab16031",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-19.json": "120d6dcab7fa6cd30e97cd75bacc714ab026a765fba616770eb2b65dac634672",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-2.json": "9e9ad2778315e47135b230d6f4147efe27ca84a267f6967fa11703c01bdacff4",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-20.json": "bee588024510a94dae5394fce58fccec5e3e6da26c793f4fea37e16218ccbfea",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-21.json": "262562042831381fd0bacbd0226db272e4911e6a4cf6230639c584f0873d8eb8",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-22.json": "52228a84982bb3bf1b1d05563ab15f8de2b7aecb951121d94bae9c106ed51431",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-23.json": "638bfd3cfe02acfb634b970fdffdc2fc55ee8f41beff428e5d1dc4882e28e96f",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-24.json": "9dc4f6975291885b04aa8fb86eb0e3ed4d1c0034ba2c1bcf99225fe9caa1a91b",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-25.json": "7fd3d7fe22597218b2ca38c26ed4cb2e124caa53aa00903d843351e64d03d5af",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-26.json": "d50efc0b1d2eb894ebbb8fb75b1ef3a01e62c4283e800e4cf1df68737ee68593",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-27.json": "a1b97bdb93eb7b1529ca08db1b0738738e8c18f4cdb92dca15733fad818450db",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-28.json": "a7474d3c909013c4a78f8ab524c91daa6ac7d389ff7a5883ad87ae7fada44f9e",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-29.json": "38a144e1495c6c8d48e8d160e48d5e2d83333f978662a8f4e479d19d116628d5",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-3.json": "3f529656584d814ebd2f751243060db32000b1628f1fd5f6496406f860232f07",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-30.json": "ccfbc442dd26005d0003868405b19269f448464aa80714e58430f8a1b2a10d1c",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-4.json": "f4cdc233ae83109a3e6ac764dd4e385a1dd3b2f3c7bd297210c55a3d9c33b41e",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-5.json": "9f8d4128439520b699a1558f0290f0e5e1b47c343eaa92f6d69169d33bd95f45",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-6.json": "c2af7afaa8aff27b6b9fb29fa4e3cd2d3baf5bbd73d1e515419ea913f8eee225",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-7.json": "15184648734928fde4e26e0f67e86aa8f834c6a2930eb17866fbb9db4e14ca22",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-8.json": "b5da69b1f746862eb36343246ba0747a51a44ca75bfe46d3ff6b1ef410b2ce6f",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/request-9.json": "2cd4c7b95acf8d44a273f2b6c1ce0d98397192c1a4534b5a973e0b0f7071a56a",
+    "artifacts/delegation-interface-real-20261104/checkin-user-decision/interface-checkin-stop-OKB1an/result.json": "93d8a341645c44d97c0538e565214354413bc2a0db3e30657c9a89c2644f9344"
+  },
+  "disposition": "verified-with-accounting-limitations",
+  "checks": {
+    "scenarioRecordedPass": true,
+    "sourceManifestMatchesBeforeAfter": true,
+    "cleanupSucceeded": true,
+    "noBudgetOrCaptureFailure": true,
+    "sevenSequentialOriginalReads": true,
+    "validatedFinalMatchesEvent": true,
+    "sameChildAndWorkAcrossFourRuns": true,
+    "exactCompletedOrdinals": true,
+    "checkinBoundariesAndActors": true,
+    "actionsAndPrivateAuthority": true,
+    "userStopAndGuidancePreservedLatch": true,
+    "exactUserResetAtSix": true,
+    "noAdditionalUserBranchSelected": true,
+    "finalCounterAfterOneNewParentApproval": true,
+    "oldPublicationCorrectlyRefused": true,
+    "freshPrimaryAnswer": true,
+    "noObservedWaitOrUnassessedExecution": true,
+    "utilityUsesPublicPrimarySpan": true
+  },
+  "reads": [
+    {
+      "run_id": "630ed1a4-2787-45bc-bcfc-13e5ef859ed7",
+      "attempt_id": "dfa4f7c3-6012-434c-b5b1-f5a017b13aef",
+      "step_number": 0,
+      "tool_call_id": "call_00_ET_lehpPfxAE1JeyPSErfoR6791",
+      "path": "chain-1.json",
+      "evidence": 17,
+      "nextFile": "evidence-44fdfa45-b5ef-4378-9825-805997eab9cc.json",
+      "retainedFileMatchesReadBody": true
+    },
+    {
+      "run_id": "630ed1a4-2787-45bc-bcfc-13e5ef859ed7",
+      "attempt_id": "dfa4f7c3-6012-434c-b5b1-f5a017b13aef",
+      "step_number": 1,
+      "tool_call_id": "call_00_ZzetLHAtKCoLAXwsjC1Y4790",
+      "path": "evidence-44fdfa45-b5ef-4378-9825-805997eab9cc.json",
+      "evidence": 23,
+      "nextFile": "evidence-165f1f76-12fd-4b66-92cc-04e4138c7332.json",
+      "retainedFileMatchesReadBody": true
+    },
+    {
+      "run_id": "630ed1a4-2787-45bc-bcfc-13e5ef859ed7",
+      "attempt_id": "dfa4f7c3-6012-434c-b5b1-f5a017b13aef",
+      "step_number": 2,
+      "tool_call_id": "call_00_VA2xth5iNhQLH15xm6eY5339",
+      "path": "evidence-165f1f76-12fd-4b66-92cc-04e4138c7332.json",
+      "evidence": 41,
+      "nextFile": "evidence-aa6d5263-8b9a-4c79-8fdb-01ccafa61e83.json",
+      "retainedFileMatchesReadBody": true
+    },
+    {
+      "run_id": "3a671562-7b09-4a17-8f35-5bf8195ba87b",
+      "attempt_id": "9882266d-79af-46a6-890d-e65a25c01aba",
+      "step_number": 0,
+      "tool_call_id": "call_00_waHL2Eo4C3zaQDiNyz3R9164",
+      "path": "evidence-aa6d5263-8b9a-4c79-8fdb-01ccafa61e83.json",
+      "evidence": 59,
+      "nextFile": "evidence-e3d236fd-a99f-4136-8ae1-5e920769df13.json",
+      "retainedFileMatchesReadBody": true
+    },
+    {
+      "run_id": "3a671562-7b09-4a17-8f35-5bf8195ba87b",
+      "attempt_id": "9882266d-79af-46a6-890d-e65a25c01aba",
+      "step_number": 2,
+      "tool_call_id": "call_00_tlXnSCjnvCYgHgtctzdw3905",
+      "path": "evidence-e3d236fd-a99f-4136-8ae1-5e920769df13.json",
+      "evidence": 61,
+      "nextFile": "evidence-c1f19555-9c77-4847-923a-e49932bf1567.json",
+      "retainedFileMatchesReadBody": true
+    },
+    {
+      "run_id": "ced39ae6-d7e1-4e13-9948-2861d7ad9fd7",
+      "attempt_id": "76b21990-16fa-49e3-8ae9-10f78b374478",
+      "step_number": 0,
+      "tool_call_id": "call_00_5mX1aGKOedl4BLuoUD6h4891",
+      "path": "evidence-c1f19555-9c77-4847-923a-e49932bf1567.json",
+      "evidence": 37,
+      "nextFile": "evidence-2bc6b4cf-a188-42bf-9fcd-9563940754c8.json",
+      "retainedFileMatchesReadBody": true
+    },
+    {
+      "run_id": "ced39ae6-d7e1-4e13-9948-2861d7ad9fd7",
+      "attempt_id": "76b21990-16fa-49e3-8ae9-10f78b374478",
+      "step_number": 2,
+      "tool_call_id": "call_00_5t22zFiIrOA2JumbPEY50182",
+      "path": "evidence-2bc6b4cf-a188-42bf-9fcd-9563940754c8.json",
+      "evidence": 70,
+      "nextFile": null,
+      "retainedFileMatchesReadBody": true
+    }
+  ],
+  "verifiedSum": 308,
+  "checkins": [
+    {
+      "eventId": "a23a501a-cff9-4bb7-bbd5-ceb15f5ae428",
+      "modelEffectId": "6b7a9517-c2f1-45c3-bfe8-37cc9fc14e58",
+      "completedSteps": 3,
+      "intervalStartSteps": 0,
+      "intervalSteps": 3,
+      "parentApprovalLimit": 1,
+      "consecutiveParentApprovals": 0,
+      "requiredActor": "parent_or_user",
+      "reportKind": "core_snapshot"
+    },
+    {
+      "eventId": "60c9ea98-a4f6-4932-a9c6-f43d4d659e5d",
+      "modelEffectId": "34f89b06-6a19-4d70-bad7-2a118bf5ee5b",
+      "completedSteps": 6,
+      "intervalStartSteps": 3,
+      "intervalSteps": 3,
+      "parentApprovalLimit": 1,
+      "consecutiveParentApprovals": 1,
+      "requiredActor": "user",
+      "reportKind": "core_snapshot"
+    },
+    {
+      "eventId": "89c4145d-a090-4be3-bbd3-2b3998b7dd13",
+      "modelEffectId": "78c79421-41c3-432d-b50f-39bef6f303e7",
+      "completedSteps": 9,
+      "intervalStartSteps": 6,
+      "intervalSteps": 3,
+      "parentApprovalLimit": 1,
+      "consecutiveParentApprovals": 0,
+      "requiredActor": "parent_or_user",
+      "reportKind": "core_snapshot"
+    }
+  ],
+  "actionWitnesses": [
+    {
+      "event_id": "a23a501a-cff9-4bb7-bbd5-ceb15f5ae428",
+      "tool_call_id": "call_00_ABZqAFfnPwdPOV9RYYrw4148",
+      "consumer_id": "69faac8e-8da5-44ad-83b0-df1e03c02d51",
+      "operation_key": "event:3af11f53eae1329cc3382de5a1de5e0e0eed8584d575b4770c5682ba35b60b57",
+      "model_effect_id": "9521099f-614e-4360-8497-0e29dbc15dcd",
+      "consumer_run_id": "e9ff2255-eac2-44b6-8cf6-1b34ffcfcff0",
+      "consumer_attempt_id": "0785dcb5-0c3b-4958-a962-88aecbbe63b2",
+      "consumer_state": "settled",
+      "mode": "idle",
+      "event_digest": "06afd631cfef4346656f8a55fb27241f786e49b2b020a8ef0794ad0a0456f32c",
+      "body_digest": "06afd631cfef4346656f8a55fb27241f786e49b2b020a8ef0794ad0a0456f32c",
+      "model_input_digest": "0ab2765419a49e6b340d563cbe6a18681c998b1f899b2502fd55b7544b6feb05",
+      "input_digest": "0ab2765419a49e6b340d563cbe6a18681c998b1f899b2502fd55b7544b6feb05",
+      "effect_run_id": "e9ff2255-eac2-44b6-8cf6-1b34ffcfcff0",
+      "effect_attempt_id": "0785dcb5-0c3b-4958-a962-88aecbbe63b2",
+      "effect_kind": "model",
+      "effect_outcome": "completed",
+      "canonicalAction": {
+        "kind": "continue_child",
+        "target": {
+          "subagentId": "f647a506-88a6-4a84-8aa8-5957f4aed2d7",
+          "workInputId": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+          "expectedRunId": null,
+          "expectedControlVersion": 2
+        },
+        "replyToEventId": "a23a501a-cff9-4bb7-bbd5-ceb15f5ae428",
+        "direction": "Approved once (routine progress check-in). Continue the chain exactly as before: open each linked nextFile separately with read_file, record each file's own \"evidence\" value verbatim (chain-1.json=17, evidence-44fdfa45...=23, evidence-165f1f76...=41 so far), and keep going until a file has no nextFile link. Do not infer or estimate any unseen value. Then report the seven original values with their file names and their sum."
+      },
+      "canonicalResult": {
+        "ok": true,
+        "eventId": "a23a501a-cff9-4bb7-bbd5-ceb15f5ae428",
+        "disposition": "continue_child",
+        "inputId": "b5330a3a-be79-4b6b-b093-44beecdff5cc"
+      },
+      "authorityJoinVerified": true,
+      "publicToolRows": 0,
+      "privatePartRows": 2
+    },
+    {
+      "event_id": "60c9ea98-a4f6-4932-a9c6-f43d4d659e5d",
+      "tool_call_id": "call_00_kwYs6vJ2wLbD9zOaPkB69541",
+      "consumer_id": "8ab36bb5-ac1d-4a66-af10-095e821a2d5b",
+      "operation_key": "event:d1ef08188471a2a8aedc3992d57d78faf46368ba0f3dfbc98c3df22e4da3e918",
+      "model_effect_id": "b15f4e40-b428-4888-9904-ef54ed13ca22",
+      "consumer_run_id": "a6248438-6510-4593-b9b3-781e31487fbf",
+      "consumer_attempt_id": "54b13daa-1001-4e93-a8cf-0881a6231b45",
+      "consumer_state": "settled",
+      "mode": "idle",
+      "event_digest": "f30f4e18f1b65d45217f5e1bfe9803afe800cc68a8cc350f2b1450a5b6632a0b",
+      "body_digest": "f30f4e18f1b65d45217f5e1bfe9803afe800cc68a8cc350f2b1450a5b6632a0b",
+      "model_input_digest": "b963f8cccd8f175715d1b7cec4be1b79856fd01b40423a80fca0fa39cf4330e4",
+      "input_digest": "b963f8cccd8f175715d1b7cec4be1b79856fd01b40423a80fca0fa39cf4330e4",
+      "effect_run_id": "a6248438-6510-4593-b9b3-781e31487fbf",
+      "effect_attempt_id": "54b13daa-1001-4e93-a8cf-0881a6231b45",
+      "effect_kind": "model",
+      "effect_outcome": "completed",
+      "canonicalAction": {
+        "kind": "needs_user_input",
+        "note": "审核员在要第二次进度批准了——按你说的，这次该你决定。\n\n目前进度：链式文件已经逐个打开并读到第5个原始值（17、23、41、59、61），还差2个。中途它有一次读取漏了路径参数、报错，自己承认是它的失误，不是链条断了，已经重试。\n\n要让它继续跑完这7个值并给出总和吗？"
+      },
+      "canonicalResult": {
+        "ok": true,
+        "eventId": "60c9ea98-a4f6-4932-a9c6-f43d4d659e5d",
+        "disposition": "needs_user_input"
+      },
+      "authorityJoinVerified": true,
+      "publicToolRows": 0,
+      "privatePartRows": 2
+    },
+    {
+      "event_id": "89c4145d-a090-4be3-bbd3-2b3998b7dd13",
+      "tool_call_id": "call_00_1WX3qKWsdyGknvBecBZj2777",
+      "consumer_id": "08e1fdf9-58da-4875-a34e-a593b552ba34",
+      "operation_key": "event:94ac175f867c00f6d3f0d1d1cd8570aac6796db5df8e2f63a922c96ce99fff09",
+      "model_effect_id": "19d59455-7489-4b1c-aaeb-a8eacb0deb3c",
+      "consumer_run_id": "7a8b4793-54c8-40c5-9766-998860f40097",
+      "consumer_attempt_id": "42ecf809-b7af-4d16-afc7-4c2eac4de7fa",
+      "consumer_state": "settled",
+      "mode": "idle",
+      "event_digest": "7b9e9e9abd45e5c68d0430d3d084acbe61b0991851c4837d540d2a7980c0cf39",
+      "body_digest": "7b9e9e9abd45e5c68d0430d3d084acbe61b0991851c4837d540d2a7980c0cf39",
+      "model_input_digest": "b6969e682b83454dfc4807fd717469b867512c60b7f252c6ec25959c646c9f74",
+      "input_digest": "b6969e682b83454dfc4807fd717469b867512c60b7f252c6ec25959c646c9f74",
+      "effect_run_id": "7a8b4793-54c8-40c5-9766-998860f40097",
+      "effect_attempt_id": "42ecf809-b7af-4d16-afc7-4c2eac4de7fa",
+      "effect_kind": "model",
+      "effect_outcome": "completed",
+      "canonicalAction": {
+        "kind": "continue_child",
+        "target": {
+          "subagentId": "f647a506-88a6-4a84-8aa8-5957f4aed2d7",
+          "workInputId": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+          "expectedRunId": null,
+          "expectedControlVersion": 8
+        },
+        "replyToEventId": "89c4145d-a090-4be3-bbd3-2b3998b7dd13",
+        "direction": "继续。原始证据不要丢，七个原始值都要保留，只报你没猜过的数。"
+      },
+      "canonicalResult": {
+        "ok": true,
+        "eventId": "89c4145d-a090-4be3-bbd3-2b3998b7dd13",
+        "disposition": "continue_child",
+        "inputId": "decee5f1-b3ae-4d79-8ab0-c84aaed30f24"
+      },
+      "authorityJoinVerified": true,
+      "publicToolRows": 0,
+      "privatePartRows": 2
+    },
+    {
+      "event_id": "ac154a06-b6ad-4825-94eb-ce1a6434f0c9",
+      "tool_call_id": "call_00_UnU7GG90AMW01sQPaHvx8399",
+      "consumer_id": "95084133-39f9-46d2-afbb-1641719a0e6a",
+      "operation_key": "event:dbc29ed8881fd6b5e03a4aa38147d841f8990d4593dd9035916127ac671edd9e",
+      "model_effect_id": "7086f267-1430-4888-a7dd-e6a1043678fd",
+      "consumer_run_id": "a6eb0c7e-88fa-44e1-88a1-1539b65f2371",
+      "consumer_attempt_id": "a5589c4c-1979-4568-8d91-5cc1e9de4482",
+      "consumer_state": "settled",
+      "mode": "idle",
+      "event_digest": "b59767f857d3e966663d0398b4bf6afaea798db503147a8e167c1562a18edb88",
+      "body_digest": "b59767f857d3e966663d0398b4bf6afaea798db503147a8e167c1562a18edb88",
+      "model_input_digest": "9d5f17687043bbd440cbc77faa36bb19cecab8e7841eef3704d71d7b84f01056",
+      "input_digest": "9d5f17687043bbd440cbc77faa36bb19cecab8e7841eef3704d71d7b84f01056",
+      "effect_run_id": "a6eb0c7e-88fa-44e1-88a1-1539b65f2371",
+      "effect_attempt_id": "a5589c4c-1979-4568-8d91-5cc1e9de4482",
+      "effect_kind": "model",
+      "effect_outcome": "completed",
+      "canonicalAction": {
+        "kind": "speech_proposed",
+        "note": "总出来了。\n\n七个文件，按链条顺序一个一个打开的，每个值都是原样的：\n\n1. chain-1.json — 17\n2. evidence-44fdfa45…json — 23\n3. evidence-165f1f76…json — 41\n4. evidence-aa6d5263…json — 59\n5. evidence-e3d236fd…json — 61\n6. evidence-c1f19555…json — 37\n7. evidence-2bc6b4cf…json — 70（nextFile 为 null，链条到此结束）\n\n加起来：17 → 40 → 81 → 140 → 201 → 238 → 308\n\n**总和：308**\n\n核对过的地方也说一句：七个文件都在、都能读、没截断，链接没有断的。中间它自己有两次 read_file 漏填参数报错，跟文件无关，立刻用完整文件名重试成功了，没有跳文件、没有丢值、没有估出来的数字。文件一个都没改。\n\n……就这样。"
+      },
+      "canonicalResult": {
+        "ok": true,
+        "eventId": "ac154a06-b6ad-4825-94eb-ce1a6434f0c9",
+        "disposition": "speech_proposed",
+        "publication": "not_published"
+      },
+      "authorityJoinVerified": true,
+      "publicToolRows": 0,
+      "privatePartRows": 2
+    }
+  ],
+  "userStopControl": [
+    {
+      "control_id": "835d196a-f53e-4a5c-a874-8fcef204608e",
+      "subagent_id": "f647a506-88a6-4a84-8aa8-5957f4aed2d7",
+      "work_input_id": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+      "origin": "user",
+      "action": "stop",
+      "control_version": 5,
+      "created_at": "2026-11-04T12:07:13.980Z"
+    }
+  ],
+  "userResetReceipt": {
+    "conversation": {
+      "subagentId": "f647a506-88a6-4a84-8aa8-5957f4aed2d7",
+      "characterId": "taki",
+      "label": "serial-evidence-chain-review",
+      "createdAt": "2026-11-04T12:06:54.533Z",
+      "activeRunId": null,
+      "activeWorkInputId": null,
+      "controlVersion": 6,
+      "stopOrigin": null,
+      "state": "queued",
+      "pendingRequest": null,
+      "progress": {
+        "completedSteps": 6,
+        "intervalStartSteps": 6,
+        "intervalSteps": 3,
+        "parentApprovalLimit": 1,
+        "consecutiveParentApprovals": 0,
+        "workInputId": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+        "tracking": "work_start"
+      },
+      "tokenUsage": {
+        "modelEffects": 6,
+        "inflightEffects": 0,
+        "missingUsageEffects": 0,
+        "inputTokens": 32447,
+        "outputTokens": 651,
+        "totalTokens": 33098,
+        "knownTotalTokens": 33098,
+        "complete": true
+      },
+      "latestWorkInputId": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+      "latestCompletionId": "3a671562-7b09-4a17-8f35-5bf8195ba87b"
+    },
+    "input": {
+      "inputId": "1e8d1676-10dc-4729-9a90-f01172b30b52",
+      "subagentId": "f647a506-88a6-4a84-8aa8-5957f4aed2d7",
+      "inputSeq": 4,
+      "workInputId": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+      "workSeq": 4,
+      "operationKey": "3ddb423b-3ff3-4079-8632-439d11ba7263",
+      "requestDigest": "50b3d1fae94980e66c0105f1f53d654f658b6b1bddbf2f92aa7ec2805028be65",
+      "kind": "continue",
+      "sender": {
+        "kind": "user"
+      },
+      "direction": "I explicitly lift my Stop for this same review. Finish the remaining evidence chain and report its verified total.",
+      "materials": [],
+      "toolSelection": null,
+      "createdAt": "2026-11-04T12:07:27.233Z",
+      "completionPolicy": "request_parent",
+      "workExpiresAt": null,
+      "workValidity": {
+        "kind": "until_cancelled"
+      },
+      "replyToEventId": "60c9ea98-a4f6-4932-a9c6-f43d4d659e5d",
+      "consumed": null,
+      "replyAcceptance": null
+    },
+    "cancellationRequested": false
+  },
+  "finalProgress": {
+    "work_input_id": "c9bb15f7-0d8c-4db8-a401-b90b6ecfd14b",
+    "completed_steps": 10,
+    "interval_start_steps": 9,
+    "interval_steps": 3,
+    "parent_approval_limit": 1,
+    "consecutive_parent_approvals": 1,
+    "tracking": "work_start",
+    "last_user_input_id": "1e8d1676-10dc-4729-9a90-f01172b30b52"
+  },
+  "finalChild": {
+    "runId": "d9012e45-a599-4b71-84f4-3e4190db8046",
+    "receiptId": "a60eeb0c-d918-480b-be94-f9897c2e19c6",
+    "eventId": "ac154a06-b6ad-4825-94eb-ce1a6434f0c9",
+    "outputKind": "validated",
+    "textSha256": "0868bbcd81f73be312b9bf46b9a067965984a509ae971e4a4c1d805a8e22ca7e"
+  },
+  "publication": {
+    "originalRootRunId": "90d98e41-50b8-4bad-bf19-46e402e23415",
+    "originalRootState": "cancelled",
+    "eventId": "ac154a06-b6ad-4825-94eb-ce1a6434f0c9",
+    "actionId": "event:dbc29ed8881fd6b5e03a4aa38147d841f8990d4593dd9035916127ac671edd9e",
+    "result": {
+      "status": "refused",
+      "reason": "source_unavailable"
+    }
+  },
+  "freshPrimaryDelivery": {
+    "userTimelineSeq": 15,
+    "assistantTimelineSeq": 22,
+    "primarySourceId": "9de83432-cc64-4ce3-bf4f-a1b0b817e826",
+    "text": "审核员已经完成，七个文件都打开了，链在第七个中止（nextFile 为 null）。\n\n原值：17、23、41、59、61、37、70\n合计：**308**\n\n我抽了两个文件单独核对过——第二个是23，末尾那个是70、nextFile为空，和它的报告对得上。它说中途有两次读文件时参数漏了，都是它自己的输入错误，当场重试成功，没有漏值。原始文件一个没改。\n\n308。这下能交差了吧。"
+  },
+  "requestAccounting": {
+    "observerRequests": 30,
+    "admittedObserverReservations": 30,
+    "responseConfirmedSuccessfulRequests": 29,
+    "physicalUpstreamExactCount": null,
+    "possibleSentRange": [
+      29,
+      30
+    ],
+    "admittedModelEffects": 29,
+    "completedModelEffects": 29,
+    "usageRows": 29,
+    "observedPrivateSummaryWitnesses": 0,
+    "additionalNonStreamingRequests": 1,
+    "lastRequest": {
+      "requestNumber": 30,
+      "startedAt": "2026-11-04T12:07:58.387Z",
+      "bodySha256": "3d7a801dad619b57456af05ec450a139840af4f607331f0928aa2b0581e64350",
+      "purpose": "Primary Memory eligibility/ownership classification of committed public primary span",
+      "observation": {
+        "tools": [],
+        "requestNumber": 30,
+        "upstreamAttempted": true,
+        "error": "observer-closed"
+      },
+      "fetchInvocationReached": true,
+      "providerReceiptConfirmed": false,
+      "billingOutcome": "unknown",
+      "decisionOutcome": "unknown",
+      "reason": "Observer records attempted immediately before fetch; teardown aborted the still-unanswered request with observer-closed. No transport or upstream response witness establishes server receipt."
+    },
+    "campaignPriorKnownSuccessful": 69,
+    "campaignKnownSuccessful": 98,
+    "campaignConservativeCountIncludingUncertainReservation": 99,
+    "campaignExactPhysicalCount": null,
+    "campaignCeiling": 103
+  },
+  "callReview": {
+    "mainCalls": 17,
+    "mainExecCalls": 0,
+    "repeatedIdenticalInspectArguments": 0,
+    "unknownOriginalArguments": [
+      {
+        "toolCallId": "call_00_ABZqAFfnPwdPOV9RYYrw4148",
+        "toolName": "handle_agent_event",
+        "canonicalActionDerivation": {
+          "intent": "continue_child",
+          "actionKind": "continue_child",
+          "eventId": "a23a501a-cff9-4bb7-bbd5-ceb15f5ae428",
+          "provenance": "canonical-action-receipt"
+        }
+      },
+      {
+        "toolCallId": "call_00_kwYs6vJ2wLbD9zOaPkB69541",
+        "toolName": "handle_agent_event",
+        "canonicalActionDerivation": {
+          "intent": "ask_user",
+          "actionKind": "needs_user_input",
+          "eventId": "60c9ea98-a4f6-4932-a9c6-f43d4d659e5d",
+          "provenance": "canonical-action-receipt"
+        }
+      },
+      {
+        "toolCallId": "call_00_1WX3qKWsdyGknvBecBZj2777",
+        "toolName": "handle_agent_event",
+        "canonicalActionDerivation": {
+          "intent": "continue_child",
+          "actionKind": "continue_child",
+          "eventId": "89c4145d-a090-4be3-bbd3-2b3998b7dd13",
+          "provenance": "canonical-action-receipt"
+        }
+      },
+      {
+        "toolCallId": "call_00_UnU7GG90AMW01sQPaHvx8399",
+        "toolName": "handle_agent_event",
+        "canonicalActionDerivation": {
+          "intent": "reply",
+          "actionKind": "speech_proposed",
+          "eventId": "ac154a06-b6ad-4825-94eb-ce1a6434f0c9",
+          "provenance": "canonical-action-receipt"
+        }
+      }
+    ],
+    "childInvalidReadCalls": [
+      {
+        "runId": "3a671562-7b09-4a17-8f35-5bf8195ba87b",
+        "stepNumber": 1,
+        "toolCallId": "call_00_ET_gg2L5zPw089OemZzxWhi5559",
+        "reason": "Missing path argument rejected by SDK before read execution"
+      },
+      {
+        "runId": "ced39ae6-d7e1-4e13-9948-2861d7ad9fd7",
+        "stepNumber": 1,
+        "toolCallId": "call_00_ET_CU1QuBVgMIZm4xUmf1dS6088",
+        "reason": "Missing path argument rejected by SDK before read execution"
+      }
+    ],
+    "misaddressedGuidance": {
+      "toolCallId": "call_00_EF7gRYprraUVVMsYfyIc3222",
+      "refusalCode": "SUBAGENT_CHECKIN_CONTINUE_REQUIRED",
+      "assessment": "Ordinary guidance wrongly addressed an open check-in and was refused; corrected replyToEventId=null guidance was accepted without lifting Stop."
+    },
+    "inspectionAssessment": "Check-in detail calls supplied exact control targets and full snapshots; workers reads refreshed state for stopped-child guidance and found the completed result for the later foreground request. Final result retrieval answered the fresh user request. Two direct source reads were optional spot-checks, not waiting. Do not claim zero extra work."
+  },
+  "privacy": {
+    "privateHandlerCallIdsAbsentFromTimeline": true,
+    "privateHandlerPartsRetained": true,
+    "memoryUtilityPrimaryRowSeqs": [
+      1,
+      6,
+      7,
+      14,
+      15,
+      22
+    ],
+    "scope": "Observed routing only; not a new general Memory/privacy acceptance campaign."
+  },
+  "limitations": [
+    "Four final-step handler raw input payloads are unavailable. Canonical actions establish accepted semantics only, not original model arguments.",
+    "The additional ask_user-at-step9 branch was not selected in this real run. It has separate scripted coverage and prior failed-run real observation, not a passing real execution of that branch.",
+    "Two SDK-invalid child read calls and one refused misaddressed parent guidance call occurred; the run was not error-free or frictionless.",
+    "The last primary Memory utility request was aborted at teardown without a response; provider receipt, usage, billing, and Memory decision are unknown.",
+    "The final public answer used a fresh primary request. The original delayed publication right stayed revoked after user Stop.",
+    "No native Host/UI, owner visual acceptance, native Hindsight, or T4/main convergence claim follows from this scenario.",
+    "Earlier failed artifacts remain failed and were not overwritten."
+  ],
+  "sourceReasoningReference": {
+    "file": "e2e/src/fixture/real-provider-observer.ts",
+    "baselineSha256": "561303f6a5e0472c06b88506af93493b9bfdb5577dd249c62794e0e8ea64ee00",
+    "lines": "103-109,129-134"
+  }
+}

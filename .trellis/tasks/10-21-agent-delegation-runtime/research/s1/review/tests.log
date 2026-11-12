@@ -1,0 +1,300 @@
+Scope: 5 of 6 workspace projects
+packages/shared test$ vitest run "--maxWorkers=4"
+packages/shared test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+packages/shared test:  Test Files  76 passed (76)
+packages/shared test:       Tests  677 passed (677)
+packages/shared test:    Start at  19:11:15
+packages/shared test:    Duration  12.83s (transform 3.55s, setup 0ms, import 17.54s, tests 1.74s, environment 11ms)
+packages/shared test: Done
+apps/cli test$ vitest run "--maxWorkers=4"
+apps/desktop test$ vitest run --passWithNoTests "--maxWorkers=4"
+packages/core test$ vitest run "--maxWorkers=4"
+apps/cli test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/cli
+packages/core test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+apps/desktop test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop
+apps/cli test:  Test Files  8 passed (8)
+apps/cli test:       Tests  50 passed (50)
+apps/cli test:    Start at  19:11:29
+apps/cli test:    Duration  3.51s (transform 4.49s, setup 0ms, import 8.17s, tests 455ms, environment 1ms)
+apps/cli test: Done
+apps/desktop test:  Test Files  202 passed (202)
+apps/desktop test:       Tests  1214 passed (1214)
+apps/desktop test:    Start at  19:11:30
+apps/desktop test:    Duration  48.96s (transform 19.39s, setup 0ms, import 91.30s, tests 11.08s, environment 36ms)
+apps/desktop test: Done
+packages/core test:  ❯ src/db/pending-memory-repo.test.ts (23 tests | 1 failed) 2124ms
+packages/core test:      × applies the current migration tail after a populated version-34 database and reopens without changes 174ms
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts (10 tests | 10 failed) 1747ms
+packages/core test:      × converges a fresh database and is a no-op after reopen 178ms
+packages/core test:      × converges the historical T4 17/18 MCP-Skill lineage through the current tail 182ms
+packages/core test:      × applies the committed main 021-023 tail to the pre-main database 170ms
+packages/core test:      × upgrades a version-31 database with an existing summary and reopens as a no-op 161ms
+packages/core test:      × preserves a legal Hindsight authority marker and activation receipt on reopen 166ms
+packages/core test:      × adds the current tail without rewriting an existing replica, checkpoint, or usable lease 194ms
+packages/core test:      × preserves the 034 history and data through all B4 storage and reopen 164ms
+packages/core test:      × preserves the main history and data through all B4 storage and reopen 189ms
+packages/core test:      × preserves the t4 history and data through all B4 storage and reopen 168ms
+packages/core test:      × preserves the both history and data through all B4 storage and reopen 172ms
+packages/core test:  ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts (10 tests | 2 failed) 1029ms
+packages/core test:      × applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline 111ms
+packages/core test:      × upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration 208ms
+packages/core test:  ❯ src/db/scheduled-task-repo.test.ts (3 tests | 1 failed) 345ms
+packages/core test:      × backfills occurrence Character ownership when migration 030 follows an applied 029 database 103ms
+packages/core test:  ❯ src/db/migrations/048-memory-operations.test.ts (2 tests | 1 failed) 211ms
+packages/core test:      × applies on a fresh database and on a database at 047 111ms
+packages/core test:  ❯ src/db/migrations/index-list.test.ts (1 test | 1 failed) 13ms
+packages/core test:      × is contiguous, strictly ascending, and uniquely versioned 11ms
+packages/core test: ⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+packages/core test:  FAIL  src/db/pending-memory-repo.test.ts > Pending Memory repository > applies the current migration tail after a populated version-34 database and reopens without changes
+packages/core test: AssertionError: expected [ 35, 36, 37, 38, 39, 40, 41, …(15) ] to deeply equal [ 35, 36, 37, 38, 39, 40, 41, …(14) ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -18,6 +18,7 @@
+packages/core test:     51,
+packages/core test:     52,
+packages/core test:     53,
+packages/core test:     54,
+packages/core test:     55,
+packages/core test: +   56,
+packages/core test:   ]
+packages/core test:  ❯ src/db/pending-memory-repo.test.ts:172:49
+packages/core test:     170|     const f = fixture(true, 34); const records = f.db.prepare("SELECT …
+packages/core test:     171|     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_…
+packages/core test:     172|     const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 3…
+packages/core test:        |                                                 ^
+packages/core test:     173|     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([…
+packages/core test:     174|     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+packages/core test:  FAIL  src/db/scheduled-task-repo.test.ts > ScheduledTaskRepo > backfills occurrence Character ownership when migration 030 follows an applied 029 database
+packages/core test: AssertionError: expected [ 30, 31, 32, 33, 34, 35, 36, …(20) ] to deeply equal [ 30, 31, 32, 33, 34, 35, 36, …(19) ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -23,6 +23,7 @@
+packages/core test:     51,
+packages/core test:     52,
+packages/core test:     53,
+packages/core test:     54,
+packages/core test:     55,
+packages/core test: +   56,
+packages/core test:   ]
+packages/core test:  ❯ src/db/scheduled-task-repo.test.ts:12:907
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+packages/core test:  FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline
+packages/core test: AssertionError: expected 56 to be 55 // Object.is equality
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: - 55
+packages/core test: + 56
+packages/core test:  ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:57:40
+packages/core test:      55|     const applied: number[][] = []; const db = open(":memory:", MIGRAT…
+packages/core test:      56|     expect(applied).toEqual([MIGRATIONS.map(({ version }) => version)]…
+packages/core test:      57|     expect(MIGRATIONS.at(-1)?.version).toBe(55);
+packages/core test:        |                                        ^
+packages/core test:      58|     const tables = db.prepare("SELECT name FROM sqlite_schema WHERE ty…
+packages/core test:      59|     expect(addedTables.every((table) => tables.includes(table))).toBe(…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+packages/core test:  FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+packages/core test: AssertionError: expected [ [ 41, 42, 43, 44, 45, 46, …(10) ] ] to deeply equal [ Array(1) ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -13,7 +13,8 @@
+packages/core test:       51,
+packages/core test:       52,
+packages/core test:       53,
+packages/core test:       54,
+packages/core test:       55,
+packages/core test: +     56,
+packages/core test:     ],
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+packages/core test:      92|     const before = { history: historyBytes(old), current: currentRows(…
+packages/core test:      93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+packages/core test:      94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, …
+packages/core test:        |                     ^
+packages/core test:      95|     expect(historyBytes(upgraded)).toEqual(before.history);
+packages/core test:      96|     expect(currentRows(upgraded)).toEqual(before.current);
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+packages/core test:  FAIL  src/db/migrations/048-memory-operations.test.ts > migration 048 memory operations > applies on a fresh database and on a database at 047
+packages/core test: AssertionError: expected 56 to be 55 // Object.is equality
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: - 55
+packages/core test: + 56
+packages/core test:  ❯ src/db/migrations/048-memory-operations.test.ts:18:81
+packages/core test:      16| describe("migration 048 memory operations", () => {
+packages/core test:      17|   it("applies on a fresh database and on a database at 047", () => {
+packages/core test:      18|     expect(open().prepare("SELECT max(version) AS v FROM migrations").…
+packages/core test:        |                                                                                 ^
+packages/core test:      19|     const upgraded = open(MIGRATIONS.slice(0, 47));
+packages/core test:      20|     expect(upgraded.prepare("SELECT max(version) AS v FROM migrations"…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+packages/core test:  FAIL  src/db/migrations/index-list.test.ts > MIGRATIONS registry > is contiguous, strictly ascending, and uniquely versioned
+packages/core test: AssertionError: expected [ Array(56) ] to deeply equal [ Array(55) ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -52,6 +52,7 @@
+packages/core test:     51,
+packages/core test:     52,
+packages/core test:     53,
+packages/core test:     54,
+packages/core test:     55,
+packages/core test: +   56,
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/index-list.test.ts:7:22
+packages/core test:       5|   it("is contiguous, strictly ascending, and uniquely versioned", () =…
+packages/core test:       6|     const versions = MIGRATIONS.map((migration) => migration.version);
+packages/core test:       7|     expect(versions).toEqual(Array.from({ length: 55 }, (_, index) => …
+packages/core test:        |                      ^
+packages/core test:       8|     expect(new Set(versions).size).toBe(versions.length);
+packages/core test:       9|     expect(MIGRATIONS.every((migration) => migration.sql.trim().length…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges a fresh database and is a no-op after reopen
+packages/core test: AssertionError: expected 56 to be 55 // Object.is equality
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: - 55
+packages/core test: + 56
+packages/core test:  ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:84:87
+packages/core test:      82|
+packages/core test:      83| function expectFinalSchema(db: Database): void {
+packages/core test:      84|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+packages/core test:        |                                                                                       ^
+packages/core test:      85|   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map(…
+packages/core test:      86|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:208:5
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > converges the historical T4 17/18 MCP-Skill lineage through the current tail
+packages/core test: AssertionError: expected 56 to be 55 // Object.is equality
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: - 55
+packages/core test: + 56
+packages/core test:  ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:84:87
+packages/core test:      82|
+packages/core test:      83| function expectFinalSchema(db: Database): void {
+packages/core test:      84|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+packages/core test:        |                                                                                       ^
+packages/core test:      85|   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map(…
+packages/core test:      86|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+packages/core test:  ❯ expectReopenNoOp src/db/migrations/lineage-reopen-matrix.test.ts:159:3
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:269:5
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > applies the committed main 021-023 tail to the pre-main database
+packages/core test: AssertionError: expected [ [ 21, 22, 23, 24, 25, 26, …(30) ] ] to deeply equal [ [ 21, 22, 23, 24, 25, 26, …(29) ] ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -33,7 +33,8 @@
+packages/core test:       51,
+packages/core test:       52,
+packages/core test:       53,
+packages/core test:       54,
+packages/core test:       55,
+packages/core test: +     56,
+packages/core test:     ],
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:279:25
+packages/core test:     277|     const tailApplied: number[][] = [];
+packages/core test:     278|     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.p…
+packages/core test:     279|     expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, …
+packages/core test:        |                         ^
+packages/core test:     280|     expectFinalSchema(reopened);
+packages/core test:     281|     expect(reopened.prepare("SELECT mode FROM memory_authority_selecti…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > upgrades a version-31 database with an existing summary and reopens as a no-op
+packages/core test: AssertionError: expected [ [ 32, 33, 34, 35, 36, 37, …(19) ] ] to deeply equal [ [ 32, 33, 34, 35, 36, 37, …(18) ] ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -22,7 +22,8 @@
+packages/core test:       51,
+packages/core test:       52,
+packages/core test:       53,
+packages/core test:       54,
+packages/core test:       55,
+packages/core test: +     56,
+packages/core test:     ],
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:296:21
+packages/core test:     294|     const applied: number[][] = [];
+packages/core test:     295|     const upgraded = open(path, MIGRATIONS, (versions) => applied.push…
+packages/core test:     296|     expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, …
+packages/core test:        |                     ^
+packages/core test:     297|     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_ope…
+packages/core test:     298|       source_digest,captured_tail_seq FROM conversation_summary WHERE …
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves a legal Hindsight authority marker and activation receipt on reopen
+packages/core test: AssertionError: expected 56 to be 55 // Object.is equality
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: - 55
+packages/core test: + 56
+packages/core test:  ❯ expectFinalSchema src/db/migrations/lineage-reopen-matrix.test.ts:84:87
+packages/core test:      82|
+packages/core test:      83| function expectFinalSchema(db: Database): void {
+packages/core test:      84|   expect(db.prepare("SELECT max(version) AS version FROM migrations").…
+packages/core test:        |                                                                                       ^
+packages/core test:      85|   expect(db.prepare("PRAGMA table_info(timeline_messages)").all().map(…
+packages/core test:      86|   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type…
+packages/core test:  ❯ expectReopenNoOp src/db/migrations/lineage-reopen-matrix.test.ts:159:3
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:337:22
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > adds the current tail without rewriting an existing replica, checkpoint, or usable lease
+packages/core test: AssertionError: expected [ [ 34, 35, 36, 37, 38, 39, …(17) ] ] to deeply equal [ [ 34, 35, 36, 37, 38, 39, …(16) ] ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -20,7 +20,8 @@
+packages/core test:       51,
+packages/core test:       52,
+packages/core test:       53,
+packages/core test:       54,
+packages/core test:       55,
+packages/core test: +     56,
+packages/core test:     ],
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:360:21
+packages/core test:  Test Files  6 failed | 480 passed | 1 skipped (487)
+packages/core test:     358|     close(first); const applied: number[][] = [];
+packages/core test:     359|     const upgraded = open(path, MIGRATIONS, (versions) => applied.push…
+packages/core test:     360|     expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, …
+packages/core test:        |                     ^
+packages/core test:     361|     expectFinalSchema(upgraded);
+packages/core test:     362|     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_reco…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the 034 history and data through all B4 storage and reopen
+packages/core test: AssertionError: expected [ [ 35, 36, 37, 38, 39, 40, …(16) ] ] to deeply equal [ [ 35, 36, 37, 38, 39, 40, …(15) ] ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -19,7 +19,8 @@
+packages/core test:       51,
+packages/core test:       52,
+packages/core test:       53,
+packages/core test:       54,
+packages/core test:       55,
+packages/core test: +     56,
+packages/core test:     ],
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:391:21
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/16]⎯
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the main history and data through all B4 storage and reopen
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the t4 history and data through all B4 storage and reopen
+packages/core test:  FAIL  src/db/migrations/lineage-reopen-matrix.test.ts > migration lineage reopen matrix > preserves the both history and data through all B4 storage and reopen
+packages/core test: AssertionError: expected [ [ 36, 37, 38, 39, 40, 41, …(15) ] ] to deeply equal [ [ 36, 37, 38, 39, 40, 41, …(14) ] ]
+packages/core test: - Expected
+packages/core test: + Received
+packages/core test: @@ -18,7 +18,8 @@
+packages/core test:       51,
+packages/core test:       52,
+packages/core test:       53,
+packages/core test:       54,
+packages/core test:       55,
+packages/core test: +     56,
+packages/core test:     ],
+packages/core test:   ]
+packages/core test:  ❯ src/db/migrations/lineage-reopen-matrix.test.ts:391:21
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/16]⎯
+packages/core test:       Tests  16 failed | 4060 passed | 2 skipped (4078)
+packages/core test:    Start at  19:11:29
+packages/core test:    Duration  224.97s (transform 30.50s, setup 0ms, import 302.67s, tests 422.86s, environment 72ms)
+packages/core test: Failed
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run "--maxWorkers=4"`
+Exit status 1

@@ -1,0 +1,25 @@
+{
+  "devices": [
+    {
+      "deviceId": "b55527dc-2c5c-4ca5-9099-0427edcd472e",
+      "deviceName": "Restart acceptance",
+      "role": "operator",
+      "tokenHash": "La4SDW9id3bKgBwK7wDSNSWhEHQ6ajwPxTzjtIXbl4o=",
+      "pairedAt": "2026-10-25T14:52:55.255Z"
+    },
+    {
+      "deviceId": "7b09d604-0c06-43ba-8ce3-8c4477478c68",
+      "deviceName": "Restart acceptance",
+      "role": "operator",
+      "tokenHash": "3UviCizbduqxhTjgiJXm5Ni+2lVRq0u3Cwoxhni7Fog=",
+      "pairedAt": "2026-10-25T14:53:02.251Z"
+    },
+    {
+      "deviceId": "b02be642-bd59-4aa1-b509-c4314380758b",
+      "deviceName": "Restart acceptance",
+      "role": "operator",
+      "tokenHash": "I/kn7N6HOoNchT++5JfRvvAeu82UWUbQNTjv9PEApCc=",
+      "pairedAt": "2026-10-25T14:53:08.509Z"
+    }
+  ]
+}

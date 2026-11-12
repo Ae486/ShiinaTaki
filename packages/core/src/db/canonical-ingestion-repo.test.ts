@@ -49,7 +49,8 @@ describe("canonical ingestion journal and primary witnesses", () => {
 
   it("detects an edited row behind an old witness and never treats a role-only row as proof", () => {
     const f = fixture();
-    expect(() => f.journal.primaryEntries({ characterId: "taki", fromSeq: 0, throughSeq: 2 })).toThrow("MEMORY_INGESTION_SOURCE_UNPROVEN");
+    expect(f.journal.primaryEntries({ characterId: "taki", fromSeq: 0, throughSeq: 2 })).toEqual([]);
+    expect(f.journal.coverageGap({ ...f.scope, throughSeq: 2 })).toEqual({ seq: 1, code: "MEMORY_INGESTION_SOURCE_UNPROVEN" });
     f.journal.recordPrimaryCommitted({ characterId: "taki", entries: f.entries });
     f.db.prepare("UPDATE timeline_messages SET content=:text WHERE seq=1").run({ text: "edited after witnessing" });
     expect(() => f.journal.primaryEntries({ characterId: "taki", fromSeq: 0, throughSeq: 2 })).toThrow("MEMORY_INGESTION_SOURCE_UNPROVEN");
@@ -76,7 +77,8 @@ describe("canonical ingestion journal and primary witnesses", () => {
       .toEqual(Array.from({ length: 2 }, () => ({ authority_epoch_id: f.scope.epochId, ingestion_span_id: state.spanId })));
     expect(f.journal.unprocessedCount(f.scope)).toBe(0);
     expect(f.journal.pendingEntries({ ...f.scope, throughSeq: 3 })).toEqual([]);
-    expect(() => f.journal.advanceCoverage({ ...f.scope, throughSeq: 3, now: AT })).toThrow("MEMORY_INGESTION_INCOMPLETE");
+    expect(f.journal.advanceCoverage({ ...f.scope, throughSeq: 3, now: AT })).toBe(0);
+    expect(f.journal.coverageGap({ ...f.scope, throughSeq: 3 })).toEqual({ seq: 1, code: "MEMORY_INGESTION_INCOMPLETE" });
     state = f.journal.saveGate({ state, gate: { decision: "skip" }, now: AT });
     f.journal.complete({ state, now: AT });
     expect(f.journal.pending(f.scope)).toBeUndefined();

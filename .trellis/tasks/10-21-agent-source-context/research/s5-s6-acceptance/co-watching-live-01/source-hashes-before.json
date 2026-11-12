@@ -1,0 +1,21 @@
+{
+  "pnpm-lock.yaml": "2f66fc75926ca324f353dea4b01eb9fc81822202f8e7044721b87091a58b3391",
+  "packages/core/src/testing/source-live-evidence.ts": "08c034434974103754f3ba537920561c3a8d2ca19ba32feeb81c7fe86a3beabb",
+  "e2e/src/fixture/real-provider-observer.ts": "9671b8ab139dca8359350ad86cd25542287489c2f6ed2c01ceaf71ab67303fa5",
+  "e2e/src/fixture/paths.ts": "8ee024740471cb055973cca0f39d6e6fe68d9f21717e25e807575402244f8b18",
+  "packages/core/src/co-watching/source-preparation-real.test.ts": "8b1b8e44bbd7018ccaccc428c46c873af67aeeba0eb2bced99167e96fbe5595f",
+  "packages/core/src/co-watching/child-adapter.ts": "5bf44cf4384ee6dab9de5a5c8e93fdd6dc62b1213cf8e26c278398ca95a18730",
+  "packages/core/src/co-watching/task-workspace.ts": "12b2260d877592520aa14eabcf39aecb2971b4a2db59d5ae4933d73777e419ae",
+  "packages/core/src/testing/co-watching-fixture.ts": "284f1c6e4c24fa97d13c6a1b9eea0835976a4f41c8a7f1bcd5dd884d80219d43",
+  "packages/core/src/testing/co-watching-tool-fixture.ts": "2deb3c38a4d5f8c9f42d2dc190c4c0163ccdad131b3a04de4fc7639cb3cae563",
+  "packages/core/src/agents/chat-agent.ts": "c15c4a433ef48dbfb3c1d7ddbb427c9aa73bcfacf84217e5be866aa6c5bdecd1",
+  "packages/core/src/harness/subagent-service.ts": "20599e12020e6121a996c956093e6ae26479058607996a39afde2ce1e5425142",
+  "packages/core/src/harness/subagent-execution.ts": "776a5c6cc4b2b4e1fa301eff788c44d1cc6090d750c79b2dd24869e478446101",
+  "packages/core/src/agents/source-context.ts": "4f2d95407393e2bde7d335bf98af16680a490a9af3dc639fc71a8e56c441b7e1",
+  "packages/core/src/agents/source-interpretation.ts": "1c9c7eba1970b45223c0b189dec5fd4c90db5810aaff338d9b4e7607e023633d",
+  "packages/core/src/skills/skills-loader.ts": "515156badf0262fb299f37db9e1c51188e6b6be82f149d6117b918e61fb979a1",
+  "packages/core/src/workspace/read-file-tool.ts": "a796518419c0201f50f5cc9d59a09f422b83906e78c4eab02a3658df24b73d33",
+  "packages/core/src/workspace/write-file-tool.ts": "6ab2cbfc4e359ba04b403459c4e271b98f557e14ded21717426520b354e08673",
+  "packages/core/src/governance/core-tool-governance-adapter.ts": "d608ffaf363ffeb404b7ed9d7be1b44af3118302fb3fada8bef126c872fe0524",
+  "integrations/taki-co-watching/SKILL.md": "6fc77e16549bc252fded14bf9109b0fa79fd07f542be5c4d4c3c2e2726bde804"
+}

@@ -6,11 +6,21 @@
  * POS:    unit test for windows/home/home-shell (node-safe via renderToStaticMarkup). Exempt from size caps.
  */
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { HomeShell } from "./home-shell.tsx";
 import { DEFAULT_PAGE_ID, HOME_PAGES, visibleHomePages } from "./pages.ts";
 import { useHomeStore } from "./home-store.ts";
+
+const route = vi.hoisted(() => ({ value: "chat" }));
+vi.mock("./home-store.ts", async (load) => {
+  const actual = await load<typeof import("./home-store.ts")>();
+  return { ...actual, useHomeStore: Object.assign(
+    (selector: (state: ReturnType<typeof actual.useHomeStore.getState>) => unknown) => selector({ ...actual.useHomeStore.getState(), currentPage: route.value as ReturnType<typeof actual.useHomeStore.getState>["currentPage"] }),
+    actual.useHomeStore,
+  ) };
+});
+afterEach(() => { route.value = DEFAULT_PAGE_ID; });
 
 // zustand hands a static render its INITIAL state, so the shell under renderToStaticMarkup always shows the default
 // page — the highlight assertions below are about the default row, whatever navigate() was last called with.
@@ -27,6 +37,14 @@ function menuRows(): string[] {
 }
 
 describe("HomeShell", () => {
+  it("keeps local QQ history available without a Core connection banner while other Core pages retain it", () => {
+    route.value = "settings";
+    expect(renderToStaticMarkup(<HomeShell />)).toContain("z-(--z-notice)");
+    route.value = "qqmm";
+    const html = renderToStaticMarkup(<HomeShell />);
+    expect(html).toContain('aria-label="QQ 消息"');
+    expect(html).not.toContain("z-(--z-notice)");
+  });
   it("renders one menu entry per registry row, marking the current page", () => {
     const html = shellMarkup();
     for (const page of visibleHomePages(false)) expect(html).toContain(page.label);

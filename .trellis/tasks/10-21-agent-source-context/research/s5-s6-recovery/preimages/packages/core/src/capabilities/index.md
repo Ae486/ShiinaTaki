@@ -1,0 +1,19 @@
+# core/capabilities/
+- capability-broker.ts — sealed Host request/challenge/respond/cancel broker with independent Run abort lifetime; cooperative read cancellation stays distinct from unknown effect outcomes
+- capability-broker-state.ts — pending/terminal state owner with exact cleanup and execution/cancellation-aware interruption settlement shared with the Approval bridge
+- capability-effect-lifecycle.ts — Host preflight-to-wait/intent coordinator and exact terminal Effect settlement
+- capability-response.ts — pure terminal verifier shared by live and terminal-cache settlement: provenance, exact control, authorization lineage, and stricter-only governance evidence
+- capability-challenge.ts — Host ask provenance/digest checks, immediate exec legacy-peer refusal, operator-owned Approval and one-use resume authority
+- capability-tools.ts — the six Shell-routed capability tools as one per-call factory: binds the initiating operator socket for interactive turns and yields the unattended bag otherwise
+- canonical-input.ts — deterministic JSON canonicalization + lowercase SHA-256 input digest for sealed dispatch identity
+- capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results
+- route-capability.ts — explicit Host-qualified route→broker step with sealed pre-await Host/connection/catalog provenance and a live currentness guard; legacy fallback only for exactly one routable Host
+- screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
+- screenshot-describe.ts — optional screenshot→VLM bridge; admitted callers retain original Run/Effect accounting and cancellation, with null on failure
+- screenshot-tool.ts — the agent tool: route → broker.request → persist(→describe, optional describePrompt focus → PII scrub → A1 fence, D44) → { ok, path, width, height, bytes, capturedAt, description? }
+- process-list-tool.ts — the agent tool: route → broker → { ok, processes, count, capturedAt } (read-only, no kill)
+- clipboard-read-tool.ts — the agent tool: route → broker → { ok, text, capturedAt } (empty clipboard → "")
+- clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)
+- shell-open-tool.ts — the agent tool: route → broker → { ok:true, opened } (url/path launch; dialog shows target)
+- exec-tool.ts — the agent tool: route → broker → ExecOutput (opaque `{command}` pass-through; parsed/governed Shell-side)
+- (the node-role capability.respond/challenge methods live in server/methods/capability-respond.ts and server/methods/capability-challenge.ts)

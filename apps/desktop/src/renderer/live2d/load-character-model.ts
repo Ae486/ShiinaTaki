@@ -1,7 +1,8 @@
 /**
  * INPUT:  an initialized PixiJS Application + a costume source: either the dev settings URL (DEV_MODEL_SOURCE) or a
  *         CostumeSource {settingsUrl, resolve, costumeId?} for an imported costume; vendored Cubism runtimes.
- * OUTPUT: loadCharacterModel(app, source) -> a loaded, centered Live2DModel on the governed ticker (eye-blink+breath).
+ * OUTPUT: loadCharacterModel(app, source) -> a loaded, centered Live2DModel on the governed ticker (eye-blink+breath),
+ *         with isolated Cubism 2 mask caches installed before its first stage render.
  * POS:    ui/renderer/live2d — framework-free (ZERO React/Tauri imports). For an imported costume the caller passes a
  *         `resolve` fn (built in lib/character-asset-url): unresolvable refs are PRUNED from the settings before the
  *         engine sees them (`..` never reaches the asset protocol), every kept sub-resource becomes its OWN absolute
@@ -9,8 +10,9 @@
  */
 
 import type { Application } from "pixi.js";
-import { CubismLegacyModelSettings, CubismModelSettings, Live2DModel, ModelSettings } from "untitled-pixi-live2d-engine";
+import { CubismLegacyInternalModel, CubismLegacyModelSettings, CubismModelSettings, Live2DModel, ModelSettings } from "untitled-pixi-live2d-engine";
 import { pruneSettings } from "./settings-prune.ts";
+import { isolateLegacyMaskContext } from "./legacy-mask-context.ts";
 
 // Dev fallback: the git-ignored self-contained Cubism 2 costume served by the vite middleware (apply:"serve"). Used
 // when no character is imported so `pnpm tauri dev` still renders; absent from a packaged build (an imported model
@@ -38,6 +40,11 @@ export async function loadCharacterModel(app: Application, source: string | Cost
     breathDepth: 1,
   });
 
+  // The first render may be the forced click-through RenderTexture capture in attachModel.
+  // Install before addChild so an async StrictMode probe cannot overwrite another context's mask.
+  if (model.internalModel instanceof CubismLegacyInternalModel) {
+    isolateLegacyMaskContext(model.internalModel);
+  }
   placeCentered(app, model);
   app.stage.addChild(model);
   return model;

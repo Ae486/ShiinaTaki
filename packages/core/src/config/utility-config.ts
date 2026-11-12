@@ -1,16 +1,16 @@
 /**
  * INPUT:  process env (TAKI_UTILITY_BASE_URL / _API_KEY / _MODEL) — the UTILITY model slot for background work
  * OUTPUT: loadUtilityConfig(env) -> { baseUrl, apiKey, model } | null (slot absent); partial = fatal, names the missing var
- * POS:    core/config — the third optional model slot (vision-config precedent); absent means background work runs on
+ * POS:    core/config — the optional text-maintenance model slot; absent means background work runs on
  *         the MAIN model (T5-R11 fallback), so "off" degrades rather than disabling a feature; apiKey never logged
  */
 import { z } from "zod";
 
-// Env-var names ARE the schema keys so a fatal boot error names the exact missing variable (vision-config precedent).
+// Env-var names ARE the schema keys so a fatal boot error names the exact missing variable (provider-config precedent).
 export const UtilityConfigSchema = z
   .object({
     TAKI_UTILITY_BASE_URL: z.string().min(1),
-    TAKI_UTILITY_API_KEY: z.string().min(1),
+    TAKI_UTILITY_API_KEY: z.string().min(1).optional(),
     TAKI_UTILITY_MODEL: z.string().min(1),
   })
   .transform((env) => ({

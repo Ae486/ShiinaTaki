@@ -1,0 +1,236 @@
+[
+  {
+    "file": "packages/core/src/agents/agent-tool-assembly.ts",
+    "sha256": "5a7a5c562a7630a74163ade4be8816a9796544a0fcdfc07303ec9cb7dfc8d046",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/agents/chat-agent.ts",
+    "sha256": "c15c4a433ef48dbfb3c1d7ddbb427c9aa73bcfacf84217e5be866aa6c5bdecd1",
+    "preimageSha256": "aeb37f6b696f6fded04c872aba93a99a1f63bb702f01a5d1ce545bb82f48fba2",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/agents/run-message-store.ts",
+    "sha256": "7539885cd4f1c0d49e0c90dd970917a6184d72d510b7ccb5ca0514a358111cba",
+    "preimageSha256": "1bcb991dc105c470cae1ad36d3878aa08fed7acf88bbe23c61f3703b94a4e465",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/agents/subagent-delegate-tool.ts",
+    "sha256": "ed1de7ccf2c285b6b36b97c8a9e102370ec65fe3e474cfe58142a02d75c3f002",
+    "preimageSha256": "57acf39b7c954da581253d7104a49186465eda09caa740a8968c1b28add497a8",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/agents/subagent-message-tool.ts",
+    "sha256": "d1debcb9d8ffee1942f536d8dbba699944c6925e5338e82276850d5620646776",
+    "preimageSha256": "5af45440ae7867642bc7c8d9a7b3ca1be3956f6bfc1114ae6d2b76860f697c3c",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/agents/subagent-tools.ts",
+    "sha256": "f05d4df65d71e00fc579aeb09f35a861159a61ea55826d51e07dd60141c4a9f4",
+    "preimageSha256": "1c42a605faac2383d9eafc785b3fa659c438016c30bd9659e7afec2fa902ac18",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/agents/tool-source-materials.ts",
+    "sha256": "fa501eefaec86bd7729d593ddab3fa6d16c99864b44e48c11a87e1021b3ab8b8",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/db/subagent-input-repo.ts",
+    "sha256": "84db50b1338b9e761cbb67ffc8200af738d9ee3516015f150d480b4b099fc337",
+    "preimageSha256": "103aab019d1283e0a208d899692d42bb7d247cad0ab22ba416e32b9577e01425",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/delivery/direct-request-report.test.ts",
+    "sha256": "f71edde4981c7b788dc0f80b1765296424736f4a8ad5c70dd38fb13bdca0d304",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/delivery/direct-request-report.ts",
+    "sha256": "82e47bea6aea27845ac180e5de8faac99644b1ca40c4941f79fb5053fe2fc089",
+    "preimageSha256": "ea869707a9f43b046ed0abb2fbb5c7a5f8b2b50eea850c0139aca3df0a4da9eb",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/extensions/extension-registry.ts",
+    "sha256": "391c63e52e4a9abeb48c2e57c3d63b599af9fea5712186b678dcd352fc9a7257",
+    "preimageSha256": "89e13f5328515d252abf96b5c3b7387fe18cca8775054ff9752933b295c4e77b",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/extensions/extension-sources.ts",
+    "sha256": "9baacb91fdf006ccec5d77d11319b2bacfbbc1d0f9bbbbb9a615fc3794fce007",
+    "preimageSha256": "20afeb5a0184dda7bd45e4fe1a3b12e8c483d99166d86071c57be478034f0fdf",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/governance/executable-tool-selection.ts",
+    "sha256": "b1b4b025df0c98b2b00a57022035580ff9ba43410809bc8a2807d2945ad2cf4f",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/delegation-tools.test.ts",
+    "sha256": "f14cf5568d691b7cd5fe8986f8e25abd477883ccddd459813c5051e7eacad73c",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/recovery-coordinator.ts",
+    "sha256": "6b672a4758886dc920d7f7cc65573887d99cb330798610ec4657c611cb84a251",
+    "preimageSha256": "1bc3cc541f1c8e466c005907c133d6c7c95d4fee04a2f887548ca0466a36a0ae",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/run-service.ts",
+    "sha256": "9fac9118938a08977d3fe4f0fb2ed59a6f5d6e3a5cb386ded08ca061997ac5d4",
+    "preimageSha256": "d4c4b30226934343d41f3095a72ecf238f057767b1340c1a18cc3ecd3c9b341c",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/run-snapshot-capture.ts",
+    "sha256": "ec597e3a3156b3029eacbc38e6c4d0bf59a69b179a38eac6ed66c54fa1dbe5e0",
+    "preimageSha256": "d61c887631c9e5046a5b828f5b88aff44dbbe6c19c58e41334f7451f7ad6dab7",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/subagent-completion.test.ts",
+    "sha256": "27cde23563aa4d260033f439c8919432debae4fe0d00f7fcdc0724e8db5bf219",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-completion.ts",
+    "sha256": "a9b7ac751cee111aa9fc23a9cafc995a58161eb4b05b61380b7c3486aca3efc6",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-composition.ts",
+    "sha256": "419441770466893bc452ba94209952dacff0b36c57ba35b86c2be7d3f9cdcb59",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-execution.ts",
+    "sha256": "776a5c6cc4b2b4e1fa301eff788c44d1cc6090d750c79b2dd24869e478446101",
+    "preimageSha256": "bf98854dbd35e45fc06d6c7add41f75e45bde30f7477b2f0839f402599f435fd",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/subagent-materials.test.ts",
+    "sha256": "5f170e18b403417eb8fdc880f74e132f9dc4d08755d9eb638f817d5cb3806c33",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-parent-execution.ts",
+    "sha256": "b8df6d4d297855b942f94d0a68769ee7a4a49aaad1b33381c1fde8e69943d056",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-queries.ts",
+    "sha256": "1fa86ecfcaabe7683ee34ae908cb1b6d24d1a208130335c9c6c393cda9547ef4",
+    "preimageSha256": "08b1aaa1010dc10c036706131f811d9541b287ca6c7282bf3b2a800621b12fad",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/subagent-recovery.test.ts",
+    "sha256": "d0ff9e0a5209b7ec4e2fadfe06998f88fd025c818e0879f0264ed9e96bbcaa82",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-recovery.ts",
+    "sha256": "de80df7ec08366628e7d236f41ee4f6ba439bda3ce52b8d0f44fb58fe4b3985b",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/harness/subagent-service.ts",
+    "sha256": "20599e12020e6121a996c956093e6ae26479058607996a39afde2ce1e5425142",
+    "preimageSha256": "d6a27c968543d205e0f5a5f2215bf4ed5e7c33e95952bff9c8cda92eac601121",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/subagent-state.ts",
+    "sha256": "0f25151d479cbc43c53dc1fe30d1fc1d0cc7985b0e91a632bb412ad6b0128a1e",
+    "preimageSha256": "106ac4e5a27a9c97e23e60ea91ced99bb8d8f9e2fbb0ac5282cc83bf51262558",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/subagent-subscriptions.ts",
+    "sha256": "2711afe45f7c73c13f7635da60d912583827a1e0ab67421cd5d1f4ff2aed50a8",
+    "preimageSha256": "f1bf352287455f8b6a9aca29b10061d9325a80a2924754c282dfc8b3b66d45b7",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/harness/subagent-tool-materials.ts",
+    "sha256": "028a1690f037229d8f6fd7ac17583be68a1396d1dd58310ad6a88e1d01dc3f17",
+    "preimageSha256": "523e93d6a43c91d53037857d905a4b0a4d254b6fb9006f6c96a659102c688e42",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/main.ts",
+    "sha256": "b01e2cd89b134df1297a87d58a0ccd72809b4d603466ff4bfa6d80c782b61206",
+    "preimageSha256": "93b44a1cbfdfd10fec837176d39b244db708cc0d7bf968fbddc621a160a7e9f4",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/server/methods/subagent-methods.test.ts",
+    "sha256": "15cbc008360e8d399042effd30c1f9470e34c583919249f9f61994babbe7ee26",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/core/src/server/methods/subagent-methods.ts",
+    "sha256": "df54135b9194f4571ef1ef760fdb478ce348ad39f045d8f4a201c6142ab3edeb",
+    "preimageSha256": "c6431f825e5b66ed83bc2443833e3119b1fd5e6887d9c56bc3cdc169b7c7b2f9",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/testing/subagent-fixture.ts",
+    "sha256": "22065c5137de211652fbfdfcf60e059a1b469eb47dc3e0776557dc5d3be54175",
+    "preimageSha256": "073bdda802ddc5f1a3b805288702a9fc3f793f4c04dae26ec0a73f5a2a953326",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/core/src/workspace/read-file-tool.ts",
+    "sha256": "a796518419c0201f50f5cc9d59a09f422b83906e78c4eab02a3658df24b73d33",
+    "preimageSha256": null,
+    "preimageAvailable": false
+  },
+  {
+    "file": "packages/shared/src/index.ts",
+    "sha256": "ff08a4dbaa9a77f86836097558fa32bcd5441f93277759bf18883c3fe1a6592b",
+    "preimageSha256": "434d13652d2b4b3b8b722a435accff518db14fee550b411ed9bebbd49dc66dde",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/shared/src/subagent-api-schema.ts",
+    "sha256": "bc1442d3820de3355bdc7a2178a2e04584d40eefa1f3f96e8989e19c7ca84e45",
+    "preimageSha256": "af6df8129b21f11685a6f32766814423b0a811c6c169298d5bbd7398fdd61994",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/shared/src/subagent-schema.ts",
+    "sha256": "59dcc40aeb5a5cc0c6066b87b03ab363a7664c28755006bbb5d03f065ca99474",
+    "preimageSha256": "40baeed070be72b61501a083a2358494f994c839a77d4a1c9dce10f75035d456",
+    "preimageAvailable": true
+  },
+  {
+    "file": "packages/shared/src/subagent-tool-schema.ts",
+    "sha256": "05fca0838a5d3cfa7bf287c5947270a5311e27b2d6b38c6e50502c460c73829e",
+    "preimageSha256": "29a022fb8f9e72dd6838bd8bcd92d2d2ca24f921cd980369c4168ed2be0992de",
+    "preimageAvailable": true
+  }
+]

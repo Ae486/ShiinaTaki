@@ -1,0 +1,22 @@
+{
+  "cwd": "G:/TakiAgent-integration/apps/hindsight-host",
+  "command": "pnpm exec vitest run --maxWorkers=1 --reporter=json --outputFile=../../.trellis/tasks/11-11-main-t4-baseline-integration/research/test-host-preparation-final-20261112.json",
+  "node": "24.18.0",
+  "pnpm": "10.22.0",
+  "rustc": "1.97.0 (2d8144b78 2026-07-07)",
+  "python": "3.11.5",
+  "temp": "G:\\Temp",
+  "tmp": "G:\\Temp",
+  "explicitKeyAdapter": null,
+  "tests": 88,
+  "passed": 87,
+  "failed": 0,
+  "skipped": 1,
+  "elapsedMs": 64055.718994140625,
+  "remainingFixturePythonProcesses": 0,
+  "sourceHashesUnchanged": true,
+  "typecheck": "pnpm --filter @taki/hindsight-host typecheck passed exit0",
+  "lint": "Scoped4-file eslint passed",
+  "diff": "Scoped tracked source/index git diff --check passed",
+  "limits": "Existing opt-in installed Shell test remains skipped; no real Docker, Native/PG service, credentials or model was used by this worker; peak RSS not separately instrumented"
+}

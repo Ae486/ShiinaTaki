@@ -1,0 +1,130 @@
+[
+  {
+    "file": "ai-latest.json",
+    "url": "https://registry.npmjs.org/ai/latest",
+    "resolved_url": "https://registry.npmjs.org/ai/latest",
+    "sha256": "b6e92c083cee82b9ab45794a8dbce80bdaf191842f95062232dbfcb847cefaf7",
+    "bytes": 3874,
+    "retrieved_at": "2026-10-21T11:59:06.314689+00:00"
+  },
+  {
+    "file": "ai-repo-main.json",
+    "url": "https://api.github.com/repos/vercel/ai/commits/main",
+    "resolved_url": "https://api.github.com/repos/vercel/ai/commits/main",
+    "sha256": "7dca8671da7218865ef500db9bde1b9dd88586daa717f06a15818586fcfc6471",
+    "bytes": 176899,
+    "retrieved_at": "2026-10-21T11:59:01.938848+00:00"
+  },
+  {
+    "file": "anthropic-compaction.md",
+    "url": "https://platform.claude.com/docs/en/build-with-claude/compaction.md",
+    "resolved_url": "https://platform.claude.com/docs/en/build-with-claude/compaction.md",
+    "sha256": "7a655205a3db0594a392dd25ac18e8fc1f8d6ed8af56a4d48707abb7057b3121",
+    "bytes": 12234,
+    "retrieved_at": "2026-10-21T11:59:01.250087+00:00"
+  },
+  {
+    "file": "anthropic-prompting.md",
+    "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices.md",
+    "resolved_url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices.md",
+    "sha256": "e9bd30b6abd49cc42549387cfa7a4cd9946d79d0eb7ed2a1c12f4cf431ee04f4",
+    "bytes": 74447,
+    "retrieved_at": "2026-10-21T11:59:01.854490+00:00"
+  },
+  {
+    "file": "anthropic-citations.md",
+    "url": "https://platform.claude.com/docs/en/build-with-claude/citations.md",
+    "resolved_url": "https://platform.claude.com/docs/en/build-with-claude/citations.md",
+    "sha256": "d109b64127d1993b36fa0195fa3063e8c7bb61d3e4b99edd9e3e3b3a8ecbbe6a",
+    "bytes": 74932,
+    "retrieved_at": "2026-10-21T11:59:01.897246+00:00"
+  },
+  {
+    "file": "anthropic-tool-use.md",
+    "url": "https://platform.claude.com/docs/en/build-with-claude/tool-use/implement-tool-use.md",
+    "resolved_url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools.md",
+    "sha256": "f1db4ebbe6aee0ef13941fa46e3ca9e07fb76c32e16e95dfbbda955576383d18",
+    "bytes": 38615,
+    "retrieved_at": "2026-10-21T11:59:02.794766+00:00"
+  },
+  {
+    "file": "ai-subagents.mdx",
+    "url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-agents/06-subagents.mdx",
+    "resolved_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-agents/06-subagents.mdx",
+    "sha256": "44b3962d39647b428b80c60d7ce79b9384583de7aab9d6b3ba2dc79ea966a828",
+    "bytes": 13030,
+    "retrieved_at": "2026-10-21T12:01:55.100475+00:00"
+  },
+  {
+    "file": "ai-loop-control.mdx",
+    "url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-agents/04-loop-control.mdx",
+    "resolved_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/03-agents/04-loop-control.mdx",
+    "sha256": "dbbf508f4b8a3b578279e29c576be876c1e502d66d281bcbbddec6dee3594b10",
+    "bytes": 15780,
+    "retrieved_at": "2026-10-21T12:01:55.621598+00:00"
+  },
+  {
+    "file": "ai-prompts.mdx",
+    "url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/02-foundations/03-prompts.mdx",
+    "resolved_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/content/docs/02-foundations/03-prompts.mdx",
+    "sha256": "57de6724bf6a0953e368ba3a218e16a7d151b23f87630ccb37bf2de4b1af597b",
+    "bytes": 17552,
+    "retrieved_at": "2026-10-21T12:01:55.441432+00:00"
+  },
+  {
+    "file": "ai-tool-output-types.ts",
+    "url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/provider-utils/src/types/tool.ts",
+    "resolved_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/provider-utils/src/types/tool.ts",
+    "sha256": "606db4176b93cf1e1a5483da6e13c302259c272de4e7b87bdd5d9afa6d6ff250",
+    "bytes": 12762,
+    "retrieved_at": "2026-10-21T12:01:55.401833+00:00"
+  },
+  {
+    "file": "ai-convert-prompt.ts",
+    "url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/ai/src/prompt/convert-to-language-model-prompt.ts",
+    "resolved_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/ai/src/prompt/convert-to-language-model-prompt.ts",
+    "sha256": "8e3c53b787dc5d5791e658574777ec4b3734524b00e947408d0dc1d422641d0f",
+    "bytes": 25822,
+    "retrieved_at": "2026-10-21T12:01:55.801149+00:00"
+  },
+  {
+    "file": "ai-openai-compatible-messages.ts",
+    "url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/openai-compatible/src/chat/convert-to-openai-compatible-chat-messages.ts",
+    "error": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)>"
+  },
+  {
+    "file": "anthropic-compaction-on-demand.md",
+    "url": "https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand.md",
+    "resolved_url": "https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand.md",
+    "sha256": "649c1b29e0f4d41b940b5aacdb47149fc91d7aac8aed04c1fcf7b02a98591aca",
+    "bytes": 47077,
+    "retrieved_at": "2026-10-21T12:01:57.675814+00:00"
+  },
+  {
+    "file": "anthropic-context-editing.md",
+    "url": "https://platform.claude.com/docs/en/build-with-claude/context-editing.md",
+    "resolved_url": "https://platform.claude.com/docs/en/build-with-claude/context-editing.md",
+    "sha256": "652c965cc22dd54f50ba76bafc2b977f278230f04e38f244263145180315de45",
+    "bytes": 104419,
+    "retrieved_at": "2026-10-21T12:01:58.216089+00:00"
+  },
+  {
+    "file": "anthropic-implement-tool-use.md",
+    "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/implement-tool-use.md",
+    "resolved_url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools.md",
+    "sha256": "f1db4ebbe6aee0ef13941fa46e3ca9e07fb76c32e16e95dfbbda955576383d18",
+    "bytes": 38615,
+    "retrieved_at": "2026-10-21T12:01:59.047823+00:00"
+  },
+  {
+    "file": "anthropic-handle-tool-calls.md",
+    "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls.md",
+    "error": "HTTP 403; official page verified through EXA search full relevant sections, no local Markdown snapshot"
+  },
+  {
+    "file": ".trellis\\tasks\\10-21-agent-delegation-source-context\\research\\sdk-upgrade\\ai-sdk-openai-compatible-3.0.75\\package\\src\\chat\\convert-to-openai-compatible-chat-messages.ts",
+    "url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/openai-compatible/src/chat/convert-to-openai-compatible-chat-messages.ts",
+    "source": "official npm artifact independently pinned by SDK researcher; read locally",
+    "sha256": "52f48021d2516348cf19fa64cba49b760ea0ec1774b11740d1e67a173c135a70"
+  }
+]

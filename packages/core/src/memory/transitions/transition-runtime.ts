@@ -24,6 +24,7 @@ import { createTransitionIntentExecutor } from "./transition-intent-executor.ts"
 interface Dependencies { db: Database; local: LocalRuntimeBinding; hindsight: HindsightRuntimeBinding;
   authority: MemoryAuthorityVerification;
   selected: SelectedMemoryRuntime; custody: PrimaryMemoryCustody; alive(): void; settle(): Promise<void>; startHindsight(): void;
+  prepareLocal?(): Promise<void>;
   retireBackground?(): void }
 
 export function createMemoryTransitionRuntime(input: Dependencies) {
@@ -82,7 +83,8 @@ export function createMemoryTransitionRuntime(input: Dependencies) {
         if (receipt.kind === "transition.emergency-local") input.hindsight.quarantine(receipt.identity.predecessorEpochId);
         else await input.hindsight.retire();
         alive(); input.custody.reconcile();
-        return input.selected.recoverCanonical(receipt.newEpochId);
+        const binding = input.selected.recoverCanonical(receipt.newEpochId);
+        await input.prepareLocal?.(); alive(); return binding;
       } else {
         input.local.retire(); await Promise.all([input.local.settle(), input.settle()]); alive(); input.custody.reconcile();
         input.selected.recoverHindsight(receipt.newEpochId); input.startHindsight();
@@ -113,6 +115,7 @@ async function resumeSource(input: Dependencies, operationId: string, alive: () 
     await input.hindsight.retire(); alive(); input.selected.recoverHindsight(selected.epochId); input.startHindsight();
   } else {
     input.local.retire(); await Promise.all([input.local.settle(), input.settle()]); alive(); input.selected.recoverCanonical(selected.epochId!);
+    await input.prepareLocal?.(); alive();
   }
 }
 

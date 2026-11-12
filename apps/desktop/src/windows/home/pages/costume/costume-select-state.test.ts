@@ -44,12 +44,13 @@ describe("a click", () => {
 });
 
 describe("the pet's result", () => {
-  it("moves the selection only on succeeded, and clears the pending row", () => {
+  it("retires the old observation on success until the live scene answers", () => {
     const started = result(click(worn, "taki-summer"), { costumeId: "taki-summer", phase: "started" });
     expect(started).toEqual({ pending: "taki-summer", selected: "taki-default", error: null });
 
     const done = result(started, { costumeId: "taki-summer", phase: "succeeded" });
-    expect(done).toEqual({ pending: null, selected: "taki-summer", error: null });
+    expect(done).toEqual({ pending: null, selected: null, error: null });
+    expect(reduceCostumeSelect(done, { kind: "observed", costumeId: "taki-summer" }).selected).toBe("taki-summer");
   });
 
   it("leaves the selection on the pre-switch costume when the switch fails (#74)", () => {
@@ -110,8 +111,8 @@ describe("the pet's result", () => {
     expect(result(pending, { costumeId: "taki-winter", phase: "cancelled" })).toEqual(pending);
   });
 
-  it("still follows a succeeded switch the page did not command (the pet is wearing it)", () => {
-    expect(result(worn, { costumeId: "taki-winter", phase: "succeeded" }).selected).toBe("taki-winter");
+  it("requests a fresh observation even for an unrequested success", () => {
+    expect(result(worn, { costumeId: "taki-winter", phase: "succeeded" }).selected).toBeNull();
   });
 
   it("clears a stale deadline message when the slow switch lands after all", () => {
@@ -123,7 +124,7 @@ describe("the pet's result", () => {
 
     const late = result(timedOut, { costumeId: "taki-summer", phase: "succeeded" });
 
-    expect(late).toEqual({ pending: null, selected: "taki-summer", error: null });
+    expect(late).toEqual({ pending: null, selected: null, error: null });
   });
 });
 

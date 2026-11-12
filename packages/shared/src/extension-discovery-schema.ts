@@ -6,7 +6,11 @@
 import { z } from "zod";
 
 export const EXTENSION_KINDS = ["skill", "mcp-tool", "capability"] as const;
-export const EXTENSION_METHODS = { status: "extension.status" } as const;
+export const EXTENSION_METHODS = {
+  status: "extension.status",
+  subscribe: "extension.subscribe",
+  changed: "extension.changed",
+} as const;
 export const ExtensionKindSchema = z.enum(EXTENSION_KINDS);
 export type ExtensionKind = z.infer<typeof ExtensionKindSchema>;
 
@@ -105,6 +109,7 @@ export type ExtensionDescribeParams = z.infer<typeof ExtensionDescribeParamsSche
 export const ExtensionDescribeResultSchema = z.strictObject({
   runId: HostIdSchema,
   entry: ExtensionDescriptorSchema.nullable(),
+  toolName: z.string().min(1).max(256).regex(/^[A-Za-z0-9_-]+$/).optional(),
 });
 export type ExtensionDescribeResult = z.infer<typeof ExtensionDescribeResultSchema>;
 

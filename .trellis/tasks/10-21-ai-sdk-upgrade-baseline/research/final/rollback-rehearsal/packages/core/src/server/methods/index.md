@@ -1,0 +1,55 @@
+# core/server/methods/
+- interaction-pattern-methods.ts — strict live-operator Pattern reads, exact candidate confirmation and CAS lifecycle commands
+- initiative-setup-methods.ts — explicit Skill/seed setup and same-Monitor bounded wake-policy reads
+- connect.ts — the only pre-auth method: token/pairing/loopback authentication and offered operator-display support echo on every success path
+- host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound publication and fail-closed retirement; accepted mutations are observed inside the Host catalog owner
+- extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
+- extension-subscribe.ts — operator-only opt-in extension change membership before acknowledgement; idempotent retries and one close cleanup, with no read/probe/reconcile
+- chat-send.ts — durable send admission/ack, queue-owner activity replacement plus legacy stream settlement, exact captured observer wiring and unchanged initiator cancellation
+- chat-activity-read.ts — operator-only Character recovery snapshot; read-only, complete or explicitly unavailable, with no execution/replay path
+- chat-cancel.ts — chat.cancel (operator-only): legacy character-only active-turn abort plus optional exact runId durable cancellation for queued work; idempotent ({cancelled:false} when absent/mismatched)
+- run-status.ts — run.status (operator-only): bounded Run/Attempt/Receipt status by durable runId
+- scheduled-task-methods.ts — operator-only Scheduled Task list/create/update/pause/resume/delete registration seam
+- user-timezone-methods.ts — authenticated operator timezone state/settings and designated-device report leases; ordinary same-device windows remain independent
+- presence-methods.ts — authenticated connection-bound presence and ordinary Timeline presentation reports; malformed reports retire only their own source
+- timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
+- timeline-subscribe.ts — operator-only Character append/remove/commit/activity subscription; observing disconnect retires only that subscription
+- avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect
+- avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names (+ the worn costume id for 1f change-detection) into the vocabulary store
+- avatar-outcome.ts — avatar.outcome (operator-only): the Pet UI's Presentation Outcome for one commandId; FORBIDDEN unless the connection is subscribed to that character; late/unknown reports are ok + debug-logged (D80)
+- media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)
+- media-clear.ts — media.clear (operator-only): purge retained attachment bytes on demand (the description-memory is untouched)
+- media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)
+- memory-tidy.ts — memory.tidy (operator-only): run the store-maintenance tidy pass NOW; responds with per-class defect counts, edits, steps and the utility slot's cumulative spend — never memory content
+- memory-status.ts — memory.status (operator-only): the settings panel's maintenance counters — window calibration per slot, compaction summary coverage + LENGTH, auto-write/tidy watermarks; counts only
+- memory-migration.ts — memory.migration.* (operator-only): on-demand legacy migration control, bounded reports, verification and activation
+- perception-methods.ts — one registration seam for the operator pauseGet/pauseSet/card/subscribe surface
+- perception-pause-get.ts — perception.pauseGet (operator-only): the Privacy Pause snapshot (a lapsed deadline self-resumes on this read)
+- perception-pause-set.ts — perception.pauseSet (operator-only): pause until resumed / until a caller-supplied epoch-ms deadline / resume; the ONLY production writer of the pause state (the agent has no path — swept by privacy-pause-writer.test.ts)
+- perception-card.ts — perception.card (operator-only): unchanged strict activity/pause read, independently usable with or without producer invalidation membership
+- perception-subscribe.ts — perception.subscribe (authenticated operator-only): idempotent content-free changed notifications with one connection-close cleanup; no baseline push or capture/write
+- character-import.ts — character.import (operator-only): extract an uploaded model archive into the Workspace characters/ subtree; thin delegation to the characters importer
+- character-list.ts — character.list (operator-only): enumerate imported characters from their character.json markers
+- character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)
+- character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
+- approval-respond.ts — legacy compatibility handler retained for tests/migration only; `main.ts` does not register it, and canonical Approval methods begin in Batch B
+- approval-methods.ts — canonical operator-only approval.respond/list/revoke registration; response ownership is enforced by the exact MethodContext Connection
+- capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement with authorization-lineage verification
+- capability-challenge.ts — capability.challenge (node-only): the Host ask handoff — validates the sealed challenge before any Approval work bridges it to the initiating operator
+- capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM while retaining Core governance and any Host final-enforcement path; + devTriggerEnabled(env)
+- config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe
+- config-list.ts — config.list (operator-only): every knob with effective value + provenance (stored/env-locked/apply class); secrets as set/not-set
+- config-set.ts — config.set (operator-only): thin controller over config-writer; refusals ride CONFIG_REFUSED + a machine-readable reason; logs keys, never values
+- config-subscribe.ts — config.subscribe (operator-only): config.changed pushes, ctx.onClose auto-unsubscribe
+- permission-methods.ts — operator-only permission.levelGet/levelSet/cellsGet/cellSet; material policy mutations notify Approval invalidation while validated no-ops do not
+- secret-methods.ts — operator-only secret.set/clear/presence/list over the Core-local encrypted catalog; write-only results (presence/provenance/health), storage failures sanitized to bounded SECRET_REFUSED app exceptions BEFORE the registry's verbatim echo paths; logs carry the opaque ref only
+- mcp-methods.ts — operator-only mcp.* lifecycle registration seam (list/get/add/edit/enable/disable/remove/test/reconnect/status); MCP_CONFIG_CONFLICT carries currentConfigRevision, MCP_REFUSED carries a bounded reason, both sanitized before the registry's verbatim echo points
+- skill-methods.ts — operator-only skill.* lifecycle registration seam; strict Shared schemas plus bounded conflict/refusal errors
+- hindsight-setup-methods.ts — operator-only memory.hindsight.* setup/status/disable/explicit LLM-health controllers with bounded refusals
+- hindsight-cutover-methods.ts — operator-only memory.hindsight.cutover.status/verify projections; read-only, stale-epoch-aware, and privacy-bounded
+- observability-methods.ts — operator-only bounded Monitor pages/Inspector and authorized connection-scoped backfill-before-live subscriptions; operator-only monitor state/list/trajectory/inspector and connection-scoped live subscription
+- memory-operation-methods.ts — operator-only memory.operations.submit/status/list/cancel/subscribe over the durable operation owner; refusals ride MEMORY_OPERATION_REFUSED + a closed reason (busy carries activeOperationId); subscribe pushes memory.operations.changed until the socket closes
+- memory-authority-status.ts — memory.authority.status (operator-only): the strict composite read (authority, runtime availability, setup, per-Bank replica/Pending, operations); a read, never a subscription
+- initiative-backoff-methods.ts — authenticated same-Monitor backoff read and explicit operator reset without Run creation
+- browser-playback-methods.ts — strict Node-only selected playback reports and operator-only snapshots using actual connection identity
+- co-watching-methods.ts — live operator-only acceptance/configuration/control, contextual invitation read/respond and versioned Character invalidation subscriptions

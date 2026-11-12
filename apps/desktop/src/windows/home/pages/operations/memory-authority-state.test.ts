@@ -28,7 +28,7 @@ describe("memory authority view model", () => {
 
   it("renders Local mode without Bank rows and never invents replica evidence", () => {
     const view = memoryAuthorityView(localStatus());
-    expect(view.headline).toBe("Local（canonical） · epoch epoch-1");
+    expect(view.headline).toBe("Local（canonical）");
     expect(view.runtimeLine).toBe("运行时可用");
     expect(view.setupLine).toBe("compatible");
     expect(view.hindsight).toBe(false);
@@ -57,7 +57,7 @@ describe("memory authority view model", () => {
       runtime: { providerId: "hindsight", available: false, unavailableReason: "connection_unavailable" }, replica: null, pending: null }));
     expect(unavailable.banks.map((bank) => bank.bankId)).toEqual(["character-taki", "global"]);
     expect(unavailable.banks.every((bank) => bank.schedule === null && bank.retryKind === null)).toBe(true);
-    expect(unavailable.banks[0]?.label).toBe("character-taki");
+    expect(unavailable.banks[0]?.label).toBe("记忆库（范围未知）");
     expect(unavailable.banks[1]?.label).toBe("Global");
   });
 
@@ -86,7 +86,7 @@ describe("memory authority view model", () => {
   it("marks only an admitted replica.sync as cancellable", () => {
     const status = hindsightStatus({ operations: { active: [operation(), operation({ operationId: "33333333-3333-4333-8333-333333333333", state: "running" })], recent: [] } });
     const [admitted, running] = memoryAuthorityView(status).active;
-    expect(admitted).toMatchObject({ cancellable: true, label: "同步副本 · global (incremental) · 已受理（未认领）" });
+    expect(admitted).toMatchObject({ cancellable: true, label: "同步副本 · 共享记忆（增量同步） · 已受理（未认领）" });
     expect(running).toMatchObject({ cancellable: false, state: "running" });
   });
 

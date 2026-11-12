@@ -1,4 +1,4 @@
-import { CANONICAL_GOVERNANCE_REGISTRY } from "@taki/shared";
+import { CANONICAL_GOVERNANCE_REGISTRY, createGovernanceRegistry, type GovernanceRegistry } from "@taki/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
@@ -9,10 +9,10 @@ const hostId = "11111111-1111-4111-8111-111111111111";
 const dbs: Database[] = [];
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
 
-function service() {
+function service(registry: GovernanceRegistry = CANONICAL_GOVERNANCE_REGISTRY) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
-  return createGovernancePolicyService(createGovernancePolicyRepo(db));
+  return createGovernancePolicyService(createGovernancePolicyRepo(db), registry);
 }
 
 function openService() {
@@ -22,6 +22,23 @@ function openService() {
 }
 
 describe("governance policy service", () => {
+  it("reads both classifier fields from its own registry without exposing mutable authority", () => {
+    const registry = createGovernanceRegistry({
+      ...CANONICAL_GOVERNANCE_REGISTRY,
+      descriptors: CANONICAL_GOVERNANCE_REGISTRY.descriptors.map((descriptor) => descriptor.capabilityId === "fs-write"
+        ? { ...descriptor, classifier: { ...descriptor.classifier, classifierId: "workspace-path-next", classifierRevision: 7 } }
+        : descriptor),
+    });
+    const policy = service(registry);
+    const before = policy.cells();
+    const metadata = policy.classifierMetadata("fs-write");
+    expect(metadata).toEqual({ classifierId: "workspace-path-next", classifierRevision: 7 });
+    Object.assign(metadata, { classifierId: "consumer-edit", classifierRevision: 99 });
+    expect(policy.classifierMetadata("fs-write")).toEqual({ classifierId: "workspace-path-next", classifierRevision: 7 });
+    expect(policy.cells()).toEqual(before);
+    expect(() => policy.classifierMetadata("unknown")).toThrow("unknown governance capability");
+  });
+
   it("projects every registered cell/level and supports real optimistic mutations", () => {
     const policy = service();
     const generation = policy.level().policyGeneration;

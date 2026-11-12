@@ -1,0 +1,72 @@
+{
+  "kind": "native-exec-only-host",
+  "binary": "G:\\TakiAgent-integration\\apps\\desktop\\src-tauri\\target\\debug\\taki-node.exe",
+  "dataDir": "G:\\Temp\\taki-agent-interface-node-E0iMCv",
+  "deviceName": "Agent interface native 537de9d6-b40e-4cf7-b5ce-75358a886e14",
+  "accepted": {
+    "observedAt": "2026-11-11T16:58:15.770Z",
+    "coreHostId": "6601a94c-746f-4124-90bf-36322e412a5f",
+    "hosts": [
+      {
+        "hostId": "65a00317-afbe-41f4-8440-b5c7c7926a28",
+        "available": true,
+        "connectionGeneration": 1,
+        "catalogGeneration": 1,
+        "extensionCount": 1
+      }
+    ],
+    "entries": [
+      {
+        "identity": {
+          "extensionId": "ext:dc23ecc161915f12c8b0f0103ebc78daf188f8ac",
+          "kind": "capability",
+          "ownerHostId": "65a00317-afbe-41f4-8440-b5c7c7926a28",
+          "subjectId": "exec",
+          "subjectRevision": "descriptor.33395ee9967dcfbad2b7605059f7fac89ccb6237c66861ed54e1dda64e3a7016",
+          "connectionGeneration": 1,
+          "catalogGeneration": 1
+        },
+        "displayName": "exec",
+        "summary": "Host capability (effect; non-cooperative cancellation)",
+        "callMode": "capability",
+        "modelKey": "ext_capability_bddd4e01468d_2706c619fe73f0cf1124",
+        "available": true
+      }
+    ],
+    "collisions": []
+  },
+  "policy": {
+    "mode": "allowlist",
+    "allowlist": [
+      "hostname"
+    ],
+    "cwd": "G:\\Temp\\taki-agent-interface-node-E0iMCv"
+  },
+  "autoApprove": "exec=deny",
+  "preflightResult": {
+    "ok": true,
+    "exitCode": 0,
+    "stdout": "tianxuanji\r\n",
+    "stderr": "",
+    "truncated": false,
+    "timedOut": false,
+    "durationMs": 50
+  },
+  "pid": 33120,
+  "exitCode": 1,
+  "signalCode": null,
+  "exited": true,
+  "closed": true,
+  "startupFailed": false,
+  "cleanupFailed": false,
+  "nodeDataRemoved": true,
+  "audit": [
+    {
+      "ts": "2026-11-11T16:58:15.821Z",
+      "requestId": "e30ea85f-90fc-4544-9d74-b798bcd3a0ba",
+      "capability": "exec",
+      "decision": "auto-allowed",
+      "command": "hostname"
+    }
+  ]
+}

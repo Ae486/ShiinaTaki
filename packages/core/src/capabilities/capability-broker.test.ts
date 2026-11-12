@@ -50,6 +50,19 @@ function governedTarget(hostId: string, notify: CapabilityNotify): CapabilityDis
 }
 
 describe("createCapabilityBroker", () => {
+  it("aborts an unattended cooperative preflight and never sends an already-cancelled request", async () => {
+    const { broker: b } = broker();
+    const notify = vi.fn();
+    const controller = new AbortController();
+    const pending = b.request({ ...target(HOST_A, notify), signal: controller.signal }, {});
+    const sent = notify.mock.calls[0]![1] as CapabilityRequest;
+    controller.abort();
+    expect(notify).toHaveBeenCalledWith("capability.cancel", expect.objectContaining({ requestId: sent.requestId, reason: "caller_cancelled" }));
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED" });
+    notify.mockClear();
+    await expect(b.request({ ...target(HOST_A, notify), signal: controller.signal }, {})).resolves.toMatchObject({ ok: false, code: "CANCELLED" });
+    expect(notify).not.toHaveBeenCalled();
+  });
   it("mints sealed control and accepts only the owning Host/generation response", async () => {
     const { broker: b } = broker();
     let sent: CapabilityRequest | undefined;

@@ -1,0 +1,11 @@
+{
+  "binary": "apps/desktop/src-tauri/target/debug/taki-node.exe",
+  "sha256": "c700f0c07a0e0c05ca368b910d4c9930b5580f104ca18d23fc3ed92b2a096fc0",
+  "bytes": 9364480,
+  "buildCommand": "cargo build --offline --locked --manifest-path apps/desktop/src-tauri/Cargo.toml --bin taki-node",
+  "clippy": "passed",
+  "rustTests": {
+    "passed": 211,
+    "failed": 0
+  }
+}

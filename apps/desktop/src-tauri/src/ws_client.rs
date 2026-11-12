@@ -1,5 +1,5 @@
 //! INPUT:  Core WS endpoint, pairing codes, Host negotiation, capability request/cancel/resume frames
-//! OUTPUT: reconnecting Node client with catalog publication and final Host enforcement/audited terminal responses
+//! OUTPUT: reconnecting Node client, immediate disclosure/ACK failure settlement and final Host enforcement/audit
 //! POS:    shell/ws_client — socket/session owner; resume rechecks current Host floors immediately before effects
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -19,7 +19,7 @@ use crate::capabilities_impl::shell_open::classify as classify_shell_open;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::Gate;
 use crate::host_session::{BeginDecision, ChallengeSlot, HostSession};
-use crate::protocol::ws_challenge::{build_challenge, matches_pending_authorization};
+use crate::protocol::ws_challenge::{build_challenge, matches_pending_authorization, ChallengeBuildError};
 use crate::protocol::{
     CapabilityAuthorizationLineage, CapabilityCancel, CapabilityCancellation,
     CapabilityExecutionKind, CapabilityRequest, CapabilityRespond, ClientFrame, ConnectParams,
@@ -31,12 +31,14 @@ use crate::protocol::{
 use crate::secrets::SecretStore;
 use crate::status::StatusEmitter;
 
-const TOKEN_KEY: &str = "node-token";
+pub(crate) const TOKEN_KEY: &str = "node-token";
 const RECONNECT_MIN: Duration = Duration::from_millis(500);
 const RECONNECT_MAX: Duration = Duration::from_secs(30);
 
 /// Everything the WS task needs; assembled by node::build_node (fields are crate-internal wiring).
 pub struct WsClient {
+    pub(crate) local_auth: bool,
+    pub(crate) browser_attachment: Arc<crate::browser_attachment::BrowserAttachment>,
     pub(crate) url: String,
     pub(crate) device_id: String,
     pub(crate) device_name: String,
@@ -54,6 +56,7 @@ pub struct WsClient {
 impl WsClient {
     /// The reconnect loop: connect, run until the socket drops, back off, retry (tokenless-free after pairing).
     pub async fn run(self, mut pairing_rx: Receiver<String>) {
+        let _browser_server = self.browser_attachment.spawn();
         let mut backoff = RECONNECT_MIN;
         loop {
             self.emit_status("connecting");
@@ -61,6 +64,7 @@ impl WsClient {
                 Ok(()) => backoff = RECONNECT_MIN,
                 Err(error) => tracing::warn!(error = %error, "ws session ended"),
             }
+            self.browser_attachment.set_core_enabled(false);
             self.emit_status("disconnected");
             tokio::time::sleep(backoff).await;
             backoff = (backoff * 2).min(RECONNECT_MAX);
@@ -68,10 +72,16 @@ impl WsClient {
     }
 
     async fn connect_and_run(&self, pairing_rx: &mut Receiver<String>) -> Result<(), String> {
-        let (mut socket, _response) = connect_async(&self.url)
-            .await
+        let descriptor = if self.local_auth { Some(crate::local_auth::descriptor()?) } else { None };
+        let url = descriptor.as_ref().map_or(self.url.as_str(), |local| local.endpoint.as_str());
+        let (mut socket, _response) = tokio::time::timeout(Duration::from_secs(15), connect_async(url))
+            .await.map_err(|_| "Core socket open timed out")?
             .map_err(|error| error.to_string())?;
-        let Some(negotiation) = self.perform_handshake(&mut socket, pairing_rx).await? else {
+        let negotiation = match descriptor {
+            Some(descriptor) => Some(self.local_handshake(&mut socket, &descriptor).await?),
+            None => self.perform_handshake(&mut socket, pairing_rx).await?,
+        };
+        let Some(negotiation) = negotiation else {
             return Ok(()); // auth failed / pairing abandoned — the loop reconnects fresh
         };
         let catalog_generation = 1;
@@ -80,7 +90,7 @@ impl WsClient {
         self.emit_status("connected");
 
         let session = Arc::new(Mutex::new(HostSession::new(
-            negotiation.host_id,
+            negotiation.host_id.clone(),
             negotiation.connection_generation,
             catalog_generation,
         )));
@@ -88,15 +98,53 @@ impl WsClient {
         let write = Arc::new(Mutex::new(write));
         let relay = Arc::new(crate::hindsight_checkpoint_relay::CheckpointRelay::default());
         let mut failure = None;
-        while let Some(message) = read.next().await {
-            let message = match message { Ok(message) => message, Err(error) => { failure = Some(error.to_string()); break; } };
-            match message {
-                Message::Text(text) => self.dispatch(text.as_str(), &write, &session, &relay).await,
-                Message::Ping(payload) => {
-                    let _ = write.lock().await.send(Message::Pong(payload)).await;
-                }
-                Message::Close(_) => break,
-                _ => {}
+        let mut browser = self.browser_attachment.subscribe();
+        let mut browser_configuration = self.browser_attachment.configuration_changes();
+        let mut forwarder = crate::browser_attachment::forwarder::Forwarder::default();
+        let mut browser_revision = 0;
+        if self.browser_attachment.configured() {
+            write.lock().await.send(Message::text(json!({ "jsonrpc": "2.0", "id": "browser-playback-ready",
+                "method": "browser.playback.ready", "params": { "schemaVersion": "taki.browser-playback.v1" } }).to_string()))
+                .await.map_err(|_| "Browser attachment readiness send failed")?;
+        }
+        loop {
+            tokio::select! {
+                message = read.next() => {
+                    let Some(message) = message else { break; };
+                    let message = match message { Ok(message) => message,
+                        Err(error) => { failure = Some(error.to_string()); break; } };
+                    match message {
+                        Message::Text(text) => {
+                            if !self.browser_attachment.handle_core_frame(text.as_str(), &negotiation, &mut browser_revision) {
+                                self.dispatch(text.as_str(), &write, &session, &relay).await;
+                            }
+                        },
+                        Message::Ping(payload) => { let _ = write.lock().await.send(Message::Pong(payload)).await; },
+                        Message::Close(_) => break,
+                        _ => {},
+                    }
+                },
+                changed = browser_configuration.changed() => {
+                    if changed.is_err() { break; }
+                    if self.browser_attachment.configured()
+                        && write.lock().await.send(Message::text(json!({ "jsonrpc": "2.0", "id": "browser-playback-ready",
+                            "method": "browser.playback.ready", "params": { "schemaVersion": "taki.browser-playback.v1" } }).to_string()))
+                            .await.is_err() { failure = Some("Browser attachment readiness send failed".into()); break; }
+                },
+                changed = browser.changed() => {
+                    if changed.is_err() { break; }
+                    let mut writer = write.lock().await;
+                    let observation = browser.borrow_and_update().clone();
+                    if let Some(report) = forwarder.frame(observation, catalog_generation) {
+                        let frame = Message::text(json!({ "jsonrpc": "2.0", "id": format!("browser-playback-report:{}", uuid::Uuid::new_v4()),
+                            "method": "browser.playback.report", "params": report }).to_string());
+                        match tokio::time::timeout(Duration::from_secs(2), writer.send(frame)).await {
+                            Ok(Ok(())) => {},
+                            Ok(Err(_)) => { failure = Some("Browser observation send failed".into()); break; },
+                            Err(_) => { failure = Some("Browser observation send deadline".into()); break; },
+                        }
+                    }
+                },
             }
         }
         session.lock().await.close();
@@ -135,8 +183,7 @@ impl WsClient {
                     pairing_code = Some(pairing_rx.recv().await.ok_or("pairing channel closed")?);
                 }
                 ConnectStep::AuthFailed => {
-                    self.secrets.delete(TOKEN_KEY)?; // a stale token is worthless — drop it and re-pair next round
-                    return Ok(None);
+                    return Err("Core refused the existing Node identity; credential preserved".into());
                 }
             }
         }
@@ -227,15 +274,20 @@ impl WsClient {
 
     // Host-control notifications remain responsive while a blocking capability executes on a worker thread.
     async fn dispatch(&self, text: &str, write: &SharedWrite, session: &SharedSession, relay: &Arc<crate::hindsight_checkpoint_relay::CheckpointRelay>) {
-        match serde_json::from_str::<ClientFrame>(text) {
-            Ok(ClientFrame::Success { id, result, .. }) => { relay.deliver(&id, result); return; }
-            Ok(ClientFrame::Error { id: Some(id), .. }) => { relay.deliver(&id, json!({"state":"unavailable","reason":"host-unavailable"})); return; }
-            _ => {},
-        }
-        let Ok(ClientFrame::Notification { method, params, .. }) =
-            serde_json::from_str::<ClientFrame>(text)
-        else {
-            return; // capability.respond/challenge acks and other frames need no action
+        let Ok(frame) = serde_json::from_str::<ClientFrame>(text) else { return; };
+        let (method, params) = match frame {
+            ClientFrame::Notification { method, params, .. } => (method, params),
+            ClientFrame::Success { id, result, .. } => {
+                relay.deliver(&id, result.clone());
+                settle_challenge_ack(&id, Some(result), write, session).await;
+                return;
+            }
+            ClientFrame::Error { id: Some(id), .. } => {
+                relay.deliver(&id, json!({"state":"unavailable","reason":"host-unavailable"}));
+                settle_challenge_ack(&id, None, write, session).await;
+                return;
+            }
+            ClientFrame::Error { id: None, .. } => return,
         };
         match method.as_str() {
             "capability.request" => self.dispatch_request(params, write, session).await,
@@ -282,29 +334,7 @@ impl WsClient {
                             }
                         }
                         Authorized::Challenge { evidence, request } => {
-                            // ask never executes and never prompts locally: emit one sealed challenge and
-                            // keep the exact raw input in memory-only session state until resume/cancel.
-                            let descriptor = capability_descriptor(&request.control.capability_id);
-                            let outcome = match descriptor {
-                                Some(descriptor) => build_challenge(&host_id, evidence, &request, &descriptor),
-                                None => Err(format!(
-                                    "capability {} has no descriptor",
-                                    request.control.capability_id
-                                )),
-                            };
-                            let challenge = match outcome {
-                                Ok(challenge) => challenge,
-                                Err(error) => {
-                                    tracing::warn!(request_id = %request.request_id, error = %error,
-                                        "capability challenge could not be sealed");
-                                    return;
-                                }
-                            };
-                            match session.lock().await.store_challenge(challenge.clone(), request.input) {
-                                ChallengeSlot::Stored => send_challenge(&write, challenge).await,
-                                slot => tracing::warn!(request_id = %challenge.request_id,
-                                    slot = ?slot, "capability challenge slot was not free"),
-                            }
+                            publish_challenge(&host_id, evidence, request, &write, &session).await;
                         }
                     }
                 });
@@ -314,22 +344,26 @@ impl WsClient {
 
     async fn dispatch_execute(&self, params: Value, write: &SharedWrite, session: &SharedSession, relay: &Arc<crate::hindsight_checkpoint_relay::CheckpointRelay>) {
         let Ok(execute) = serde_json::from_value::<crate::protocol::CapabilityExecute>(params) else { return; };
-        let Some(record) = session.lock().await.pending_challenge(&execute.request_id).cloned() else { return; };
-        if record.challenge.challenge_id != execute.challenge_id || record.challenge.control != execute.control { return; }
-        let mut lineage = None;
-        if let Some(raw) = execute.authorization.clone() {
-            let Ok(authorization) = serde_json::from_value(raw) else { return; };
-            let resume = crate::protocol::CapabilityResume { request_id: execute.request_id.clone(), control: execute.control.clone(), challenge_id: execute.challenge_id.clone(), authorization };
-            if matches_pending_authorization(&record, &resume).is_err() { return; }
-            lineage = Some(CapabilityAuthorizationLineage {
-                authorization_id: resume.authorization.authorization_id,
-                approval_generation: resume.authorization.approval_generation,
-                challenge_digest: resume.authorization.challenge_digest,
-            });
-        }
+        let (record, lineage, live) = {
+            let mut guard = session.lock().await;
+            let Some(pending) = guard.pending_challenge(&execute.request_id) else { return; };
+            if pending.challenge.challenge_id != execute.challenge_id || pending.challenge.control != execute.control { return; }
+            let lineage = if let Some(raw) = execute.authorization.clone() {
+                let Ok(authorization) = serde_json::from_value(raw) else { return; };
+                let resume = crate::protocol::CapabilityResume { request_id: execute.request_id.clone(), control: execute.control.clone(), challenge_id: execute.challenge_id.clone(), authorization };
+                if matches_pending_authorization(pending, &resume).is_err() { return; }
+                Some(CapabilityAuthorizationLineage {
+                    authorization_id: resume.authorization.authorization_id,
+                    approval_generation: resume.authorization.approval_generation,
+                    challenge_digest: resume.authorization.challenge_digest,
+                })
+            } else { None };
+            let Some(live) = guard.invocation_live(&execute.request_id, &execute.control) else { return; };
+            // Exact validation, liveness capture and consumption share the authoritative pending-slot lock.
+            let Some(record) = guard.consume_challenge(&execute.request_id) else { return; };
+            (record, lineage, live)
+        };
         let authorized_ask = lineage.is_some();
-        let Some(live) = session.lock().await.invocation_live(&execute.request_id, &execute.control) else { return; };
-        let _ = session.lock().await.consume_challenge(&execute.request_id);
         let handlers = self.handlers.clone(); let gate = self.gate.clone(); let exec_policy = self.exec_policy.clone(); let session = session.clone(); let write = write.clone();
         let relay = relay.clone();
         tokio::spawn(async move {
@@ -393,26 +427,36 @@ impl WsClient {
             return;
         };
         let request_id = resume.request_id.clone();
-        let authorized = {
+        let (authorized, refused) = {
             let mut guard = session.lock().await;
             let Some(pending) = guard.pending_challenge(&resume.request_id) else {
                 tracing::warn!(request_id = %request_id, "capability resume matched no pending challenge");
                 return;
             };
+            // A stale or foreign tuple cannot void another challenge that reuses this request ID.
+            if pending.challenge.challenge_id != resume.challenge_id || pending.challenge.control != resume.control {
+                return;
+            }
             match matches_pending_authorization(pending, &resume) {
                 Ok(()) => {
                     let consumed = guard.consume_challenge(&resume.request_id);
-                    consumed.map(|record| (record, resume.authorization.clone()))
+                    (consumed.map(|record| (record, resume.authorization.clone())), None)
                 }
                 Err(error) => {
-                    // Fail closed: a tampered/replayed/expired resume voids the pending challenge entirely.
-                    guard.consume_challenge(&resume.request_id);
+                    // This exact pending operation has not executed. Retire raw input AND its
+                    // active binding atomically, then deliver the finite denial after unlocking.
+                    let refused = guard.complete_challenge_failure(&resume.request_id, &resume.challenge_id,
+                        "审批授权已失效，已拒绝执行。请重新发起操作。");
                     tracing::warn!(request_id = %request_id, error = %error,
                         "capability resume authorization rejected; pending challenge voided");
-                    None
+                    (None, refused)
                 }
             }
         };
+        if let Some(response) = refused {
+            log_terminal(&resume.control.capability_id, &response);
+            send_response(write, response).await;
+        }
         let Some((record, authorization)) = authorized else {
             return;
         };
@@ -467,7 +511,7 @@ impl WsClient {
         });
     }
 
-    fn connect_params(&self, token: Option<String>, pairing_code: Option<String>) -> ConnectParams {
+    pub(crate) fn connect_params(&self, token: Option<String>, pairing_code: Option<String>) -> ConnectParams {
         ConnectParams {
             device_id: self.device_id.clone(),
             device_name: self.device_name.clone(),
@@ -511,7 +555,7 @@ impl WsClient {
         }
     }
 
-    fn validate_negotiation(&self, host: &HostNegotiation) -> Result<(), String> {
+    pub(crate) fn validate_negotiation(&self, host: &HostNegotiation) -> Result<(), String> {
         if host.host_id != self.device_id
             || host.protocol_version != HOST_CONTROL_PROTOCOL_VERSION
             || host.catalog_schema_version != HOST_CATALOG_SCHEMA_VERSION
@@ -527,7 +571,7 @@ impl WsClient {
     }
 }
 
-type WsStream =
+pub(crate) type WsStream =
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 pub(crate) type SharedWrite = Arc<Mutex<futures_util::stream::SplitSink<WsStream, Message>>>;
 pub(crate) type SharedSession = Arc<Mutex<HostSession>>;
@@ -553,7 +597,7 @@ fn classify_error(error: &Value) -> ConnectStep {
     let code = error.get("data").and_then(|data| data.get("code")).cloned();
     match code.and_then(|value| serde_json::from_value::<ErrorCode>(value).ok()) {
         Some(ErrorCode::PairingRequired) => ConnectStep::PairingRequired,
-        _ => ConnectStep::AuthFailed, // AUTH_FAILED and anything else -> drop the token, re-pair
+        _ => ConnectStep::AuthFailed, // Refusal never destroys a durable identity or silently re-enrolls it.
     }
 }
 
@@ -732,15 +776,59 @@ async fn send_response(write: &SharedWrite, response: CapabilityRespond) {
         .await;
 }
 
-// The ask handoff: a REQUEST frame (Core acknowledges with a Host ack); the raw input stays behind in
-// memory-only session state and never appears in this frame or in any log line.
-async fn send_challenge(write: &SharedWrite, challenge: crate::protocol::CapabilityChallenge) {
-    let frame = json!({ "jsonrpc": "2.0", "id": next_id(), "method": "capability.challenge", "params": challenge });
-    let _ = write
+// Core receives only the sealed permitted projection; the original executable input remains in the
+// session. A correlated ACK confirms receipt, never authorization or execution.
+async fn send_challenge(write: &SharedWrite, challenge: &crate::protocol::CapabilityChallenge) -> Result<(), ()> {
+    let id = if challenge.presentation.command_disclosure.is_some() {
+        json!(format!("challenge:{}:{}", challenge.request_id, challenge.challenge_id))
+    } else { json!(next_id()) };
+    let frame = json!({ "jsonrpc": "2.0", "id": id, "method": "capability.challenge", "params": challenge });
+    write
         .lock()
         .await
         .send(Message::text(frame.to_string()))
-        .await;
+        .await.map_err(|_| ())
+}
+
+async fn settle_challenge_ack(id: &JsonRpcId, result: Option<Value>, write: &SharedWrite, session: &SharedSession) {
+    let response = session.lock().await.acknowledge_challenge(id, result);
+    if let Some(response) = response {
+        log_terminal("exec", &response);
+        send_response(write, response).await;
+    }
+}
+
+async fn publish_challenge(
+    host_id: &str,
+    evidence: HostGovernanceEvidence,
+    request: CapabilityRequest,
+    write: &SharedWrite,
+    session: &SharedSession,
+) {
+    let outcome = capability_descriptor(&request.control.capability_id)
+        .ok_or(ChallengeBuildError::MissingDescriptor)
+        .and_then(|descriptor| build_challenge(host_id, &evidence, &request, &descriptor));
+    let challenge = match outcome {
+        Ok(challenge) => challenge,
+        Err(category) => {
+            tracing::warn!(request_id = %request.request_id, ?category, "capability challenge could not be sealed");
+            let response = CapabilityRespond::err(request.request_id, request.control,
+                crate::protocol::CapabilityErrorCode::Denied,
+                "无法完整、安全地展示此命令审批，已拒绝执行。请调整命令后重试。".into())
+                .with_governance(evidence);
+            let completed = session.lock().await.complete(response);
+            if let Some(response) = completed { send_response(write, response).await; }
+            return;
+        }
+    };
+    let slot = session.lock().await.store_challenge(challenge.clone(), request.input);
+    if slot != ChallengeSlot::Stored { return; }
+    if send_challenge(write, &challenge).await.is_err() {
+        // The socket may be gone. Release local raw state; remote settlement remains the existing
+        // disconnect/deadline contract, never a claim of successful terminal delivery.
+        session.lock().await.complete_challenge_failure(&challenge.request_id, &challenge.challenge_id,
+            "完整命令审批发送失败，已停止本次执行。");
+    }
 }
 
 fn log_terminal(capability: &str, response: &CapabilityRespond) {
@@ -817,14 +905,16 @@ mod tests {
     use crate::gate::decisions::DecisionStore;
     use crate::gate::GatePolicy;
 
+    type AuditRecord = (String, String, Decision, Option<String>);
+
     #[derive(Default)]
     struct RecordingAudit {
-        records: StdMutex<Vec<(String, String, Decision)>>,
+        records: StdMutex<Vec<AuditRecord>>,
     }
 
     impl AuditSink for RecordingAudit {
-        fn record(&self, request_id: &str, capability: &str, decision: Decision, _command: Option<&str>) {
-            self.records.lock().unwrap().push((request_id.into(), capability.into(), decision));
+        fn record(&self, request_id: &str, capability: &str, decision: Decision, command: Option<&str>) {
+            self.records.lock().unwrap().push((request_id.into(), capability.into(), decision, command.map(str::to_owned)));
         }
     }
 
@@ -903,7 +993,7 @@ mod tests {
         assert!(!approved);
         assert_eq!(evidence.effective_posture, crate::protocol::HostGovernancePosture::Deny);
         assert_eq!(audit.records.lock().unwrap().as_slice(), &[(
-            request.request_id, "screenshot".into(), Decision::AutoDenied,
+            request.request_id, "screenshot".into(), Decision::AutoDenied, None,
         )]);
     }
 
@@ -919,7 +1009,7 @@ mod tests {
         assert!(approved);
         assert_eq!(evidence.effective_posture, crate::protocol::HostGovernancePosture::Ask);
         assert_eq!(audit.records.lock().unwrap().as_slice(), &[(
-            request.request_id, "screenshot".into(), Decision::AllowedOnce,
+            request.request_id, "screenshot".into(), Decision::AllowedOnce, None,
         )]);
     }
 
@@ -952,5 +1042,192 @@ mod tests {
             crate::protocol::HostGovernancePosture::Deny);
         assert_eq!(input_digest("hindsight-deployment-plan:v1", &input["plan"]),
             "35764c5d2ba0a365c09588e4f3c5a8e609c360a23229b3a53e8b420384ebe40b");
+    }
+
+    fn exec_request(command: &str) -> CapabilityRequest {
+        let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../packages/shared/fixtures/protocol/capability-challenge.exec-disclosure.valid.json");
+        let template = crate::protocol::parse_capability_challenge(serde_json::from_str(
+            &std::fs::read_to_string(path).unwrap()).unwrap()).unwrap();
+        let mut request = CapabilityRequest { request_id: template.request_id, control: template.control,
+            input: json!({"command": command}) };
+        // The golden disclosure fixture remains historical wire evidence; runtime admission uses the current registry.
+        request.control.governance_projection.registry_revision = 4;
+        request.control.governance_projection.digest = crate::host_session::projection_digest(&request.control.governance_projection);
+        request.control.input_digest = input_digest("exec", &request.input);
+        request
+    }
+
+    #[test]
+    fn approved_exec_audits_the_original_command_once_not_the_masked_projection() {
+        let (_dir, gate, policy, audit, _decisions) = harness();
+        let command = "whoami   --token=RAW_SECRET_SENTINEL  tail";
+        let request = exec_request(command);
+        let evidence = final_host_enforcement(&gate, &policy, &request.control, &request.input);
+        let challenge = build_challenge(&request.control.target_host_id, &evidence, &request, &capability_descriptor("exec").unwrap()).unwrap();
+        assert!(!serde_json::to_string(&challenge.presentation).unwrap().contains("RAW_SECRET_SENTINEL"));
+        let (approved, _) = enforce_authorized_resume(&gate, &policy, &request.request_id, &request.control, &request.input);
+        assert!(approved);
+        assert_eq!(audit.records.lock().unwrap().as_slice(), &[(request.request_id, "exec".into(), Decision::AllowedOnce, Some(command.into()))]);
+    }
+
+    struct CountingExec(std::sync::atomic::AtomicUsize);
+
+    impl crate::capabilities_impl::CapabilityExec for CountingExec {
+        fn capability(&self) -> &str { "exec" }
+        fn run(&self, _: &Value) -> Result<Value, crate::capabilities_impl::ExecError> {
+            self.0.fetch_add(1, Ordering::SeqCst);
+            Ok(json!({}))
+        }
+    }
+
+    type TestSocket = tokio_tungstenite::WebSocketStream<tokio::net::TcpStream>;
+
+    async fn receive_test_frame(socket: &mut TestSocket) -> Value {
+        let message = tokio::time::timeout(Duration::from_secs(5), socket.next()).await
+            .expect("Host frame deadline").expect("Host socket open").expect("Host text frame");
+        serde_json::from_str(message.to_text().unwrap()).unwrap()
+    }
+
+    async fn reply_test_frame(socket: &mut TestSocket, frame: Value) {
+        socket.send(Message::text(frame.to_string())).await.unwrap();
+    }
+
+    async fn accept_test_host(socket: &mut TestSocket, host_id: &str) {
+        let connect = receive_test_frame(socket).await;
+        assert_eq!(connect["method"], "connect");
+        assert_eq!(connect["params"]["token"], "existing-test-token");
+        assert_eq!(connect["params"]["host"]["protocol"]["max"], 3);
+        reply_test_frame(socket, json!({"jsonrpc":"2.0", "id":connect["id"], "result": {
+            "status":"ok", "host": {"hostId":host_id, "protocolVersion":3, "catalogSchemaVersion":2, "connectionGeneration":1}
+        }})).await;
+        let catalog = receive_test_frame(socket).await;
+        assert_eq!(catalog["method"], "host.catalogPublish");
+        reply_test_frame(socket, json!({"jsonrpc":"2.0", "id":catalog["id"], "result":{"accepted":true}})).await;
+    }
+
+    async fn reject_test_disclosure(socket: &mut TestSocket, request: &CapabilityRequest) -> Value {
+        let frame = receive_test_frame(socket).await;
+        assert_eq!(frame["method"], "capability.challenge");
+        let challenge = crate::protocol::parse_capability_challenge(frame["params"].clone()).unwrap();
+        assert_eq!(frame["id"], format!("challenge:{}:{}", request.request_id, challenge.challenge_id));
+        assert!(challenge.presentation.command_disclosure.is_some());
+        assert!(!frame.to_string().contains("RAW_SECRET_SENTINEL"));
+        // This models an older strict Core's INVALID_PARAMS, including arbitrary peer diagnostics.
+        // Duplicating it exercises the actual frame dispatch, not only the session helper.
+        let error = json!({"jsonrpc":"2.0", "id":frame["id"], "error": {
+            "code":-32602, "message":"PEER_SECRET_SENTINEL", "data":{"issues":"PEER_SECRET_SENTINEL"}
+        }});
+        reply_test_frame(socket, error.clone()).await;
+        reply_test_frame(socket, error).await;
+        receive_test_frame(socket).await
+    }
+
+    #[tokio::test]
+    async fn actual_socket_disclosure_failures_settle_once_without_execution_audit_or_token_loss() {
+        for (command, rejected_ack) in [
+            ("whoami --token=RAW_SECRET_SENTINEL tail".to_string(), true),
+            (format!("whoami {}", "x".repeat(48_001)), false),
+            ("whoami --token='RAW_SECRET_SENTINEL".to_string(), false),
+        ] {
+            let (_dir, gate, policy, audit, _) = harness();
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let url = format!("ws://{}", listener.local_addr().unwrap());
+            let mut request = exec_request(&command);
+            let now = time::OffsetDateTime::now_utc();
+            request.control.dispatched_at = now.format(&time::format_description::well_known::Rfc3339).unwrap();
+            request.control.deadline_at = (now + time::Duration::seconds(60)).format(&time::format_description::well_known::Rfc3339).unwrap();
+            let host_id = request.control.target_host_id.clone();
+            let handler = Arc::new(CountingExec(std::sync::atomic::AtomicUsize::new(0)));
+            let mut registry = CapabilityRegistry::new();
+            registry.register(handler.clone());
+            let secrets = Arc::new(crate::secrets::InMemoryStore::new());
+            secrets.set(TOKEN_KEY, "existing-test-token").unwrap();
+            let client = WsClient { local_auth: false, browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Disclosure test".into(),
+                capabilities: vec!["exec".into()], secrets: secrets.clone(), gate: Arc::new(gate),
+                handlers: Arc::new(registry), status: Arc::new(crate::status::TracingStatusEmitter), exec_policy: Arc::new(policy) };
+            let server = tokio::spawn(async move {
+                let (stream, _) = listener.accept().await.unwrap();
+                let mut socket = tokio_tungstenite::accept_async(stream).await.unwrap();
+                accept_test_host(&mut socket, &host_id).await;
+                reply_test_frame(&mut socket, json!({"jsonrpc":"2.0", "method":"capability.request", "params":request})).await;
+                let terminal = if rejected_ack { reject_test_disclosure(&mut socket, &request).await }
+                    else { receive_test_frame(&mut socket).await };
+                assert_eq!(terminal["method"], "capability.respond");
+                assert_eq!(terminal["params"]["control"], serde_json::to_value(&request.control).unwrap());
+                assert_eq!(terminal["params"]["error"]["code"], "DENIED");
+                assert_eq!(terminal["params"]["governance"]["effectivePosture"], "ask");
+                assert!(terminal["params"].get("authorization").is_none());
+                assert!(!terminal.to_string().contains("RAW_SECRET_SENTINEL"));
+                assert!(!terminal.to_string().contains("PEER_SECRET_SENTINEL"));
+                assert!(tokio::time::timeout(Duration::from_millis(75), socket.next()).await.is_err(), "no duplicate terminal");
+                socket.send(Message::Close(None)).await.unwrap();
+            });
+            let (_tx, mut rx) = tokio::sync::mpsc::channel(1);
+            tokio::time::timeout(Duration::from_secs(10), client.connect_and_run(&mut rx)).await.unwrap().unwrap();
+            server.await.unwrap();
+            assert_eq!(handler.0.load(Ordering::SeqCst), 0);
+            assert!(audit.records.lock().unwrap().is_empty());
+            assert_eq!(secrets.get(TOKEN_KEY).unwrap().as_deref(), Some("existing-test-token"));
+        }
+    }
+
+    #[tokio::test]
+    async fn actual_socket_resume_mismatch_only_retires_its_exact_pending_binding() {
+        for mismatch in ["challenge", "control", "authorization"] {
+            let (_dir, gate, policy, audit, _) = harness();
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let url = format!("ws://{}", listener.local_addr().unwrap());
+            let request = exec_request("whoami --token=RAW_SECRET_SENTINEL");
+            let host_id = request.control.target_host_id.clone();
+            let handler = Arc::new(CountingExec(std::sync::atomic::AtomicUsize::new(0)));
+            let mut registry = CapabilityRegistry::new();
+            registry.register(handler.clone());
+            let secrets = Arc::new(crate::secrets::InMemoryStore::new());
+            secrets.set(TOKEN_KEY, "existing-test-token").unwrap();
+            let client = WsClient { local_auth: false, browser_attachment: crate::browser_attachment::BrowserAttachment::disabled(), url, device_id: host_id.clone(), device_name: "Resume test".into(),
+                capabilities: vec!["exec".into()], secrets: secrets.clone(), gate: Arc::new(gate),
+                handlers: Arc::new(registry), status: Arc::new(crate::status::TracingStatusEmitter), exec_policy: Arc::new(policy) };
+            let server = tokio::spawn(async move {
+                let (stream, _) = listener.accept().await.unwrap();
+                let mut socket = tokio_tungstenite::accept_async(stream).await.unwrap();
+                accept_test_host(&mut socket, &host_id).await;
+                reply_test_frame(&mut socket, json!({"jsonrpc":"2.0", "method":"capability.request", "params":request})).await;
+                let frame = receive_test_frame(&mut socket).await;
+                let challenge = crate::protocol::parse_capability_challenge(frame["params"].clone()).unwrap();
+                let now = time::OffsetDateTime::now_utc();
+                let mut resume = json!({"requestId": request.request_id, "control": request.control, "challengeId": challenge.challenge_id,
+                    "authorization": {"authorizationId": "88888888-8888-4888-8888-888888888888", "approvalGeneration": challenge.control.approval_generation, "decisionScope": "once",
+                        "controlDigest": challenge.control_digest, "challengeDigest": challenge.challenge_digest, "decisionScopeDigest": challenge.decision_scope_digest,
+                        "issuedAt": now.format(&time::format_description::well_known::Rfc3339).unwrap(),
+                        "expiresAt": (now + time::Duration::seconds(60)).format(&time::format_description::well_known::Rfc3339).unwrap() }});
+                match mismatch {
+                    "challenge" => resume["challengeId"] = json!("99999999-9999-4999-8999-999999999999"),
+                    "control" => resume["control"]["inputDigest"] = json!("f".repeat(64)),
+                    _ => resume["authorization"]["challengeDigest"] = json!("f".repeat(64)),
+                }
+                reply_test_frame(&mut socket, json!({"jsonrpc":"2.0", "method":"capability.resume", "params":resume})).await;
+                if mismatch != "authorization" {
+                    assert!(tokio::time::timeout(Duration::from_millis(75), socket.next()).await.is_err(), "a different binding is ignored");
+                    reply_test_frame(&mut socket, json!({"jsonrpc":"2.0", "id":frame["id"], "error": {"code":-32602, "message":"PEER_SECRET_SENTINEL"}})).await;
+                }
+                let terminal = receive_test_frame(&mut socket).await;
+                assert_eq!(terminal["method"], "capability.respond");
+                assert_eq!(terminal["params"]["control"], serde_json::to_value(&request.control).unwrap());
+                assert_eq!(terminal["params"]["error"]["code"], "DENIED");
+                assert_eq!(terminal["params"]["governance"]["effectivePosture"], "ask");
+                assert!(terminal["params"].get("authorization").is_none());
+                assert!(!terminal.to_string().contains("SENTINEL"));
+                reply_test_frame(&mut socket, json!({"jsonrpc":"2.0", "id":frame["id"], "result":{"accepted":false, "reason":"late"}})).await;
+                assert!(tokio::time::timeout(Duration::from_millis(75), socket.next()).await.is_err(), "settlement is once-only");
+                socket.send(Message::Close(None)).await.unwrap();
+            });
+            let (_tx, mut rx) = tokio::sync::mpsc::channel(1);
+            tokio::time::timeout(Duration::from_secs(10), client.connect_and_run(&mut rx)).await.unwrap().unwrap();
+            server.await.unwrap();
+            assert_eq!(handler.0.load(Ordering::SeqCst), 0);
+            assert!(audit.records.lock().unwrap().is_empty());
+            assert_eq!(secrets.get(TOKEN_KEY).unwrap().as_deref(), Some("existing-test-token"));
+        }
     }
 }

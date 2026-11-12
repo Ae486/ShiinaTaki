@@ -31,6 +31,7 @@ export interface WsServerOptions {
 export interface WsServer {
   /** The actually-bound port (resolves the ephemeral port when started with 0). */
   port: number;
+  /** Resolves after the listener and every accepted socket's connection cleanup have closed. */
   close(): Promise<void>;
 }
 
@@ -49,6 +50,7 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
     // Peer address (ws passes the upgrade request as the 2nd arg) — the connect handler uses it for
     // loopback auto-trust (P3). Undefined for an unknown peer ⇒ never auto-trusted (fail-closed).
     const connection = connectionRegistry.create(notify, request.socket.remoteAddress, () => socket.close());
+    connection.notifyObserved = (method, params) => replyObserved(socket, createJSONRPCNotification(method, params));
     // Cleanups registered by handlers (via ctx.onClose) for THIS socket — run once on close.
     const closeListeners: Array<() => void> = [];
     log.info("client connected");
@@ -143,6 +145,24 @@ function reply(socket: WebSocket, payload: unknown): void {
   if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(payload));
 }
 
+/** A ws callback proves transport acceptance only. The bounded timeout preserves uncertainty after dispatch. */
+function replyObserved(socket: WebSocket, payload: unknown): Promise<"accepted" | "refused" | "unknown"> {
+  if (socket.readyState !== WebSocket.OPEN) return Promise.resolve("refused");
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: "accepted" | "refused" | "unknown") => {
+      if (settled) return;
+      settled = true; clearTimeout(timer); socket.off("close", closed); resolve(value);
+    };
+    const closed = () => finish("unknown");
+    // Five seconds bounds a local write callback; it is not a user-reading or presentation deadline.
+    const timer = setTimeout(() => finish("unknown"), 5_000); timer.unref();
+    socket.once("close", closed);
+    try { socket.send(JSON.stringify(payload), (error) => finish(error ? "unknown" : "accepted")); }
+    catch { finish("unknown"); }
+  });
+}
+
 function recoverableId(parsed: unknown): JsonRpcId | null {
   if (typeof parsed === "object" && parsed !== null && "id" in parsed) {
     const { id } = parsed as { id: unknown };
@@ -156,9 +176,15 @@ function boundPort(wss: WebSocketServer, fallback: number): number {
   return typeof address === "object" && address !== null ? address.port : fallback;
 }
 
-function closeServer(wss: WebSocketServer): Promise<void> {
-  return new Promise((resolve, reject) => {
-    for (const client of wss.clients) client.terminate();
+async function closeServer(wss: WebSocketServer): Promise<void> {
+  const clients = [...wss.clients];
+  // ws's internally owned HTTP server can report close before upgraded sockets emit their close events. The
+  // application releases shared storage after this promise, so wait for our previously registered cleanup listeners
+  // as well. Register before terminate; socket errors are already logged and do not replace the close boundary.
+  const clientsClosed = clients.map((client) => new Promise<void>((resolve) => client.once("close", () => resolve())));
+  const listenerClosed = new Promise<void>((resolve, reject) => {
     wss.close((err) => (err ? reject(err) : resolve()));
   });
+  for (const client of clients) client.terminate();
+  await Promise.all([listenerClosed, ...clientsClosed]);
 }

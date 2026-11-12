@@ -86,6 +86,7 @@ function fit(state: HindsightMemoryProviderState, input: Input & {
     data: { hits: input.hits, returned: input.hits.length, pending, truncated: input.truncated,
       vectorState, partial: false, branchFailures: [] } }], query: input.request.query, now: Date.parse(input.at),
   limit: input.request.limit, maxTokens: input.request.maxTokens });
+  for (const hit of fitted.hits) state.deps.observeRecallEvidence?.(hit.record, input.request.query, input.context.requestId);
   return { hits: fitted.hits, returned: fitted.hits.length, pending: fitted.pending,
     truncated: input.truncated || fitted.truncated, vectorState, partial: input.degraded,
     branchFailures: input.degraded ? [{ scope: bound.route.scope, code: "MEMORY_PROVIDER_UNAVAILABLE", retryable: true, nextAction: "check-provider" }] : [] };

@@ -1,9 +1,8 @@
 # windows/home/pages/operations/
-The operations page: Local onboarding, Hindsight activation, the memory authority / Hindsight operations card, manual memory maintenance,
-the memory/context status card, and storage usage with the D46 attachment purge. Every number comes from a WS read — the page computes nothing the Core owns.
-Browser acceptance uses the installed matching Chromium Headless Shell for configuration, templates and transitions; missing runtime files skip, while launch or application failures remain test failures.
-The transition browser's synthetic control HTTP requests close after each response to avoid idle socket reuse across Core work; they never retry or change application WebSocket behavior.
-- operations-page.tsx — page root: authority, repeated transitions/emergency recovery, Local onboarding, first Hindsight activation, API configuration observation, template/user management, tidy, status and storage cards.
+The Operations page joins durable Memory authority, Hindsight management, Tidy, context and storage.
+Every fact comes from Core; retained reads never replay mutations.
+
+- operations-page.tsx — durable Tidy and independent Memory/storage reads alongside Local onboarding and complete Hindsight management; page root: authority, repeated transitions/emergency recovery, Local onboarding, first Hindsight activation, API configuration observation, template/user management, tidy, status and storage cards.
 - hindsight-configuration-card.tsx — Global/Character selector and desired-versus-permitted API configuration table; explicit observe/status actions, partial coverage, aliases, refusal and unknown states.
 - hindsight-configuration-state.ts — closed configuration reason/profile labels and Core-computed comparison formatting; no health/readiness inference.
 - hindsight-configuration-controller.ts — disposable selected-scope/client generations, serialized bounded reads, old-response rejection and one Core status read per evidence expiry; failures clear prior comparisons.
@@ -21,9 +20,9 @@ The transition browser's synthetic control HTTP requests close after each respon
 - hindsight-template-plan.tsx — separate receipt, selection publication, runtime and original-operation results; current child observations never replace historical records.
 - hindsight-template-test-fixture.ts — test-only actual authenticated Core registry/service/operation owner and persisted Bank reads; deterministic Native evidence and synthetic runtime/sync remain explicit.
 - storage-card.tsx — media.usage display + the two-step attachment purge; confirmation and Cancel lock once clearing starts (outcomes ride FeedbackLine)
-- use-operations.ts — the page's ws touchpoint: memory.tidy plus the cached memory.status / media.usage reads (a failed re-read keeps the last counters on screen; refresh() backs the retry)
+- use-operations.ts — independent retained Memory/storage reads and retries; durable Tidy settlement invalidates counters
 - use-media-clear.ts — destructive purge owner: immediate exact-once guard, media.clear call, terminal release, and refresh
-- operations-state.ts — pure view models + media.clear state machine; Cancel is valid only before destructive execution
+- operations-state.ts — pure view models with complete typed Tidy/transition issue guidance + media.clear state machine; Cancel is valid only before destructive execution
 - memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup, lifecycle/backup, per-Bank replica/Pending controls and policy review, persistent catch-up records and explicit last-read markers; active operations with Cancel (admitted replica.sync only)
 - memory-authority-state.ts — pure authority/review and accepted-waiting projections, automatic/manual next actions and operation labels; real Pending counts and unknown evidence stay distinct
 - memory-policy-review-state.ts — producer-backed policy review facts; null state is idle, null counts stay unknown and historical catch-up identity never implies current catch-up
@@ -33,8 +32,8 @@ The transition browser's synthetic control HTTP requests close after each respon
 - memory-hindsight-backup-block.tsx — the card's Hindsight backup block: rollback warning, state / age / per-Bank missing interval, in-flight or failure line, route-b 导入备份 form, 创建备份 / 校验备份 through the generic submit, collapsed 备份诊断
 - memory-hindsight-backup-state.ts — pure backup inventory/operation projection, explicit quiescence-busy retry guidance, template evidence and unknown remote writes, staged captures, newest sealed verification and inbox admit actions; actions wait only for an open backup operation
 - memory-hindsight-backup-fixtures.ts — test support (not in the production path): one MemoryAuthorityStatus per backup block state plus backup.* operation rows
-- memory-operations-controller.ts — framework-free guard shared by the Stage 1 and Hindsight cards: generation-guarded status behind the shared operation/replica invalidation subscription, serialized submit/configureSync/cancel and coalesced outcome refetch; no replay
-- use-memory-operations.ts — the React seam for memory.authority.status + memory.operations.* / memory.replica.configure: authenticated-client state and serialized submit / submitSync / configureSync / cancel
+- memory-operations-controller.ts — generic authority/activation reads gated by acknowledged subscriptions with feature-specific setup feedback; separate serialized mutation adapters preserve Tidy/sync/configure/cancel outcomes and visibility obligations without replay
+- use-memory-operations.ts — authenticated-client authority/Tidy read failures, route/document visibility and serialized complete Memory operation/configuration actions
 - memory-replica-settings-state.ts — lossless visible interval units, complete draft-to-config conversion and existing 1-minute/31-day/90-day bounds.
 - use-memory-replica-settings.ts — disposable mode/interval drafts preserving both intervals on toggles and explicit complete-config save through the common controller.
 - memory-replica-settings-form.tsx — labelled per-Bank background mode and interval/unit form, range guidance and manual-mode foreground/transition explanation.
@@ -58,3 +57,7 @@ The transition browser's synthetic control HTTP requests close after each respon
 - hindsight-activation-actions.ts — action labels, allow checks (Core-derived actions plus the setup kinds while unconfigured), the exact submit request per action and the dispatch through the generic controller
 - use-hindsight-activation.ts — the React seam for memory.activation.status: the generic controller bound to the authenticated client and page visibility (hidden retires the generation)
 - hindsight-activation-fixtures.ts — test support (not in the production path): one MemoryActivationStatus fixture per card state shared by the card, view-model and dispatch tests
+- memory-tidy-card.tsx — Core-owned tidy progress, partial/interrupted outcomes, read recovery and explicit next actions
+- memory-tidy-state.ts — semantic tidy operation projection, input-budget guidance and continued Block work; unknown remaining work and unreported coverage stay explicit
+- memory-tidy-fixtures.ts — synthetic typed tidy operations for controller and rendered-card regressions (test support only)
+- media-clear-controller.ts — explicit confirmation, per-client attempt lock, stale-result suppression and terminal retryable errors; reconnect cannot erase an unconfirmed prior purge

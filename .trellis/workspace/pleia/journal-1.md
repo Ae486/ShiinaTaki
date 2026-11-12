@@ -1424,7 +1424,105 @@ Committed the independently verified offline Waves 0-2 implementation and associ
 - B4 current-Local coverage/final fence, B6 wiring and live activation remain gated. No task finish/archive, push, real Hindsight/LLM call, existing-user-data migration or protected-backup access occurred.
 
 
+## Session T4-31: Home continuity closeout and Heartbeat planning entry
+
+**Date**: 2026-09-08
+**Task**: Home continuity closeout and Heartbeat planning entry
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Closed the owner-accepted Home continuity work, recorded deferred permission UX as D78, and entered T4 Heartbeat planning without production implementation.
+
+### Main Changes
+
+- Committed 95 reviewed UI/spec/test files; preserve unrelated Lab/OpenBiliClaw work and D71-D74.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d6ddf2e5f932a096ff6162d31b05caeb16e7286e` | (see git log) |
+
+### Testing
+
+- [OK] 952 Desktop tests, five workspace typechecks, lint/build and strict WebView2 14/14 already passed; final source hashes still match.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Complete Heartbeat scope/design and review incoming Memory lineage before implementation.
+
+
 ## Session 31: Hindsight closure Stage 1: durable memory operations
+
+**Date**: 2026-09-19
+**Task**: Hindsight closure Stage 1: durable memory operations
+**Branch**: `main`
+
+### Summary
+
+Core-owned durable operation owner (setup validate/apply, manual replica sync), interrupted-setup recovery, composite memory.authority.status read and a Home operations card; archived 09-19-hindsight-durable-operations.
+
+### Main Changes
+
+- memory_operations table (migration 048) with single-flight partial index; settlement derived only from persisted producer state; stage-aware cancel; boot reconciliation
+- HINDSIGHT_SETUP_INTERRUPTED for busy phases found at boot; failed validate clears compatibility
+- memory.operations.* methods, changed push fan-out, memory.authority.status read; Home card refetches on push/reconnect/remount
+- Spec memory-operations.md; D84 records replica.sync attribution limits
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `406d7cd` | (see git log) |
+| `eb20c58` | (see git log) |
+| `4b2694f` | (see git log) |
+| `7d80d87` | (see git log) |
+| `18fe4d4` | (see git log) |
+
+### Testing
+
+- [OK] typecheck 5/5, lint clean, Shared 512 / Core 3088 / Desktop 567 tests green
+- [OK] Isolated boot through migration 048 on a non-default port with clean SIGINT exit; manual acceptance not run
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Stage 2: Local-only onboarding, existing-instance first activation (PR03 source custody, PR05 Local-only slice), active Bank/configuration lifecycle
+- Scoped grill for PR02 before Stage 3; U1 before Stage 4
+
+
+## Session 32: Avatar lab panel acceptance, native lip-sync verdict and closeout
+
+**Date**: 2026-09-19
+**Task**: Avatar lab panel acceptance, native lip-sync verdict and closeout
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and formally checked the Lab three-arm mouth comparison, pose preview and face view; browser acceptance 24/24 on real Fish audio. Owner judged native lip-sync sufficient; custom mouth path closed, wawa benchmark not run. Recorded engine per-frame order in live2d-renderer.md, wrote AVATAR-PRESENTATION section 6/7 answers, archived the lab task. Next: D80/D69 avatar command outcome, then the A-series renderer batch.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8694355` | (see git log) |
+| `328c5ea` | (see git log) |
+| `7814a5e` | (see git log) |
+
+### Status
+
+[OK] **Completed**
+
+
+## Session main-31: Hindsight closure Stage 1: durable memory operations
 
 **Date**: 2026-09-19
 **Task**: Hindsight closure Stage 1: durable memory operations
@@ -1653,3 +1751,37 @@ W5 native route client + D92, W6 restore drill (AC11) with two Core fixes, rollb
 ### Next Steps
 
 - Stage 4 transitions and emergency takeover
+## Session 34: Complete cache token diagnosis and live monitoring
+
+**Date**: 2026-11-01
+**Task**: Complete cache token diagnosis and live monitoring
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Completed and archived cache-token-cost-diagnosis with owner authorization; preserved later optimization ideas as separate follow-ups.
+
+### Main Changes
+
+- Delivered truthful partial tidy recovery and live summary-window cache statistics; retained existing source recovery, catch-up and auxiliary accounting evidence.
+- Archived the task under .trellis/tasks/archive/2026-11/11-01-cache-token-cost-diagnosis and repaired driver/context references.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `57d14a1` | (see git log) |
+| `3637f27` | (see git log) |
+
+### Testing
+
+- [OK] 6591 tests passed, 6 skipped; typecheck, active-source lint and Clippy passed. Independent review, 11 browser cases and actual Core/WS integration passed.
+- [OK] Archived JavaScript syntax/import checks and context validation passed; read-only live query and historical analyzer reproduced expected results.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Use normal activity to observe cold starts and long sessions. Windows exec guidance and gate-only reasoning experiments remain optional follow-ups; no push performed.

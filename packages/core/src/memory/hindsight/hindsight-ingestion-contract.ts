@@ -8,6 +8,7 @@ import { z } from "zod";
 import { MemoryReplicaBankSchema, RetainRequestSchema, RetainCompletedResultSchema, TAKI_MEMORY_DEFAULT_IMPORTANCE } from "@taki/shared";
 import { CanonicalWriteGateDecisionSchema } from "../canonical-ingestion-plan.ts";
 import { SanitizedCommittedSpanSchema, retainedIngestionSource } from "../canonical-ingestion-source.ts";
+import { HindsightSourceLifetimeSchema } from "./hindsight-source-lifetime.ts";
 
 const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
@@ -22,6 +23,9 @@ export const HindsightIngestionBatchSchema = HindsightIngestionBindingSchema.ext
 export type HindsightIngestionBatch = z.infer<typeof HindsightIngestionBatchSchema>;
 export const HindsightIngestionCoverageSchema = z.strictObject({
   bankId: Id, requestId: Id, status: z.enum(["pending", "confirmed"]),
+  // Optional only for historical journals. Missing original evidence cannot authorize dependent initiative output.
+  sourceBinding: HindsightSourceLifetimeSchema.shape.sourceBinding.optional(),
+  memoryBindings: HindsightSourceLifetimeSchema.shape.memoryBindings.optional(),
   evidence: z.discriminatedUnion("kind", [
     z.strictObject({ kind: z.literal("outbox"), operationId: Id, intentHash: Digest }),
     z.strictObject({ kind: z.literal("provider"), result: RetainCompletedResultSchema }),

@@ -288,6 +288,16 @@ describe("ChatClient.call (generic operator invoker)", () => {
 });
 
 describe("ChatClient.connect (pairing handshake)", () => {
+  it.each([true, false])("requires the command support echo before promotion (echo=%s)", async (echo) => {
+    const client = await bootConnect(({ send, requestId, params }) => {
+      expect(params).toMatchObject({ capabilities: [], approvalCommandDisclosureRevision: 1, token: "existing" });
+      send({ jsonrpc: "2.0", id: requestId, result: { status: "ok", ...(echo ? { approvalCommandDisclosureRevision: 1 } : {}) } });
+    });
+    const outcome = await client.connect({ deviceId: DEVICE_ID, deviceName: "cli", role: "operator", capabilities: [],
+      token: "existing", approvalCommandDisclosureRevision: 1 });
+    expect(outcome).toMatchObject(echo ? { ok: true, approvalCommandDisclosureRevision: 1 }
+      : { ok: false, code: null, message: "Core 版本不支持完整命令审批，请更新 Core 后重试。" });
+  });
   it("T11 surfaces PAIRING_REQUIRED, then succeeds with a code and exposes the token", async () => {
     const client = await bootConnect(({ send, requestId, params }) => {
       if (params.pairingCode === undefined) {

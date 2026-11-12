@@ -1,0 +1,29 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/mcp/mcp-http.test.ts (3 tests | 1 failed) 1308ms
+     × waits for delayed modern-only HTTP discovery inside the Core candidate budget 1130ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/mcp/mcp-http.test.ts > createMcpManager over Streamable HTTP (T7) > waits for delayed modern-only HTTP discovery inside the Core candidate budget
+AssertionError: expected undefined to be defined
+ ❯ src/mcp/mcp-http.test.ts:127:41
+    125|     await manager.reconcile([{ serverId: "modern", ownerHostId: "11111…
+    126|       configRevision: 1, config: { url: running.url }, selectedTools: …
+    127|     expect(manager.tools().modern_echo).toBeDefined();
+       |                                         ^
+    128|     expect(running.methods).toContain("server/discover");
+    129|     expect(running.methods).not.toContain("initialize");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:38:03
+   Duration  4.20s (transform 2.94s, setup 0ms, import 4.36s, tests 2.53s, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/agents/sdk-wire-compatibility.test.ts src/mcp/mcp-http.test.ts

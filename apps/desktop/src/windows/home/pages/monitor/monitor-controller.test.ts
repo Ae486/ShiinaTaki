@@ -108,8 +108,8 @@ describe("monitor controller", () => {
     controller.setVisible(false);
     await vi.waitFor(() => expect(unsubscribeMonitor).toHaveBeenCalledTimes(1));
     const emitsAtHide = states.length;
-    await controller.refresh(); // work may still run against the client, but a hidden page must not emit
-    expect(ws.monitorList).toHaveBeenCalledTimes(2);
+    await controller.refresh(); // hidden pages neither fetch nor emit
+    expect(ws.monitorList).toHaveBeenCalledTimes(1);
     expect(states.length).toBe(emitsAtHide);
     expect(states.at(-1)?.selectedRunKey).toBe("run-1"); // selection memory untouched by the gate
   });

@@ -20,5 +20,5 @@
 - enroll-node.ts — explicit Node-role pairing into a protected new token credential file; no key creation.
 - stdio-request.ts — bounded abortable private JSON control reader.
 - custody-test-fixtures.ts — non-secret original-control fixtures for deterministic tests; no installed-OS trust claim.
-- deployment-test-fixtures.ts — explicit vacant state, generated fake TSC1 values and current C2 protocol inputs for process tests.
+- deployment-test-fixtures.ts — explicit vacant state, generated fake TSC1 values and current C2 protocol inputs; prepares a fixed fake adapter from retained Rust source in each new test root when no explicit adapter is supplied.
 - restart-observer.ts — internal C1b fake-adapter startup observation, independent grants and original-ID recovery; no production registry/Docker/start wiring.

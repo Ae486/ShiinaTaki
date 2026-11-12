@@ -1,0 +1,12 @@
+{
+  "label": "review-lint",
+  "command": [
+    "pnpm",
+    "lint"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T11:20:07.535527+00:00",
+  "seconds": 25.672,
+  "exitCode": 0,
+  "log": "logs/review-lint.log"
+}

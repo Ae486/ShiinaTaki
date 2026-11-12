@@ -1,0 +1,264 @@
+{
+  "registry": "https://registry.npmjs.org/%40ai-sdk%2Fopenai-compatible",
+  "versions": {
+    "3.0.5": {
+      "name": "@ai-sdk/openai-compatible",
+      "version": "3.0.5",
+      "keywords": [
+        "ai"
+      ],
+      "license": "Apache-2.0",
+      "_id": "@ai-sdk/openai-compatible@3.0.5",
+      "maintainers": [
+        {
+          "name": "vercel-release-bot",
+          "email": "infra+release@vercel.com"
+        },
+        {
+          "name": "matheuss",
+          "email": "matheus.frndes@gmail.com"
+        },
+        {
+          "name": "matt.straka",
+          "email": "matt.j.straka@gmail.com"
+        }
+      ],
+      "homepage": "https://ai-sdk.dev/docs",
+      "bugs": {
+        "url": "https://github.com/vercel/ai/issues"
+      },
+      "dist": {
+        "shasum": "5e519805266e96de3b6b7c8b9a039fdd355bd7a8",
+        "tarball": "https://registry.npmjs.org/@ai-sdk/openai-compatible/-/openai-compatible-3.0.5.tgz",
+        "fileCount": 37,
+        "integrity": "sha512-4UtDxT6Ga7U225o5fBEgtCFZHba4/iTDXRqMrU62yEfTrFks4o+F4jt0D3OWmUasR9LPFzLy0KnEITxFDtc89g==",
+        "signatures": [
+          {
+            "sig": "MEUCIQDKI1gr2QxUewbGZ2sZ9BJ/ppmAwCdzsh3VlRbSt9YGYQIgR3JTqFP6mvwkPpUqhItVN2VDFQc06e08EQFcboNpbgE=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fopenai-compatible@3.0.5",
+          "provenance": {
+            "predicateType": "https://slsa.dev/provenance/v1"
+          }
+        },
+        "unpackedSize": 394648
+      },
+      "main": "./dist/index.js",
+      "type": "module",
+      "_from": "file:ai-sdk-openai-compatible-3.0.5.tgz",
+      "types": "./dist/index.d.ts",
+      "engines": {
+        "node": ">=22"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js",
+          "default": "./dist/index.js"
+        },
+        "./internal": {
+          "types": "./dist/internal/index.d.ts",
+          "import": "./dist/internal/index.js",
+          "default": "./dist/internal/index.js"
+        },
+        "./package.json": "./package.json"
+      },
+      "scripts": {
+        "test": "pnpm test:node && pnpm test:edge",
+        "build": "pnpm clean && tsup --tsconfig tsconfig.build.json",
+        "clean": "del-cli dist docs *.tsbuildinfo",
+        "test:edge": "vitest --config vitest.edge.config.js --run",
+        "test:node": "vitest --config vitest.node.config.js --run",
+        "test:watch": "vitest --config vitest.node.config.js",
+        "type-check": "tsc --build",
+        "build:watch": "pnpm clean && tsup --watch",
+        "test:update": "pnpm test:node -u"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:30369ee5-01ba-4537-9095-287567f15343"
+        }
+      },
+      "_resolved": "/tmp/f0900d67e8c0dc7cb20bafb5b551aa33/ai-sdk-openai-compatible-3.0.5.tgz",
+      "_integrity": "sha512-4UtDxT6Ga7U225o5fBEgtCFZHba4/iTDXRqMrU62yEfTrFks4o+F4jt0D3OWmUasR9LPFzLy0KnEITxFDtc89g==",
+      "repository": {
+        "url": "git+https://github.com/vercel/ai.git",
+        "type": "git",
+        "directory": "packages/openai-compatible"
+      },
+      "_npmVersion": "11.16.0",
+      "description": "This package provides a foundation for implementing providers that expose an OpenAI-compatible API.",
+      "directories": {
+        "doc": "./docs"
+      },
+      "sideEffects": false,
+      "_nodeVersion": "24.18.0",
+      "dependencies": {
+        "@ai-sdk/provider": "4.0.2",
+        "@ai-sdk/provider-utils": "5.0.5"
+      },
+      "publishConfig": {
+        "access": "public",
+        "provenance": true
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "zod": "3.25.76",
+        "tsup": "^8.5.1",
+        "typescript": "5.8.3",
+        "@types/node": "22.19.19",
+        "@ai-sdk/test-server": "2.0.0",
+        "@vercel/ai-tsconfig": "0.0.0"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/openai-compatible_3.0.5_1783024930350_0.05421225996351797",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "3.0.75": {
+      "name": "@ai-sdk/openai-compatible",
+      "version": "3.0.75",
+      "keywords": [
+        "ai"
+      ],
+      "license": "Apache-2.0",
+      "_id": "@ai-sdk/openai-compatible@3.0.75",
+      "maintainers": [
+        {
+          "name": "vercel-release-bot",
+          "email": "infra+release@vercel.com"
+        },
+        {
+          "name": "matheuss",
+          "email": "matheus.frndes@gmail.com"
+        },
+        {
+          "name": "matt.straka",
+          "email": "matt.j.straka@gmail.com"
+        }
+      ],
+      "homepage": "https://ai-sdk.dev/docs",
+      "bugs": {
+        "url": "https://github.com/vercel/ai/issues"
+      },
+      "dist": {
+        "shasum": "216e5759aa8f10dfada57c41e9ecd194779434f3",
+        "tarball": "https://registry.npmjs.org/@ai-sdk/openai-compatible/-/openai-compatible-3.0.75.tgz",
+        "fileCount": 40,
+        "integrity": "sha512-Zs+EWsK1XprpCR6+VIva50W2YuD3TNSymd5DKFh8XSrroK0copxm2BlSDRKWVdx3SZEh1XqD+1cgYzGR7huL4A==",
+        "signatures": [
+          {
+            "sig": "MEYCIQD+ZWe9fr+VWGXWyOiVgkX5Vt6p7nm4xg+WW7YhAht8VQIhANAxy0zWEyatDc2Z3vDrSC7J1/LOAXJJQFGfIeEQwrv4",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEUCIQDebj0JFLAfS+qF3NZ6sgb429mSm97dW8VRw+YYrA46IQIgaX27Xfst5UhdT2zBWRtMZVoyQFfFzqcEVX8jDW+tG3o=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fopenai-compatible@3.0.75",
+          "provenance": {
+            "predicateType": "https://slsa.dev/provenance/v1"
+          }
+        },
+        "unpackedSize": 420227
+      },
+      "main": "./dist/index.js",
+      "type": "module",
+      "types": "./dist/index.d.ts",
+      "engines": {
+        "node": ">=22"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js",
+          "default": "./dist/index.js"
+        },
+        "./internal": {
+          "types": "./dist/internal/index.d.ts",
+          "import": "./dist/internal/index.js",
+          "default": "./dist/internal/index.js"
+        },
+        "./package.json": "./package.json"
+      },
+      "scripts": {
+        "test": "pnpm test:node && pnpm test:edge",
+        "build": "pnpm clean && tsdown",
+        "clean": "del-cli docs *.tsbuildinfo",
+        "test:edge": "vitest --config vitest.edge.config.js --run",
+        "test:node": "vitest --config vitest.node.config.js --run",
+        "test:watch": "vitest --config vitest.node.config.js",
+        "type-check": "tsc --build",
+        "build:watch": "pnpm clean && tsdown --watch",
+        "test:update": "pnpm test:node -u"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "30369ee5-01ba-4537-9095-287567f15343"
+        }
+      },
+      "repository": {
+        "url": "https://github.com/vercel/ai",
+        "type": "git",
+        "directory": "packages/openai-compatible"
+      },
+      "directories": {
+        "doc": "./docs"
+      },
+      "sideEffects": false,
+      "dependencies": {
+        "@ai-sdk/provider": "4.0.31",
+        "@ai-sdk/provider-utils": "5.0.65"
+      },
+      "publishConfig": {
+        "access": "public",
+        "provenance": true
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "zod": "3.25.76",
+        "tsdown": "^0.23.0",
+        "typescript": "6.0.3",
+        "@types/node": "22.19.19",
+        "@ai-sdk/test-server": "2.0.4",
+        "@vercel/ai-tsconfig": "0.0.0",
+        "@vercel/ai-tsdown-config": "0.0.0"
+      },
+      "peerDependencies": {
+        "zod": "^3.25.76 || ^4.1.8"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/openai-compatible_3.0.75_1792549215149_0.8956787103939456",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    }
+  },
+  "time": {
+    "3.0.5": "2026-07-02T20:42:10.505Z",
+    "3.0.75": "2026-10-21T02:20:15.248Z"
+  },
+  "observedAt": "2026-10-21T11:56:03.4976025Z",
+  "distTags": {
+    "alpha": "1.0.0-alpha.15",
+    "canary": "3.0.0-canary.56",
+    "beta": "3.0.0-beta.58",
+    "snapshot": "0.0.0-f1630544-20260811180950",
+    "ai-v5": "1.0.59",
+    "ai-v6": "2.0.87",
+    "latest": "3.0.75"
+  }
+}

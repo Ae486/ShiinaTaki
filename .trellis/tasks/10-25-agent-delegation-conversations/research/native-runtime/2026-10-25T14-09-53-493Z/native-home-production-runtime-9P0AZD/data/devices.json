@@ -1,0 +1,18 @@
+{
+  "devices": [
+    {
+      "deviceId": "a9f577cd-ae8f-49d6-97f3-2a58c84a3237",
+      "deviceName": "Agent context acceptance",
+      "role": "operator",
+      "tokenHash": "5jXGrLvhLFKKIPEclb+zUXY+yRAJfZUyHLH346G+ZZU=",
+      "pairedAt": "2026-10-25T14:09:59.856Z"
+    },
+    {
+      "deviceId": "1bad45ca-9af8-4362-8abe-d693d82ca2b1",
+      "deviceName": "taki-home",
+      "role": "operator",
+      "tokenHash": "GuGGHmNemYEYYJZ9SDrFzzZwHoNZAlT7u2CmGyELwpY=",
+      "pairedAt": "2026-10-25T14:10:01.940Z"
+    }
+  ]
+}

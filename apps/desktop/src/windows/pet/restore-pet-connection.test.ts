@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
   type AvatarCommand,
+  type AvatarOutcomeParams,
   type AvatarReportParams,
+  type ChatActivityReadResult,
 } from "@taki/shared";
 import {
   createConnectionGenerationController,
@@ -15,8 +17,8 @@ import { createTimingPolicyStore } from "@/lib/timing-policy.js";
 import type { WsTransport } from "@/lib/ws-transport.js";
 import { restorePetConnection } from "./restore-pet-connection.ts";
 
-const EXPRESSION: AvatarCommand = { characterId: "taki", kind: "expression", name: "smile" };
-const MOTION: AvatarCommand = { characterId: "taki", kind: "motion", name: "wave", priority: "normal" };
+const EXPRESSION: AvatarCommand = { characterId: "taki", commandId: "expression-test", kind: "expression", name: "smile" };
+const MOTION: AvatarCommand = { characterId: "taki", commandId: "motion-test", kind: "motion", name: "wave", priority: "normal" };
 
 class AvatarClient implements ConnectionGenerationClient {
   readonly order: string[] = [];
@@ -45,10 +47,37 @@ class AvatarClient implements ConnectionGenerationClient {
     this.avatarHandler = handler;
   }
 
+  onChatActivity(): () => void {
+    this.order.push("activity-handler");
+    return () => undefined;
+  }
+
+  async subscribeTimeline(): Promise<void> {
+    this.order.push("timeline-subscribe");
+  }
+
+  async chatActivityRead(): Promise<ChatActivityReadResult> {
+    this.order.push("activity-read");
+    return { characterId: "taki", status: "idle" };
+  }
+
+  onTimelineAppended(): void {}
+  onTimelineRemoved(): void {}
+  onTimelineCommitted(): () => void { return () => undefined; }
+  async timelineHistory() { return { entries: [], nextBefore: null }; }
+
   async reportAvatar(params: AvatarReportParams): Promise<void> {
     this.order.push("report");
     this.reports.push(params);
     if (this.failAt === "report") throw new Error("report failed");
+  }
+
+  readonly outcomes: AvatarOutcomeParams[] = [];
+  outcomeFails = false;
+  async reportAvatarOutcome(params: AvatarOutcomeParams): Promise<void> {
+    this.order.push("outcome");
+    if (this.outcomeFails) throw new Error("outcome rpc failed");
+    this.outcomes.push(params);
   }
 
   async subscribeAvatar(): Promise<void> {
@@ -75,7 +104,7 @@ describe("restorePetConnection", () => {
     const client = new AvatarClient();
     await restorePetConnection({ client, scene: null, context: context(() => true) });
 
-    expect(client.order).toEqual(["handler", "report", "subscribe"]);
+    expect(client.order).toEqual(["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"]);
     expect(client.reports).toEqual([{ characterId: "taki", motions: [], expressions: [] }]);
     expect(client.subscribeCalls).toBe(1);
   });
@@ -86,19 +115,71 @@ describe("restorePetConnection", () => {
     const applied: AvatarCommand[] = [];
     const scene = {
       reportSnapshot: () => ({ motions: ["wave"], expressions: ["smile"], costume: "arbeit" }),
-      applyAvatarCommand: (command: AvatarCommand) => applied.push(command),
+      applyAvatarCommand: async (command: AvatarCommand) => { applied.push(command); return { outcome: "applied" as const }; },
     };
     await restorePetConnection({ client, scene, context: context(() => true), reportSync });
     client.deliver(EXPRESSION);
     client.deliver(MOTION);
+    await flush();
 
-    expect(client.order).toEqual(["handler", "report", "subscribe"]);
+    expect(client.order).toEqual(["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read", "outcome", "outcome"]);
     expect(client.reports).toEqual([
       { characterId: "taki", motions: ["wave"], expressions: ["smile"], costume: "arbeit" },
     ]);
     expect(client.subscribeCalls).toBe(1);
     expect(applied).toEqual([EXPRESSION, MOTION]);
+    expect(client.outcomes).toEqual([
+      { characterId: "taki", commandId: "expression-test", outcome: "applied" },
+      { characterId: "taki", commandId: "motion-test", outcome: "applied" },
+    ]);
     expect(reportSync.snapshot()).toEqual({ kind: "synced", costumeId: "arbeit", source: "reconnect" });
+  });
+
+  it("reports a rejection with its reason for the received commandId", async () => {
+    const client = new AvatarClient();
+    await restorePetConnection({
+      client,
+      scene: {
+        reportSnapshot: () => ({ motions: [], expressions: [] }),
+        applyAvatarCommand: async () => ({ outcome: "rejected" as const, reason: "motion_busy" as const }),
+      },
+      context: context(() => true),
+    });
+    client.deliver(MOTION);
+    await flush();
+    expect(client.outcomes).toEqual([{ characterId: "taki", commandId: "motion-test", outcome: "rejected", reason: "motion_busy" }]);
+  });
+
+  it("stays silent when the generation retires while the command is being applied", async () => {
+    let current = true;
+    const client = new AvatarClient();
+    await restorePetConnection({
+      client,
+      scene: {
+        reportSnapshot: () => ({ motions: [], expressions: [] }),
+        applyAvatarCommand: async () => { current = false; return { outcome: "applied" as const }; },
+      },
+      context: context(() => current),
+    });
+    client.deliver(EXPRESSION);
+    await flush();
+    expect(client.outcomes).toEqual([]);
+    expect(client.order).not.toContain("outcome");
+  });
+
+  it("logs an outcome RPC failure instead of throwing out of the gate", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const client = new AvatarClient();
+    client.outcomeFails = true;
+    await restorePetConnection({
+      client,
+      scene: { reportSnapshot: () => ({ motions: [], expressions: [] }), applyAvatarCommand: async () => ({ outcome: "applied" as const }) },
+      context: context(() => true),
+    });
+    expect(() => client.deliver(EXPRESSION)).not.toThrow();
+    await flush();
+    expect(warn).toHaveBeenCalledWith("[pet] avatar outcome report failed", expect.any(Error));
+    warn.mockRestore();
   });
 
   it.each(["report", "subscribe"] as const)("propagates an observed %s failure", async (failAt) => {
@@ -193,7 +274,7 @@ describe("accelerated long-idle avatar recovery", () => {
           context: generation,
           scene: {
             reportSnapshot: () => ({ motions: ["wave"], expressions: ["smile"], costume: "arbeit" }),
-            applyAvatarCommand: (command) => applied.push(command),
+            applyAvatarCommand: async (command) => { applied.push(command); return { outcome: "applied" as const }; },
           },
         }),
       scheduler,
@@ -213,12 +294,19 @@ describe("accelerated long-idle avatar recovery", () => {
     clients[1]?.deliver(EXPRESSION);
     clients[1]?.deliver(MOTION);
     clients[0]?.deliver(EXPRESSION);
+    await flush();
 
     expect(homeChat.sends).toBe(2);
     expect(clients).toHaveLength(2);
-    expect(clients.map((client) => client.order)).toEqual([
-      ["handler", "report", "subscribe"],
-      ["handler", "report", "subscribe"],
+    expect(clients.map((client) => client.order.filter((step) => step !== "outcome"))).toEqual([
+      ["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"],
+      ["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"],
+    ]);
+    // Outcomes ride only the generation that received the command AND is still current when the apply resolves: the
+    // first socket was retired in the same tick as its deliveries, so it reports nothing; the replacement reports its own two.
+    expect(clients.map((client) => client.outcomes.map((outcome) => outcome.commandId))).toEqual([
+      [],
+      ["expression-test", "motion-test"],
     ]);
     expect(clients.map((client) => client.subscribeCalls)).toEqual([1, 1]);
     expect(applied).toEqual([EXPRESSION, MOTION, EXPRESSION, MOTION]);

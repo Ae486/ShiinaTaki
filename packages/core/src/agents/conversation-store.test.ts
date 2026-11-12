@@ -125,6 +125,8 @@ describe("createConversationStore", () => {
     // Every row fired timeline.appended (UI parity), and the tool row carries its structured parts.
     expect(emitted.map((entry) => entry.role)).toEqual(["user", "assistant", "tool", "assistant"]);
     expect(emitted[2]?.parts?.[0]).toMatchObject({ type: "tool-result", toolCallId: "c1" });
+    expect(emitted[1]?.parts?.[0]).toMatchObject({ toolName: "screenshot", displayName: "屏幕截图" });
+    expect(emitted[2]?.parts?.[0]).toMatchObject({ toolName: "screenshot", displayName: "屏幕截图" });
 
     expect(store.history("taki")).toEqual([
       { role: "user", content: "screenshot please" },
@@ -162,6 +164,27 @@ describe("createConversationStore", () => {
     }]);
   });
 
+  it("captures the presentation input once before append observers can replace its names", () => {
+    const names = { opaque_route: "Original server · tool" };
+    const emitted: TimelineEntry[] = [];
+    const store = makeStore((entry) => {
+      emitted.push(entry);
+      names.opaque_route = "Replacement server · tool";
+    });
+    store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "opaque_route", input: {} }] },
+      { role: "tool", content: [{ type: "tool-result", toolCallId: "c1", toolName: "opaque_route", output: { type: "text", value: "done" } }] },
+    ], names);
+
+    expect(emitted.map((entry) => entry.parts?.[0])).toEqual([
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName: "Original server · tool" },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName: "Original server · tool",
+        output: { type: "text", value: "done" } },
+    ]);
+    expect(JSON.stringify(store.history("taki"))).not.toContain("Original server");
+    expect(JSON.stringify(store.history("taki"))).not.toContain("Replacement server");
+  });
+
   it("drops leading orphan tool rows from history (window cut must not start replay with a tool message)", () => {
     const store = makeStore();
     // Simulates the replay window slicing mid-turn: the tool row's assistant tool-call fell outside the window.
@@ -184,7 +207,7 @@ describe("createConversationStore", () => {
     expect(store.history("taki")).toEqual([{ role: "user", content: "hi" }]);
   });
 
-  it("appendUser with images persists image parts, but history replays only the TEXT projection (#17)", () => {
+  it("appendUser persists image refs and missing storage remains an explicit unavailable-image fact", () => {
     const emitted: TimelineEntry[] = [];
     const store = makeStore((entry) => emitted.push(entry));
     store.appendUser("taki", "look", [{ mediaType: "image/png", ref: "attachments/deadbeef.png" }]);
@@ -194,9 +217,8 @@ describe("createConversationStore", () => {
       { type: "text", text: "look" },
       { type: "image", mediaType: "image/png", ref: "attachments/deadbeef.png" },
     ]);
-    // ... but the model replay is text only — no ref, no bytes (decision 6).
-    expect(store.history("taki")).toEqual([{ role: "user", content: "look" }]);
-    expect(JSON.stringify(store.history("taki"))).not.toContain("attachments/deadbeef.png");
+    expect(JSON.stringify(store.history("taki"))).toContain("STORAGE_UNAVAILABLE");
+    expect(JSON.stringify(store.history("taki"))).not.toContain('"type":"file"');
   });
 });
 
@@ -427,14 +449,15 @@ describe("summary substitution (batch 7 — R3 head message)", () => {
 
     const projection = store.project("taki");
     const serialized = JSON.stringify(projection.messages);
-    expect(projection.messages[0]).toEqual({ role: "user", content: "看这张图里的拉面" });
+    expect(JSON.stringify(projection.messages[0])).toContain("看这张图里的拉面");
+    expect(JSON.stringify(projection.messages[0])).toContain("STORAGE_UNAVAILABLE");
     expect(repo.latestAscending("taki", 20)[0]?.parts).toContainEqual(
       expect.objectContaining({ type: "image", ref: `attachments/${"a".repeat(64)}.png` }),
     );
     for (let index = 0; index < 6; index += 1) {
       expect(serialized).toContain(`"toolCallId":"c${index}"`);
     }
-    // Persisted image references stay text-authoritative on replay; the source still carries the ref for UI display.
+    // Missing storage never fabricates visual contents; the exact ref remains durable for later valid hydration.
     expect(projection.measurement.historyTokens).toBeGreaterThan(600);
   });
 });

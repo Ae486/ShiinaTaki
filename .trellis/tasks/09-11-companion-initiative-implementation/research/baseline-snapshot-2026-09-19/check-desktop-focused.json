@@ -1,0 +1,22 @@
+{
+  "label": "desktop-focused",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@taki/desktop",
+    "exec",
+    "vitest",
+    "run",
+    "src/lib",
+    "src/windows/home/pages/operations",
+    "src/windows/home/pages/chat",
+    "src/windows/home/pages/monitor",
+    "src/windows/pet",
+    "src/renderer/live2d/avatar-commands.test.ts"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-19T11:37:47.917502+00:00",
+  "seconds": 21.922,
+  "exitCode": 1,
+  "log": "logs/desktop-focused.log"
+}

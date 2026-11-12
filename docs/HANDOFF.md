@@ -1,4 +1,21 @@
-# TakiAgent T4 Leader Handoff — Skills/MCP First
+# Current Baseline Integration (2026-11-11)
+
+> The active engineering work in this isolated checkout is
+> [Main/T4 baseline integration](../.trellis/tasks/11-11-main-t4-baseline-integration/prd.md),
+> executed in `G:/TakiAgent-integration`. Main owns Hindsight contracts; T4 owns other accepted functionality,
+> including optional-model boot and live configuration. Integration and its validation gates are in progress.
+> Original worktrees, real profiles and external publication remain outside these documentation changes.
+> Read the current task before acting on any older session, branch or lifecycle instruction below.
+
+## Historical Leader Handoff
+
+### TakiAgent T4 Leader Handoff — Skills/MCP First
+
+> **2026-11-10 owner freeze:** T4 is paused while main completes its current stage.
+> Read [T4-FREEZE-HANDOFF.md](T4-FREEZE-HANDOFF.md) first for the checkpoint, verified
+> backups, unfinished acceptance and integration gates. This ruling supersedes the
+> historical continuation instructions below. Do not resume T4 implementation or
+> open the real profile with T4.
 
 > Main-worktree prompt continuation (2026-11-07): the owner approved prompt optimization. Managed v3 preserves
 > immutable v1/v2 and is exercised through registered template application before new Native retains. Final run

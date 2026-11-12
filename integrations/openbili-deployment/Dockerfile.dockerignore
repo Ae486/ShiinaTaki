@@ -1,0 +1,13 @@
+**
+!.worktrees/
+!.worktrees/openbili-recommendations/
+!.worktrees/openbili-recommendations/src/
+!.worktrees/openbili-recommendations/src/**
+!integrations/
+!integrations/openbili-deployment/
+!integrations/openbili-deployment/bootstrap.py
+!integrations/openbili-deployment/verify.py
+!integrations/openbili-deployment/source-manifest.json
+**/__pycache__/**
+**/*.pyc
+**/*.pyo

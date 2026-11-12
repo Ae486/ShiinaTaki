@@ -4,15 +4,38 @@
  * POS:    core/memory — automatic ingestion source boundary; never trusts role labels as provenance
  */
 import { createHash } from "node:crypto";
-import { CanonicalMemorySourceSchema, type TimelineEntry } from "@taki/shared";
+import { CanonicalMemorySourceSchema, SourceContextSchema, type TimelineEntry } from "@taki/shared";
+import type { PrimaryConversationSourceRepo, PrimarySourceMemoryIdentity } from "../db/primary-conversation-source-repo.ts";
 import { z } from "zod";
 import { sanitizeLegacyRetainText } from "./legacy-migration/legacy-retain-sanitizer.ts";
+import { renderSourceContext } from "../agents/source-context.ts";
 
 /** Supplied only by the primary Chat persistence owner after the exact rows have committed. */
 export interface PrimaryConversationCommit {
   characterId: string;
   entries: readonly TimelineEntry[];
   runId?: string;
+}
+
+export interface IngestionCoverageGap {
+  seq: number; code: "MEMORY_INGESTION_SOURCE_UNPROVEN" | "MEMORY_INGESTION_INCOMPLETE";
+}
+export interface PrimarySourceImportResult { imported: number; unresolvedSourceIds: string[] }
+
+/** DB-only bounded import. A corrupt retained source must not suppress independent valid sources. */
+export function importRetainedPrimarySources(input: {
+  sources: PrimaryConversationSourceRepo; characterId: string; memory: PrimarySourceMemoryIdentity;
+  record(commit: PrimaryConversationCommit): void;
+}): PrimarySourceImportResult {
+  const result: PrimarySourceImportResult = { imported: 0, unresolvedSourceIds: [] };
+  for (const sourceId of input.sources.listUnbound({ characterId: input.characterId, memory: input.memory })) {
+    try {
+      const source = input.sources.readRetained(sourceId);
+      input.record({ characterId: source.characterId, entries: source.entries, runId: source.runId });
+      result.imported += 1;
+    } catch { result.unresolvedSourceIds.push(sourceId); }
+  }
+  return result;
 }
 
 /** The repository verifies this witness against the current durable row before returning it. */
@@ -26,7 +49,7 @@ export interface ProvenPrimaryEntry {
 const SourceTextSchema = CanonicalMemorySourceSchema.shape.retainedText.unwrap();
 export const IngestionMessageSchema = z.strictObject({
   id: z.uuid(), seq: z.int().positive(), role: z.enum(["user", "assistant"]),
-  text: SourceTextSchema, createdAt: z.iso.datetime({ offset: true }),
+  text: SourceTextSchema, createdAt: z.iso.datetime({ offset: true }), sourceContext: SourceContextSchema.optional(),
 });
 export const SanitizedCommittedSpanSchema = z.strictObject({
   schemaVersion: z.literal(1), characterId: z.string().min(1).max(256),
@@ -46,7 +69,8 @@ const SECRET_TEXT = /\bBearer\s+[A-Za-z0-9._~+/=-]{8,}|\bsk-(?:proj-)?[A-Za-z0-9
 /** Digest includes every durable field: a later edit cannot inherit an earlier primary witness. */
 export function primaryEntryDigest(entry: TimelineEntry): string {
   return digest(JSON.stringify({ id: entry.id, seq: entry.seq, characterId: entry.characterId,
-    role: entry.role, content: entry.content, parts: entry.parts ?? null, createdAt: entry.createdAt }));
+    role: entry.role, content: entry.content, parts: entry.parts ?? null, createdAt: entry.createdAt,
+    ...(entry.sourceContext ? { sourceContext: entry.sourceContext } : {}) }));
 }
 
 export function sanitizeCommittedPrimarySpan(input: {
@@ -66,7 +90,7 @@ export function sanitizeCommittedPrimarySpan(input: {
     const text = conversationText(entry);
     if (text === null) { excludedRows += 1; continue; }
     messages.push(IngestionMessageSchema.parse({ id: entry.id, seq: entry.seq, role: entry.role,
-      text, createdAt: entry.createdAt }));
+      text, createdAt: entry.createdAt, ...(entry.sourceContext ? { sourceContext: entry.sourceContext } : {}) }));
   }
   return SanitizedCommittedSpanSchema.parse({ schemaVersion: 1, characterId: input.characterId,
     fromSeq: input.fromSeq, throughSeq: input.throughSeq, messages, excludedRows,
@@ -80,7 +104,8 @@ export function isSafeAutomaticMemoryText(text: string): boolean {
 
 export function renderIngestionSource(messages: readonly IngestionMessage[]): string {
   // Labels and dates are source framing. The eligible original wording stays byte-for-byte intact.
-  return messages.map((message) => `[${message.seq} ${message.createdAt}] ${message.role}: ${message.text}`).join("\n");
+  return messages.map((message) => [renderSourceContext(message.sourceContext),
+    `[${message.seq} ${message.createdAt}] ${message.role}: ${message.text}`].filter(Boolean).join("\n")).join("\n");
 }
 
 export function retainedIngestionSource(messages: readonly IngestionMessage[]) {
@@ -88,7 +113,8 @@ export function retainedIngestionSource(messages: readonly IngestionMessage[]) {
   const entries = messages.map((message, index) => {
     if (index > 0) offset += 1;
     const entry = { id: message.id, seq: message.seq, role: message.role, createdAt: message.createdAt,
-      utf16Start: offset, utf16Length: message.text.length };
+      utf16Start: offset, utf16Length: message.text.length,
+      ...(message.sourceContext ? { sourceContext: message.sourceContext } : {}) };
     offset += message.text.length;
     return entry;
   });

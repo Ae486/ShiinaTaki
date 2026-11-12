@@ -38,6 +38,7 @@ export interface CapabilityDispatchTarget {
   policyGeneration: number;
   governanceProjection: HostGovernanceProjection;
   operator?: { connection: Connection; signal?: AbortSignal };
+  signal?: AbortSignal;
   isCurrent(): boolean;
   ownerCurrent?: () => boolean;
 }
@@ -62,6 +63,7 @@ export interface PendingCapability {
   finish: (outcome: CapabilityOutcome) => void;
   timer: ReturnType<typeof setTimeout>;
   abortListener?: () => void;
+  executionAbortListener?: () => void;
   challenge?: PendingChallenge;
   authorization?: PendingAuthorization;
   effect?: { id: string; version: number; state: "waiting" | "intent_committed" };
@@ -110,6 +112,8 @@ export function settlePending(
   };
   state.pending.delete(requestId);
   clearTimeout(entry.timer);
+  entry.executionAbortListener?.();
+  entry.executionAbortListener = undefined;
   releaseChallenge(entry);
   rememberTerminal(state.terminal, requestId, { control: entry.control, authorization: entry.authorization, reason: terminal.terminalReason });
   // Effect settlement may downgrade success. Only its final outcome can reach an admission owner.

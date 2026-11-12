@@ -1,0 +1,41 @@
+{
+  "id": "agent-delegation-source-context",
+  "name": "agent-delegation-source-context",
+  "title": "Agent delegation and source-aware context",
+  "description": "Coordinate SDK upgrade, shared-runtime delegation, source-aware prompts and integrated acceptance under owner-authorized readiness gates.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-10-21",
+  "completedAt": null,
+  "branch": "task/t4-skills-mcp-productization",
+  "base_branch": "main",
+  "worktree_path": "H:/TakiAgent-worktrees/t4",
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-21-ai-sdk-upgrade-baseline",
+    "10-21-agent-delegation-runtime",
+    "10-21-agent-source-context",
+    "10-21-agent-context-acceptance"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Owner-authorized development continues under the reviewed child gates. Real-model E2E tests are explicitly authorized on 2026-10-22 with bounded cases and isolated test-owned state. No commit, push, archive, production publication or real-user data mutation is authorized.",
+  "meta": {
+    "scope": "coordinate_reviewed_development",
+    "production_implementation": "sdk_runtime_source_desktop_delivered; automatic_gate_passed; stopped_before_human",
+    "execution_gate": "authorized_subject_to_child_readiness",
+    "owner_authorization": "Optimize global rules first; enter development when preparation is complete (2026-10-21)",
+    "active_delivery": "10-21-agent-context-acceptance; session_binding_remains_runtime",
+    "real_model_e2e_authorization": "Explicit owner approval on 2026-10-22; bounded functional E2E testing with isolated test-owned state.",
+    "current_main_migration_gate": "not_passed_preexisting_049_plus_lineage_split; T4-only functional verification",
+    "parallel_delivery": "none; source_and_desktop_delivery_complete",
+    "acceptance_report": ".trellis/tasks/10-21-agent-context-acceptance/research/acceptance-before-human-20261023.md"
+  }
+}

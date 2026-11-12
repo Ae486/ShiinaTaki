@@ -1,32 +1,53 @@
 # lib/
+- ws-client-cache-usage.ts — Shared-validated whole-window cache subscription methods; no execution or reset authority
+- ws-client-maintenance-monitor.ts — Shared-validated background Monitor subscriptions, separate from normal Run and cache memberships
+- ws-client-model-profiles.ts — Shared-validated profile read/save/explicit test methods and retryable physical-client subscription; credentials are write-only
+- ws-client-subagents.ts — Shared-validated child read/control RPCs and retryable physical-client subscription; no mutation replay
+- ws-client-subagent-inbox.ts — Shared-validated bounded attention, explicit parent-event recovery/idempotent continuation and deliberate pre-intent retry RPCs
+- ws-client-initiative.ts — Shared-validated Pattern review/lifecycle, explicit setup, same-Monitor policy and separate backoff read/reset facade
+- ws-client-co-watching.ts — Shared-validated Co-Watching read/start/stop, contextual invitation read/respond and Character-specific retryable subscription setup
+- ws-client-presence.ts — Shared-validated presence and ordinary committed Timeline presentation-report RPC facade
+- ws-client-user-timezone.ts — Shared-validated Core timezone read/update/designated-source report RPC facade
 Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-shared services). Framework-free apart from
 icons/ (the shared glyph set) and the two window-shared React hooks below.
-- ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring, typed secret presence/clear and memory-operation/replica configuration families
-- ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval/monitor/memory-operation/replica configuration push routing) and the D29 mid-turn-close abort
-- ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence and write-only secret presence/clear
-- ws-client-memory-operations.ts — Shared-validated authority/activation, complete replica configure, transition preview/status/overview and operation wrappers; exact-once memory.operations.subscribe covers operation and replica invalidations per client.
+- ws-client.ts — authenticated operator WebSocket/JSON-RPC composition with exact initiating-request ACKs, handshake, typed secret/memory/configuration/monitor families and independent activity/commit observers
+- ws-client-binding.ts — transport lifecycle, JSON-RPC frame validation/dispatch, bounded socket-open waits and complete close/retire settlement, with a type-only Routes dependency
+- ws-client-routes.ts — strict typed chat/avatar/Timeline/Approval/monitor/memory/replica/Perception/extension/backoff/Co-Watching push routing; compatibility re-exports preserve the existing connection-owner API
+- ws-client-methods.ts — schema-validated operator methods, command-display echo validation, read-only activity recovery, exact-Run cancel, avatar.outcome and write-only secret presence/clear
+- ws-client-memory-operations.ts — Shared-validated authority/activation, complete replica configuration, transition preview/status/overview and durable operation wrappers; shared exact-once subscription with explicit retry after failed membership
 - ws-client-memory-onboarding.ts — outbound sibling: memory.onboarding.preview/status/exceptions/exclude wrappers and the exact-once memory.onboarding.subscribe (retryable after failure)
 - ws-client-hindsight-configuration.ts — strict optional configuration status/observe reads over the authenticated client; both use ordinary read deadlines and never invoke model health.
 - ws-client-hindsight-templates.ts — strict template preview, exact Bank consequences, status and one-child observation reads; apply/recover retain the existing durable operation adapter.
-- rpc-deadline.ts — method-class timing table and native JSON-RPC cleanup; transition reads use bounded long reads, while secret presence stays read-only and replica/secret writes retain unknown-outcome mutation semantics.
+- rpc-deadline.ts — native JSON-RPC timing/cleanup and typed deadline errors; bounded long transition reads, ordinary child/cache/secret reads and unknown-outcome replica/secret mutation semantics
+- ws-chat-turn.ts — bounded acknowledgement-race buffering, exact Character/message matching and one initiating-request settlement
+- chat-activity-state.ts — shared immutable Chat/Pet activity reducer, stable item keys and missing-sequence detection
+- chat-activity-coalescer.ts — per-generation/message/attempt/segment text cadence with immediate semantic boundaries and cancellable publication
+- chat-activity-recovery.ts — subscribe/read/live reconciliation, bounded races, explicit unavailable state, read-only gap recovery and disposal
+- tool-activity-display.ts — shared captured-name and truthful phase/outcome vocabulary for Chat and Pet
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
-- timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client
+- timing-policy-sync.ts — serialized last-good full-policy refresh after changes and recovered config membership
+- ws-config-methods.ts — retryable physical-client config subscription, bounded config.list sharing and separate Shared-validated model-capability reads
+- ws-read-subscriptions.ts — shared physical-client Perception/Extension subscriptions, strict acknowledgements, explicit unsupported-Core outcome and deliberate retry after setup failure
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
 - connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal
-- operator-auth.ts — shared Pet/Home/Chat authentication using the newest same-origin operator credential per generation
-- ws-transport.ts — browser-WebSocket wrapper behind a small transport interface (keeps ws-client node-testable)
+- operator-auth.ts — shared Pet/Home/Chat admission; native same-socket server proof precedes saved tokens and accepted client identity drives reporting
+- native-local-auth.ts — finite Tauri identity/proof boundary and per-generation native endpoint discovery transport
+- ws-transport.ts — browser-WebSocket wrapper with non-open send rejection before native dispatch; keeps ws-client node-testable and retired-socket RPCs bounded
 - device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
 - presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together
 - active-character.ts — the pet window's active character id (data; M5 #24 makes it selectable)
 - last-costume.ts — the last-worn costume per character (localStorage) so restarts re-wear it, not the default (M5 #24 moves this into real config)
 - costume-report-sync.ts — window-local synchronization health for committed costume reports; newer tickets prevent stale report outcomes from overwriting the current costume
-- costume-switch-attempt.ts — D61's cancellable whole-attempt controller: resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
+- costume-switch-attempt.ts — D61's cancellable whole-attempt controller: fresh costume metadata, resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
 - promise-timeout.ts — withTimeout(promise, ms, label): labeled rejection for loads that can wedge (costume switches / boot promotion)
-- character-asset-url.ts — costume identity + settings/per-resource asset URLs (convertFileSrc per file); unresolvable/`..` refs are stripped before the engine (#18)
+- character-asset-url.ts — settings/per-resource asset URLs rooted in the finite native-selected characters directory; unresolvable/`..` refs are stripped before the engine (#18)
+- costume-scene-event.ts — correlated Home reads of Pet's nullable live costume plus data-free scene invalidation; no persisted selection authority
 - open-home-window.ts — pet→home window opener: creates home.html at the requested page or restores, navigates and focuses the open one (single instance by label); also owns the home:navigate event name
 - costume-switch-event.ts — the BIDIRECTIONAL home↔pet costume seam: the three pet-scoped event names (switch / cancel / result), their emit helpers and the payload gates each side reads through (the live PetScene exists only in the pet window, so the page commands and the pet reports back)
 - use-tauri-event.ts — the shared window-event plumbing: one stable listener per event name, handler read through a ref, unlisten on unmount
-- use-cached-fetch.ts — the stale-while-revalidate seam every settings-family page loads through: last-good value first, background refresh, manual refresh, local mutate
-- cached-fetch-state.ts — pure core of that seam: the load lifecycle, and the rule that a REJECTED load keeps the last good value on screen behind an error line
+- use-cached-fetch.ts — guarded snapshot adapter with explicit demand/invalidation, pre-paint scope retirement and retained content
+- cached-fetch-state.ts — actual running/retired/error phases, cold versus retained loading and local view updates
+- read-coordinator.ts — one owned read and one trailing dirty obligation, truthful per-attempt busy state, retired-result guards and newer push/echo protection
+- read-observation.ts — effect-owned invalidation membership, handler-before-ack ordering, monotonic hints and retryable readiness without domain data authority
 - cache-persist.ts — what the page cache may keep on disk: the persist allow-list (perception/chat payloads excluded by construction), the secret-knob scrub, and the schema-checked read that drops a drifted entry
 - icons/ — self-drawn inline-SVG glyphs (no icon package, no imported asset): the shared Glyph frame + one file per glyph

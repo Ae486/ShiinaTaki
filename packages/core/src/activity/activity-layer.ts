@@ -1,11 +1,11 @@
 /**
- * INPUT:  a route fn (partial-applied routeCapability) + a Logger
- * OUTPUT: createActivityLayer(deps) -> { state, sampler }; the perception layer wired with its default cadence/bounds
- * POS:    core/activity — the single composition point + home of the deterministic defaults (D11 config-ize later);
- *         main.ts constructs one of these, starts the sampler, and renders state via render-activity.
+ * INPUT:  governed route, privacy predicates, Logger and optional data-free change observer
+ * OUTPUT: createActivityLayer(deps) -> { state, sampler } with unchanged cadence/dwell/bounds
+ * POS:    core/activity — composition of accepted-state and scheduled-loop producers for Perception
  */
 import type { Logger } from "../logging/logger.ts";
 import type { RouteResult } from "../capabilities/route-capability.ts";
+import type { PerceptionEvidence } from "../perception/perception-evidence.ts";
 import { createActivitySampler, type ActivitySampler } from "./activity-sampler.ts";
 import { createActivityState, type ActivityState } from "./activity-state.ts";
 
@@ -34,6 +34,8 @@ export interface ActivityLayerDeps {
   /** Sensitive-process skip (core/perception): forwarded verbatim; a hit drops the sample before it is stored. */
   isSensitive: (processName: string | null) => boolean;
   logger: Logger;
+  evidence?: PerceptionEvidence;
+  onChange?: () => void;
 }
 
 export interface ActivityLayer {
@@ -48,14 +50,16 @@ export function createActivityLayer(deps: ActivityLayerDeps): ActivityLayer {
     idleThresholdSeconds: DEFAULTS.idleThresholdSeconds,
     spanMs: DEFAULTS.spanMs,
     maxEntries: DEFAULTS.maxEntries,
-  });
+  }, deps.onChange);
   const sampler = createActivitySampler({
     route: deps.route,
     hasNode: deps.hasNode,
     isPaused: deps.isPaused,
     isSensitive: deps.isSensitive,
     state,
+    evidence: deps.evidence,
     logger: deps.logger,
+    onChange: deps.onChange,
     config: { pollMs: DEFAULTS.pollMs, errorBackoffThreshold: DEFAULTS.errorBackoffThreshold, maxBackoffMs: DEFAULTS.maxBackoffMs },
   });
   return { state, sampler };

@@ -8,27 +8,20 @@ import { execFile } from "node:child_process";
 import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PendingMemoryStateSchema } from "../../../../../packages/shared/src/index.ts";
-import { decodeHindsightMemoryWrite } from "../../../../../packages/core/src/db/hindsight-memory-write-storage.ts";
+import { readRetainWrite } from "./memory-tool-evidence.mjs";
 
 export function pendingWriteEvidence(ctx, run) {
   const db = new DatabaseSync(join(ctx.coreOptions.dataDir, "taki.db"), { readOnly: true });
   try {
-    const parents = db.prepare("SELECT * FROM hindsight_memory_write_intents WHERE authority_epoch_id = ? AND request_id = ?")
-      .all(ctx.epochId, run.retain.requestId);
-    assert.equal(parents.length, 1, "original retain must still have exactly one parent");
-    const parent = decodeHindsightMemoryWrite(parents[0]);
-    const children = db.prepare("SELECT sequence, state_json FROM pending_memory WHERE authority_epoch_id = ? AND bank_id = ? AND operation_id = ?")
-      .all(ctx.epochId, parent.identity.key.bankId, parent.nativeOperationId);
-    assert.equal(children.length, 1, "original retain must still have exactly one child");
-    const child = PendingMemoryStateSchema.parse(JSON.parse(children[0].state_json));
+    assert.equal(run.memoryEffect.authorityEpochId, ctx.epochId, "original retain belongs to another authority");
+    const { parentRow, parent, childRow, child } = readRetainWrite(db, run.memoryEffect);
     return {
       identity: { parent: { ...parent.identity.key, sequence: parent.sequence, intentHash: parent.intentHash,
         nativeOperationId: parent.nativeOperationId, namespace: parent.identity.namespace },
-      child: { sequence: children[0].sequence, operationId: child.intent.operationId, intentHash: child.intentHash,
+      child: { sequence: childRow.sequence, operationId: child.intent.operationId, intentHash: child.intentHash,
         remoteOperationId: child.remoteOperationId, createdAt: child.createdAt, originalAt: child.intent.originalAt,
         providerLineageId: child.intent.providerLineageId, bankGeneration: child.intent.bankGeneration } },
-      parentState: parents[0].state, childPhase: child.phase, diagnosticCode: child.diagnosticCode,
+      parentState: parentRow.state, childPhase: child.phase, diagnosticCode: child.diagnosticCode,
       documentId: child.documentId, content: parent.identity.operation.request.content,
     };
   } finally { db.close(); }

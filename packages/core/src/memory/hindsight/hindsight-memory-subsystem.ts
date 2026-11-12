@@ -18,6 +18,8 @@ import { createMemoryAutoRepo } from "../../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../../db/memory-events-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import type { TimelineRepo } from "../../db/timeline-repo.ts";
+import type { PrimaryConversationSourceRepo } from "../../db/primary-conversation-source-repo.ts";
+import { captureHindsightIngestionBinding } from "./hindsight-recall-evidence.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 import type { AutoMemoryMaintenance } from "../auto-memory.ts";
@@ -51,6 +53,9 @@ interface Input {
   reviewActivity?: Pick<TurnRegistry, "idleSince" | "observe">;
   configChanges?: Pick<ConfigSubscriptions, "observe">;
   onPolicyReviewChanged?: (bankId: string) => void;
+  captureConfig?: () => MemoryConfig;
+  currentPromptDir?: () => string;
+  primarySources?: PrimaryConversationSourceRepo;
 }
 
 export function createHindsightMemorySubsystem(input: Input) {
@@ -62,6 +67,7 @@ export function createHindsightMemorySubsystem(input: Input) {
   const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now, workFence,
     onReplicaApplied: (bankId) => scheduler.rearmPolicy("replica", bankId) });
   const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir,
+    currentPromptDir: input.currentPromptDir, captureConfig: input.captureConfig,
     admissionBudgetMs: () => admissionBudgetMs(input.source, runtime.connection.requestTimeoutMs),
     onUnavailable: (event) => {
       input.logger.warn({ characterId: event.characterId, code: event.reason }, "Hindsight Run admitted without memory");
@@ -69,9 +75,11 @@ export function createHindsightMemorySubsystem(input: Input) {
     },
     onSynced: () => reconnectAfterForegroundSync(scheduler, input.logger), onSync: (event) => logCaptureSync(input.logger, event) });
   const journal = createHindsightIngestionRepo({ db: input.db, pending: state.pending,
+    captureBinding: captureHindsightIngestionBinding(state.replica, input.db),
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
   const ingestion = createHindsightIngestion({ authority: runtime.authority, journal, timeline: input.timeline,
-    slot: input.utility, provider: state.provider, resolveBanks: runtime.resolveBanks, config: input.config, now: input.now });
+    slot: input.utility, provider: state.provider, resolveBanks: runtime.resolveBanks, config: input.config, now: input.now,
+    primarySources: input.primarySources });
   const { curator, policy } = policyMaintenance({ ...input, onPolicyReviewChanged: (bankId) => reviewChanged?.(bankId) },
     { state, writeFence, workFence });
   const scheduleRepo = createHindsightReplicaSchedulerRepo(input.db, input.now);
@@ -81,16 +89,7 @@ export function createHindsightMemorySubsystem(input: Input) {
     input.configChanges?.observe(() => scheduler.rearmPolicy("config"))];
   state.writes.setRetryScheduler(scheduler);
   const tidy = createTidyAdapter({ state, curator, view: foreground.tidy, logger: input.logger });
-  const maintenance: AutoMemoryMaintenance = { run: async (characterId, origin) => {
-    runtime.assertConnection();
-    // A Character without a routed Bank has nothing to ingest into or curate: no Utility model call, no failure log. Its
-    // witnesses stay in the source ledger until the Bank is ready.
-    if (!runtime.characterRouted(characterId)) return;
-    if (origin === "primary") {
-      try { await ingestion.maybeRun({ characterId }); }
-      catch { input.logger.warn({ characterId, code: "MEMORY_INGESTION_FAILED" }, "Hindsight source ingestion will retry"); }
-    }
-  } };
+  const maintenance = createSourceMaintenance(runtime, ingestion, input.logger);
   const memoryFlush = routedFlushPort(runtime, ingestion);
   const writers = fenceHindsightWriters({ engine: foreground.engine, maintenance, memoryFlush, tidy,
     writeMemory: createHindsightObservedWriter(state),
@@ -101,10 +100,25 @@ export function createHindsightMemorySubsystem(input: Input) {
       return drift === "none" ? foreground.captureRun(characterId, signal) : foreground.unavailableRun(characterId, drift);
     } }, writeFence, () => sourceTransition(input.db, input.epochId) !== undefined);
   return { ...writers, snapshot: foreground.snapshot, state, ingestion, curator, scheduler, writeFence, workFence,
+    importPrimarySources: ingestion.importPrimarySources,
     start: () => { runtime.assertConnection(); scheduler.start(); },
     stop: () => { reviewChanged = undefined; for (const unsubscribe of subscriptions) unsubscribe?.();
       writeFence.retire(); workFence.retire(); return stopSubsystem({ state, ingestion, curator, scheduler, foreground }); },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
+}
+
+function createSourceMaintenance(runtime: ReturnType<typeof createHindsightRuntimeConnection>,
+  ingestion: ReturnType<typeof createHindsightIngestion>, logger: Logger): AutoMemoryMaintenance {
+  return { run: async (characterId, origin) => {
+    runtime.assertConnection();
+    // A Character without a routed Bank has nothing to ingest into or curate: no Utility model call, no failure log. Its
+    // witnesses stay in the source ledger until the Bank is ready.
+    if (!runtime.characterRouted(characterId)) return;
+    if (origin === "primary") {
+      try { await ingestion.maybeRun({ characterId }); }
+      catch { logger.warn({ characterId, code: "MEMORY_INGESTION_FAILED" }, "Hindsight source ingestion will retry"); }
+    }
+  } };
 }
 
 /** Unrouted or held source retirement stays refused, preserving its uncovered Timeline witnesses. */
@@ -194,7 +208,7 @@ function policyMaintenance(input: Input, owners: { state: HindsightRuntimeState;
     slot: input.utility, resolveBanks: (id) => id === null ? runtime.banks().filter((bank) => bank.scope === "global") : runtime.resolveBanks(id),
     publish: writeFence.admit, readBlock: state.blocks.read, now: input.now,
     refreshBank: (bankId, context, receiptTarget) => state.service.synchronize({ bankId, context, receiptTarget }),
-    config: () => ({ memory: input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) };
+    config: () => ({ memory: input.captureConfig?.() ?? input.config, policy: loadHindsightPolicyConfig(input.source.env()) }) };
   const curator = createHindsightPolicyCurator(curatorDeps);
   const policy = createHindsightPolicySchedule({ db: input.db, deps: curatorDeps, curator,
     config: () => loadHindsightPolicyReviewConfig(input.source.env()), timezone: createScheduledTaskRepo(input.db).userTimezone,

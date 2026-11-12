@@ -1,0 +1,850 @@
+[
+  {
+    "name": "add-tool-results-to-conversation.ts",
+    "path": "packages/workflow/src/add-tool-results-to-conversation.ts",
+    "sha": "a423adc62d6b523b062dda215a38b2d3eca3a640",
+    "size": 3161,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/add-tool-results-to-conversation.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/add-tool-results-to-conversation.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/a423adc62d6b523b062dda215a38b2d3eca3a640",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/add-tool-results-to-conversation.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/add-tool-results-to-conversation.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/a423adc62d6b523b062dda215a38b2d3eca3a640",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/add-tool-results-to-conversation.ts"
+    }
+  },
+  {
+    "name": "build-model-step-result.ts",
+    "path": "packages/workflow/src/build-model-step-result.ts",
+    "sha": "ef6df86108b402dd8c8cdf12a2f7f773e119c45c",
+    "size": 10856,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/build-model-step-result.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/build-model-step-result.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/ef6df86108b402dd8c8cdf12a2f7f773e119c45c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/build-model-step-result.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/build-model-step-result.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/ef6df86108b402dd8c8cdf12a2f7f773e119c45c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/build-model-step-result.ts"
+    }
+  },
+  {
+    "name": "client.ts",
+    "path": "packages/workflow/src/client.ts",
+    "sha": "447fcb24cce79546e10df5e16350baa078dee3a1",
+    "size": 171,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/client.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/client.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/447fcb24cce79546e10df5e16350baa078dee3a1",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/client.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/client.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/447fcb24cce79546e10df5e16350baa078dee3a1",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/client.ts"
+    }
+  },
+  {
+    "name": "create-language-model-tool-result-output.ts",
+    "path": "packages/workflow/src/create-language-model-tool-result-output.ts",
+    "sha": "8b2b7f83539f519dcf6aca06ea3a9277b200198c",
+    "size": 2452,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/create-language-model-tool-result-output.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/create-language-model-tool-result-output.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/8b2b7f83539f519dcf6aca06ea3a9277b200198c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/create-language-model-tool-result-output.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/create-language-model-tool-result-output.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/8b2b7f83539f519dcf6aca06ea3a9277b200198c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/create-language-model-tool-result-output.ts"
+    }
+  },
+  {
+    "name": "do-generate-step.test.ts",
+    "path": "packages/workflow/src/do-generate-step.test.ts",
+    "sha": "da36859e3439a57dae06697e283c0bfc72539fda",
+    "size": 7634,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-generate-step.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-generate-step.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/da36859e3439a57dae06697e283c0bfc72539fda",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-generate-step.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-generate-step.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/da36859e3439a57dae06697e283c0bfc72539fda",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-generate-step.test.ts"
+    }
+  },
+  {
+    "name": "do-generate-step.ts",
+    "path": "packages/workflow/src/do-generate-step.ts",
+    "sha": "139206a46689d7d73ff64ee2180246bfe99853ca",
+    "size": 9335,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-generate-step.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-generate-step.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/139206a46689d7d73ff64ee2180246bfe99853ca",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-generate-step.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-generate-step.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/139206a46689d7d73ff64ee2180246bfe99853ca",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-generate-step.ts"
+    }
+  },
+  {
+    "name": "do-stream-step.test.ts",
+    "path": "packages/workflow/src/do-stream-step.test.ts",
+    "sha": "e849bd75f2dfc33df733057bc703184eb18381f6",
+    "size": 22774,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-stream-step.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-stream-step.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/e849bd75f2dfc33df733057bc703184eb18381f6",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-stream-step.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-stream-step.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/e849bd75f2dfc33df733057bc703184eb18381f6",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-stream-step.test.ts"
+    }
+  },
+  {
+    "name": "do-stream-step.ts",
+    "path": "packages/workflow/src/do-stream-step.ts",
+    "sha": "13d6e635b673b30a8888a7c26885049ff94f647e",
+    "size": 20752,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-stream-step.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-stream-step.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/13d6e635b673b30a8888a7c26885049ff94f647e",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-stream-step.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/do-stream-step.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/13d6e635b673b30a8888a7c26885049ff94f647e",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/do-stream-step.ts"
+    }
+  },
+  {
+    "name": "generate-video.integration.test.ts",
+    "path": "packages/workflow/src/generate-video.integration.test.ts",
+    "sha": "e643566d03e6f769f30d6ebbb6f861e106157895",
+    "size": 627,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/generate-video.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/e643566d03e6f769f30d6ebbb6f861e106157895",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/generate-video.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/e643566d03e6f769f30d6ebbb6f861e106157895",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.integration.test.ts"
+    }
+  },
+  {
+    "name": "generate-video.test.ts",
+    "path": "packages/workflow/src/generate-video.test.ts",
+    "sha": "160693934ebd4bed2a5f6059bc9a31e45b3869b1",
+    "size": 6910,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/generate-video.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/160693934ebd4bed2a5f6059bc9a31e45b3869b1",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/generate-video.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/160693934ebd4bed2a5f6059bc9a31e45b3869b1",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.test.ts"
+    }
+  },
+  {
+    "name": "generate-video.ts",
+    "path": "packages/workflow/src/generate-video.ts",
+    "sha": "ba3125051a78aa306991f6973768ea41b0186f6c",
+    "size": 3085,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/generate-video.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/ba3125051a78aa306991f6973768ea41b0186f6c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/generate-video.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/ba3125051a78aa306991f6973768ea41b0186f6c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/generate-video.ts"
+    }
+  },
+  {
+    "name": "index.ts",
+    "path": "packages/workflow/src/index.ts",
+    "sha": "51032121be3b6cb4651ef2421fb44c2c7653f304",
+    "size": 1666,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/index.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/index.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/51032121be3b6cb4651ef2421fb44c2c7653f304",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/index.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/index.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/51032121be3b6cb4651ef2421fb44c2c7653f304",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/index.ts"
+    }
+  },
+  {
+    "name": "language-model-prompt-to-model-messages.test.ts",
+    "path": "packages/workflow/src/language-model-prompt-to-model-messages.test.ts",
+    "sha": "752f69524aee2117f027ed0fe11488ef69a2a66c",
+    "size": 1450,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/language-model-prompt-to-model-messages.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/language-model-prompt-to-model-messages.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/752f69524aee2117f027ed0fe11488ef69a2a66c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/language-model-prompt-to-model-messages.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/language-model-prompt-to-model-messages.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/752f69524aee2117f027ed0fe11488ef69a2a66c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/language-model-prompt-to-model-messages.test.ts"
+    }
+  },
+  {
+    "name": "language-model-prompt-to-model-messages.ts",
+    "path": "packages/workflow/src/language-model-prompt-to-model-messages.ts",
+    "sha": "265bc9a743ffb1ee033a6d4df8ac0026127834c8",
+    "size": 973,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/language-model-prompt-to-model-messages.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/language-model-prompt-to-model-messages.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/265bc9a743ffb1ee033a6d4df8ac0026127834c8",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/language-model-prompt-to-model-messages.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/language-model-prompt-to-model-messages.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/265bc9a743ffb1ee033a6d4df8ac0026127834c8",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/language-model-prompt-to-model-messages.ts"
+    }
+  },
+  {
+    "name": "model-call-iterator.test.ts",
+    "path": "packages/workflow/src/model-call-iterator.test.ts",
+    "sha": "ec974264bcd11864a73684f8437e3815f0c0b9e4",
+    "size": 60817,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-iterator.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-iterator.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/ec974264bcd11864a73684f8437e3815f0c0b9e4",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-iterator.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-iterator.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/ec974264bcd11864a73684f8437e3815f0c0b9e4",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-iterator.test.ts"
+    }
+  },
+  {
+    "name": "model-call-iterator.ts",
+    "path": "packages/workflow/src/model-call-iterator.ts",
+    "sha": "1a2797f6b5f1155e93024e11143fd0cc26ef7ff8",
+    "size": 34971,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-iterator.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-iterator.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/1a2797f6b5f1155e93024e11143fd0cc26ef7ff8",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-iterator.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-iterator.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/1a2797f6b5f1155e93024e11143fd0cc26ef7ff8",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-iterator.ts"
+    }
+  },
+  {
+    "name": "model-call-payload.integration.test.ts",
+    "path": "packages/workflow/src/model-call-payload.integration.test.ts",
+    "sha": "2215623271773375c36d9a71c53d74c5f6b768f9",
+    "size": 1920,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-payload.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-payload.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/2215623271773375c36d9a71c53d74c5f6b768f9",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-payload.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-payload.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/2215623271773375c36d9a71c53d74c5f6b768f9",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-payload.integration.test.ts"
+    }
+  },
+  {
+    "name": "model-call-telemetry.ts",
+    "path": "packages/workflow/src/model-call-telemetry.ts",
+    "sha": "ac518d7743b917b1ac11f2ed9ed43d4b46e85254",
+    "size": 5143,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-telemetry.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-telemetry.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/ac518d7743b917b1ac11f2ed9ed43d4b46e85254",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-telemetry.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call-telemetry.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/ac518d7743b917b1ac11f2ed9ed43d4b46e85254",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call-telemetry.ts"
+    }
+  },
+  {
+    "name": "model-call.ts",
+    "path": "packages/workflow/src/model-call.ts",
+    "sha": "acf54e2c428ce0e2f3f58fe07762a03cb6d2e3ec",
+    "size": 6729,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/acf54e2c428ce0e2f3f58fe07762a03cb6d2e3ec",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/model-call.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/acf54e2c428ce0e2f3f58fe07762a03cb6d2e3ec",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/model-call.ts"
+    }
+  },
+  {
+    "name": "normalize-ui-message-stream.ts",
+    "path": "packages/workflow/src/normalize-ui-message-stream.ts",
+    "sha": "42e314cf99771ee19b94b5eba8509d50f4c99c7f",
+    "size": 6059,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/normalize-ui-message-stream.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/normalize-ui-message-stream.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/42e314cf99771ee19b94b5eba8509d50f4c99c7f",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/normalize-ui-message-stream.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/normalize-ui-message-stream.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/42e314cf99771ee19b94b5eba8509d50f4c99c7f",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/normalize-ui-message-stream.ts"
+    }
+  },
+  {
+    "name": "providers",
+    "path": "packages/workflow/src/providers",
+    "sha": "bf5943b594e969be92ebf609a109681c2b636681",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/providers?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/providers",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/bf5943b594e969be92ebf609a109681c2b636681",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/providers?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/bf5943b594e969be92ebf609a109681c2b636681",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/providers"
+    }
+  },
+  {
+    "name": "resolve-tool-context.ts",
+    "path": "packages/workflow/src/resolve-tool-context.ts",
+    "sha": "f4257faab0a8b95a522a73cbfec040239daec15e",
+    "size": 754,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/resolve-tool-context.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/resolve-tool-context.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/f4257faab0a8b95a522a73cbfec040239daec15e",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/resolve-tool-context.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/resolve-tool-context.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/f4257faab0a8b95a522a73cbfec040239daec15e",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/resolve-tool-context.ts"
+    }
+  },
+  {
+    "name": "serializable-schema.test.ts",
+    "path": "packages/workflow/src/serializable-schema.test.ts",
+    "sha": "d7b801c4b15141a75889c9515bb732da7c615983",
+    "size": 11084,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/serializable-schema.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/serializable-schema.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/d7b801c4b15141a75889c9515bb732da7c615983",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/serializable-schema.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/serializable-schema.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/d7b801c4b15141a75889c9515bb732da7c615983",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/serializable-schema.test.ts"
+    }
+  },
+  {
+    "name": "serializable-schema.ts",
+    "path": "packages/workflow/src/serializable-schema.ts",
+    "sha": "f21b5d5de2955c04fddeba61667e9446c0d897c8",
+    "size": 8652,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/serializable-schema.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/serializable-schema.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/f21b5d5de2955c04fddeba61667e9446c0d897c8",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/serializable-schema.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/serializable-schema.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/f21b5d5de2955c04fddeba61667e9446c0d897c8",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/serializable-schema.ts"
+    }
+  },
+  {
+    "name": "test",
+    "path": "packages/workflow/src/test",
+    "sha": "603faf51cbd1bdf10d15c3c5053314d186a585fe",
+    "size": 0,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/test?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/test",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/trees/603faf51cbd1bdf10d15c3c5053314d186a585fe",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/test?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/trees/603faf51cbd1bdf10d15c3c5053314d186a585fe",
+      "html": "https://github.com/vercel/ai/tree/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/test"
+    }
+  },
+  {
+    "name": "to-model-response-messages.ts",
+    "path": "packages/workflow/src/to-model-response-messages.ts",
+    "sha": "16bb9591740272d29ef7c48d3c82a8a2ba32840c",
+    "size": 972,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/to-model-response-messages.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-model-response-messages.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/16bb9591740272d29ef7c48d3c82a8a2ba32840c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-model-response-messages.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/to-model-response-messages.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/16bb9591740272d29ef7c48d3c82a8a2ba32840c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-model-response-messages.ts"
+    }
+  },
+  {
+    "name": "to-ui-message-chunk.test.ts",
+    "path": "packages/workflow/src/to-ui-message-chunk.test.ts",
+    "sha": "3ecf976948f94e65cd7fad880b52ab1b26261100",
+    "size": 7698,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/to-ui-message-chunk.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-ui-message-chunk.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/3ecf976948f94e65cd7fad880b52ab1b26261100",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-ui-message-chunk.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/to-ui-message-chunk.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/3ecf976948f94e65cd7fad880b52ab1b26261100",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-ui-message-chunk.test.ts"
+    }
+  },
+  {
+    "name": "to-ui-message-chunk.ts",
+    "path": "packages/workflow/src/to-ui-message-chunk.ts",
+    "sha": "6599d48eab608cf8b3643fd67b2ae5b19a043ceb",
+    "size": 7810,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/to-ui-message-chunk.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-ui-message-chunk.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/6599d48eab608cf8b3643fd67b2ae5b19a043ceb",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-ui-message-chunk.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/to-ui-message-chunk.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/6599d48eab608cf8b3643fd67b2ae5b19a043ceb",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/to-ui-message-chunk.ts"
+    }
+  },
+  {
+    "name": "types.ts",
+    "path": "packages/workflow/src/types.ts",
+    "sha": "9be64917fec9e5543d2e290a229abfc5a186694c",
+    "size": 270,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/types.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/types.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/9be64917fec9e5543d2e290a229abfc5a186694c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/types.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/types.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/9be64917fec9e5543d2e290a229abfc5a186694c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/types.ts"
+    }
+  },
+  {
+    "name": "video.ts",
+    "path": "packages/workflow/src/video.ts",
+    "sha": "5ed4694cd52c2c99d76a62632f9aeb96f0138055",
+    "size": 142,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/video.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/video.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/5ed4694cd52c2c99d76a62632f9aeb96f0138055",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/video.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/video.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/5ed4694cd52c2c99d76a62632f9aeb96f0138055",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/video.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-approval.integration.test.ts",
+    "path": "packages/workflow/src/workflow-agent-approval.integration.test.ts",
+    "sha": "a59530e8d0b8a0180115baa7b3ed9e39bc6c2020",
+    "size": 4309,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-approval.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-approval.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/a59530e8d0b8a0180115baa7b3ed9e39bc6c2020",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-approval.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-approval.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/a59530e8d0b8a0180115baa7b3ed9e39bc6c2020",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-approval.integration.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-approval.test.ts",
+    "path": "packages/workflow/src/workflow-agent-approval.test.ts",
+    "sha": "e9af66a6d6d7f39c454449058821c31eed20c073",
+    "size": 17968,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-approval.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-approval.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/e9af66a6d6d7f39c454449058821c31eed20c073",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-approval.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-approval.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/e9af66a6d6d7f39c454449058821c31eed20c073",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-approval.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-boundaries.integration.test.ts",
+    "path": "packages/workflow/src/workflow-agent-boundaries.integration.test.ts",
+    "sha": "34aa68a6ebe9786c0cb769d3018b3a2b83d71c34",
+    "size": 6474,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-boundaries.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-boundaries.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/34aa68a6ebe9786c0cb769d3018b3a2b83d71c34",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-boundaries.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-boundaries.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/34aa68a6ebe9786c0cb769d3018b3a2b83d71c34",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-boundaries.integration.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-compat.test.ts",
+    "path": "packages/workflow/src/workflow-agent-compat.test.ts",
+    "sha": "00614fe6779f074f8ee384365cf74562cfcbff0b",
+    "size": 89894,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-compat.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-compat.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/00614fe6779f074f8ee384365cf74562cfcbff0b",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-compat.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-compat.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/00614fe6779f074f8ee384365cf74562cfcbff0b",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-compat.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-concurrency.test.ts",
+    "path": "packages/workflow/src/workflow-agent-concurrency.test.ts",
+    "sha": "75744fa4e6d7e5ff36fd8761dba36741c6790f75",
+    "size": 8611,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-concurrency.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-concurrency.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/75744fa4e6d7e5ff36fd8761dba36741c6790f75",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-concurrency.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-concurrency.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/75744fa4e6d7e5ff36fd8761dba36741c6790f75",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-concurrency.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-contract.test.ts",
+    "path": "packages/workflow/src/workflow-agent-contract.test.ts",
+    "sha": "f116f1748675f512820de8078bbf316981c8ae36",
+    "size": 13160,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-contract.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-contract.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/f116f1748675f512820de8078bbf316981c8ae36",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-contract.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-contract.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/f116f1748675f512820de8078bbf316981c8ae36",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-contract.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-e2e.integration.test.ts",
+    "path": "packages/workflow/src/workflow-agent-e2e.integration.test.ts",
+    "sha": "75c090fd93ce3b644dec399db9051b48c7040e4f",
+    "size": 13150,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-e2e.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-e2e.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/75c090fd93ce3b644dec399db9051b48c7040e4f",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-e2e.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-e2e.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/75c090fd93ce3b644dec399db9051b48c7040e4f",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-e2e.integration.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-file-source-retention.test.ts",
+    "path": "packages/workflow/src/workflow-agent-file-source-retention.test.ts",
+    "sha": "01181f8dab725ed9b85168c910bcb0c6017752ea",
+    "size": 2942,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-file-source-retention.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-file-source-retention.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/01181f8dab725ed9b85168c910bcb0c6017752ea",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-file-source-retention.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-file-source-retention.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/01181f8dab725ed9b85168c910bcb0c6017752ea",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-file-source-retention.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-generate.test-d.ts",
+    "path": "packages/workflow/src/workflow-agent-generate.test-d.ts",
+    "sha": "7f8518e008745d5ef1a83f14ca2feab712cbd31a",
+    "size": 2889,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-generate.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-generate.test-d.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/7f8518e008745d5ef1a83f14ca2feab712cbd31a",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-generate.test-d.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-generate.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/7f8518e008745d5ef1a83f14ca2feab712cbd31a",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-generate.test-d.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-generate.test.ts",
+    "path": "packages/workflow/src/workflow-agent-generate.test.ts",
+    "sha": "56630c3176997c71210c654a67f6a0b2377f8614",
+    "size": 18534,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-generate.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-generate.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/56630c3176997c71210c654a67f6a0b2377f8614",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-generate.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-generate.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/56630c3176997c71210c654a67f6a0b2377f8614",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-generate.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-response-format.test.ts",
+    "path": "packages/workflow/src/workflow-agent-response-format.test.ts",
+    "sha": "8496473eeac7b7d5ae6a7e79fbe48f46c14d0245",
+    "size": 2050,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-response-format.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-response-format.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/8496473eeac7b7d5ae6a7e79fbe48f46c14d0245",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-response-format.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-response-format.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/8496473eeac7b7d5ae6a7e79fbe48f46c14d0245",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-response-format.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-stream-error.test.ts",
+    "path": "packages/workflow/src/workflow-agent-stream-error.test.ts",
+    "sha": "6174fc3a85a272091b0967006e16adacf4232e3c",
+    "size": 5025,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-stream-error.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-stream-error.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/6174fc3a85a272091b0967006e16adacf4232e3c",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-stream-error.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-stream-error.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/6174fc3a85a272091b0967006e16adacf4232e3c",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-stream-error.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-telemetry.integration.test.ts",
+    "path": "packages/workflow/src/workflow-agent-telemetry.integration.test.ts",
+    "sha": "f48bd6d4d2347e105fb66307351e6f6c74bec6bc",
+    "size": 5135,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-telemetry.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-telemetry.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/f48bd6d4d2347e105fb66307351e6f6c74bec6bc",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-telemetry.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-telemetry.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/f48bd6d4d2347e105fb66307351e6f6c74bec6bc",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-telemetry.integration.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent-transform.test.ts",
+    "path": "packages/workflow/src/workflow-agent-transform.test.ts",
+    "sha": "c85c6e3b91a2b4f206b09f5615b5fea618eb2dd1",
+    "size": 3073,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-transform.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-transform.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/c85c6e3b91a2b4f206b09f5615b5fea618eb2dd1",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-transform.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent-transform.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/c85c6e3b91a2b4f206b09f5615b5fea618eb2dd1",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent-transform.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent.test-d.ts",
+    "path": "packages/workflow/src/workflow-agent.test-d.ts",
+    "sha": "5943ead806596d2c5145b55a9e43cec1dc69325b",
+    "size": 15758,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.test-d.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/5943ead806596d2c5145b55a9e43cec1dc69325b",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.test-d.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent.test-d.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/5943ead806596d2c5145b55a9e43cec1dc69325b",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.test-d.ts"
+    }
+  },
+  {
+    "name": "workflow-agent.test.ts",
+    "path": "packages/workflow/src/workflow-agent.test.ts",
+    "sha": "c4231489016ebb5492e3e782befc99a56bb26bd6",
+    "size": 154726,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/c4231489016ebb5492e3e782befc99a56bb26bd6",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/c4231489016ebb5492e3e782befc99a56bb26bd6",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.test.ts"
+    }
+  },
+  {
+    "name": "workflow-agent.ts",
+    "path": "packages/workflow/src/workflow-agent.ts",
+    "sha": "9a4670c22e76005ede8c184360d5ba62b15a04b2",
+    "size": 126124,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/9a4670c22e76005ede8c184360d5ba62b15a04b2",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-agent.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/9a4670c22e76005ede8c184360d5ba62b15a04b2",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-agent.ts"
+    }
+  },
+  {
+    "name": "workflow-chat-transport.stream-repair.test.ts",
+    "path": "packages/workflow/src/workflow-chat-transport.stream-repair.test.ts",
+    "sha": "d9c912ead1ace541c6206a8f751c53862030b146",
+    "size": 7807,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-chat-transport.stream-repair.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.stream-repair.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/d9c912ead1ace541c6206a8f751c53862030b146",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.stream-repair.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-chat-transport.stream-repair.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/d9c912ead1ace541c6206a8f751c53862030b146",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.stream-repair.test.ts"
+    }
+  },
+  {
+    "name": "workflow-chat-transport.test.ts",
+    "path": "packages/workflow/src/workflow-chat-transport.test.ts",
+    "sha": "0e3804beea22cd9c7d7924130e22ed3ff166e864",
+    "size": 38453,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-chat-transport.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/0e3804beea22cd9c7d7924130e22ed3ff166e864",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-chat-transport.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/0e3804beea22cd9c7d7924130e22ed3ff166e864",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.test.ts"
+    }
+  },
+  {
+    "name": "workflow-chat-transport.ts",
+    "path": "packages/workflow/src/workflow-chat-transport.ts",
+    "sha": "5f44e40eb8e9714ec8844cfcdaa1d6e4f420802b",
+    "size": 20566,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-chat-transport.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/5f44e40eb8e9714ec8844cfcdaa1d6e4f420802b",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-chat-transport.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/5f44e40eb8e9714ec8844cfcdaa1d6e4f420802b",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-chat-transport.ts"
+    }
+  },
+  {
+    "name": "workflow-execution-result.test.ts",
+    "path": "packages/workflow/src/workflow-execution-result.test.ts",
+    "sha": "90db48aa9673ce1ec21bea1698f5ff65b6796add",
+    "size": 2119,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-execution-result.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-execution-result.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/90db48aa9673ce1ec21bea1698f5ff65b6796add",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-execution-result.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-execution-result.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/90db48aa9673ce1ec21bea1698f5ff65b6796add",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-execution-result.test.ts"
+    }
+  },
+  {
+    "name": "workflow-execution-result.ts",
+    "path": "packages/workflow/src/workflow-execution-result.ts",
+    "sha": "86f3d278b0dc1a4bf4cbcdc9bb0579244b896646",
+    "size": 1650,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-execution-result.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-execution-result.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/86f3d278b0dc1a4bf4cbcdc9bb0579244b896646",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-execution-result.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-execution-result.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/86f3d278b0dc1a4bf4cbcdc9bb0579244b896646",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-execution-result.ts"
+    }
+  },
+  {
+    "name": "workflow-smoke.integration.test.ts",
+    "path": "packages/workflow/src/workflow-smoke.integration.test.ts",
+    "sha": "5d17bb74f3a69e60ef1f186f1075dd793cfa7a66",
+    "size": 565,
+    "url": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-smoke.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+    "html_url": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-smoke.integration.test.ts",
+    "git_url": "https://api.github.com/repos/vercel/ai/git/blobs/5d17bb74f3a69e60ef1f186f1075dd793cfa7a66",
+    "download_url": "https://raw.githubusercontent.com/vercel/ai/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-smoke.integration.test.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/vercel/ai/contents/packages/workflow/src/workflow-smoke.integration.test.ts?ref=e6230e43ba9def164550eea562c457e23be9efa6",
+      "git": "https://api.github.com/repos/vercel/ai/git/blobs/5d17bb74f3a69e60ef1f186f1075dd793cfa7a66",
+      "html": "https://github.com/vercel/ai/blob/e6230e43ba9def164550eea562c457e23be9efa6/packages/workflow/src/workflow-smoke.integration.test.ts"
+    }
+  }
+]

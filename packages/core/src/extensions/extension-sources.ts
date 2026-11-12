@@ -1,12 +1,12 @@
 /**
  * INPUT:  live Skill/MCP catalogs, authenticated Host catalogs, and existing governed tool/route adapters
- * OUTPUT: host-qualified ExtensionCandidate snapshots plus captured direct MCP compatibility tools
+ * OUTPUT: host-qualified candidates plus direct MCP tools and names captured in the same snapshot iteration
  * POS:    core/extensions — adapter layer; it reuses lifecycle/governance authority and adds no execution path
  */
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { Tool, ToolExecutionOptions, ToolSet } from "ai";
-import type { ExtensionHostSnapshot } from "@taki/shared";
+import { captureToolDisplayNames, formatMcpToolDisplayName, type ExtensionHostSnapshot } from "@taki/shared";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import type { HostCatalogStore, LiveHostCatalog } from "../hosts/host-catalog.ts";
 import type { McpManager, McpToolSnapshot } from "../mcp/mcp-manager.ts";
@@ -17,12 +17,16 @@ import { createReadSkillResourceTool } from "../skills/read-skill-resource-tool.
 import type { SkillsLoader } from "../skills/skills-loader.ts";
 import type { ExtensionCandidate } from "./extension-registry.ts";
 import { routeExtensionTransfer } from "./extension-transfer.ts";
+import type { CapabilityRouteRequest } from "../capabilities/route-capability.ts";
+import { governedExecutionContext } from "../governance/captured-tool-execution.ts";
+import { retainContentOrigin } from "../agents/context-attribution.ts";
 
-type CapabilityRoute = (request: { capabilityId: string; input: unknown; targetHostId: string }) => Promise<unknown>;
+type CapabilityRoute = (request: CapabilityRouteRequest & { targetHostId: string }) => Promise<unknown>;
 
 export interface McpExtensionSnapshot {
   readonly candidates: readonly ExtensionCandidate[];
   readonly directTools: ToolSet;
+  readonly toolDisplayNames?: Readonly<Record<string, string>>;
 }
 
 export function snapshotSkillExtensions(input: {
@@ -45,7 +49,9 @@ export function snapshotSkillExtensions(input: {
       displayName: name.slice(0, 160),
       summary: (entry.row.description ?? "Load this Skill's instructions").slice(0, 512),
       callMode: "skill-load",
+      selectionToolNames: ["load_skill"],
       isCurrent: current,
+      toModelOutput: loadTool?.toModelOutput,
       call: (value, options) => emptyInput(value)
         ? executeTool(loadTool, { name }, options)
         : invalidInput(),
@@ -55,7 +61,9 @@ export function snapshotSkillExtensions(input: {
       displayName: `${name} resources`.slice(0, 160),
       summary: "Read one listed UTF-8 support resource from this Skill package.",
       callMode: "skill-resource",
+      selectionToolNames: ["read_skill_resource"],
       isCurrent: current,
+      toModelOutput: resourceTool?.toModelOutput,
       call: (value, options) => {
         const parsed = ResourceInputSchema.safeParse(value);
         return parsed.success ? executeTool(resourceTool, { name, path: parsed.data.path }, options) : invalidInput();
@@ -68,16 +76,23 @@ export function snapshotSkillExtensions(input: {
 export function snapshotMcpExtensions(manager: McpManager, interactive?: TurnInteractive): McpExtensionSnapshot {
   const snapshots = manager.snapshot(interactive);
   const directTools: ToolSet = {};
+  const names: [string, string][] = [];
   const candidates = snapshots.map((entry) => {
-    directTools[entry.toolKey] = entry.tool;
+    directTools[entry.toolKey] = retainContentOrigin(entry.tool, "mcp");
+    names.push([entry.toolKey, formatMcpToolDisplayName(entry.ref)]);
     return mcpCandidate(entry);
   });
-  return Object.freeze({ candidates: Object.freeze(candidates), directTools: Object.freeze(directTools) });
+  return Object.freeze({
+    candidates: Object.freeze(candidates),
+    directTools: Object.freeze(directTools),
+    toolDisplayNames: captureToolDisplayNames(Object.fromEntries(names)),
+  });
 }
 
 export function snapshotHostCapabilityExtensions(
   catalogs: HostCatalogStore,
   route: CapabilityRoute,
+  projections: { projectScreenshot?: (output: unknown) => unknown; projectAmbientScreenshot?: (output: unknown) => unknown } = {},
 ): readonly ExtensionCandidate[] {
   return Object.freeze(catalogs.list().flatMap((catalog) => catalog.capabilities.map((descriptor) => {
     const transfer = catalog.workspaces.some((workspace) =>
@@ -94,17 +109,28 @@ export function snapshotHostCapabilityExtensions(
     displayName: descriptor.capabilityId.slice(0, 160),
     summary: `Host capability (${descriptor.execution}; ${descriptor.cancellation} cancellation)`,
     callMode: transfer ? "transfer" as const : "capability" as const,
+    selectionToolNames: [descriptor.capabilityId.replaceAll("-", "_")],
     available: catalog.readiness === "ready",
     isCurrent: () => currentCapability(catalogs, catalog, descriptor.capabilityId),
-    call: (value: unknown) => transfer
-      ? routeExtensionTransfer({ catalogs, route }, {
+    call: (value: unknown, options: ToolExecutionOptions<unknown>) => transfer
+      ? routeExtensionTransfer({ catalogs, route: (request) => route({ ...request, ...hostExecution(options) }) }, {
           targetHostId: catalog.hostId,
           transferCapabilityId: descriptor.capabilityId,
           input: value,
         })
-      : route({ capabilityId: descriptor.capabilityId, input: value, targetHostId: catalog.hostId }),
+      : route({ capabilityId: descriptor.capabilityId, input: value, targetHostId: catalog.hostId, ...hostExecution(options) })
+        .then((output) => {
+          const project = descriptor.capabilityId === "screenshot" ? projections.projectScreenshot
+            : descriptor.capabilityId === "screenshot-ambient" ? projections.projectAmbientScreenshot : undefined;
+          return project ? project(output) : output;
+        }),
     };
   })));
+}
+
+function hostExecution(options: ToolExecutionOptions<unknown>): Partial<CapabilityRouteRequest> {
+  const execution = governedExecutionContext(options);
+  return execution ? { runId: execution.runId, attemptId: execution.attemptId, signal: options.abortSignal ?? execution.signal } : {};
 }
 
 export function snapshotHosts(catalogs: readonly LiveHostCatalog[]): readonly ExtensionHostSnapshot[] {
@@ -119,6 +145,7 @@ export function snapshotHosts(catalogs: readonly LiveHostCatalog[]): readonly Ex
 }
 
 function mcpCandidate(entry: McpToolSnapshot): ExtensionCandidate {
+  const capturedTool = entry.tool;
   return {
     identity: localIdentity({
       kind: "mcp-tool",
@@ -130,8 +157,9 @@ function mcpCandidate(entry: McpToolSnapshot): ExtensionCandidate {
     displayName: entry.ref.toolName.slice(0, 160),
     summary: typeof entry.tool.description === "string" ? entry.tool.description.slice(0, 512) : "Configured MCP tool",
     callMode: "mcp-tool",
+    modelToolName: entry.toolKey,
     isCurrent: entry.isCurrent,
-    call: (value, options) => executeTool(entry.tool, value, options),
+    call: (value, options) => executeTool(capturedTool, value, options),
   };
 }
 

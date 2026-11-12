@@ -4,6 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { join, normalize, extname } from "node:path";
+import { devLabCharacters } from "./lab/vite/lab-characters.ts";
+import { devLabTtsConfig, labTtsProxy } from "./lab/vite/lab-tts-proxy.ts";
 
 // Dev-only: serves the git-ignored extracted taki models (repo models/extracted/taki) to the Live2D spike page at
 // /spike-assets/*. Keeps copyrighted assets out of public/ and out of any production build. Spike scaffolding (#13).
@@ -43,9 +45,11 @@ export default defineConfig(({ command }) => {
   // of the rollup input list — the entry stays listed so the dev graph remains explicit).
   if (command === "serve") {
     input.spike = fileURLToPath(new URL("./spike.html", import.meta.url));
+    // Avatar presentation lab (09-03): same dev-only ruling; delete apps/desktop/lab/ + these lines to remove it.
+    input.lab = fileURLToPath(new URL("./lab/lab.html", import.meta.url));
   }
   return {
-    plugins: [react(), tailwindcss(), spikeAssets()],
+    plugins: [react(), tailwindcss(), spikeAssets(), devLabCharacters(), devLabTtsConfig()],
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -61,6 +65,7 @@ export default defineConfig(({ command }) => {
     server: {
       port: 1420,
       strictPort: true,
+      ...(command === "serve" ? { proxy: labTtsProxy(process.env) } : {}),
       // Rust build output churns and Windows exclusively locks the .dll while cargo writes it; watching
       // src-tauri makes Vite's file watcher crash with EBUSY. The Rust side has its own watcher (tauri dev).
       watch: {

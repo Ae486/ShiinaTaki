@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "legacy-app-commands",
+  "description": "Preserve the three existing local app commands when introducing explicit QQMM app ACLs. These commands were previously available to every local window; no remote origins are granted.",
+  "windows": ["*"],
+  "permissions": ["allow-ping", "allow-get-status", "allow-submit-pairing-code"]
+}

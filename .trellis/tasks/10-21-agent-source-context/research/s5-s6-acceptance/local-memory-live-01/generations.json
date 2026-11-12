@@ -1,0 +1,16 @@
+[
+  {
+    "modelId": "deepseek-flash",
+    "finishReason": "stop",
+    "text": "{\"decision\":\"keep\",\"route\":\"global\",\"fromSeq\":2,\"throughSeq\":5}",
+    "inputTokens": 664,
+    "outputTokens": 168
+  },
+  {
+    "modelId": "deepseek-flash",
+    "finishReason": "stop",
+    "text": "[{\"layer\":\"profile\",\"content\":\"2026-10-23，用户让我记住：视频里的林述说「我被裁员了，我的项目也停了」，那是林述自己的经历。\",\"importance\":8,\"disclosure\":\"林述被裁员那个视频\"},{\"layer\":\"profile\",\"content\":\"用户本人没有被裁员，但他自己的「星河」项目停了——他特意要求把这个区别记清楚。\",\"importance\":8,\"disclosure\":\"我的「星河」项目停了\"},{\"layer\":\"profile\",\"content\":\"用户要求以后聊到他的工作时，保留他不是被裁员、只是「星河」项目停了这一区别。\",\"importance\":7,\"disclosure\":\"聊到我的工作时\"}]",
+    "inputTokens": 682,
+    "outputTokens": 328
+  }
+]

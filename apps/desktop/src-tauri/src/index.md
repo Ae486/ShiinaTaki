@@ -1,6 +1,7 @@
 # desktop/src-tauri/src/
 - main.rs — thin shim (windows_subsystem + mobile entry) calling taki_desktop_lib::run(); untouched
-- lib.rs — Tauri composition root: dirs/legacy-approver/status-sink resolution, TauriStatusEmitter, node::build_node call, commands; the retained approver is not consulted by the Slice-3 production WS execution path
+- lib.rs — Home-first composition root; retryable Node assembly, native operator admission and independent optional-adapter lifecycle; existing Host governance remains unchanged
+- qqmm.rs — Home-only finite management commands, source-WebView-bound Channel delivery and helper-only teardown using the shared QQMM runtime; independent from the Node/Core path
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node, create-only stable device identity with winner adoption, tracing, and WsClient; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
 - protocol.rs — stable crate-internal protocol import surface, non-Host serde mirrors, and the golden-fixture parity sweep
@@ -9,14 +10,16 @@
 - hindsight_host.rs — registered C1 executor; only internal post-gate context can invoke the installed Windows helper.
 - hindsight_windows.rs — retained Windows installation/owner and hidden bounded invocation entry.
 - hindsight_windows/ — NTFS/ACL/SID handles, mutable Catalog snapshot and Job-owned process lifetime; platform and copied-install tests.
-- ws_challenge.rs — pure Host ask helpers: sealed challenge building, redacted classification-only presentation, and exact one-shot resume authorization validation
+- ws_challenge.rs — sealed preflight challenge building, complete ask-exec disclosure, Chinese Host prompts and exact one-shot resume authorization checks
 - host_control_protocol.rs — strict Host negotiation/catalog/immutable-control/request/cancel/response serde mirrors and protocol-v3 constants
-- host_approval_protocol.rs — validated Host challenge/resume authorization DTOs plus cross-language canonical digest helpers (control, challenge, and approval decision scope)
-- host_session.rs — one live Host generation's exact binding, cancellation, terminal-attempt cache, one-shot challenge and retireable execution liveness state.
+- host_approval_protocol.rs — validated Host challenge/resume DTOs, strict optional command-disclosure mirror and legacy-compatible control/challenge/decision-scope canonical digests
+- host_session.rs — exact live-generation binding, policy-independent exact cancellation/ACK retirement, raw pending cleanup, one-shot challenge liveness and bounded terminal-attempt cache
 - hindsight_deployment_protocol.rs — strict C2 plan, resource, invocation, independent permit and closed status mirrors.
 - hindsight_deployment.rs — post-gate effect/observation handlers sharing one installed resident and state lock.
 - hindsight_checkpoint_relay.rs — bounded per-session one-use checkpoint request/reply map, retired on disconnect or cancellation.
-- ws_client.rs — reconnecting node client: handshake/catalog, request classification, challenge/resume; resume consumes once, rechecks current Host floors immediately before execution, and audits approved/denied truth
+- ws_client.rs — reconnecting Node handshake/catalog, request classification, disclosure/ACK settlement and atomic exact-bound execute/resume; final Host-floor rechecks, once-only retirement and original audit truth
+- exec_command_disclosure.rs — pure whole-value credential masking, visible escaping and complete bounded 8-by-12 chunk packing
+- exec_command_disclosure/ — borrowed-span credential contexts and finite token/header/URI/private-key recognition; colocated adversarial tests
 - gate.rs — retained pre-Slice-3 evaluator plus production legacy-deny/legacy-level readers and distinct auto/deny/Core-approved final-enforcement audit seams; `ws_client.rs` never calls the local prompt/writer
 - gate/ — read-only legacy compatibility plus dormant pre-Slice-3 evaluator/approver helpers and tests; current production authority is the Core projection composed with Host stricter-only constraints
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp
@@ -24,3 +27,11 @@
 - capabilities_impl.rs — capability handler registry and non-deserializable trusted post-gate invocation context; legacy opaque executors retain their compatibility seam.
 - capabilities_impl/ — one executor per capability (screenshot, screenshot-ambient, process-list, clipboard read/write, shell-open, exec, foreground-window)
 - bin/ — extra crate roots (taki-node, the headless e2e/CI node)
+- browser_attachment.rs — optional loopback browser sensor with dedicated credential, Core privacy control and latest-value source lifecycle
+- browser_attachment/ — authenticated local transport, monotonic forwarding and source/cleanup regression tests
+- browser_playback_protocol.rs — strict selected-player/control serde mirrors preserving opaque Chromium document tokens and the Shared wire contract
+- browser_attachment_commands.rs — Home-only local setup/pairing commands and explicit isolated Shell data root
+- local_auth.rs — selected-profile descriptor validation, cached native bootstrap key and domain-separated server/client HMAC proofs
+- local_auth_commands.rs — actual-window/origin/operator-identity checks for finite local admission commands
+- character_assets.rs — captured selected-profile Character root, lazy confined asset grant and fixed-purpose Home/Pet command; missing resources never block Home startup
+- ws_local_auth.rs — native Node same-socket challenge/proof, server verification before durable token transmission and bounded authentication

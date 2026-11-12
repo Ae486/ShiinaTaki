@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "database": "G:/taki-first-use-Btl1vA/core-data/taki.db",
+  "sourceSha256": "b063f5e638532af26ae5e3fc5059cd618950c95b0abb883dbf98e63b8fd2ef4b",
+  "sourceUnchanged": true,
+  "command": "node .trellis/tasks/08-09-memory-operations-ui/research/first-use-runtime/memory-tool-replay.mjs G:/taki-first-use-Btl1vA/core-data/taki.db",
+  "cwd": "G:/TakiAgent-integration",
+  "node": "v24.18.0",
+  "wallTimeSeconds": 1.5132936,
+  "checks": 19,
+  "passed": [
+    "actual local retain projection and durable Effect",
+    "actual hindsight retain projection and durable Effect",
+    "recorded Local completed and Hindsight Pending remain distinct",
+    "original Hindsight parent and Native child remain Pending",
+    "restart evidence uses the same proven request and original document",
+    "refuse wrong runId",
+    "refuse wrong authorityEpochId",
+    "refuse wrong providerId",
+    "refuse wrong parent requestId",
+    "refuse wrong parent providerLineageId",
+    "refuse wrong parent inputDigest",
+    "SDK error output remains a failure",
+    "flattened Hindsight recall preserves exact text and scope",
+    "Local observed text keeps its existing fence",
+    "recall refuses partial branch",
+    "recall refuses branch failure",
+    "recall refuses wrong scope",
+    "recall refuses duplicate fact",
+    "recall refuses unconfirmed fact"
+  ],
+  "syntax": {
+    "native-smoke.mjs": "passed",
+    "memory-tool-evidence.mjs": "passed",
+    "memory-tool-replay.mjs": "passed",
+    "pending-write-evidence.mjs": "passed"
+  },
+  "trackedDiffWhitespace": "passed",
+  "limits": "Recall uses production projection of saved data; no live recall, Native completion, or full journey success is claimed."
+}

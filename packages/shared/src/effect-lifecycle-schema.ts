@@ -64,6 +64,8 @@ export const UsageRecordSchema = z.strictObject({
   provider: ID, modelId: ID, quality: UsageQualitySchema,
   inputTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
   inputTokenDetails: InputTokenDetailsSchema.optional(),
+  /** Presence checked at the provider boundary; absent on historical SDK-normalized records. */
+  cacheReadObserved: z.boolean().optional(),
   outputTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
   outputTokenDetails: OutputTokenDetailsSchema.optional(),
   totalTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),

@@ -64,6 +64,16 @@ const KEY = generateCatalogKey();
 const OTHER_KEY = generateCatalogKey();
 
 describe("secret catalog service (durable layer)", () => {
+  it("keeps the basic plane available when first-use key provisioning fails", async () => {
+    const dir = tempDir(); const capture = createCaptureLogger();
+    const service = await createSecretCatalogService({ filePath: join(dir, "secret-catalog.bin"), storeId: STORE,
+      logger: capture.logger, keySource: { kind: "key-helper", canCreate: true, read: () => null,
+        create: () => { throw new Error(SENTINEL); } } });
+    expect(service.health()).toBe("locked");
+    expect(() => service.set(REF, "value")).toThrow(/store-locked/);
+    expect(existsSync(join(dir, "secret-catalog.bin"))).toBe(false);
+    expect(JSON.stringify(capture.records)).not.toContain(SENTINEL);
+  });
   it("set survives reopen (restart survival) and never writes the sentinel in cleartext", async () => {
     const dir = tempDir();
     const first = await boot(dir, KEY);

@@ -1,0 +1,9 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Complete frontend quality gates"}
+{"file":".trellis/spec/frontend/reactive-read-models.md","reason":"Cross-Run, client, visibility, request and rendering correctness"}
+{"file":".trellis/spec/frontend/state-management.md","reason":"No new authority/cache or mutation replay"}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Permission, MCP, Skills and meaningful action results"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Strict types and boundary ownership"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Focused tests, indexes, perf and responsibility boundaries"}
+{"file":".trellis/spec/frontend/packaged-build.md","reason":"Actual WebView and frozen build evidence"}
+{"file":".trellis/tasks/09-08-uiux-visual-continuity/research/audit.md","reason":"All user-reported classes and evidence gaps"}
+{"file":".trellis/tasks/09-08-uiux-visual-continuity/research/react-continuity.md","reason":"Verify correct use of React scheduling and reconciliation"}

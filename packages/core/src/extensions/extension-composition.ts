@@ -9,6 +9,7 @@ import type { GovernancePolicyService } from "../governance/governance-policy-se
 import type { HostCatalogStore } from "../hosts/host-catalog.ts";
 import type { McpManager } from "../mcp/mcp-manager.ts";
 import type { TurnInteractive } from "../mcp/mcp-turn-tools.ts";
+import type { CapabilityRouteRequest } from "../capabilities/route-capability.ts";
 import { createLoadSkillTool } from "../skills/load-skill-tool.ts";
 import { createReadSkillResourceTool } from "../skills/read-skill-resource-tool.ts";
 import type { SkillCatalogManager } from "../skills/skill-catalog-manager.ts";
@@ -20,7 +21,9 @@ interface ExtensionCompositionInput {
   catalogs: HostCatalogStore;
   skills: { catalog: SkillCatalogManager; loader: SkillsLoader; governance: GovernancePolicyService };
   mcp: McpManager;
-  route: (request: { capabilityId: string; input: unknown; targetHostId: string }, interactive?: TurnInteractive) => Promise<unknown>;
+  route: (request: CapabilityRouteRequest & { targetHostId: string }, interactive?: TurnInteractive) => Promise<unknown>;
+  projectScreenshot?: (output: unknown) => unknown;
+  projectAmbientScreenshot?: (output: unknown) => unknown;
 }
 
 export function createExtensionComposition(input: ExtensionCompositionInput): {
@@ -41,6 +44,8 @@ export function createExtensionComposition(input: ExtensionCompositionInput): {
       mcp: input.mcp,
       interactive,
       route: (request) => input.route(request, interactive),
+      projectScreenshot: input.projectScreenshot,
+      projectAmbientScreenshot: input.projectAmbientScreenshot,
     }),
   };
 }

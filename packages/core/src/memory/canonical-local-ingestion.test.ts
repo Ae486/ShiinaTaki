@@ -14,13 +14,20 @@ import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase } from "../db/sqlite.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
+import { createPrimaryConversationSourceRepo } from "../db/primary-conversation-source-repo.ts";
+import { createMemoryRunReference } from "./memory-capability-snapshot.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { failingGenerateModel, generatingModel, scriptedGenerateModel } from "../testing/mock-language-model.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { createCanonicalLocalIngestion } from "./canonical-local-ingestion.ts";
-import { createLocalMemoryProvider } from "./local-memory-provider.ts";
+import { createLocalMemoryProvider, LOCAL_MEMORY_CAPABILITIES } from "./local-memory-provider.ts";
 import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
 import { createUtilitySlot } from "./utility-slot.ts";
+import { createPrimaryMemorySourceState } from "./primary-memory-source-state.ts";
+import { patternDigest } from "../initiative/patterns/pattern-source.ts";
+import { createLocalRecallEvidence } from "./memory-recall-evidence.ts";
+import { readPrimaryMemorySource } from "../db/primary-memory-source-read.ts";
+import { loadMemoryConfig } from "../config/memory-config.ts";
 
 const AT = "2026-09-11T00:00:00.000Z";
 const cleanup: Array<() => void> = [];
@@ -36,7 +43,7 @@ function fact(layer = "episodes", content = "我记得他说「很烦」。", im
   return { layer, content, importance, disclosure: "很烦" };
 }
 
-function fixture(model: LanguageModel, path = ":memory:") {
+function fixture(model: LanguageModel, path = ":memory:", captureRetentionDays?: () => number) {
   const db = openDatabase({ path, migrations: MIGRATIONS });
   let closed = false;
   const close = () => { if (!closed) { db.close(); closed = true; } };
@@ -54,13 +61,17 @@ function fixture(model: LanguageModel, path = ":memory:") {
   const provider = createLocalMemoryProvider({ authority, records, maintenance, tokenizer,
     sparse: createCanonicalMemorySparseRepo(db), now: () => AT });
   const timeline = createTimelineRepo(db);
+  const primarySources = createPrimaryConversationSourceRepo({ db, timeline });
+  const memory = createMemoryRunReference({ providerId: "local", providerLineageId: epoch.providerLineageId,
+    authorityEpochId: epoch.epochId, contractVersion: 1, capabilities: LOCAL_MEMORY_CAPABILITIES });
   const autoState = createMemoryAutoRepo(db);
   const events = createMemoryEventsRepo(db);
   const journal = createCanonicalIngestionRepo({ db, maintenance });
   const captured = createCaptureLogger();
   const slot = createUtilitySlot({ mainModel: model, logger: captured.logger });
   const ingestion = createCanonicalLocalIngestion({ provider, authority, maintenance, journal, timeline, autoState,
-    events, slot, now: () => AT });
+    events, slot, now: () => AT, primarySources, captureRetentionDays,
+    config: captureRetentionDays ? loadMemoryConfig({}) : undefined });
   const scope = { epochId: epoch.epochId, characterId: "taki" };
   function primary(user = "我最近工作卡住了，真的很烦", assistant = "我会记得你说的「很烦」"): TimelineEntry[] {
     const entries = [timeline.append({ characterId: "taki", role: "user", content: user }),
@@ -69,7 +80,7 @@ function fixture(model: LanguageModel, path = ":memory:") {
     return entries;
   }
   return { db, close, authority, epoch, records, maintenance, provider, timeline, autoState, events, journal,
-    slot, ingestion, scope, primary, logs: captured.records };
+    slot, ingestion, scope, primary, primarySources, memory, logs: captured.records };
 }
 
 function retirement(throughSeq: number) {
@@ -77,6 +88,136 @@ function retirement(throughSeq: number) {
 }
 
 describe("canonical Local automatic ingestion", () => {
+  it("captures retention before the Character queue and never rereads it during extraction", async () => {
+    let days = 4;
+    const capture = vi.fn(() => days);
+    const model = script(keep("character"), [fact("intentions", "Remember to revisit the plan")],
+      keep("character", 3, 4), [fact("intentions", "Remember to revisit the next plan")]);
+    const f = fixture(model, ":memory:", capture);
+    f.ingestion.initializeBaseline("taki"); f.primary();
+    const first = f.ingestion.run({ characterId: "taki", throughSeq: 2 });
+    days = 9;
+    expect(capture).toHaveBeenCalledTimes(1);
+    await first;
+    f.primary("A different next intention", "I will keep the new plan");
+    const second = f.ingestion.run({ characterId: "taki", throughSeq: 4 });
+    days = 15;
+    await second;
+    expect(capture).toHaveBeenCalledTimes(2);
+    const expiries = f.maintenance.list(f.scope).map((record) => record.policy.retention.kind === "expiring"
+      ? (Date.parse(record.policy.retention.expiresAt!) - Date.parse(AT)) / 86_400_000 : null).sort();
+    expect(expiries).toEqual([4, 9]);
+  });
+
+  it("imports retained source after SQLite reopen without a callback and preserves duplicate receipts", async () => {
+    const root = mkdtempSync(join(tmpdir(), "taki-primary-import-")); cleanup.push(() => rmTempDir(root));
+    const path = join(root, "memory.sqlite"); const initial = fixture(script(), path);
+    initial.ingestion.initializeBaseline("taki");
+    const source = initial.primarySources.begin({ user: { characterId: "taki", role: "user", content: "I prefer quiet cafes" }, memory: initial.memory });
+    initial.primarySources.retain({ sourceId: source.sourceId, rows: [{ characterId: "taki", role: "assistant", content: "I will remember" }] });
+    initial.close();
+    const model = script(keep("character"), [fact("profiles", "I prefer quiet cafes")]); const f = fixture(model, path);
+    expect(await f.ingestion.maybeRun({ characterId: "taki" })).toBeNull();
+    expect(model.doGenerateCalls).toHaveLength(0);
+    const before = f.db.prepare("SELECT * FROM canonical_memory_primary_commits ORDER BY timeline_seq").all();
+    expect(before).toHaveLength(2); expect(before.map((row) => row.committed_through_seq)).toEqual([2, 2]);
+    expect(f.ingestion.importPrimarySources("taki")).toEqual({ imported: 0, unresolvedSourceIds: [] });
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 1, throughSeq: 2 });
+    const receipt = f.db.prepare("SELECT * FROM canonical_memory_ingestion_spans").all();
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 0, throughSeq: 2 });
+    expect(f.db.prepare("SELECT * FROM canonical_memory_ingestion_spans").all()).toEqual(receipt);
+    expect(model.doGenerateCalls).toHaveLength(2);
+    const row = f.db.prepare("SELECT id,seq,character_id,role,content,parts,created_at FROM timeline_messages WHERE id=:id").get({ id: source.userEntry.id })!;
+    expect(readPrimaryMemorySource(f.db, { characterId: "taki", userTimelineId: source.userEntry.id,
+      userTimelineSeq: source.userEntry.seq, sourceDigest: patternDigest(row) }).kind).toBe("local");
+  });
+
+  it("imports before the existing 20-message cadence and batches multiple closed sources in one gate", async () => {
+    const model = script({ decision: "skip" }); const f = fixture(model); f.ingestion.initializeBaseline("taki");
+    for (let i = 0; i < 10; i += 1) {
+      const source = f.primarySources.begin({ user: { characterId: "taki", role: "user", content: `source ${i}` }, memory: f.memory });
+      f.primarySources.retain({ sourceId: source.sourceId, rows: [{ characterId: "taki", role: "assistant", content: "noted" }] });
+    }
+    expect(await f.ingestion.maybeRun({ characterId: "taki" })).toMatchObject({ skippedSpans: 1, throughSeq: 20, sourceImport: { imported: 10 } });
+    expect(model.doGenerateCalls).toHaveLength(1);
+  });
+
+  it("leaves absent or mismatched captured memory unbound and isolates a corrupt source", () => {
+    const f = fixture(script()); f.ingestion.initializeBaseline("taki");
+    for (const memory of [undefined, { ...f.memory, authorityEpochId: "other-epoch" },
+      { ...f.memory, providerLineageId: "other-lineage" }]) {
+      const source = f.primarySources.begin({ user: { characterId: "taki", role: "user", content: "unknown authority" }, memory,
+        runId: memory ? undefined : "run-without-memory-snapshot" });
+      f.primarySources.retain({ sourceId: source.sourceId, rows: [] });
+    }
+    const corrupt = f.primarySources.begin({ user: { characterId: "taki", role: "user", content: "before edit" }, memory: f.memory });
+    f.primarySources.retain({ sourceId: corrupt.sourceId, rows: [] });
+    f.db.prepare("UPDATE timeline_messages SET content='changed' WHERE seq=:seq").run({ seq: corrupt.userEntry.seq });
+    const valid = f.primarySources.begin({ user: { characterId: "taki", role: "user", content: "valid later source" },
+      memory: createMemoryRunReference({ ...f.memory, capabilities: { ...f.memory.capabilities, vectorRetrieval: "ready" } }) });
+    f.primarySources.retain({ sourceId: valid.sourceId, rows: [] });
+    expect(f.ingestion.importPrimarySources("taki")).toEqual({ imported: 1, unresolvedSourceIds: [corrupt.sourceId] });
+    expect(f.journal.unprocessedCount(f.scope)).toBe(1);
+  });
+
+  it("processes later known groups while preserving an older gap and never joins across a user hole", async () => {
+    const model = script(keep("character", 1, 2), [fact("episodes", "First known fact")],
+      keep("character", 4, 7), [fact("episodes", "Later known fact")]);
+    const f = fixture(model); f.ingestion.initializeBaseline("taki"); f.primary("first", "answer");
+    f.timeline.append({ characterId: "taki", role: "user", content: "unknown source between groups" });
+    f.primary("later", "answer"); f.primary("third", "answer");
+    const result = await f.ingestion.run({ characterId: "taki" });
+    expect(result).toMatchObject({ writes: 2, sources: 2, throughSeq: 2,
+      coverageGap: { seq: 3, code: "MEMORY_INGESTION_SOURCE_UNPROVEN" } });
+    expect(f.journal.cursor(f.scope)).toBe(2); expect(f.autoState.get("taki").lastFlushSeq).toBe(2);
+    const spans = f.db.prepare("SELECT source_json FROM canonical_memory_ingestion_spans ORDER BY from_seq").all();
+    expect(spans.map((row) => JSON.parse(String(row.source_json)).proofs.map((proof: { seq: number }) => proof.seq))).toEqual([[1, 2], [4, 5, 6, 7]]);
+    expect(model.doGenerateCalls).toHaveLength(4);
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 0, throughSeq: 2, coverageGap: { seq: 3 } });
+  });
+
+  it("keeps the actual pre-ingestion primary source current without forcing maintenance", () => {
+    const model = script(); const f = fixture(model);
+    const user = f.timeline.append({ characterId: "taki", role: "user", content: "My interview is tomorrow" });
+    const sourceState = createPrimaryMemorySourceState({ db: f.db, assertAlive: () => undefined, hindsight: () => undefined });
+    const row = f.db.prepare("SELECT id,seq,character_id,role,content,parts,created_at FROM timeline_messages WHERE id=:id").get({ id: user.id })!;
+    const witness = { characterId: "taki", userTimelineId: user.id, userTimelineSeq: user.seq, sourceDigest: patternDigest(row) };
+    expect(sourceState(witness)).toBe("current");
+    expect(model.doGenerateCalls).toHaveLength(0);
+    f.timeline.deleteEntry("taki", user.seq);
+    expect(sourceState(witness)).toBe("withdrawn");
+  });
+
+  it.each(["edit", "invalidate", "policy", "delete", "source"] as const)(
+    "detects %s before the first post-ingestion check while the original Timeline remains", async (change) => {
+      const f = fixture(script(keep("character"), [fact("episodes", "My interview is tomorrow")]));
+      f.db.prepare(`UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id=:epoch,
+        verified_snapshot_id='fixture-snapshot',activation_transaction_id='fixture-activation' WHERE singleton=1`).run({ epoch: f.epoch.epochId });
+      f.ingestion.initializeBaseline("taki"); const [user] = f.primary("My interview is tomorrow", "We can talk afterward");
+      const row = f.db.prepare("SELECT id,seq,character_id,role,content,parts,created_at FROM timeline_messages WHERE id=:id").get({ id: user!.id })!;
+      const witness = { characterId: "taki", userTimelineId: user!.id, userTimelineSeq: user!.seq, sourceDigest: patternDigest(row) };
+      await f.ingestion.run({ characterId: "taki" });
+      expect(readPrimaryMemorySource(f.db, witness).kind).toBe("local");
+      const record = f.maintenance.list(f.scope)[0]!;
+      const held = createLocalRecallEvidence(f.db)(record, "interview")!;
+      expect(held()).toBe(true);
+      const target = { ...f.scope, bankId: record.unit.bankId, memoryId: record.unit.memoryId,
+        expectedRevision: record.unit.revision, requestId: "correction", now: AT };
+      if (change === "edit") f.records.edit({ ...target, requestHash: "c".repeat(64), patch: { text: "The interview was cancelled" }, searchTerms: "interview cancelled" });
+      if (change === "invalidate") f.maintenance.invalidate({ ...target, reason: "withdrawn" });
+      if (change === "policy") f.maintenance.policyEdit({ ...target, patch: { visibility: "hidden" } });
+      if (change === "source") f.db.prepare("UPDATE canonical_memory_sources SET revision=revision+1 WHERE document_id=:id").run({ id: record.unit.documentId! });
+      if (change === "delete") {
+        f.db.prepare("DELETE FROM canonical_memory_units WHERE memory_id=:id").run({ id: record.unit.memoryId });
+        f.db.prepare("DELETE FROM canonical_memory_sources WHERE document_id=:id").run({ id: record.unit.documentId! });
+        f.db.prepare(`INSERT INTO canonical_memory_retired_sources(authority_epoch_id,bank_id,document_id,last_revision,deleted_at)
+          VALUES (:epoch,:bank,:document,1,:at)`).run({ epoch: f.epoch.epochId, bank: record.unit.bankId, document: record.unit.documentId!, at: AT });
+      }
+      const sourceState = createPrimaryMemorySourceState({ db: f.db, assertAlive: () => undefined, hindsight: () => undefined });
+      expect(sourceState(witness)).toBe("withdrawn");
+      expect(held()).toBe(false);
+      expect(f.db.prepare("SELECT content FROM timeline_messages WHERE id=:id").get({ id: user!.id })?.content).toBe("My interview is tomorrow");
+    });
   it("uses one shared-slot gate, keeps the approved original source apart from multiple facts, and recalls without embeddings", async () => {
     const model = script(keep("character"), [fact(), fact("intentions", "我想下次问他工作是否还「卡住了」。", 10)]);
     const f = fixture(model);

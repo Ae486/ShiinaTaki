@@ -1,0 +1,20 @@
+{
+  "revision": "1bfaa4fe-f56d-4a27-abcc-c5c10cee9261",
+  "candidates": [
+    {
+      "candidateRef": "first-flat-delivery",
+      "momentId": "first",
+      "text": "「我被裁员了，我的项目也停了」——两件事一口气说完，语气还平得过分。越是这么说话的人，心里那口气越不容易散吧。"
+    },
+    {
+      "candidateRef": "second-folders-first",
+      "momentId": "second",
+      "text": "他没有先喊什么决心，而是先把资料整理起来。从手边还能做的事开始，这种做法我倒是认。"
+    },
+    {
+      "candidateRef": "second-relearn-weight",
+      "momentId": "second",
+      "text": "「重新学习」四个字说起来轻，真做起来是从翻旧资料、把生疏的东西再捡一遍开始的，挺枯燥，但也没别的捷径。"
+    }
+  ]
+}

@@ -23,33 +23,31 @@ const RESULT: CharacterCostumesResult = {
 
 describe("costumeListView", () => {
   it("orders renderable costumes first and disables the rest", () => {
-    const view = costumeListView(RESULT, null);
+    const view = costumeListView(RESULT);
 
     expect(view.rows.map((row) => row.id)).toEqual(["casual", "school", "broken"]);
     expect(view.rows.at(-1)).toMatchObject({ id: "broken", renderable: false });
   });
 
   it("badges a degraded costume with its missing-motion count, and leaves a complete one bare", () => {
-    const view = costumeListView(RESULT, null);
+    const view = costumeListView(RESULT);
 
     expect(view.rows[0]?.badge).toContain("3");
     expect(view.rows[1]?.badge).toBeNull();
   });
 
   it("unions the missing packs across costumes, sorted", () => {
-    expect(costumeListView(RESULT, null).missingPacks).toEqual(["arisa", "kasumi"]);
+    expect(costumeListView(RESULT).missingPacks).toEqual(["arisa", "kasumi"]);
   });
 
-  it("highlights the remembered costume, falling back to the marker default", () => {
-    expect(costumeListView(RESULT, "casual").current).toBe("casual");
-    expect(costumeListView(RESULT, "deleted-costume").current).toBe("school");
-    expect(costumeListView(RESULT, null).current).toBe("school");
+  it("does not turn the marker default into a worn-costume claim", () => {
+    expect(costumeListView(RESULT)).not.toHaveProperty("current");
   });
 
   it("handles a result with no availability metadata as fully renderable", () => {
     const bare = { ...RESULT, availability: undefined };
 
-    const view = costumeListView(bare, null);
+    const view = costumeListView(bare);
 
     expect(view.rows.every((row) => row.renderable && row.badge === null)).toBe(true);
     expect(view.missingPacks).toEqual([]);

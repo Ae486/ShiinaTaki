@@ -1,0 +1,24 @@
+Scope: 5 of 6 workspace projects
+packages/shared typecheck$ tsc --noEmit
+packages/shared typecheck: Done
+apps/cli typecheck$ tsc --noEmit
+apps/desktop typecheck$ tsc --noEmit
+e2e typecheck$ tsc --noEmit
+packages/core typecheck$ tsc --noEmit
+apps/cli typecheck: Done
+e2e typecheck: Done
+apps/desktop typecheck: Done
+packages/core typecheck: src/server/methods/chat-send-sdk-transport.test.ts(48,25): error TS2550: Property 'withResolvers' does not exist on type 'PromiseConstructor'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2024' or later.
+packages/core typecheck: src/server/methods/chat-send-sdk-transport.test.ts(114,5): error TS2322: Type '() => { tools: { probe: Tool; } | { probe?: undefined; }; }' is not assignable to type '(turn?: TurnContext | undefined) => AgentRunContext'.
+packages/core typecheck:   Call signature return types '{ tools: { probe: Tool; } | { probe?: undefined; }; }' and 'AgentRunContext' are incompatible.
+packages/core typecheck:     The types of 'tools' are incompatible between these types.
+packages/core typecheck:       Type '{ probe: Tool; } | { probe?: undefined; }' is not assignable to type 'ToolSet | undefined'.
+packages/core typecheck:         Type '{ probe?: undefined; }' is not assignable to type 'ToolSet'.
+packages/core typecheck:           Property 'probe' is incompatible with index signature.
+packages/core typecheck:             Type 'undefined' is not assignable to type '(Tool<never, never, any> | Tool<any, any, any> | Tool<any, never, any> | Tool<never, any, any>) & Pick<Tool<any, any, any>, "execute" | "onInputAvailable" | "onInputStart" | "onInputDelta" | "needsApproval">'.
+packages/core typecheck: src/server/methods/chat-send-sdk-transport.test.ts(200,141): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SqlRow'.
+packages/core typecheck: src/server/methods/chat-send-sdk-transport.test.ts(205,124): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SqlRow'.
+packages/core typecheck: Failed
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2

@@ -1,0 +1,46 @@
+[
+  {
+    "path": "pnpm-lock.yaml",
+    "sha256": "2f66fc75926ca324f353dea4b01eb9fc81822202f8e7044721b87091a58b3391"
+  },
+  {
+    "path": "packages/core/package.json",
+    "sha256": "30604fd2035415faf5eb38c4cdd3603dd417612fabdc6eafaa2d93122cb52f58"
+  },
+  {
+    "path": "packages/core/src/main.ts",
+    "sha256": "93b44a1cbfdfd10fec837176d39b244db708cc0d7bf968fbddc621a160a7e9f4"
+  },
+  {
+    "path": "packages/core/src/agents/chat-agent.ts",
+    "sha256": "ca270e331805a772605bc0d015cf3317c250697d27421a4816027e1a4ce97548"
+  },
+  {
+    "path": "packages/core/src/config/provider-factory.ts",
+    "sha256": "770cae675659763143bdb5fb1eb50f44d8ef42773256d8d2d203b396662d47a9"
+  },
+  {
+    "path": "packages/core/src/config/agent-config.ts",
+    "sha256": "0a333ebbfc12c118fe47fc69436d53c9970f1032e1b6561cd32ccc585b85818d"
+  },
+  {
+    "path": "e2e/src/initiative-pattern-real.e2e.test.ts",
+    "sha256": "ad4c378cf6db4229f8f41a4f3b92accdfa055aca595be8d11f1c05af5a8759a0"
+  },
+  {
+    "path": "e2e/src/fixture/paths.ts",
+    "sha256": "8ee024740471cb055973cca0f39d6e6fe68d9f21717e25e807575402244f8b18"
+  },
+  {
+    "path": "e2e/src/fixture/initiative-process.ts",
+    "sha256": "52e7e3be9931edef8c1d0bb9624709b9f3c4f2b17c74727f2172ed4b1eb9e398"
+  },
+  {
+    "path": "e2e/src/fixture/seed-canonical-memory.ts",
+    "sha256": "6e5586d1006ad01c415970a0545d62773fe4043576155faaa6139774de0f4c09"
+  },
+  {
+    "path": "e2e/src/fixture/real-provider-observer.ts",
+    "sha256": "a5b0c6b2be72efc84eacacc98cf13ac6ffcfc19e84a4e27e757baf3fa5fefd43"
+  }
+]

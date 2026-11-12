@@ -1,0 +1,158 @@
+{
+  "source": "canonical run_usage rows; all retained C4 real attempts plus C3 compatibility",
+  "batches": {
+    "real-llm-round1-2026-09-28": {
+      "cases": [
+        {
+          "file": "finite-1.json",
+          "passed": false,
+          "requests": 4,
+          "usageRows": 4
+        },
+        {
+          "file": "finite-2.json",
+          "passed": false,
+          "requests": 5,
+          "usageRows": 5
+        },
+        {
+          "file": "recall-1.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        },
+        {
+          "file": "recall-2.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        }
+      ],
+      "knownSubtotal": {
+        "input_tokens": 108115,
+        "output_tokens": 5613,
+        "total_tokens": 113728,
+        "cache_read_tokens": 81920,
+        "reasoning_tokens": 4170
+      },
+      "unknownRows": 0,
+      "observedRequests": 13,
+      "usageRows": 13,
+      "unattributedRequestCount": 0
+    },
+    "real-llm-round2-2026-09-28": {
+      "cases": [
+        {
+          "file": "finite-1.json",
+          "passed": true,
+          "requests": 4,
+          "usageRows": 4
+        },
+        {
+          "file": "finite-2.json",
+          "passed": true,
+          "requests": 4,
+          "usageRows": 4
+        },
+        {
+          "file": "recall-1.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        },
+        {
+          "file": "recall-2.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        }
+      ],
+      "knownSubtotal": {
+        "input_tokens": 103479,
+        "output_tokens": 6507,
+        "total_tokens": 109986,
+        "cache_read_tokens": 78592,
+        "reasoning_tokens": 5057
+      },
+      "unknownRows": 0,
+      "observedRequests": 12,
+      "usageRows": 12,
+      "unattributedRequestCount": 0
+    },
+    "real-c3-compat-2026-09-28": {
+      "cases": [
+        {
+          "file": "authoring-1.json",
+          "passed": true,
+          "requests": 17,
+          "usageRows": 15
+        },
+        {
+          "file": "authoring-2.json",
+          "passed": true,
+          "requests": 16,
+          "usageRows": 15
+        },
+        {
+          "file": "clarification-1.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        },
+        {
+          "file": "clarification-2.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        },
+        {
+          "file": "heartbeat-1.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        },
+        {
+          "file": "heartbeat-2.json",
+          "passed": true,
+          "requests": 3,
+          "usageRows": 3
+        },
+        {
+          "file": "scheduled-1.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        },
+        {
+          "file": "scheduled-2.json",
+          "passed": true,
+          "requests": 2,
+          "usageRows": 2
+        }
+      ],
+      "knownSubtotal": {
+        "input_tokens": 698213,
+        "output_tokens": 15563,
+        "total_tokens": 713776,
+        "cache_read_tokens": 591104,
+        "reasoning_tokens": 9143
+      },
+      "unknownRows": 0,
+      "observedRequests": 46,
+      "usageRows": 43,
+      "unattributedRequestCount": 3
+    }
+  },
+  "knownSubtotal": {
+    "input_tokens": 909807,
+    "output_tokens": 27683,
+    "total_tokens": 937490,
+    "cache_read_tokens": 751616,
+    "reasoning_tokens": 18370
+  },
+  "unknownRows": 0,
+  "observedRequests": 71,
+  "usageRows": 68,
+  "unattributedRequestCount": 3,
+  "interpretation": "Known subtotals only, not provider billing totals. Input includes cache reads; output includes reasoning. Unattributed requests and missing usage remain unknown."
+}

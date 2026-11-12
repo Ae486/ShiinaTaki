@@ -1,0 +1,44 @@
+[
+  {
+    "name": "deterministic-e2e",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/e2e",
+      "exec",
+      "vitest",
+      "run",
+      "src/agent-context-runtime.e2e.test.ts",
+      "src/agent-context-r2.e2e.test.ts",
+      "src/agent-context-restart.e2e.test.ts",
+      "src/agent-context-real.e2e.test.ts",
+      "src/fixture/real-provider-observer.e2e.test.ts",
+      "src/fixture/agent-context-timing-relay.e2e.test.ts",
+      "--maxWorkers=2",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-agent-context-acceptance\\research\\final-automatic\\repaired-final\\deterministic-e2e.json"
+    ],
+    "cwd": "H:\\TakiAgent-worktrees\\t4",
+    "exitCode": 0,
+    "seconds": 52.63,
+    "finishedAt": "2026-10-23T03:56:22Z",
+    "providerEnvironmentStripped": true,
+    "liveEnabled": false
+  },
+  {
+    "name": "desktop-build",
+    "command": [
+      "pnpm.cmd",
+      "--filter",
+      "@taki/desktop",
+      "build"
+    ],
+    "cwd": "H:\\TakiAgent-worktrees\\t4",
+    "exitCode": 0,
+    "seconds": 3.41,
+    "finishedAt": "2026-10-23T03:56:26Z",
+    "providerEnvironmentStripped": true,
+    "liveEnabled": false
+  }
+]

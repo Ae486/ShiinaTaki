@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ForegroundWindowOutput } from "@taki/shared";
 import { createActivityState, type ActivityConfig } from "./activity-state.ts";
 
@@ -15,6 +15,52 @@ function sample(over: Partial<ForegroundWindowOutput> = {}): ForegroundWindowOut
 }
 
 describe("createActivityState", () => {
+  it("notifies after admitted samples and preserves the current-before-dwell distinction", () => {
+    const onChange = vi.fn();
+    const state = createActivityState(CONFIG, onChange);
+    state.push(sample(), 0);
+    expect(onChange).toHaveBeenCalledExactlyOnceWith();
+    expect(state.current()?.samples).toBe(1);
+    expect(state.entries()).toEqual([]);
+    state.push(sample(), 30_000);
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(state.entries()[0]?.samples).toBe(2);
+  });
+
+  it("notifies only an effective seal, without carrying a declined sample or reason", () => {
+    const onChange = vi.fn();
+    const state = createActivityState(CONFIG, onChange);
+    state.seal();
+    state.push(sample({ available: false }), 0);
+    expect(onChange).not.toHaveBeenCalled();
+    state.push(sample(), 30_000);
+    state.seal();
+    state.seal();
+    state.push(sample({ available: false, processName: "private", windowTitle: "secret" }), 60_000);
+    expect(onChange.mock.calls).toEqual([[], []]);
+    expect(state.current()).toBeUndefined();
+  });
+
+  it("publishes only after span/cap pruning has produced the coherent retained state", () => {
+    const visible: string[][] = [];
+    const state = createActivityState({ ...CONFIG, dwellMinSamples: 1, maxEntries: 2, spanMs: 100_000 }, () => {
+      visible.push(state.entries().map((entry) => entry.windowTitle));
+    });
+    state.push(sample({ windowTitle: "a" }), 0);
+    state.push(sample({ windowTitle: "b" }), 30_000);
+    state.push(sample({ windowTitle: "c" }), 60_000);
+    state.push(sample({ windowTitle: "d" }), 500_000);
+    expect(visible).toEqual([["a"], ["a", "b"], ["b", "c"], ["d"]]);
+  });
+
+  it("an observer failure cannot make an admitted sample or effective seal fail", () => {
+    const state = createActivityState(CONFIG, () => { throw new Error("observer retired"); });
+    expect(() => state.push(sample(), 0)).not.toThrow();
+    expect(state.current()?.windowTitle).toBe("main.ts");
+    expect(() => state.seal()).not.toThrow();
+    expect(state.current()).toBeUndefined();
+  });
+
   it("merges identical samples within pulsetime into one growing entry", () => {
     const state = createActivityState(CONFIG);
     state.push(sample(), 0);

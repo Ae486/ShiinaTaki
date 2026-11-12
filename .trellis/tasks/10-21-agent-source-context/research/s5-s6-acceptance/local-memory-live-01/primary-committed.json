@@ -1,0 +1,223 @@
+{
+  "stage": "primary-committed",
+  "utilityUsage": {
+    "calls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "usageUnknown": 0
+  },
+  "primaryWitnesses": [
+    {
+      "timeline_seq": 2,
+      "entry_id": "2db509de-f754-4706-b32b-9e52cb5d2602",
+      "entry_digest": "9fd5f05266b89bc57febf7afc2f8895970dabafd6c8de68c6194fc91e4b9e403",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    },
+    {
+      "timeline_seq": 3,
+      "entry_id": "30a9eb18-a48a-4390-9383-200347b2d0a2",
+      "entry_digest": "68fe561eb17ad1f8e5ec6ce73725d2322978413829bc8586666c09d0931da354",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    },
+    {
+      "timeline_seq": 4,
+      "entry_id": "d6669329-03df-4b6b-955e-e401788f0f7a",
+      "entry_digest": "d0bcffc6133925adf96e16fe309c05cab06c8987c0a38df1a4a8a1722797f553",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    },
+    {
+      "timeline_seq": 5,
+      "entry_id": "3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc",
+      "entry_digest": "558efce37fd2964fbf6b50320c0017021cd8de57d8f012da46611727ccccbc68",
+      "run_id": "1d91974e-e6e3-4e01-be19-50915fb6789b",
+      "committed_through_seq": 5
+    }
+  ],
+  "timeline": [
+    {
+      "seq": 1,
+      "id": "c76ff5cc-0c3b-4bbe-a77d-165ac4c5919c",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "EXCLUDED_PUBLICATION_MARKER",
+      "sourceContext": {
+        "generatedBy": {
+          "runId": "bb9eef29-6a4a-4508-945e-29fcb4651a29",
+          "attemptId": "fa5392ed-d6fc-4c7d-a44e-7f335533ee0d",
+          "subagentId": "faf5df1d-9bb6-4cc3-bdc2-08cb8151255e"
+        },
+        "materials": [
+          {
+            "label": "Fixture video",
+            "reference": "https://www.bilibili.com/video/BV1UEaq6qEZt/?p=1",
+            "time": "10-20 seconds; moment first"
+          }
+        ]
+      },
+      "createdAt": "2026-10-23T03:22:46.027Z"
+    },
+    {
+      "seq": 2,
+      "id": "2db509de-f754-4706-b32b-9e52cb5d2602",
+      "characterId": "taki",
+      "role": "user",
+      "content": "请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。",
+      "createdAt": "2026-10-23T03:22:46.075Z"
+    },
+    {
+      "seq": 3,
+      "id": "30a9eb18-a48a-4390-9383-200347b2d0a2",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "[tool-call: read_file]",
+      "parts": [
+        {
+          "type": "tool-call",
+          "toolCallId": "read-source",
+          "toolName": "read_file",
+          "displayName": "读取工作区文件"
+        }
+      ],
+      "createdAt": "2026-10-23T03:22:46.188Z"
+    },
+    {
+      "seq": 4,
+      "id": "d6669329-03df-4b6b-955e-e401788f0f7a",
+      "characterId": "taki",
+      "role": "tool",
+      "content": "[tool-result: read_file -> json]",
+      "parts": [
+        {
+          "type": "tool-result",
+          "toolCallId": "read-source",
+          "toolName": "read_file",
+          "displayName": "读取工作区文件",
+          "output": {
+            "type": "json",
+            "value": {
+              "ok": true,
+              "path": "tool-only.txt",
+              "content": "EXCLUDED_TOOL_MARKER: external file content is not user biography.",
+              "bytes": 66,
+              "truncated": false
+            }
+          },
+          "sourceMaterials": [
+            {
+              "key": "result",
+              "source": {
+                "label": "Workspace file",
+                "reference": "tool-only.txt"
+              }
+            }
+          ]
+        }
+      ],
+      "createdAt": "2026-10-23T03:22:46.189Z"
+    },
+    {
+      "seq": 5,
+      "id": "3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc",
+      "characterId": "taki",
+      "role": "assistant",
+      "content": "我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。",
+      "createdAt": "2026-10-23T03:22:46.191Z"
+    }
+  ],
+  "privateMessages": [
+    {
+      "role": "user",
+      "content": "Prepare grounded companion reactions for this accepted video."
+    },
+    {
+      "role": "assistant",
+      "content": "private"
+    }
+  ],
+  "spans": [],
+  "sources": [],
+  "memories": [],
+  "primary": {
+    "commits": [
+      {
+        "characterId": "taki",
+        "entries": [
+          {
+            "seq": 2,
+            "id": "2db509de-f754-4706-b32b-9e52cb5d2602",
+            "characterId": "taki",
+            "role": "user",
+            "content": "请记住：视频里的林述说‘我被裁员了，我的项目也停了’，那是他的经历。我本人没有被裁员，但是我的‘星河’项目停了。以后聊到我的工作，请保留这个区别。",
+            "createdAt": "2026-10-23T03:22:46.075Z"
+          },
+          {
+            "seq": 3,
+            "id": "30a9eb18-a48a-4390-9383-200347b2d0a2",
+            "characterId": "taki",
+            "role": "assistant",
+            "content": "[tool-call: read_file]",
+            "parts": [
+              {
+                "type": "tool-call",
+                "toolCallId": "read-source",
+                "toolName": "read_file",
+                "displayName": "读取工作区文件"
+              }
+            ],
+            "createdAt": "2026-10-23T03:22:46.188Z"
+          },
+          {
+            "seq": 4,
+            "id": "d6669329-03df-4b6b-955e-e401788f0f7a",
+            "characterId": "taki",
+            "role": "tool",
+            "content": "[tool-result: read_file -> json]",
+            "parts": [
+              {
+                "type": "tool-result",
+                "toolCallId": "read-source",
+                "toolName": "read_file",
+                "displayName": "读取工作区文件",
+                "output": {
+                  "type": "json",
+                  "value": {
+                    "ok": true,
+                    "path": "tool-only.txt",
+                    "content": "EXCLUDED_TOOL_MARKER: external file content is not user biography.",
+                    "bytes": 66,
+                    "truncated": false
+                  }
+                },
+                "sourceMaterials": [
+                  {
+                    "key": "result",
+                    "source": {
+                      "label": "Workspace file",
+                      "reference": "tool-only.txt"
+                    }
+                  }
+                ]
+              }
+            ],
+            "createdAt": "2026-10-23T03:22:46.189Z"
+          },
+          {
+            "seq": 5,
+            "id": "3f8d7906-9d8a-4ee5-a7b3-4606ec3a19dc",
+            "characterId": "taki",
+            "role": "assistant",
+            "content": "我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。",
+            "createdAt": "2026-10-23T03:22:46.191Z"
+          }
+        ],
+        "runId": "1d91974e-e6e3-4e01-be19-50915fb6789b"
+      }
+    ],
+    "text": "我分清楚了：林述在视频里讲的是他被裁员、项目停止；你本人没有被裁员，但你的‘星河’项目停了。",
+    "modelCalls": 2,
+    "answerProducer": "scripted; not a real primary semantic trial"
+  }
+}

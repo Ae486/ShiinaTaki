@@ -1,0 +1,12 @@
+{
+  "apply_state": "applied",
+  "apply_revision": 1,
+  "host_loopback_remapped": false,
+  "key_matches": true,
+  "endpoint_matches": true,
+  "model": "deepseek-flash",
+  "scheduler_enabled": false,
+  "embedding_provider_set": false,
+  "generation_invoked": false,
+  "account_initialization_invoked": false
+}

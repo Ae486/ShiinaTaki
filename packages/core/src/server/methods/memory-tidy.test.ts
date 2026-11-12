@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { MemoryTidyResultSchema } from "@taki/shared";
+import { MemoryTidyFailureDetailsSchema, MemoryTidyResultSchema } from "@taki/shared";
 import type { TidyRunOutcome } from "../../memory/tidy-pass.ts";
 import type { MethodContext } from "../method-registry.ts";
 import { memoryTidyMethod } from "./memory-tidy.ts";
+import { createMethodRegistry } from "../method-registry.ts";
 
 const CTX = {} as MethodContext;
 
@@ -45,5 +46,29 @@ describe("memory.tidy method (batch 4b — operator-only maintenance surface)", 
     const def = memoryTidyMethod({ runNow: async () => outcome("failed") });
 
     await expect(def.handler({ characterId: "taki" }, CTX)).rejects.toThrow(/tidy pass failed/);
+  });
+
+  it("preserves actual partial edits and safe reasons through the real registry error envelope", async () => {
+    const registry = createMethodRegistry();
+    registry.register(memoryTidyMethod({ runNow: async () => ({ ...outcome("failed"),
+      reason: "tool-errors", issues: [{ toolName: "memory_reinforce", code: "MEMORY_REVISION_MISMATCH" }], issueCount: 1,
+    }) }));
+    const context: MethodContext = { connection: { state: { status: "authenticated", deviceId: "operator", role: "operator", capabilities: [] } },
+      notify: () => undefined, onClose: () => undefined, close: () => undefined };
+    const response = await registry.dispatch({ jsonrpc: "2.0", id: 1, method: "memory.tidy", params: { characterId: "taki" } }, context);
+    expect(response).toHaveProperty("error");
+    if ("error" in response && response.error) {
+      expect(response.error.code).toBe(-32603);
+      expect(MemoryTidyFailureDetailsSchema.parse(response.error.data)).toMatchObject({
+        kind: "memory-tidy", status: "partial", edits: 2, steps: 4, reason: "tool-errors", issueCount: 1,
+      });
+    }
+  });
+
+  it("uses generic failure detail when an existing adapter has no fine-grained producer", async () => {
+    const method = memoryTidyMethod({ runNow: async () => ({ ...outcome("failed"), edits: 0 }) });
+    await expect(method.handler({ characterId: "taki" }, CTX)).rejects.toMatchObject({ data: {
+      status: "failed", edits: 0, reason: "execution-failed", issues: [], issueCount: 0,
+    } });
   });
 });

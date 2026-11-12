@@ -1,0 +1,24 @@
+{
+  "reversePatchCheck": {
+    "command": "git apply --reverse --check -- .trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/sdk-scope.diff",
+    "exitCode": 0
+  },
+  "verifiedOriginalPreimages": [
+    "packages/core/package.json",
+    "packages/core/src/agents/chat-agent.ts",
+    "packages/core/src/agents/index.md",
+    "packages/core/src/agents/run-observability-telemetry.test.ts",
+    "packages/core/src/mcp/index.md",
+    "packages/core/src/mcp/mcp-http.test.ts",
+    "pnpm-lock.yaml"
+  ],
+  "installedInventoryMatchesTargetFinal": true,
+  "installedDirectVersions": {
+    "ai": "7.0.148",
+    "@ai-sdk/mcp": "2.0.81",
+    "@ai-sdk/openai-compatible": "3.0.75",
+    "zod": "4.4.3",
+    "cross-spawn": "7.0.6"
+  },
+  "pnpm": "10.22.0"
+}

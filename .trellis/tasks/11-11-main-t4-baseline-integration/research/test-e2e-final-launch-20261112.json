@@ -1,0 +1,19 @@
+{
+  "files": [
+    "src/governance-authority.e2e.test.ts",
+    "src/governance-stale-projection.e2e.test.ts",
+    "src/approval-challenge-resume.e2e.test.ts",
+    "src/canonical-memory-production.e2e.test.ts",
+    "src/avatar-command-outcome.e2e.test.ts",
+    "src/agent-delegation-checkin.e2e.test.ts",
+    "src/agent-delegation-upgrade.e2e.test.ts",
+    "src/agent-context-restart.e2e.test.ts",
+    "src/agent-interface-inbox.e2e.test.ts",
+    "src/agent-interface-native.e2e.test.ts"
+  ],
+  "profile": "G:\\taki-codex-work\\integration-final-e2e-d813c8abe6ee48db86a8b9fdaba5c36f",
+  "startedAt": "2026-11-12T11:22:18.6413686Z",
+  "provider": "keyless loopback scripted provider, real provider env empty",
+  "exitCode": 0,
+  "finishedAt": "2026-11-12T11:25:25.4545764Z"
+}

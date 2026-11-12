@@ -21,6 +21,7 @@ describe("minimal transition card states", () => {
     expect(markup).toContain("Hindsight"); expect(markup).toContain("不会自动重新提交"); expect(markup).toContain("读取超时");
     expect(markup.match(/disabled=""/g)).toHaveLength(4);
     expect(render({ loading: true })).toContain("animate-pulse");
+    expect(render({ loading: true, connectionReady: false })).not.toContain("animate-pulse");
   });
   it.each([
     ["inventory-unreadable", "无法读取完整的本地证据清单。"],

@@ -5,12 +5,24 @@
  */
 
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
-import { CHAT_METHODS } from "@taki/shared";
+import { CHAT_METHODS, ChatSendResultSchema } from "@taki/shared";
+import type { SubagentActivity, SubagentChanged } from "@taki/shared";
+import type { SubagentMethods } from "./ws-client-subagents.ts";
+import type { CacheUsageMethods } from "./ws-client-cache-usage.ts";
+import type { MaintenanceMonitorMethods } from "./ws-client-maintenance-monitor.ts";
+import type { ModelProfileMethods } from "./ws-client-model-profiles.ts";
+import type { ModelProfilesChanged } from "@taki/shared";
+import type { MaintenanceMonitorUpdate } from "@taki/shared";
+import type { CacheUsageUpdate } from "@taki/shared";
+import { addSubagentChangedHandler, addSubagentActivityHandler } from "./ws-client-routes.ts";
 import type {
+  CoWatchingChanged,
+  BrowserPlaybackReadResult,
   AvatarCommand,
   ApprovalListResult,
   ApprovalRevokeParams,
   ApprovalRevokeResult,
+  AvatarOutcomeParams,
   AvatarReportParams,
   CharacterCostumeResolutionResult,
   CharacterCostumesResult,
@@ -18,16 +30,22 @@ import type {
   CharacterImportResult,
   CharacterListResult,
   ChatSendParams,
+  ChatActivity,
+  InteractionPatternChanged,
+  InitiativeBackoffChanged,
+  ChatActivityReadResult,
   CanonicalApprovalRespondParams,
   CanonicalApprovalRespondResult,
   ConfigChanged,
   ConfigListResult,
   MemoryOperation,
   MemoryOnboardingChanged,
+  ModelCapabilitiesResult,
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
   ExtensionConvergenceResult,
+  ExtensionChanged,
   MediaClearResult,
   MediaGetResult,
   MediaUsageResult,
@@ -54,6 +72,7 @@ import type {
   SecretSetResult,
   SecretClearParams, SecretClearResult, SecretPresenceParams, SecretPresenceResult, MemoryReplicaChanged,
   PerceptionCard,
+  PerceptionChanged,
   PerceptionPauseSetParams,
   PerceptionPauseState,
   PermissionCellSetParams,
@@ -65,6 +84,7 @@ import type {
   TimelineHistoryParams,
   TimelineHistoryResult,
   TimelineRemoved,
+  TimelineCommitted,
   TimingPolicy,
   MonitorStateResult,
   RunMonitorListParams,
@@ -77,15 +97,26 @@ import type {
   RunMonitorEvent,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
+import type { ReadSubscriptionSupport } from "./ws-read-subscriptions.ts";
 import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
 import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
 import type { MemoryOperationMethods } from "./ws-client-memory-operations.ts";
 import type { MemoryOnboardingMethods } from "./ws-client-memory-onboarding.ts";
 import type { HindsightConfigurationMethods } from "./ws-client-hindsight-configuration.ts";
 import type { HindsightTemplateMethods } from "./ws-client-hindsight-templates.ts";
+import type { UserTimezoneMethods } from "./ws-client-user-timezone.ts";
+import type { PresenceMethods } from "./ws-client-presence.ts";
+import type { InitiativeMethods } from "./ws-client-initiative.ts";
+import type { CoWatchingMethods } from "./ws-client-co-watching.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
+  addInitiativeChangedHandler,
+  addPerceptionChangedHandler,
+  addCoWatchingChangedHandler,
+  addExtensionChangedHandler,
+  addChatActivityHandler,
+  addTimelineCommittedHandler,
   addApprovalHandler,
   addMemoryOperationHandler,
   addMemoryReplicaHandler,
@@ -96,20 +127,38 @@ import {
   installRoutes,
   CONNECTION_LOST_MESSAGE,
   WsOpenDeadlineExceededError,
-  type ChatHandlers,
   type ApprovalPushEvent,
 } from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
+import { sendChatTurn, type ChatHandlers } from "./ws-chat-turn.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethods, HindsightConfigurationMethods, HindsightTemplateMethods {
+export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethods, HindsightConfigurationMethods, HindsightTemplateMethods,
+  UserTimezoneMethods, PresenceMethods, InitiativeMethods, CoWatchingMethods, SubagentMethods, CacheUsageMethods, MaintenanceMonitorMethods, ModelProfileMethods {
+  onModelProfilesChanged(handler: (change: ModelProfilesChanged) => void): () => void;
+  onMaintenanceMonitorChanged(handler: (update: MaintenanceMonitorUpdate) => void): () => void;
+  onCacheUsageChanged(handler: (update: CacheUsageUpdate) => void): () => void;
+  onSubagentChanged(handler: (change: SubagentChanged) => void): () => void;
+  onSubagentActivity(handler: (event: SubagentActivity) => void): () => void;
+  onCoWatchingChanged(handler: (change: CoWatchingChanged) => void): () => void;
+  browserPlaybackRead(): Promise<BrowserPlaybackReadResult>;
+  onInitiativePatternsChanged(handler: (change: InteractionPatternChanged) => void): () => void;
+  onInitiativeSetupChanged(handler: (change: InteractionPatternChanged) => void): () => void;
+  onInitiativeWakePolicyChanged(handler: (change: InteractionPatternChanged) => void): () => void;
+  onInitiativeBackoffChanged(handler: (change: InitiativeBackoffChanged) => void): () => void;
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */
-  chatCancel(characterId: string): Promise<boolean>;
+  chatCancel(characterId: string, runId?: string): Promise<boolean>;
+  /** Disposable active-turn recovery; never replays a send or a tool. */
+  chatActivityRead(characterId: string): Promise<ChatActivityReadResult>;
+  onChatActivity(handler: (event: ChatActivity) => void): () => void;
+  onTimelineCommitted(handler: (batch: TimelineCommitted) => void): () => void;
   subscribeAvatar(characterId: string): Promise<void>;
   reportAvatar(params: AvatarReportParams): Promise<void>;
+  /** Reports one received Avatar Command's Presentation Outcome (interactive deadline; the caller never replays it). */
+  reportAvatarOutcome(params: AvatarOutcomeParams): Promise<void>;
   /** Fetches one newest-first page of a character's timeline (the chat page's history paging). */
   timelineHistory(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
   /** Subscribes this socket to a character's live timeline.appended pushes (chat page backlog + live). */
@@ -126,6 +175,8 @@ export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethod
   costumeResolution(characterId: string, costume: string): Promise<CharacterCostumeResolutionResult>;
   /** Reads every config knob with its effective value + provenance (the settings pages' source of truth). */
   configList(): Promise<ConfigListResult>;
+  /** Catalog declarations for the configured MAIN identity; no endpoint probe or model invocation. */
+  configModelCapabilities(): Promise<ModelCapabilitiesResult>;
   /** Stores a knob value (null resets to env/default); refusals arrive as a CONFIG_REFUSED rejection. */
   configSet(params: ConfigSetParams): Promise<ConfigSetResult>;
   /** Subscribes this socket to config.changed pushes (another operator surface edited a knob). */
@@ -138,12 +189,15 @@ export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethod
   mediaUsage(): Promise<MediaUsageResult>;
   /** Purges every retained attachment byte — destructive, so the page confirms before calling it. */
   mediaClear(): Promise<MediaClearResult>;
-  /** Reads the Privacy Pause snapshot (a lapsed deadline self-resumes on this read). */
+  /** Reads the effective Privacy Pause snapshot; deadline projection does not write persistence. */
   perceptionPauseGet(): Promise<PerceptionPauseState>;
   /** Pauses (optionally until an epoch-ms deadline) or resumes ambient sampling; echoes the resulting state. */
   perceptionPauseSet(params: PerceptionPauseSetParams): Promise<PerceptionPauseState>;
   /** Reads the activity card: current + recent foreground stretches, sampling status, pause state. */
   perceptionCard(): Promise<PerceptionCard>;
+  /** One opt-in membership per physical socket; only an exact missing-method reply enables manual fallback. */
+  subscribePerception(): Promise<ReadSubscriptionSupport>;
+  onPerceptionChanged(handler: (changed: PerceptionChanged) => void): () => void;
   /** Reads the Core-authoritative global Permission Level and durable policy generation. */
   permissionLevelGet(): Promise<PermissionLevelState>;
   /** Mutates the global Level with optimistic generation matching; timed-out outcomes are never replayed. */
@@ -154,6 +208,8 @@ export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethod
   permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
   /** Reads current owner/generation convergence facts; this is not an executable Agent Run snapshot. */
   extensionStatus(): Promise<ExtensionConvergenceResult>;
+  subscribeExtensions(): Promise<ReadSubscriptionSupport>;
+  onExtensionChanged(handler: (changed: ExtensionChanged) => void): () => void;
   /** Reads the merged desired + runtime view of every configured MCP server (the MCP page's read). */
   mcpList(): Promise<McpListResult>;
   /** Reads one MCP server's desired row plus its live runtime status. */
@@ -226,7 +282,7 @@ interface TimingSyncInput {
   deps: WsClientDeps;
   store: TimingPolicyStore;
   state: ReturnType<typeof createRoutes>;
-  methods: ReturnType<typeof requestMethods>;
+  methods: Pick<ReturnType<typeof requestMethods>, "configList" | "subscribeConfig" | "onConfigSubscriptionRecovered">;
 }
 
 function createClientTimingSync(input: TimingSyncInput): TimingPolicySync | null {
@@ -236,6 +292,7 @@ function createClientTimingSync(input: TimingSyncInput): TimingPolicySync | null
     list: input.methods.configList,
     subscribe: input.methods.subscribeConfig,
     onConfigChanged: (handler) => addConfigChangedHandler(input.state, handler),
+    onSubscriptionRecovered: input.methods.onConfigSubscriptionRecovered,
     onDiagnostic: input.deps.onTimingPolicyDiagnostic ?? ((message) => console.warn(`[timing-policy] ${message}`)),
   });
 }
@@ -263,7 +320,10 @@ export function createWsClient(deps: WsClientDeps): WsClient {
   const state = createRoutes();
   installRoutes(rpc, state);
   const { whenOpen, isClosed, retire } = bindTransport(transport, rpc, state);
-  const methods = requestMethods(rpc, timing);
+  const { invalidateConfigList, ...methods } = requestMethods(rpc, timing);
+  // Register before timing and page observers: a verified push retires stale list sharing before
+  // any consumer can synchronously request its next baseline. Raw/malformed frames never reach it.
+  addConfigChangedHandler(state, invalidateConfigList);
   const timingSync = createClientTimingSync({ deps, store: timingPolicy, state, methods });
   transport.onClose(() => timingSync?.dispose());
 
@@ -281,16 +341,8 @@ export function createWsClient(deps: WsClientDeps): WsClient {
     async chat(params, handlers) {
       // A turn started on a dead socket can never be answered — reject now instead of leaving the caller pending (D29).
       if (isClosed()) throw new Error(CONNECTION_LOST_MESSAGE);
-      const done = new Promise<void>((resolve) => {
-        state.current = { handlers, finish: resolve };
-      });
-      try {
-        await requestWithDeadline({ rpc, timing, method: CHAT_METHODS.send, params });
-      } catch (error) {
-        state.current = null; // the turn never started — drop the stale handlers
-        throw error;
-      }
-      await done;
+      await sendChatTurn({ slot: state, characterId: params.characterId, handlers,
+        request: async () => ChatSendResultSchema.parse(await requestWithDeadline({ rpc, timing, method: CHAT_METHODS.send, params })) });
     },
     ...methods,
     ...pushRegistrations(state),
@@ -302,6 +354,29 @@ export function createWsClient(deps: WsClientDeps): WsClient {
 
 function pushRegistrations(state: ReturnType<typeof createRoutes>) {
   return {
+    onModelProfilesChanged: (handler: (change: ModelProfilesChanged) => void) => {
+      state.push.modelProfiles.add(handler);
+      return () => { state.push.modelProfiles.delete(handler); };
+    },
+    onMaintenanceMonitorChanged: (handler: (update: MaintenanceMonitorUpdate) => void) => {
+      state.push.maintenanceMonitor.add(handler);
+      return () => { state.push.maintenanceMonitor.delete(handler); };
+    },
+    onCacheUsageChanged: (handler: (update: CacheUsageUpdate) => void) => {
+      state.push.cacheUsage.add(handler);
+      return () => { state.push.cacheUsage.delete(handler); };
+    },
+    onSubagentActivity: (handler: (event: SubagentActivity) => void) => addSubagentActivityHandler(state, handler),
+    onSubagentChanged: (handler: (change: SubagentChanged) => void) => addSubagentChangedHandler(state, handler),
+    onCoWatchingChanged: (handler: (change: CoWatchingChanged) => void) => addCoWatchingChangedHandler(state, handler),
+    onInitiativePatternsChanged: (handler: (change: InteractionPatternChanged) => void) => addInitiativeChangedHandler(state, "initiativePatterns", handler),
+    onInitiativeSetupChanged: (handler: (change: InteractionPatternChanged) => void) => addInitiativeChangedHandler(state, "initiativeSetup", handler),
+    onInitiativeWakePolicyChanged: (handler: (change: InteractionPatternChanged) => void) => addInitiativeChangedHandler(state, "initiativePolicy", handler),
+    onInitiativeBackoffChanged: (handler: (change: InitiativeBackoffChanged) => void) => addInitiativeChangedHandler(state, "initiativeBackoff", handler),
+    onChatActivity: (handler: (event: ChatActivity) => void) => addChatActivityHandler(state, handler),
+    onTimelineCommitted: (handler: (batch: TimelineCommitted) => void) => addTimelineCommittedHandler(state, handler),
+    onPerceptionChanged: (handler: (changed: PerceptionChanged) => void) => addPerceptionChangedHandler(state, handler),
+    onExtensionChanged: (handler: (changed: ExtensionChanged) => void) => addExtensionChangedHandler(state, handler),
     onAvatarCommand: (handler: (command: AvatarCommand) => void) => void (state.push.avatar = handler),
     onTimelineAppended: (handler: (entry: TimelineEntry) => void) => void (state.push.timeline = handler),
     onTimelineRemoved: (handler: (ref: TimelineRemoved) => void) => void (state.push.timelineRemoved = handler),

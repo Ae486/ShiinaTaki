@@ -1,16 +1,34 @@
 /**
  * INPUT:  one MemoryEngine and the process-wide authority fence
- * OUTPUT: the same engine/tool contracts with each invocation admitted through the shared retirement fence
+ * OUTPUT: the same engine/tool and captured initiative assembly contracts under the shared retirement fence
  * POS:    core/memory/legacy-migration — narrow runtime wrapper used before auto/tidy/retention bindings are built
  */
 import type { MemoryEngine } from "../memory-engine.ts";
 import type { ToolSet } from "ai";
 import type { MemoryAuthorityFence } from "./memory-authority-fence.ts";
+import type { InitiativeMemorySelection } from "../initiative-memory-assembly.ts";
+import { forwardRenderedContextText } from "../../agents/context-attribution.ts";
 
 export function fenceMemoryEngine(engine: MemoryEngine, fence: MemoryAuthorityFence): MemoryEngine {
+  const assemble: MemoryEngine["assemble"] = (input) => fence.admitSync(() =>
+    forwardRenderedContextText(assemble, engine.assemble, engine.assemble(input)));
   return {
+    searchStatus: engine.searchStatus ? () => fence.admitSync(engine.searchStatus!) : undefined,
+    reconfigureRanking: engine.reconfigureRanking ? (weights) => fence.admitSync(() => engine.reconfigureRanking!(weights)) : undefined,
+    reconfigureSearch: engine.reconfigureSearch ? (config, signal) => fence.admit(async () => engine.reconfigureSearch!(config, signal)) : undefined,
     reconcile: () => fence.admitSync(engine.reconcile),
-    assemble: (input) => fence.admitSync(() => engine.assemble(input)),
+    assemble,
+    captureAssembly: engine.captureAssembly ? (characterId) => {
+      const capture = fence.admitSync(() => engine.captureAssembly!(characterId));
+      const render = (message: string) => fence.admitSync(() => forwardRenderedContextText(render, capture, capture(message)));
+      return render;
+    } : undefined,
+    captureInitiative: engine.captureInitiative ? (characterId) => {
+      const capture = engine.captureInitiative;
+      if (!capture) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+      const assemble = fence.admitSync(() => capture(characterId));
+      return (selection: InitiativeMemorySelection) => fence.admitSync(() => assemble(selection));
+    } : undefined,
     createTools: (characterId, seq) => fence.admitSync(() => fenceTools(engine.createTools(characterId, seq), fence)),
     createBackgroundTools: (characterId, seq) => fence.admitSync(() => fenceTools(engine.createBackgroundTools(characterId, seq), fence)),
     writeEntry: (input) => fence.admitSync(() => engine.writeEntry(input)),

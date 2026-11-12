@@ -2,22 +2,50 @@
 
 Start here. Every design decision has exactly one canonical home; nothing is duplicated.
 
-> **New session picking up implementation?** Read **`HANDOFF.md`** first - it is the durable Leader bootstrap (what
-> is done, what to read, and how to drive the Trellis leader/agent flow). For the active ZCODE takeover, start with
-> **`ZCODE-HANDOFF.md`** because its dirty-tree warning is time-sensitive, then read `HANDOFF.md` for the durable
-> program history and contracts.
+- [T4 freeze and later integration](T4-FREEZE-HANDOFF.md) — owner freeze, stage commits, verified backups, open acceptance and migration/governance integration gates; read before resuming T4.
+
+- [Flow simplification and live configuration](../.trellis/tasks/11-09-installation-user-experience/prd.md) — owner-revised planning scope: local use without connection codes, empty/incomplete configuration startup, application-saved values before environment fallback, and runtime updates; [design](../.trellis/tasks/11-09-installation-user-experience/design.md) and [execution plan](../.trellis/tasks/11-09-installation-user-experience/implement.md). The [earlier assessment](../.trellis/tasks/11-09-installation-user-experience/research/installation-user-experience-assessment.md) retains later installation/distribution and broader UX needs, not this slice's estimate.
+- [Project-wide prompt and tool optimization](PROMPT-AND-TOOL-OPTIMIZATION-2026-11-01.md) — owner-approved requirements, field decisions and role coverage.
+- [Implementation evidence](PROMPT-AND-TOOL-IMPLEMENTATION-2026-11-01.md) — current changes, checks, measured request sizes and validation limits.
+- [Real-model validation](PROMPT-AND-TOOL-REAL-VALIDATION-2026-11-01.md) — bounded paid observations, verified delayed-batch final delivery, unresolved wait-only commands and acceptance limits.
+
+> **Current integration:** start with the
+> [Main/T4 baseline integration task](../.trellis/tasks/11-11-main-t4-baseline-integration/prd.md) and its
+> [design](../.trellis/tasks/11-11-main-t4-baseline-integration/design.md). Isolated G: integration and validation
+> are in progress; neither branch alignment nor real-profile rollout is established by this index.
+> `HANDOFF.md`, `ZCODE-HANDOFF.md` and `T4-FREEZE-HANDOFF.md` retain dated history and acceptance limits.
+> Earlier session/lifecycle instructions do not replace the current task and owner authority.
 
 ## Reading order for a new agent/developer
 
 1. **`../CONTEXT.md`** — domain glossary. The project's canonical vocabulary (Companion, Sampling, Capability, Permission Gate, Node, Character...). Read first; all other docs assume these terms.
 2. **`PRODUCT.md`** — what the product is, v1 scope decisions, settings panel scope, roadmap.
 3. **`TECH-STACK.md`** — the complete v1 technology selection table (Agent Core / Shell / Pet UI / mobile), character & model import design, cross-device data pattern.
-4. **`MEMORY-DESIGN.md`** — the memory module design: layer registry, file-based truth + SQLite index, context assembly, write paths, activity capture pipeline, ship schedule.
+4. **`MEMORY-DESIGN.md`** — historical memory-layer design and context background. Current single-authority/canonical integration follows ADR 0009 and the active Memory task/specs; do not restore file-based authority from the older design.
 5. **`adr/`** — why the foundational decisions were made (see below).
 6. **`TTS-INTERFACE.md`** — reserved TTS wire contract (v1: interface only).
 7. **`deferred-decisions.md`** — the register of every "ship later" decision, including the Slice 4 AI SDK `prepareStep` safety limitation, with its trigger-to-complete. Consult when planning a task (are you about to defer something? log it) and when picking up a milestone (what debt comes due here?).
 8. **`ARCHITECTURE-ROADMAP.md`** — the living cross-module architecture plan: stable invariants, reference-design boundaries, adopted baseline, staged delivery, and implementation follow-up.
 9. **`DEPLOYMENT-RESOURCES.md`** — measured memory, CPU and disk needs of the memory stack, the cost of the local retrieval models, and sizing guidance for a deployment.
+10. **`AVATAR-PRESENTATION.md`** — the avatar expression/motion layer: the measured three-system naming reality across the imported costumes, what the current tool design gets right, the ranked problems, staged optimization directions (owner ruling: keep the tool-call design), the presentation lessons taken from the AgentAtelierR reference, and the engine/asset feasibility check for layered composition and a speaking state.
+11. **[Companion initiative development plan](../.trellis/tasks/09-11-companion-initiative-implementation/prd.md)** — consolidated Heartbeat/initiative requirements, technical design, effective prior decisions and four ordered implementation children; reuses the existing Runtime and Monitor.
+12. **[Media services integration discussion](MEDIA-INTEGRATION.md)** — product rulings/direction M01-M59: composable Agent/Skill capabilities, adjustable entry strategy, invitation gates, recommendation pre-analysis, post-consent commentary and native OpenBili browsing/feedback. The 2026-10-09 continuation records the autonomy audit without task creation/binding; historical OpenBili task artifacts require reconciliation.
+13. **[Media integration technical plan](MEDIA-AGENT-INTEGRATION-PLAN.md)** — shared Run/Agent capability mapping, current initiative restrictions, same-turn versus linked-task options, execution/notification policy, dated Hermes/OpenClaw precedents and partially exercised validation gates. M51's accepted-Co-Watching quota exemption remains settled; the assistant-proposed R7 is withdrawn. The implementation record distinguishes authorized support changes from remaining integration work.
+14. **[Media capability validation — 2026-10-09](MEDIA-VALIDATION-2026-10-09.md)** — supplied five-minute video's native BiliNote analysis (11,805 tokens; cost unavailable), owner-operated Edge observations, 52 Core baseline tests, native defects, source/environment details and explicit remaining integration gates.
+15. **[Media contracts and targeted validation — 2026-10-10](MEDIA-CONTRACT-REVIEW-2026-10-10.md)** — existing-owner multiple-publication/Stop/Attempt probes, native offline defect reproduction, Skill/Workspace and historical browser checks, concrete proposed contracts and first production slices; preserves partial gates and the no-task choice.
+16. **[Media implementation and Harness change record — 2026-10-10](MEDIA-IMPLEMENTATION-2026-10-10.md)** — delivery, quiescent work, generic authorized prepared publication and reviewed native structured generation; H01-H16 behavior impacts, B2 review corrections, framework/business-policy separation and separate offline gates. Full integration and real Heartbeat acceptance remain open; the current Heartbeat baseline is not considered stable or reliable without real testing.
+
+17. **[Native live media validation](MEDIA-LIVE-VALIDATION-2026-10-13.md)** — R7's successful original analysis, exact native/MCP result identity, real model usage and retained evidence; separate from Co-Watching product acceptance.
+18. **[Browser playback integration and reboot acceptance](MEDIA-PLAYBACK-INTEGRATION-2026-10-15.md)** — authenticated optional source channel, player/document compatibility fixes, delegated real-browser tests and isolated process restoration.
+19. **[Real-model prepared playback composition](MEDIA-PREPARED-PLAYBACK-VALIDATION-2026-10-16.md)** — real Agent/file tools and playback around two publications, foreground revision and Stop; controlled acceptance/transport boundaries and measured usage.
+20. **[Explicit Co-Watching production slice](MEDIA-CO-WATCHING-PRODUCTION-2026-10-16.md)** — real Home acceptance, governed native read, two timed deliveries, ordinary-chat revision/Stop, privacy/source retirement and measured usage; owner quality acceptance remains separate.
+21. **[Co-Watching invitation and failure recovery](MEDIA-CO-WATCHING-INVITATION-2026-10-16.md)** — chat invitations, native request reuse, remembered browser pairing, nullable-end compatibility and actual temporal-citation failures; targeted native correction and new-video delivery acceptance are tracked separately.
+22. **[Skill tool progressive disclosure](SKILL-TOOL-DISCLOSURE-2026-10-17.md)** — generic captured Skill bundles and per-tool MCP disclosure via the installed SDK, query-only video inventory, request-body tests and separately attributed live validation.
+23. **[Read existing video analysis in conversation](MEDIA-ANALYSIS-READ-2026-10-17.md)** — Skill-disclosed registered-result reading through captured MCP, bounded original-content pages and ordinary answers without accepting watching or requesting analysis.
+24. **[URL analysis and detected-viewing entries](MEDIA-ENTRY-IMPLEMENTATION-2026-10-17.md)** — shared native progression, independent accepted results, effective-viewing invitations, configurable timing and separately attributed live verification.
+25. **[Recommendation integration and deployment](MEDIA-RECOMMENDATIONS-IMPLEMENTATION-2026-10-18.md)** — native OpenBili peek/profile/feedback, bounded silent preparation, real primary-source identity, Docker deployment and separate business-readiness evidence.
+26. **[Agent Context sources](AGENT-CONTEXT-SOURCES.md)** — settled source-awareness requirements and historical investigation; links current implementation and before-human acceptance evidence, including compaction/Memory limitations.
+27. **[Agent delegation research](AGENT-DELEGATION-RESEARCH.md)** — dated Claude/AI SDK/Pi findings and agreed delegation/stop behavior; the [October 24 follow-up design](AGENT-DELEGATION-RESEARCH.md#companion-first-follow-up-design-2026-10-24) records asynchronous child notifications, compact tool returns, minimal task-worker compaction and a shared Chat UI. The [integrated delivery record](../.trellis/tasks/10-21-agent-context-acceptance/research/acceptance-before-human-20261023.md) owns prior SDK/Runtime/Source/Desktop checks and the separate human, native Hindsight and main-migration gates; the follow-up is in active implementation; its task checkpoint owns current progress and no final or human acceptance is implied.
 
 ## Architecture Decision Records (`adr/`)
 
@@ -31,6 +59,8 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 | [0006](adr/0006-mcp-processes-vs-no-os-invariant.md) | MCP boundary | MCP servers are operator-configured processes (single sanctioned spawn site); agent-initiated exec still crosses the Permission Gate |
 | [0007](adr/0007-capability-data-locality-split-machine.md) | Deployment locality | One codebase, two topologies (single-machine / VPS split); Stance A — host is the agent's world, VPS is pure compute offload; OS/data capabilities execute Node-side |
 | [0008](adr/0008-replay-view-context-seam.md) | Context seam | The model sees a per-turn Replay View derived from the stored timeline; all context management (windowing, summaries, folds, ephemeral in-flight additions) happens only there — idempotent, never persisted, cache-shaped |
+| [0009](adr/0009-single-memory-authority-with-local-replica.md) | Memory authority | One active authority, canonical Local/Hindsight contracts, explicit replica/pending state and verified migration/cutover |
+| [0010](adr/0010-separate-autonomous-run-history-from-relationship-timeline.md) | Autonomous history | Run evidence is distinct from the relationship Timeline; only actual Companion speech becomes ordinary conversation |
 
 ADR conventions: sequential numbering `NNNN-slug.md`, 1-3 paragraph body, only for hard-to-reverse + surprising + real-trade-off decisions.
 

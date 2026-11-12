@@ -17,7 +17,7 @@ import { stableRequestHash, type CanonicalMemoryRepo } from "../db/canonical-mem
 import type { CanonicalMemorySparseRepo, SparseRow } from "../db/canonical-memory-sparse-repo.ts";
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { getLayer, type MemoryLayerDefinition } from "./layer-registry.ts";
-import { projectRetention, requireLayerOwnership } from "./canonical-layer-policy.ts";
+import { canonicalLayerRetention, requireLayerOwnership } from "./canonical-layer-policy.ts";
 import { clampAutoImportance } from "./auto-layer-policy.ts";
 import { isSafeAutomaticMemoryText } from "./canonical-ingestion-source.ts";
 import { prepareLocalIngestionBatch, type PrepareLocalIngestionInput } from "./canonical-local-ingestion-batch.ts";
@@ -25,6 +25,7 @@ import { PreparedLocalIngestionSchema, type PreparedLocalIngestion, type LocalIn
 import type { MemoryProvider, MemoryProviderCallContext, MemoryVectorProjection } from "./memory-provider.ts";
 import type { SearchTokenizer } from "./search-tokenizer.ts";
 import { estimateTokens } from "./token-estimator.ts";
+import type { ObserveRecallEvidence } from "./memory-recall-evidence.ts";
 
 type RecallHit = z.infer<typeof RecallHitSchema>;
 interface ProviderState { vectorDegraded: boolean }
@@ -37,9 +38,12 @@ export interface LocalMemoryProviderDeps {
   authority: CanonicalMemoryAuthorityRepo; records: CanonicalMemoryRepo; sparse: CanonicalMemorySparseRepo;
   tokenizer: SearchTokenizer; vector?: MemoryVectorProjection; now?: () => string; providerLineageId?: string;
   maintenance?: CanonicalMemoryMaintenanceRepo; intentionsDefaultDays?: number;
+  observeRecallEvidence?: ObserveRecallEvidence;
 }
 
 export interface LocalMemoryProvider extends MemoryProvider {
+  /** Admission-local retention policy; the facade shares storage, retrieval and vector-health ownership. */
+  captureRetention(intentionsDefaultDays: number): LocalMemoryProvider;
   retain(context: MemoryProviderCallContext, request: RetainRequest): Promise<MemoryResult<RetainResult>>;
   mutate(context: MemoryProviderCallContext, request: MutationRequest): Promise<MemoryResult<MutationResult>>;
   /** Internal Local extraction port; not advertised as a public retain strategy/capability. */
@@ -53,9 +57,10 @@ export interface LocalMemoryProvider extends MemoryProvider {
 export function createLocalMemoryProvider(deps: LocalMemoryProviderDeps): LocalMemoryProvider {
   const epoch = deps.authority.activeEpoch(); const state = { vectorDegraded: false };
   const providerLineageId = deps.providerLineageId ?? epoch.providerLineageId;
-  return {
+  const provider: LocalMemoryProvider = {
     providerId: "local", providerLineageId,
     capabilities: () => capabilities(deps, state),
+    captureRetention: (days) => captureRetention({ provider, deps, state }, days),
     retain: (context, request) => retain({ deps, state, context, request }),
     recall: (context, request) => recall({ deps, state, context, request }),
     reflect: async (context) => failure({ context, caps: await capabilities(deps, state), code: "MEMORY_CAPABILITY_UNSUPPORTED", message: "reflect is unavailable for Local provider" }),
@@ -65,6 +70,16 @@ export function createLocalMemoryProvider(deps: LocalMemoryProviderDeps): LocalM
     ingestionReceipt: (input) => requireMaintenance(deps).ingestReceipt(input),
     retainObserved: (context, request) => retainObserved({ deps, state, context, request }),
   };
+  return provider;
+}
+
+function captureRetention(input: { provider: LocalMemoryProvider; deps: LocalMemoryProviderDeps; state: ProviderState }, intentionsDefaultDays: number): LocalMemoryProvider {
+  const { provider, state } = input;
+  const deps = { ...input.deps, intentionsDefaultDays };
+  return Object.freeze({ ...provider,
+    mutate: (context: MemoryProviderCallContext, request: MutationRequest) => mutate({ deps, state, context, request }),
+    prepareIngestion: (request: PrepareLocalIngestionInput) => prepareLocalIngestionBatch({ ...deps, maintenance: requireMaintenance(deps), now: () => now(deps) }, request),
+  });
 }
 
 function requireMaintenance(deps: LocalMemoryProviderDeps): CanonicalMemoryMaintenanceRepo {
@@ -180,6 +195,7 @@ function addSparseHit(input: { deps: LocalMemoryProviderDeps; context: MemoryPro
   const { deps, context, request, row, candidates } = input;
   const record = deps.records.record(context.authorityEpochId, row.bankId, row.memoryId);
   if (!record || !eligible(record, request)) return;
+  deps.observeRecallEvidence?.(record, request.query, context.requestId);
   candidates.set(key(record), { record: fenceObserved(record), scores: [{ source: "sparse", value: row.rank, higherIsBetter: false }], confirmed: true });
 }
 
@@ -190,6 +206,7 @@ async function addVectorHits(input: { deps: LocalMemoryProviderDeps; state: Prov
     for (const candidate of await deps.vector!.search(request)) {
       const record = deps.records.record(context.authorityEpochId, request.bankId, candidate.memoryId);
       if (!record || !eligible(record, request)) continue;
+      deps.observeRecallEvidence?.(record, request.query, context.requestId);
       const id = key(record); const existing = candidates.get(id);
       if (existing) existing.scores.push({ source: "vector", value: candidate.score, higherIsBetter: true });
       else candidates.set(id, { record: fenceObserved(record), scores: [{ source: "vector", value: candidate.score, higherIsBetter: true }], confirmed: true });
@@ -233,19 +250,20 @@ function mutateRecord(input: { deps: LocalMemoryProviderDeps; context: MemoryPro
   const common = { epochId: context.authorityEpochId, bankId: request.bankId, memoryId: request.memoryId, expectedRevision: request.expectedRevision, requestId: context.requestId, requestHash: stableRequestHash(request), now: now(deps) };
   if (request.kind === "invalidate") return deps.records.invalidate({ ...common, reason: request.reason, searchTerms: current ? recordTerms(deps, current) : "" });
   if (request.kind === "restore") return deps.records.restore({ ...common, searchTerms: current ? recordTerms(deps, current) : "" });
-  const { patch, policy } = editProjection({ bank, patch: request.patch, current, at: common.now });
+  const { patch, policy } = editProjection({ bank, patch: request.patch, current, at: common.now, intentionsDefaultDays: deps.intentionsDefaultDays });
   const text = patch.text ?? current?.unit.text ?? ""; const contextText = patch.context === undefined ? current?.unit.context ?? null : patch.context;
   const disclosure = current?.policy.disclosure ?? null;
   return deps.records.edit({ ...common, patch, policy, searchTerms: projectionTerms({ tokenizer: deps.tokenizer, text, context: contextText, disclosure }) });
 }
 
-function editProjection(input: { bank: CanonicalMemoryBank; patch: EditableMemoryPatch; current: CanonicalMemoryRecord | undefined; at: string }) {
+function editProjection(input: { bank: CanonicalMemoryBank; patch: EditableMemoryPatch; current: CanonicalMemoryRecord | undefined; at: string; intentionsDefaultDays?: number }) {
   const { bank, patch, current, at } = input;
   const { layerId, ...unitPatch } = patch;
   if (!layerId) return { patch: unitPatch, policy: undefined };
   const layer = getLayer(layerId); if (!layer) throw new Error("MEMORY_INVALID_REQUEST: unknown memory layer");
   requireLayerOwnership(bank, layer);
-  return { patch: unitPatch, policy: { layerId, visibility: layer.recallPolicy, retention: projectRetention(layer, current?.policy.retention, at) } };
+  return { patch: unitPatch, policy: { layerId, visibility: layer.recallPolicy, retention: canonicalLayerRetention({ layer,
+    previous: current?.policy.retention, at, intentionsDefaultDays: input.intentionsDefaultDays }) } };
 }
 
 function requireBank(deps: LocalMemoryProviderDeps, epochId: string, bankId: string): CanonicalMemoryBank {

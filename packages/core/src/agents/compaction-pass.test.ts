@@ -8,6 +8,7 @@ import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
+import { createMaintenanceAutoMemory } from "../memory/auto-memory.ts";
 import type { FlushWriter } from "../memory/flush-writer.ts";
 import { createLegacyMemoryFlushPort, type MemoryFlushPort } from "../memory/memory-flush-port.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
@@ -18,18 +19,28 @@ import { toModelMessage } from "./turn-mapping.ts";
 import { createConversationStore } from "./conversation-store.ts";
 import { buildCompactionPrompt, createCompactionPass, type CompactionPassDeps } from "./compaction-pass.ts";
 import { selectRetirementRange } from "./retirement-selector.ts";
+import { createAuxiliaryUsageMeter } from "../observability/auxiliary-usage-meter.ts";
+import { createAuxiliaryUsageRepo } from "../db/auxiliary-usage-repo.ts";
+import { createMaintenanceMonitorRepo } from "../db/maintenance-monitor-repo.ts";
 
 const dbs: Database[] = [];
 afterEach(() => {
   for (const db of dbs.splice(0)) db.close();
 });
 
+function deferred() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
 /** A generate mock that records every prompt it receives (row 9: rolling input inspection). */
-function recordingModel(text: string): { model: LanguageModel; prompts: string[] } {
+function recordingModel(text: string, beforeGenerate?: () => void): { model: LanguageModel; prompts: string[] } {
   const prompts: string[] = [];
   const model = new MockLanguageModelV4({
     doGenerate: async (options) => {
       prompts.push(JSON.stringify(options.prompt));
+      beforeGenerate?.();
       return {
         content: [{ type: "text", text }],
         finishReason: { unified: "stop" as const, raw: undefined },
@@ -120,7 +131,7 @@ function spyFlush(): { calls: SegmentCall[]; failNext: { value: boolean }; write
 
 function fixture(opts: {
   estimated?: number; wall?: number; keep?: number; model?: LanguageModel; flushPort?: MemoryFlushPort;
-  now?: () => Date; leaseMs?: number;
+  now?: () => Date; leaseMs?: number; canonical?: boolean; slot?: UtilitySlot;
 } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
@@ -137,8 +148,8 @@ function fixture(opts: {
     timeline,
     summaries,
     operations,
-    flush: opts.flushPort ?? createLegacyMemoryFlushPort({ timeline, autoState, writer: flush.writer }),
-    slot,
+    legacyFlush: opts.canonical ? undefined : () => opts.flushPort ?? createLegacyMemoryFlushPort({ timeline, autoState, writer: flush.writer }),
+    slot: opts.slot ?? slot,
     config: { triggerRatio: 0.8, keepMessages: opts.keep ?? 3 },
     logger: logger.child({ mod: "compaction" }),
     ...(opts.now ? { now: opts.now } : {}),
@@ -150,6 +161,123 @@ function fixture(opts: {
 function seed(timeline: ReturnType<typeof createTimelineRepo>, n: number): void {
   for (let i = 0; i < n; i += 1) timeline.append({ characterId: "taki", role: "user", content: `m${i + 1}` });
 }
+
+function seedToolSource(f: ReturnType<typeof fixture>) {
+  seed(f.timeline, 10);
+  // Fixed row identity/time make the pre-presentation v1 fingerprint an executable compatibility fixture.
+  f.db.prepare("UPDATE timeline_messages SET id = printf('00000000-0000-4000-8000-%012d', seq), created_at = :at")
+    .run({ at: "2026-09-06T00:00:00.000Z" });
+  const call = [{ type: "tool-call", toolCallId: "c1", toolName: "opaque_route" }];
+  const result = [{ type: "tool-result", toolCallId: "c1", toolName: "opaque_route", output: {
+    type: "json", value: { text: "original result", displayName: "business label", input: "business input" },
+  } }];
+  const update = f.db.prepare("UPDATE timeline_messages SET role = :role, content = :content, parts = :parts WHERE seq = :seq");
+  update.run({ seq: 2, role: "assistant", content: "[tool-call: opaque_route]", parts: JSON.stringify(call) });
+  update.run({ seq: 3, role: "tool", content: "[tool-result: opaque_route -> json]", parts: JSON.stringify(result) });
+  return { call, result };
+}
+
+describe("canonical compaction independent of memory extraction", () => {
+  it("links the real coordinator, Utility dispatch and SDK meter to its durable operation", async () => {
+    const f = fixture({ canonical: true }); const { logger } = createCaptureLogger();
+    const usage = createAuxiliaryUsageRepo(f.db);
+    const slot = createUtilitySlot({ mainModel: generatingModel("Retained conversation facts."), logger,
+      usageMeter: createAuxiliaryUsageMeter({ repo: usage, logger }) });
+    const pass = createCompactionPass({ timeline: f.timeline, summaries: f.summaries, operations: f.operations, slot,
+      view: { estimatedTokens: () => 90, budget: () => 100 }, config: { triggerRatio: 0.8, keepMessages: 3 }, logger });
+    seed(f.timeline, 10); await pass.maybeRun("taki");
+    const monitor = createMaintenanceMonitorRepo(f.db);
+    const row = monitor.read({ characterId: "taki" }).rows[0]!;
+    expect(row).toMatchObject({ status: "completed", ref: { kind: "compact", characterId: "taki" } });
+    const detail = monitor.read({ characterId: "taki", selected: row.ref }).detail!;
+    expect(detail.calls.totalCalls).toBe(1);
+    expect(detail.calls.rows[0]).toMatchObject({ operation: row.ref, source: "utility", label: "compact", status: "completed" });
+    expect(f.db.prepare("SELECT COUNT(*) AS n FROM run_usage").get()?.n).toBe(0);
+    await slot.stop();
+  });
+
+  it.each(["failed", "blocked"])("summarizes salient facts with %s maintenance and keeps raw Timeline", async (mode) => {
+    const recorder = recordingModel("I remember Lin's preference for tea and promise to avoid late calls.");
+    const f = fixture({ canonical: true, model: recorder.model });
+    seed(f.timeline, 10);
+    f.db.prepare("UPDATE timeline_messages SET content=:text WHERE seq=1")
+      .run({ text: "My name is Lin. I prefer tea. Never call me after 21:00." });
+    const raw = f.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all();
+    const release = deferred();
+    const compacted = deferred();
+    let maintenanceEntered = false;
+    const { logger } = createCaptureLogger();
+    const auto = createMaintenanceAutoMemory({
+      maintenance: () => ({ run: async () => {
+        maintenanceEntered = true;
+        if (mode === "failed") throw new Error("provider unavailable");
+        await release.promise;
+      } }),
+      compact: { maybeRun: async (characterId) => {
+        await f.pass.maybeRun(characterId);
+        compacted.resolve();
+      } },
+      logger,
+    });
+    const active = auto.onTurnCompleted("taki");
+    try {
+      await compacted.promise;
+      expect(maintenanceEntered).toBe(true);
+      expect(recorder.prompts).toHaveLength(1);
+      expect(recorder.prompts[0]).toContain("My name is Lin. I prefer tea. Never call me after 21:00.");
+      expect(recorder.prompts[0]).toContain("Do not assume these facts have already been stored in long-term memory");
+      expect(f.summaries.get("taki")?.throughSeq).toBe(6);
+      expect(f.autoState.get("taki").lastFlushSeq).toBe(0);
+      expect(f.db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all()).toEqual(raw);
+      expect(f.db.prepare("SELECT kind,flush_status,writes FROM conversation_compaction_events ORDER BY operation_seq").all())
+        .toEqual(["started", "summary_generated", "committed"].map((kind) => ({ kind, flush_status: null, writes: null })));
+    } finally {
+      release.resolve();
+      await active;
+      await auto.stop();
+    }
+  });
+});
+
+describe("compaction Utility Slot dispatch lease", () => {
+  it.each(["expired", "cancelled", "valid"])("checks a %s lease after queue wait before calling the model", async (state) => {
+    const { logger } = createCaptureLogger();
+    let clock = new Date("2026-11-01T00:00:00.000Z");
+    const recorder = recordingModel("A compact memory.", () => {
+      // Generation completes beyond the original lease, inside the renewed dispatch lease.
+      clock = new Date("2026-11-01T00:00:01.250Z");
+    });
+    const slot = createUtilitySlot({ mainModel: recorder.model, logger });
+    const release = deferred();
+    const entered = deferred();
+    const blocker = slot.run("maintenance", async () => { entered.resolve(); await release.promise; });
+    await entered.promise;
+    const f = fixture({ canonical: true, slot, now: () => clock, leaseMs: 1_000 });
+    seed(f.timeline, 10);
+    const active = f.pass.maybeRun("taki");
+    const operation = f.operations.active("taki")!;
+    try {
+      expect(recorder.prompts).toHaveLength(0);
+      clock = new Date(state === "expired" ? "2026-11-01T00:00:01.000Z" : "2026-11-01T00:00:00.500Z");
+      if (state === "cancelled") expect(f.pass.cancel("taki")).toBe(true);
+      release.resolve();
+      await blocker;
+      await active;
+      expect(recorder.prompts).toHaveLength(state === "valid" ? 1 : 0);
+      expect(f.operations.get(operation.operationId)?.state).toBe(state === "valid" ? "committed" : state === "expired" ? "abandoned" : "cancelled");
+      expect(f.operations.events(operation.operationId).map((event) => event.kind)).toEqual(state === "valid"
+        ? ["started", "summary_generated", "committed"] : ["started", state === "expired" ? "abandoned" : "cancelled"]);
+      if (state !== "valid") {
+        expect(f.summaries.get("taki")).toBeNull();
+        expect(f.records.some((record) => record.msg === "summary generation failed; will retry")).toBe(false);
+      }
+    } finally {
+      release.resolve();
+      await active;
+      await slot.stop();
+    }
+  });
+});
 
 describe("compaction trigger math (row 7 — fires above the ratio, never at or below)", () => {
   it("does nothing at or below triggerRatio × wall", async () => {
@@ -321,6 +449,92 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
 });
 
 describe("durable compaction coordination (Slice 3)", () => {
+  it("keeps replay and v1 Compaction identities byte-equivalent when only Timeline presentation changes", async () => {
+    const f = fixture({ model: generatingModel("") as LanguageModel });
+    seedToolSource(f);
+    const store = createConversationStore({ repo: f.timeline });
+    const replay = JSON.stringify(store.history("taki"));
+    await f.pass.maybeRun("taki");
+    const identities = f.db.prepare("SELECT operation_id,source_digest FROM conversation_compaction_operations").all();
+    for (const [entryIndex, seq] of [2, 3].entries()) {
+      f.db.prepare("UPDATE timeline_messages SET presentation=:presentation WHERE seq=:seq").run({ seq,
+        presentation: JSON.stringify({ schemaVersion: "timeline-presentation.v1", messageId: "display-only",
+          entryIndex, entryCount: 2, activitySeq: 7, references: [
+            { kind: "tool", itemId: "immutable-invocation", order: 0, partIndex: 0, outcome: "outcome_unknown", message: "结果未确认" },
+          ] }),
+      });
+    }
+    expect(f.timeline.rangeAscending("taki", 1, 3).every((entry) => entry.presentation?.messageId === "display-only")).toBe(true);
+    expect(JSON.stringify(store.history("taki"))).toBe(replay);
+    await f.pass.maybeRun("taki");
+    expect(f.db.prepare("SELECT operation_id,source_digest FROM conversation_compaction_operations").all()).toEqual(identities);
+  });
+
+  it("keeps v1 source and operation identities unchanged by tool display names", async () => {
+    // Empty output leaves the same retiring range available for another attempt without advancing the summary.
+    const f = fixture({ model: generatingModel("") as LanguageModel });
+    const parts = seedToolSource(f);
+    const identities = f.db.prepare("SELECT operation_id, source_digest FROM conversation_compaction_operations");
+    await f.pass.maybeRun("taki");
+    const baseline = identities.all();
+    expect(baseline).toEqual([{
+      operation_id: "compact:d8f6d0b7f9a57b46896b2e185d4134ab8bd53572af3faaac9ee449193ede5928",
+      source_digest: "6c2e67bc09eb04ef28d735dd5d4a413ca1b7ea094d969ff83741ab9457cc0983",
+    }]);
+
+    const update = f.db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = :seq");
+    for (const displayName of ["Original server · tool", "Replacement display only"]) {
+      update.run({ seq: 2, parts: JSON.stringify(parts.call.map((part) => ({ ...part, displayName }))) });
+      update.run({ seq: 3, parts: JSON.stringify(parts.result.map((part) => ({ ...part, displayName }))) });
+      await f.pass.maybeRun("taki");
+      expect(identities.all()).toEqual(baseline);
+      expect(f.summaries.get("taki")).toBeNull();
+      expect(f.timeline.rangeAscending("taki", 1, 3).every((entry) =>
+        entry.parts?.every((part) => "displayName" in part && part.displayName === displayName))).toBe(true);
+    }
+    expect(f.operations.get(String(baseline[0]?.operation_id))?.attemptNo).toBe(3);
+  });
+
+  it("accepts an in-flight change limited to tool display names without rewriting the Timeline", async () => {
+    const controlled = controlledGenerateModel("canonical source summary");
+    const f = fixture({ model: controlled.model });
+    const parts = seedToolSource(f);
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    const named = parts.result.map((part) => ({ ...part, displayName: "New display only" }));
+    f.db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = 3").run({ parts: JSON.stringify(named) });
+    controlled.release();
+    await running;
+
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 6, text: "canonical source summary" });
+    expect(f.timeline.rangeAscending("taki", 2, 3)[0]?.parts).toEqual(named);
+    expect(f.db.prepare("SELECT state FROM conversation_compaction_operations").get()).toEqual({ state: "committed" });
+  });
+
+  it.each(["content", "output"])("still rejects changed canonical transcript %s with named tools", async (field) => {
+    const controlled = controlledGenerateModel("must be discarded");
+    const f = fixture({ model: controlled.model });
+    const parts = seedToolSource(f);
+    const named = parts.result.map((part) => ({ ...part, displayName: "Original server · tool" }));
+    const update = f.db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = 3");
+    update.run({ parts: JSON.stringify(named) });
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    if (field === "content") {
+      f.db.prepare("UPDATE timeline_messages SET content = :content WHERE seq = 1").run({ content: "changed dialogue" });
+    } else {
+      // A displayName inside the business output is canonical data, unlike the tool part's UI-only label.
+      update.run({ parts: JSON.stringify(named.map((part) => ({ ...part, output: {
+        ...part.output, value: { ...part.output.value, displayName: "changed business result" },
+      } }))) });
+    }
+    controlled.release();
+    await running;
+    expect(f.summaries.get("taki")).toBeNull();
+    const operation = f.db.prepare("SELECT operation_id FROM conversation_compaction_operations").get();
+    expect(f.operations.get(String(operation?.operation_id))).toMatchObject({ state: "failed", failureCode: "SOURCE_STALE" });
+  });
+
   it("accepts a concurrent append strictly after the captured retiring range", async () => {
     const controlled = controlledGenerateModel("captured range summary");
     const f = fixture({ model: controlled.model });
@@ -600,7 +814,8 @@ describe("compaction rolling input (row 9 — old summary + retiring span, tail 
     expect(prompt).toContain("You are NOT the primary agent");
     expect(prompt).toContain("FIRST PERSON"); // MEMORY_VOICE_RULE imported whole (R10, tidy precedent)
     expect(prompt).toContain("WHAT MUST SURVIVE");
-    expect(prompt).toContain("Permanent facts about them"); // amendment (b): the §3.2b drop line
+    expect(prompt).toContain("Keep salient names, preferences, hard boundaries and constraints");
+    expect(prompt).not.toContain("belong to your long-term memory, not this record");
     expect(prompt).toContain("Every word\nshould enable future continuity"); // amendment (a): Letta closer, no token target
     expect(prompt).not.toContain("Aim for about");
     // Post-probe owner ruling: the input carries the base-prompt day line — the probe showed the model inventing a
@@ -628,7 +843,7 @@ describe("compaction on the real utility slot (row 11 — slot model used; main-
       timeline,
       summaries,
       operations: createCompactionOperationRepo(db),
-      flush: createLegacyMemoryFlushPort({ timeline, autoState, writer: spyFlush().writer }),
+      legacyFlush: () => createLegacyMemoryFlushPort({ timeline, autoState, writer: spyFlush().writer }),
       slot,
       config: { triggerRatio: 0.8, keepMessages: 3 },
       logger: createCaptureLogger().logger.child({ mod: "compaction" }),

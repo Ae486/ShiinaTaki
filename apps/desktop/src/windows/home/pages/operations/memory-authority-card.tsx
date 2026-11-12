@@ -32,8 +32,9 @@ export function MemoryAuthorityCard({ ops }: { ops: MemoryOperationsView }) {
           {!ops.connectionReady ? "连接已断开" : ops.error ? "读取失败" : "正在刷新"}；以下为上次读取的状态（{ops.status?.observedAt}）。
         </FeedbackLine></div>
       )}
-      {view ? <CardBody view={view} ops={ops} /> : <Skeleton lines={4} />}
-      {ops.feedback && <div className="mt-3"><FeedbackLine tone={ops.feedback.tone}>{ops.feedback.message}</FeedbackLine></div>}
+      {view ? <CardBody view={view} ops={ops} /> : ops.connectionReady && ops.loading && !ops.error ? <Skeleton lines={4} />
+        : !ops.error && <p className="text-xs text-text-secondary">{ops.connectionReady ? "等待状态读取。" : "等待连接以读取状态。"}</p>}
+      {ops.feedback && ops.feedback.scope !== "tidy" && <div className="mt-3"><FeedbackLine tone={ops.feedback.tone}>{ops.feedback.message}</FeedbackLine></div>}
     </PageCard>
   );
 }
@@ -101,7 +102,7 @@ function ActiveOperations({ rows, ops, locked }: { rows: ActiveOperationRow[]; o
     <ul className="flex flex-col gap-2 text-xs">
       {rows.map((row) => (
         <li key={row.operationId} className="flex items-center justify-between gap-2">
-          <span className="min-w-0 truncate text-text-body" title={row.operationId}>{row.label}</span>
+          <span className="min-w-0 truncate text-text-body">{row.label}</span>
           {row.cancellable && (
             <ActionButton tone="ghost" busy={ops.busyKey === `cancel:${row.operationId}`} disabled={locked} onClick={() => void ops.cancel(row.operationId)}>
               取消

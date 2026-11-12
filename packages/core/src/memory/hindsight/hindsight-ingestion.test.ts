@@ -8,6 +8,12 @@ import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import { createTimelineRepo } from "../../db/timeline-repo.ts";
+import { createPrimaryConversationSourceRepo } from "../../db/primary-conversation-source-repo.ts";
+import { createPrimaryMemoryCustody } from "../../db/primary-memory-custody-repo.ts";
+import { primaryEntryDigest, sanitizeCommittedPrimarySpan } from "../canonical-ingestion-source.ts";
+import { readPrimaryMemorySource } from "../../db/primary-memory-source-read.ts";
+import { primarySourceRowDigest } from "../../db/primary-source-row.ts";
+import { createMemoryRunReference } from "../memory-capability-snapshot.ts";
 import { createPendingMemoryRepo } from "../../db/pending-memory-repo.ts";
 import { pendingMemoryRef } from "../../db/pending-memory-store.ts";
 import { createHindsightIngestionRepo } from "../../db/hindsight-ingestion-repo.ts";
@@ -73,6 +79,9 @@ function fixture(model: LanguageModel, path = ":memory:", readVerifiedBank?: Hin
   let closed = false; const close = () => { if (!closed) { closed = true; db.close(); } }; cleanup.push(close);
   seed(db);
   const authority = createCanonicalMemoryAuthorityRepo(db); const timeline = createTimelineRepo(db);
+  const primarySources = createPrimaryConversationSourceRepo({ db, timeline });
+  const memory = createMemoryRunReference({ providerId: "hindsight", providerLineageId: LINEAGE,
+    authorityEpochId: EPOCH, contractVersion: 1, capabilities: caps });
   const pending = createPendingMemoryRepo(db, () => AT);
   const replica = createHindsightReplicaSyncRepo({ db, tokenizer: createIntlSegmenterTokenizer({ stoplist: true }),
     projection: { bankScope: (bankId) => bankRecord(BANKS.find((bank) => bank.bankId === bankId)!).scope,
@@ -98,7 +107,7 @@ function fixture(model: LanguageModel, path = ":memory:", readVerifiedBank?: Hin
   });
   const ingestion = createHindsightIngestion({ authority, journal, timeline, slot, provider: { retain },
     resolveBanks: (characterId) => BANKS.filter((bank) => bank.scope === "global" || bank.characterId === characterId),
-    config: loadMemoryConfig({}), now: () => AT });
+    config: loadMemoryConfig({}), now: () => AT, primarySources });
   cleanup.push(() => ingestion.stop());
   const scope = { epochId: EPOCH, characterId: "taki" };
   const primary = (user = "The user prefers quiet cafes.", assistant = "I will remember that preference.") => {
@@ -106,11 +115,104 @@ function fixture(model: LanguageModel, path = ":memory:", readVerifiedBank?: Hin
       timeline.append({ characterId: "taki", role: "assistant", content: assistant })];
     ingestion.recordPrimaryCommitted({ characterId: "taki", entries }); return entries;
   };
-  return { db, close, authority, timeline, pending, writer, journal, slot, retain, ingestion, scope, primary, failedBanks,
+  return { db, close, authority, timeline, pending, writer, journal, slot, retain, ingestion, scope, primary, primarySources, memory, failedBanks,
     logs: captured.records, mode: (value: typeof mode) => { mode = value; }, transform: (value: typeof transform) => { transform = value; } };
 }
 
 describe("Hindsight original-source ingestion and flush", () => {
+  it("binds retained sources after restart without native calls and preserves source receipt compatibility", async () => {
+    const path = tempPath(); const initial = fixture(script(), path); initial.ingestion.initializeBaseline("taki");
+    const source = initial.primarySources.begin({ user: { characterId: "taki", role: "user", content: "Quiet cafes are best" }, memory: initial.memory });
+    initial.primarySources.retain({ sourceId: source.sourceId, rows: [{ characterId: "taki", role: "assistant", content: "noted" }] });
+    await initial.ingestion.stop(); initial.close();
+    const model = script(keep()); const f = fixture(model, path);
+    expect(f.ingestion.importPrimarySources("taki")).toEqual({ imported: 1, unresolvedSourceIds: [] });
+    const witnesses = f.db.prepare("SELECT * FROM hindsight_ingestion_primary_commits ORDER BY timeline_seq").all();
+    expect(witnesses.map((row) => row.committed_through_seq)).toEqual([2, 2]);
+    expect(f.ingestion.importPrimarySources("taki")).toEqual({ imported: 0, unresolvedSourceIds: [] });
+    expect(f.retain).not.toHaveBeenCalled(); expect(model.doGenerateCalls).toHaveLength(0);
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 1, pendingSources: 1, throughSeq: 2 });
+    const receipt = f.db.prepare("SELECT * FROM hindsight_ingestion_spans").all();
+    const row = f.db.prepare("SELECT * FROM timeline_messages WHERE id=:id").get({ id: source.userEntry.id })!;
+    expect(readPrimaryMemorySource(f.db, { characterId: "taki", userTimelineId: source.userEntry.id,
+      userTimelineSeq: source.userEntry.seq, sourceDigest: primarySourceRowDigest(row) }).kind).toBe("hindsight");
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 0, throughSeq: 2 });
+    expect(f.db.prepare("SELECT * FROM hindsight_ingestion_spans").all()).toEqual(receipt);
+    expect(f.retain).toHaveBeenCalledTimes(1); expect(model.doGenerateCalls).toHaveLength(1);
+  });
+
+  it("imports before cadence while leaving absent and changed authority captures unbound", async () => {
+    const model = script({ decision: "skip" }); const f = fixture(model); f.ingestion.initializeBaseline("taki");
+    for (const memory of [undefined, { ...f.memory, authorityEpochId: "different-epoch" },
+      { ...f.memory, providerLineageId: "other-lineage" }]) {
+      const source = f.primarySources.begin({ user: { characterId: "taki", role: "user", content: "unmatched origin" }, memory,
+        runId: memory ? undefined : "run-without-memory-snapshot" });
+      f.primarySources.retain({ sourceId: source.sourceId, rows: [] });
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const source = f.primarySources.begin({ user: { characterId: "taki", role: "user", content: `known ${i}` },
+        memory: i === 0 ? createMemoryRunReference({ ...f.memory, capabilities: { ...f.memory.capabilities, reflect: true } }) : f.memory });
+      f.primarySources.retain({ sourceId: source.sourceId, rows: [{ characterId: "taki", role: "assistant", content: "noted" }] });
+    }
+    expect(await f.ingestion.maybeRun({ characterId: "taki" })).toMatchObject({ skippedSpans: 1, throughSeq: 0,
+      sourceImport: { imported: 10 }, coverageGap: { seq: 1, code: "MEMORY_INGESTION_SOURCE_UNPROVEN" } });
+    expect(model.doGenerateCalls).toHaveLength(1); expect(f.retain).not.toHaveBeenCalled();
+  });
+
+  it("processes known groups on both sides of an unresolved hole with conservative coverage", async () => {
+    const model = script(keep("character", 1, 2), keep("character", 4, 7));
+    const f = fixture(model); f.ingestion.initializeBaseline("taki"); f.primary("first source", "noted");
+    f.timeline.append({ characterId: "taki", role: "user", content: "unexplained hole" });
+    f.primary("second source", "noted"); f.primary("third source", "noted");
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 2, pendingSources: 2, throughSeq: 2,
+      coverageGap: { seq: 3, code: "MEMORY_INGESTION_SOURCE_UNPROVEN" } });
+    expect(f.retain.mock.calls.map((call) => call[1].content)).toEqual(["first source\nnoted", "second source\nnoted\nthird source\nnoted"]);
+    expect(model.doGenerateCalls).toHaveLength(2);
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ writes: 0, throughSeq: 2, coverageGap: { seq: 3 } });
+    expect(f.journal.cursor(f.scope)).toBe(2);
+    expect(await f.ingestion.flushPort.prepareRetirement(retirement(7))).toMatchObject({ status: "retryable_failure" });
+    const later = f.pending.list({ authorityEpochId: EPOCH, bankId: "native-taki" }).at(-1)!;
+    f.pending.cancelQueued(pendingMemoryRef(later));
+    await expect(f.ingestion.run({ characterId: "taki" })).rejects.toThrow("MEMORY_INGESTION_RECEIPT_UNPROVEN");
+    expect(f.journal.cursor(f.scope)).toBe(2);
+    expect(f.retain).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a supplied source span that bridges an unproven user occurrence", () => {
+    const model = script(keep()); const f = fixture(model); f.ingestion.initializeBaseline("taki");
+    const first = f.primary("first source", "noted");
+    f.timeline.append({ characterId: "taki", role: "user", content: "unexplained hole" });
+    const second = f.primary("second source", "noted");
+    const source = sanitizeCommittedPrimarySpan({ characterId: "taki", fromSeq: 0, throughSeq: 5,
+      entries: [...first, ...second].map((entry) => ({ kind: "primary-committed", entry,
+        digest: primaryEntryDigest(entry), committedThroughSeq: entry.seq <= 2 ? 2 : 5 })) });
+    expect(() => f.journal.start({ ...f.scope, source, now: AT })).toThrow("MEMORY_INGESTION_SOURCE_UNPROVEN");
+    expect(f.db.prepare("SELECT count(*) AS n FROM hindsight_ingestion_spans").get()?.n).toBe(0);
+    expect(model.doGenerateCalls).toHaveLength(0);
+  });
+
+  it("refuses pre-baseline and previously covered retirement while exact custody remains unsettled", async () => {
+    const f = fixture(script({ decision: "skip" }, { decision: "skip" }));
+    const custody = createPrimaryMemoryCustody({ db: f.db, bootId: "before-memory", now: () => AT });
+    const session = custody.begin({ characterId: "taki", repo: f.timeline });
+    session.repo.append({ characterId: "taki", role: "assistant", content: "original unsettled answer" });
+    f.ingestion.initializeBaseline("taki");
+    expect(f.journal.eligibilityStartSeq(f.scope)).toBe(2);
+    expect(await f.ingestion.flushPort.prepareRetirement(retirement(1))).toMatchObject({ status: "retryable_failure" });
+    expect(f.journal.cursor(f.scope)).toBe(0);
+    session.finalize();
+    expect(await f.ingestion.flushPort.prepareRetirement(retirement(1))).toMatchObject({ status: "not_required" });
+    f.primary(); await f.ingestion.run({ characterId: "taki" });
+    expect(f.journal.cursor(f.scope)).toBe(3);
+    const late = custody.begin({ characterId: "taki", repo: f.timeline });
+    const entry = late.repo.append({ characterId: "taki", role: "assistant", content: "late unfinalized answer" });
+    f.ingestion.recordPrimaryCommitted({ characterId: "taki", entries: [entry] });
+    expect(await f.ingestion.run({ characterId: "taki" })).toMatchObject({ throughSeq: 3,
+      coverageGap: { seq: 4, code: "MEMORY_INGESTION_INCOMPLETE" } });
+    expect(await f.ingestion.flushPort.prepareRetirement(retirement(4))).toMatchObject({ status: "retryable_failure" });
+    expect(f.journal.cursor(f.scope)).toBe(3);
+  });
+
   it("uses one gate/Utility Slot call and actual Pending coverage without Local fact extraction", async () => {
     const model = script(keep()); const f = fixture(model); f.ingestion.initializeBaseline("taki"); const entries = f.primary();
     const result = await f.ingestion.run({ characterId: "taki" });

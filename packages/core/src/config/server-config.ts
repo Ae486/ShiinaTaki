@@ -12,7 +12,7 @@ import { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "@taki/shared";
 /** pino log levels, high to low severity. */
 export const LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"] as const;
 export const DEFAULT_LOG_LEVEL = "info";
-export const DEFAULT_TRUST_LOOPBACK = true;
+export const DEFAULT_TRUST_LOOPBACK = false;
 
 // The prompt/ library lives at the repo root (prompt/README.md); resolve it relative to this file so the dev default
 // is OS-neutral (no hardcoded separators / %USERPROFILE%, invariant 8). Production overrides via TAKI_PROMPT_DIR
@@ -32,8 +32,7 @@ export const ServerConfigSchema = z.object({
   dataDir: z.string().min(1).default(join(homedir(), ".takiagent")),
   // Prompt-card library root: <promptDir>/system/assistant-layer.md + <promptDir>/characters/<id>/persona.md (#16).
   promptDir: z.string().min(1).default(DEFAULT_PROMPT_DIR),
-  // Loopback auto-trust for operators (P3): default ON so a local Pet UI connects without pairing; a public/VPS
-  // Core sets TAKI_TRUST_LOOPBACK_OPERATOR=false to force pairing.
+  // Explicit legacy compatibility only. Native same-user admission proves profile identity independently.
   trustLoopbackOperator: z.preprocess(parseTrustFlag, z.boolean().default(DEFAULT_TRUST_LOOPBACK)),
 });
 

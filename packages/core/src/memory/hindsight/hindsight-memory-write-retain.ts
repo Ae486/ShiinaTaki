@@ -8,6 +8,7 @@ import type { HindsightMemoryWriteJob } from "../../db/hindsight-memory-write-co
 import { nativeProofHash, verifyNativeResultPages } from "./hindsight-native-proof.ts";
 import type { HindsightCallContext } from "./hindsight-client.ts";
 import type { HindsightMemoryWriteDeps } from "./hindsight-memory-write-context.ts";
+import { captureHindsightRetainLifetime } from "./hindsight-recall-evidence.ts";
 
 export async function completeHindsightMemoryRetain(deps: HindsightMemoryWriteDeps, input: {
   job: HindsightMemoryWriteJob; child: PendingMemoryRecord; request(): HindsightCallContext;
@@ -32,10 +33,12 @@ export async function completeHindsightMemoryRetain(deps: HindsightMemoryWriteDe
   // for the original source artifact, and replay returns this saved result.
   const memories = job.references?.memories; if (!memories) throw new Error("MEMORY_INTEGRITY_ERROR");
   input.request();
-  deps.journal.finish({ key: job.identity.key, revision: job.revision, terminal: { kind: "retain", result: {
-    status: "completed", documentId: child.documentId, sourceRevision: source.payload.value.revision,
+  const result = { status: "completed" as const, documentId: child.documentId, sourceRevision: source.payload.value.revision,
     memories, ...(memories.length === 0 ? { zeroResult: true } : {}),
-  } } });
+  };
+  const sourceLifetime = captureHindsightRetainLifetime(deps.replica, { ...scope, result });
+  deps.journal.finish({ key: job.identity.key, revision: job.revision, terminal: { kind: "retain", result,
+    ...(sourceLifetime ? { sourceLifetime } : {}) } });
 }
 
 async function readReferences(deps: HindsightMemoryWriteDeps, input: {

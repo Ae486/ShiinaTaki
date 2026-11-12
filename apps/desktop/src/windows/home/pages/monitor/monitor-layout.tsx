@@ -1,105 +1,65 @@
 /**
- * INPUT:  the run browser / ledger / inspector ReactNode slots plus the inspector's width state (page memory).
- * OUTPUT: the L1 DSH-shaped three-zone scaffold — browser | ledger as the shared MasterDetail row, with the inspector
- *         as an on-demand right column that stacks inline (browser → ledger → inspector) under a narrow container.
- * POS:    ui/windows/home/pages/monitor — presentation layout only; selection/inspector keys and generation guards
- *         stay in the controller. No filters, aggregates or metrics beyond the current projections.
+ * INPUT:  temporary Inspector selection/content plus local pane width and close actions
+ * OUTPUT: conditional resizable side Inspector and the narrow closable drawer, with synchronized occupied space
+ * POS:    ui/monitor — DSH Table Inspector adaptation; see third-party-notices.md (DeepSeek MIT)
  */
-
-import { useRef, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { TrajectoryInspector } from "@taki/shared";
-import { MasterDetail } from "@/components/ui/master-detail.js";
-import { ActionButton } from "../../action-button.tsx";
-import { PageCard } from "../../page-card.tsx";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
+import type { TrajectoryRecord } from "./trajectory-records.ts";
 import { InspectorFields } from "./monitor-view.tsx";
+import { useInspectorResize, INSPECTOR_WIDTH_MAX, INSPECTOR_WIDTH_MIN } from "./use-inspector-resize.ts";
+import css from "./monitor-inspector.module.css";
 
-// Inspector width is adjustable between these bounds when it sits beside the ledger (DSH uses a wider 320-720;
-// the home window's 900x800 frame is served by the narrower clamp — a larger window can widen the constant).
-export const INSPECTOR_WIDTH_MIN = 320;
-export const INSPECTOR_WIDTH_MAX = 440;
-export const INSPECTOR_WIDTH_DEFAULT = 360;
-
-const clampWidth = (width: number): number =>
-  Math.min(INSPECTOR_WIDTH_MAX, Math.max(INSPECTOR_WIDTH_MIN, width));
-
-export function MonitorThreeZones({ browser, ledger, inspector }: {
-  browser: ReactNode;
-  ledger: ReactNode;
-  inspector: ReactNode;
-}) {
-  return (
-    <MasterDetail
-      list={browser}
-      detail={
-        // Inner container query: the inspector joins the ledger as a right column only when the detail column is
-        // wide enough (@3xl); below that it stacks after the ledger — an inline section, never a modal.
-        <div className="@container flex flex-col gap-4 @3xl:flex-row @3xl:items-start">
-          <div className="flex min-w-0 flex-1 flex-col gap-4">{ledger}</div>
-          {inspector}
-        </div>
-      }
-    />
-  );
+interface InspectorActions {
+  close(): void;
+  resize(width: number): void;
+  resizing(active: boolean): void;
 }
-
-/** The inspector pane: closable, width-adjustable when side-by-side, full-width inline section when stacked.
- *  Width rides page memory only (survives close/reopen, resets with the page). */
-export function InspectorPane({ inspector, width, onWidthChange, onClose }: {
-  inspector: TrajectoryInspector;
+export interface InspectorPaneProps {
+  open: boolean;
+  active: boolean;
+  content: { inspector?: TrajectoryInspector; record?: TrajectoryRecord; loading: boolean; error: string | null; rowKey?: string };
   width: number;
-  onWidthChange(next: number): void;
-  onClose(): void;
-}) {
-  return (
-    <aside
-      className="relative w-full min-w-0 @3xl:w-(--inspector-w) @3xl:shrink-0"
-      style={{ "--inspector-w": `${width}px` } as CSSProperties}
-    >
-      <ResizeDivider width={width} onWidthChange={onWidthChange} />
-      <PageCard title={`开发检查器 · ${inspector.title}`} action={<ActionButton tone="ghost" onClick={onClose}>关闭</ActionButton>}>
-        <p className="mb-3 text-xs text-text-secondary">{inspector.redactionNotice}</p>
-        <InspectorFields inspector={inspector} />
-      </PageCard>
-    </aside>
-  );
+  resizing: boolean;
+  actions: InspectorActions;
 }
 
-/** The inspector's left-edge drag handle, active only in the side-by-side row (stacked mode is full-width).
- *  Pointer-capture drag plus the separator keyboard contract (arrow keys step the width) keep it reachable. */
-function ResizeDivider({ width, onWidthChange }: { width: number; onWidthChange(next: number): void }) {
-  const start = useRef<{ x: number; width: number } | null>(null);
-  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    start.current = { x: event.clientX, width };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!start.current) return;
-    onWidthChange(clampWidth(start.current.width + start.current.x - event.clientX));
-  };
-  const endDrag = () => { start.current = null; };
-  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    const step = event.key === "ArrowLeft" ? -24 : event.key === "ArrowRight" ? 24 : 0;
-    if (step === 0) return;
-    event.preventDefault();
-    onWidthChange(clampWidth(width + step));
-  };
-  return (
-    <div
-      role="separator"
-      aria-orientation="vertical"
-      aria-label="调整检查器宽度"
-      aria-valuemin={INSPECTOR_WIDTH_MIN}
-      aria-valuemax={INSPECTOR_WIDTH_MAX}
-      aria-valuenow={width}
-      tabIndex={0}
-      className="absolute top-0 bottom-0 -left-2.5 hidden w-2.5 cursor-col-resize touch-none @3xl:block"
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onKeyDown={onKeyDown}
-    >
-      <span className="absolute top-1/2 left-1/2 h-10 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded bg-border-strong" />
+export function InspectorPane(props: InspectorPaneProps) {
+  return <div className={css.slot} data-open={props.open} data-resizing={props.resizing}
+    inert={!props.open} aria-hidden={!props.open} style={{ "--inspector-width": `${props.width}px` } as CSSProperties}>
+    {props.open && <OpenInspector {...props} />}
+  </div>;
+}
+
+function OpenInspector(props: InspectorPaneProps) {
+  const ref = useRef<HTMLElement>(null);
+  const close = useRef(props.actions.close);
+  close.current = props.actions.close;
+  const resize = useInspectorResize({ width: props.width, change: props.actions.resize, resizing: props.actions.resizing, active: props.active });
+  useEffect(() => {
+    const previous = document.activeElement;
+    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); close.current(); } };
+    const pane = ref.current;
+    pane?.addEventListener("keydown", escape);
+    return () => {
+      pane?.removeEventListener("keydown", escape);
+      if (previous instanceof HTMLElement && previous.isConnected && !previous.closest("[hidden], [inert]")) {
+        previous.focus({ preventScroll: true });
+      }
+    };
+  }, []);
+  return <aside ref={ref} className={css.details} aria-label="记录详情" aria-busy={props.content.loading}>
+    <div role="separator" aria-orientation="vertical" aria-label="调整详情宽度" tabIndex={0}
+      aria-valuemin={INSPECTOR_WIDTH_MIN} aria-valuemax={INSPECTOR_WIDTH_MAX} aria-valuenow={props.width}
+      className={css.resize} {...resize} />
+    <div className={css.header}><h2 className={css.title}>{props.content.record?.name ?? props.content.inspector?.title ?? "记录详情"}</h2>
+      <PendingIndicator active={props.active && props.content.loading} label="正在读取详情" />
+      <button type="button" className={css.close} aria-label="关闭详情" onClick={props.actions.close}>×</button>
     </div>
-  );
+    {props.content.loading && !props.content.inspector && <p className={css.pending} role="status">正在读取详情…</p>}
+    {props.content.error && <p className={css.error} role="alert">{props.content.error}</p>}
+    {props.content.inspector && <InspectorFields key={props.content.rowKey} inspector={props.content.inspector} record={props.content.record} />}
+    {props.content.inspector && <p className={css.notice}>{props.content.inspector.redactionNotice}</p>}
+  </aside>;
 }

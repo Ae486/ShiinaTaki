@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-21",
+  "node": "v24.18.0",
+  "probe": "Published harness-session source transpiled with import stubs; fake adapter, no model/network/sandbox execution. Current local TurnRegistry source transpiled unmodified.",
+  "rows": [
+    {
+      "turnState": "idle",
+      "ownsSandboxLifecycle": false,
+      "calls": [
+        "adapter.stop"
+      ],
+      "hasContinueFrom": false
+    },
+    {
+      "turnState": "idle",
+      "ownsSandboxLifecycle": true,
+      "calls": [
+        "adapter.stop",
+        "sandbox.stop"
+      ],
+      "hasContinueFrom": false
+    },
+    {
+      "turnState": "running",
+      "ownsSandboxLifecycle": false,
+      "calls": [
+        "adapter.suspend"
+      ],
+      "hasContinueFrom": true
+    },
+    {
+      "turnState": "running",
+      "ownsSandboxLifecycle": true,
+      "calls": [
+        "adapter.suspend",
+        "sandbox.stop"
+      ],
+      "hasContinueFrom": true
+    },
+    {
+      "registry": "same character overwrite",
+      "parentCancelMatched": false,
+      "childCancelMatched": true,
+      "parentAborted": false,
+      "childAborted": true
+    }
+  ]
+}

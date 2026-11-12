@@ -1,14 +1,15 @@
 /**
- * INPUT:  committed-turn provider usage plus the exact request projection/instructions/tools and reserve policy
- * OUTPUT: detached TurnUsageReport with provider usage and provider-neutral request/context decomposition
+ * INPUT:  one completed SDK request's usage and exact prepared envelope, plus committed-turn reserve policy
+ * OUTPUT: bounded request capture and detached TurnUsageReport with matching provider usage/request measurement
  * POS:    core/agents — calibration reporting boundary; rejected/missing usage produces no fabricated sample
  */
-import type { ModelMessage, ToolSet } from "ai";
+import type { ModelMessage, Telemetry, ToolSet } from "ai";
 import type { ReplayMeasurement } from "./conversation-store.ts";
 import { estimatePreparedToolSchemaTokens, estimateToolSchemaTokens, measureRequest, type RequestMeasurement } from "./request-measurement.ts";
 
 export interface TurnUsageReport {
   characterId?: string;
+  /** One completed request's usage, not cumulative Run/turn accounting. */
   inputTokens?: number;
   outputTokens?: number;
   /** Provider-calibration denominator; excludes response reserve because provider input usage excludes output. */
@@ -37,6 +38,29 @@ export interface TurnUsageContext {
   /** Exact SDK-prepared definitions captured at the model-call seam; absent only for compatibility callers. */
   preparedTools?: ReadonlyArray<Record<string, unknown>>;
   replay: ReplayMeasurement;
+}
+
+type RequestUsageSample = Pick<TurnUsageContext, "instructions" | "outgoing" | "preparedTools" | "usage">;
+
+/** Keep only the latest completed request; the turn owner still decides whether post-commit reporting is allowed. */
+export function createTurnUsageCapture() {
+  let pending: Omit<RequestUsageSample, "usage"> | undefined;
+  let sample: RequestUsageSample | undefined;
+  const telemetry: Telemetry = {
+    onLanguageModelCallStart: (event) => {
+      sample = undefined;
+      // ChatAgent assembles string instructions. Do not pair an unsupported SDK instruction shape with a fallback.
+      pending = typeof event.instructions === "string"
+        ? { instructions: event.instructions, outgoing: event.messages, preparedTools: event.tools ?? [] } : undefined;
+    },
+    onStepEnd: (event) => {
+      // SDK result.usage sums all steps; event.usage belongs to this prepared request, including its cache details.
+      sample = pending && event.finishReason !== "error" ? { ...pending, usage: Promise.resolve(event.usage) } : undefined;
+      pending = undefined;
+    },
+  };
+  return { telemetry, latest: () => sample,
+    dispatched: (request: Omit<RequestUsageSample, "usage">) => { pending = request; } };
 }
 
 export function fireUsageReport(deps: TurnUsageDeps, ctx: TurnUsageContext): void {

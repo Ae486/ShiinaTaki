@@ -1,0 +1,2331 @@
+{
+  "dbSha256": "973f100874a9f80716d71be96e2b8064e0aa7bf6c40d2e60ec02ff5a6304c023",
+  "migrationRows": [
+    [
+      1,
+      "2026-07-13T06:38:59.399Z"
+    ],
+    [
+      2,
+      "2026-07-13T06:38:59.402Z"
+    ],
+    [
+      3,
+      "2026-07-13T06:38:59.404Z"
+    ],
+    [
+      4,
+      "2026-07-13T06:38:59.405Z"
+    ],
+    [
+      5,
+      "2026-07-26T17:22:18.284Z"
+    ],
+    [
+      6,
+      "2026-08-02T14:31:01.388Z"
+    ],
+    [
+      7,
+      "2026-08-02T14:31:01.390Z"
+    ],
+    [
+      8,
+      "2026-08-02T14:31:01.404Z"
+    ],
+    [
+      9,
+      "2026-08-02T14:31:01.406Z"
+    ],
+    [
+      10,
+      "2026-08-02T14:31:01.407Z"
+    ],
+    [
+      11,
+      "2026-08-02T14:31:01.408Z"
+    ],
+    [
+      12,
+      "2026-08-02T14:31:01.409Z"
+    ],
+    [
+      13,
+      "2026-08-03T15:05:42.517Z"
+    ],
+    [
+      14,
+      "2026-08-19T07:35:23.519Z"
+    ],
+    [
+      15,
+      "2026-08-19T07:35:23.520Z"
+    ],
+    [
+      16,
+      "2026-08-19T07:35:23.576Z"
+    ],
+    [
+      17,
+      "2026-08-19T07:35:23.588Z"
+    ],
+    [
+      18,
+      "2026-08-19T07:35:23.589Z"
+    ],
+    [
+      19,
+      "2026-08-20T09:48:09.806Z"
+    ],
+    [
+      20,
+      "2026-08-20T09:48:09.809Z"
+    ],
+    [
+      21,
+      "2026-08-20T10:06:55.984Z"
+    ],
+    [
+      22,
+      "2026-08-21T11:11:11.468Z"
+    ],
+    [
+      23,
+      "2026-08-21T15:26:11.434Z"
+    ],
+    [
+      24,
+      "2026-08-27T12:35:19.246Z"
+    ],
+    [
+      25,
+      "2026-08-27T12:35:19.249Z"
+    ],
+    [
+      26,
+      "2026-08-27T12:35:19.250Z"
+    ],
+    [
+      27,
+      "2026-08-27T12:35:19.252Z"
+    ],
+    [
+      28,
+      "2026-08-27T12:35:19.259Z"
+    ],
+    [
+      29,
+      "2026-08-27T12:35:19.261Z"
+    ],
+    [
+      30,
+      "2026-08-27T12:35:19.263Z"
+    ],
+    [
+      31,
+      "2026-08-28T11:30:42.714Z"
+    ],
+    [
+      32,
+      "2026-09-05T08:39:24.036Z"
+    ],
+    [
+      33,
+      "2026-09-08T04:17:14.161Z"
+    ],
+    [
+      34,
+      "2026-09-08T04:17:14.167Z"
+    ],
+    [
+      35,
+      "2026-09-08T04:17:14.174Z"
+    ],
+    [
+      36,
+      "2026-10-01T16:17:08.913Z"
+    ],
+    [
+      37,
+      "2026-10-01T16:17:08.915Z"
+    ],
+    [
+      38,
+      "2026-10-01T16:17:08.917Z"
+    ],
+    [
+      39,
+      "2026-10-01T16:17:08.920Z"
+    ],
+    [
+      40,
+      "2026-10-01T16:17:08.934Z"
+    ],
+    [
+      41,
+      "2026-10-01T16:17:08.957Z"
+    ],
+    [
+      42,
+      "2026-10-01T16:17:08.961Z"
+    ],
+    [
+      43,
+      "2026-10-01T16:17:08.963Z"
+    ],
+    [
+      44,
+      "2026-10-01T16:17:08.965Z"
+    ],
+    [
+      45,
+      "2026-10-01T16:17:08.966Z"
+    ],
+    [
+      46,
+      "2026-10-01T16:17:08.967Z"
+    ],
+    [
+      47,
+      "2026-10-01T16:17:08.969Z"
+    ],
+    [
+      48,
+      "2026-10-01T16:17:08.970Z"
+    ],
+    [
+      49,
+      "2026-10-01T16:17:08.985Z"
+    ],
+    [
+      50,
+      "2026-10-01T16:17:08.987Z"
+    ],
+    [
+      51,
+      "2026-10-01T16:17:08.988Z"
+    ],
+    [
+      52,
+      "2026-10-01T16:17:08.991Z"
+    ],
+    [
+      53,
+      "2026-10-01T16:17:08.992Z"
+    ],
+    [
+      54,
+      "2026-10-01T16:17:08.994Z"
+    ],
+    [
+      55,
+      "2026-10-01T16:17:08.999Z"
+    ],
+    [
+      56,
+      "2026-10-24T06:05:44.099Z"
+    ],
+    [
+      57,
+      "2026-10-24T06:05:44.112Z"
+    ],
+    [
+      58,
+      "2026-10-25T09:15:28.849Z"
+    ],
+    [
+      60,
+      "2026-10-25T11:02:08.285Z"
+    ],
+    [
+      61,
+      "2026-10-25T13:15:46.522Z"
+    ],
+    [
+      62,
+      "2026-10-25T13:24:38.426Z"
+    ],
+    [
+      63,
+      "2026-11-01T11:03:12.580Z"
+    ],
+    [
+      64,
+      "2026-11-01T11:03:12.593Z"
+    ],
+    [
+      65,
+      "2026-11-01T12:22:36.425Z"
+    ],
+    [
+      66,
+      "2026-11-01T15:47:00.431Z"
+    ],
+    [
+      67,
+      "2026-11-06T04:48:45.930Z"
+    ],
+    [
+      68,
+      "2026-11-06T05:50:24.422Z"
+    ],
+    [
+      69,
+      "2026-11-06T06:27:01.479Z"
+    ],
+    [
+      70,
+      "2026-11-10T11:01:42.454Z"
+    ],
+    [
+      71,
+      "2026-11-10T11:01:42.458Z"
+    ],
+    [
+      72,
+      "2026-11-10T11:01:42.459Z"
+    ]
+  ],
+  "schema": [
+    [
+      "index",
+      "auxiliary_model_calls_operation",
+      "auxiliary_model_calls",
+      "CREATE INDEX auxiliary_model_calls_operation ON auxiliary_model_calls\n (json_extract(operation_json,'$.kind'),json_extract(operation_json,'$.operationId'),\n  json_extract(operation_json,'$.characterId'),started_at,call_id)"
+    ],
+    [
+      "index",
+      "auxiliary_model_calls_started",
+      "auxiliary_model_calls",
+      "CREATE INDEX auxiliary_model_calls_started ON auxiliary_model_calls(started_at DESC,call_id DESC)"
+    ],
+    [
+      "index",
+      "auxiliary_model_calls_status",
+      "auxiliary_model_calls",
+      "CREATE INDEX auxiliary_model_calls_status ON auxiliary_model_calls(status,started_at)"
+    ],
+    [
+      "index",
+      "canonical_memory_ingestion_one_pending",
+      "canonical_memory_ingestion_spans",
+      "CREATE UNIQUE INDEX canonical_memory_ingestion_one_pending\n ON canonical_memory_ingestion_spans(authority_epoch_id,character_id) WHERE state='pending'"
+    ],
+    [
+      "index",
+      "canonical_memory_primary_commits_character",
+      "canonical_memory_primary_commits",
+      "CREATE INDEX canonical_memory_primary_commits_character\n ON canonical_memory_primary_commits(character_id,timeline_seq)"
+    ],
+    [
+      "index",
+      "conversation_compaction_one_open_per_character",
+      "conversation_compaction_operations",
+      "CREATE UNIQUE INDEX conversation_compaction_one_open_per_character\n      ON conversation_compaction_operations(character_id) WHERE state = 'open'"
+    ],
+    [
+      "index",
+      "conversation_compaction_operations_character_updated",
+      "conversation_compaction_operations",
+      "CREATE INDEX conversation_compaction_operations_character_updated\n      ON conversation_compaction_operations(character_id, updated_at DESC)"
+    ],
+    [
+      "index",
+      "hindsight_application_command_pending",
+      "hindsight_application_command_jobs",
+      "CREATE INDEX hindsight_application_command_pending\n ON hindsight_application_command_jobs(authority_epoch_id,bank_id,prepared_at,request_id)\n WHERE state IN ('prepared','dispatched')"
+    ],
+    [
+      "index",
+      "hindsight_application_replica_work",
+      "hindsight_application_replica_heads",
+      "CREATE INDEX hindsight_application_replica_work ON hindsight_application_replica_heads\n (bank_id,provider_lineage,bank_generation,application_id,binding_state,assessment_state,next_attempt_at)"
+    ],
+    [
+      "index",
+      "hindsight_current_native_invalidations_preparation",
+      "hindsight_current_native_invalidations",
+      "CREATE INDEX hindsight_current_native_invalidations_preparation\n ON hindsight_current_native_invalidations(preparation_id,scope,candidate_id)"
+    ],
+    [
+      "index",
+      "hindsight_ingestion_one_pending",
+      "hindsight_ingestion_spans",
+      "CREATE UNIQUE INDEX hindsight_ingestion_one_pending\n ON hindsight_ingestion_spans(authority_epoch_id,character_id) WHERE state='pending'"
+    ],
+    [
+      "index",
+      "hindsight_ingestion_primary_character",
+      "hindsight_ingestion_primary_commits",
+      "CREATE INDEX hindsight_ingestion_primary_character\n ON hindsight_ingestion_primary_commits(authority_epoch_id,character_id,timeline_seq)"
+    ],
+    [
+      "index",
+      "hindsight_memory_write_native",
+      "hindsight_memory_write_intents",
+      "CREATE UNIQUE INDEX hindsight_memory_write_native\n ON hindsight_memory_write_intents(authority_epoch_id,bank_id,native_operation_id)\n WHERE native_operation_id IS NOT NULL"
+    ],
+    [
+      "index",
+      "hindsight_memory_write_pending",
+      "hindsight_memory_write_intents",
+      "CREATE INDEX hindsight_memory_write_pending\n ON hindsight_memory_write_intents(authority_epoch_id,bank_id,sequence) WHERE state='pending'"
+    ],
+    [
+      "index",
+      "hindsight_policy_work_due",
+      "hindsight_policy_work",
+      "CREATE INDEX hindsight_policy_work_due ON hindsight_policy_work(authority_epoch_id,bank_id,next_attempt_at,created_at,work_id)\n WHERE state IN ('ready','claimed','saved')"
+    ],
+    [
+      "index",
+      "hindsight_replica_sync_snapshot_cache_objects",
+      "hindsight_replica_sync_snapshot_cache",
+      "CREATE INDEX hindsight_replica_sync_snapshot_cache_objects\n  ON hindsight_replica_sync_snapshot_cache(bank_id,object_kind,object_id)"
+    ],
+    [
+      "index",
+      "hindsight_source_evidence_source",
+      "hindsight_source_evidence",
+      "CREATE INDEX hindsight_source_evidence_source ON hindsight_source_evidence(local_epoch_id,bank_id,document_id,source_revision)"
+    ],
+    [
+      "index",
+      "idx_canonical_memory_bank_scope",
+      "canonical_memory_banks",
+      "CREATE UNIQUE INDEX idx_canonical_memory_bank_scope ON canonical_memory_banks(authority_epoch_id,scope_kind,ifnull(character_id,''))"
+    ],
+    [
+      "index",
+      "idx_canonical_memory_one_active_epoch",
+      "canonical_memory_authority_epochs",
+      "CREATE UNIQUE INDEX idx_canonical_memory_one_active_epoch ON canonical_memory_authority_epochs(status) WHERE status='active'"
+    ],
+    [
+      "index",
+      "idx_canonical_memory_policy_layer",
+      "canonical_memory_policy",
+      "CREATE INDEX idx_canonical_memory_policy_layer ON canonical_memory_policy(authority_epoch_id,bank_id,layer_id,visibility)"
+    ],
+    [
+      "index",
+      "idx_canonical_memory_unit_sources_reverse",
+      "canonical_memory_unit_sources",
+      "CREATE INDEX idx_canonical_memory_unit_sources_reverse ON canonical_memory_unit_sources(authority_epoch_id,bank_id,source_memory_id,memory_id)"
+    ],
+    [
+      "index",
+      "idx_canonical_memory_units_document",
+      "canonical_memory_units",
+      "CREATE INDEX idx_canonical_memory_units_document ON canonical_memory_units(authority_epoch_id,bank_id,document_id)"
+    ],
+    [
+      "index",
+      "idx_canonical_memory_units_recall",
+      "canonical_memory_units",
+      "CREATE INDEX idx_canonical_memory_units_recall ON canonical_memory_units(authority_epoch_id,bank_id,state,updated_at DESC)"
+    ],
+    [
+      "index",
+      "idx_hindsight_import_facts_source",
+      "hindsight_import_facts",
+      "CREATE INDEX idx_hindsight_import_facts_source\n ON hindsight_import_facts(run_id,source_id,fact_ordinal)"
+    ],
+    [
+      "index",
+      "idx_hindsight_import_operations_status",
+      "hindsight_import_operations",
+      "CREATE INDEX idx_hindsight_import_operations_status\n ON hindsight_import_operations(run_id,status)"
+    ],
+    [
+      "index",
+      "idx_hindsight_replica_records_epoch",
+      "hindsight_replica_records",
+      "CREATE INDEX idx_hindsight_replica_records_epoch\n ON hindsight_replica_records(bank_id,replica_epoch_id,object_kind,object_id)"
+    ],
+    [
+      "index",
+      "idx_hindsight_replica_staging_kind",
+      "hindsight_replica_staging_records",
+      "CREATE INDEX idx_hindsight_replica_staging_kind\n ON hindsight_replica_staging_records(staging_id,object_kind,object_id)"
+    ],
+    [
+      "index",
+      "idx_memory_events_character",
+      "memory_events",
+      "CREATE INDEX idx_memory_events_character ON memory_events (character_id, id)"
+    ],
+    [
+      "index",
+      "idx_memory_layer_status",
+      "memory_entries",
+      "CREATE INDEX idx_memory_layer_status ON memory_entries (layer, status)"
+    ],
+    [
+      "index",
+      "idx_memory_migration_one_live_run",
+      "memory_migration_runs",
+      "CREATE UNIQUE INDEX idx_memory_migration_one_live_run\n ON memory_migration_runs((1)) WHERE status IN ('running','ready')"
+    ],
+    [
+      "index",
+      "idx_taki_memory_blocks_scope",
+      "taki_memory_blocks",
+      "CREATE UNIQUE INDEX idx_taki_memory_blocks_scope ON taki_memory_blocks(block_id,scope_kind,ifnull(character_id,''))"
+    ],
+    [
+      "index",
+      "idx_timeline_character_seq",
+      "timeline_messages",
+      "CREATE INDEX idx_timeline_character_seq ON timeline_messages (character_id, seq DESC)"
+    ],
+    [
+      "index",
+      "initiative_backoff_admissions",
+      "runs",
+      "CREATE INDEX initiative_backoff_admissions ON runs(character_id,delivery_class,queued_at)"
+    ],
+    [
+      "index",
+      "initiative_backoff_qualified",
+      "initiative_feedback",
+      "CREATE INDEX initiative_backoff_qualified ON initiative_feedback(character_id,settled_at,timeline_seq)\n WHERE disposition='weak_non_engagement'"
+    ],
+    [
+      "index",
+      "initiative_feedback_character",
+      "initiative_feedback",
+      "CREATE INDEX initiative_feedback_character ON initiative_feedback(character_id,published_at)"
+    ],
+    [
+      "index",
+      "initiative_feedback_pending",
+      "initiative_feedback",
+      "CREATE INDEX initiative_feedback_pending ON initiative_feedback(deadline_at) WHERE disposition IS NULL"
+    ],
+    [
+      "index",
+      "initiative_intentions_claim",
+      "initiative_intentions",
+      "CREATE INDEX initiative_intentions_claim ON initiative_intentions(canonical_run_key)"
+    ],
+    [
+      "index",
+      "initiative_intentions_due",
+      "initiative_intentions",
+      "CREATE INDEX initiative_intentions_due ON initiative_intentions(character_id,state,not_before,expires_at)"
+    ],
+    [
+      "index",
+      "initiative_intentions_expiry",
+      "initiative_intentions",
+      "CREATE INDEX initiative_intentions_expiry ON initiative_intentions(state,expires_at)"
+    ],
+    [
+      "index",
+      "initiative_model_charges",
+      "initiative_model_opportunities",
+      "CREATE INDEX initiative_model_charges ON initiative_model_opportunities(charged_at) WHERE charged_at IS NOT NULL"
+    ],
+    [
+      "index",
+      "initiative_model_reservations",
+      "initiative_model_opportunities",
+      "CREATE INDEX initiative_model_reservations ON initiative_model_opportunities(expires_at) WHERE state='reserved'"
+    ],
+    [
+      "index",
+      "initiative_policy_recent",
+      "initiative_policy_facts",
+      "CREATE INDEX initiative_policy_recent ON initiative_policy_facts(character_id,seq)"
+    ],
+    [
+      "index",
+      "initiative_wake_claims_patterns",
+      "initiative_wake_claims",
+      "CREATE INDEX initiative_wake_claims_patterns ON initiative_wake_claims(character_id,created_at)"
+    ],
+    [
+      "index",
+      "initiative_wake_evaluations_character",
+      "initiative_wake_evaluations",
+      "CREATE INDEX initiative_wake_evaluations_character ON initiative_wake_evaluations(character_id,seq)"
+    ],
+    [
+      "index",
+      "interaction_pattern_commands_character",
+      "interaction_pattern_commands",
+      "CREATE INDEX interaction_pattern_commands_character ON interaction_pattern_commands(character_id)"
+    ],
+    [
+      "index",
+      "interaction_pattern_primary_sources_character",
+      "interaction_pattern_primary_sources",
+      "CREATE INDEX interaction_pattern_primary_sources_character ON interaction_pattern_primary_sources(character_id)"
+    ],
+    [
+      "index",
+      "interaction_pattern_revisions_history",
+      "interaction_pattern_revisions",
+      "CREATE INDEX interaction_pattern_revisions_history ON interaction_pattern_revisions(pattern_id,base_version DESC)"
+    ],
+    [
+      "index",
+      "interaction_patterns_active",
+      "interaction_patterns",
+      "CREATE INDEX interaction_patterns_active ON interaction_patterns(character_id,state)"
+    ],
+    [
+      "index",
+      "interaction_patterns_character",
+      "interaction_patterns",
+      "CREATE INDEX interaction_patterns_character ON interaction_patterns(character_id,pattern_id)"
+    ],
+    [
+      "index",
+      "memory_operations_active_family",
+      "memory_operations",
+      "CREATE UNIQUE INDEX memory_operations_active_family ON memory_operations(family) WHERE terminal_at IS NULL"
+    ],
+    [
+      "index",
+      "memory_operations_recent",
+      "memory_operations",
+      "CREATE INDEX memory_operations_recent ON memory_operations(terminal_at DESC)"
+    ],
+    [
+      "index",
+      "pending_memory_recovery",
+      "pending_memory",
+      "CREATE INDEX pending_memory_recovery ON pending_memory(authority_epoch_id,bank_id,phase,operation_kind,sequence)"
+    ],
+    [
+      "index",
+      "primary_conversation_source_ready",
+      "primary_conversation_sources",
+      "CREATE INDEX primary_conversation_source_ready ON primary_conversation_sources(character_id,state,original_user_seq)"
+    ],
+    [
+      "index",
+      "run_attempts_run_idx",
+      "run_attempts",
+      "CREATE INDEX run_attempts_run_idx ON run_attempts(run_id, ordinal)"
+    ],
+    [
+      "index",
+      "run_deliveries_budget",
+      "run_deliveries",
+      "CREATE INDEX run_deliveries_budget ON run_deliveries(delivery_class,charged_at)"
+    ],
+    [
+      "index",
+      "run_deliveries_feedback",
+      "run_deliveries",
+      "CREATE INDEX run_deliveries_feedback ON run_deliveries(delivery_class,charged_at,timeline_seq)"
+    ],
+    [
+      "index",
+      "run_deliveries_one_held",
+      "run_deliveries",
+      "CREATE UNIQUE INDEX run_deliveries_one_held ON run_deliveries(character_id) WHERE state='held'"
+    ],
+    [
+      "index",
+      "run_effects_attempt_state_idx",
+      "run_effects",
+      "CREATE INDEX run_effects_attempt_state_idx ON run_effects(run_id, attempt_id, state)"
+    ],
+    [
+      "index",
+      "run_events_attempt_idx",
+      "run_events",
+      "CREATE INDEX run_events_attempt_idx ON run_events(attempt_id, seq)"
+    ],
+    [
+      "index",
+      "run_events_run_seq_idx",
+      "run_events",
+      "CREATE INDEX run_events_run_seq_idx ON run_events(run_id, seq)"
+    ],
+    [
+      "index",
+      "run_message_input_receipt",
+      "run_messages",
+      "CREATE UNIQUE INDEX run_message_input_receipt ON run_messages(model_effect_id,input_id) WHERE entry_kind='input'"
+    ],
+    [
+      "index",
+      "run_message_order",
+      "run_messages",
+      "CREATE INDEX run_message_order ON run_messages(run_id,seq)"
+    ],
+    [
+      "index",
+      "run_message_output_identity",
+      "run_messages",
+      "CREATE UNIQUE INDEX run_message_output_identity ON run_messages(run_id,attempt_id,step_number,entry_kind,message_index) WHERE entry_kind<>'input'"
+    ],
+    [
+      "index",
+      "run_usage_attempt_idx",
+      "run_usage",
+      "CREATE INDEX run_usage_attempt_idx ON run_usage(run_id, attempt_id)"
+    ],
+    [
+      "index",
+      "runs_character_state_idx",
+      "runs",
+      "CREATE INDEX runs_character_state_idx ON runs(character_id, state, queued_at)"
+    ],
+    [
+      "index",
+      "runs_queue_status_idx",
+      "runs",
+      "CREATE INDEX runs_queue_status_idx ON runs(state, queued_at, run_id)"
+    ],
+    [
+      "index",
+      "schedule_occurrences_character_idx",
+      "schedule_occurrences",
+      "CREATE INDEX schedule_occurrences_character_idx ON schedule_occurrences(character_id, state, updated_at)"
+    ],
+    [
+      "index",
+      "schedule_occurrences_state_idx",
+      "schedule_occurrences",
+      "CREATE INDEX schedule_occurrences_state_idx ON schedule_occurrences(state, updated_at)"
+    ],
+    [
+      "index",
+      "scheduled_tasks_character_idx",
+      "scheduled_tasks",
+      "CREATE INDEX scheduled_tasks_character_idx ON scheduled_tasks(character_id, state, updated_at)"
+    ],
+    [
+      "index",
+      "scheduled_tasks_due_idx",
+      "scheduled_tasks",
+      "CREATE INDEX scheduled_tasks_due_idx ON scheduled_tasks(state, enabled, next_run_at)"
+    ],
+    [
+      "index",
+      "skill_packages_active_name",
+      "skill_packages",
+      "CREATE UNIQUE INDEX skill_packages_active_name ON skill_packages(skill_name)\n      WHERE lifecycle_state = 'active' AND skill_name IS NOT NULL"
+    ],
+    [
+      "index",
+      "subagent_completed_step_identity",
+      "subagent_task_steps",
+      "CREATE UNIQUE INDEX subagent_completed_step_identity ON subagent_task_steps(run_id,attempt_id,step_number) WHERE completed_ordinal IS NOT NULL"
+    ],
+    [
+      "index",
+      "subagent_completion_queue",
+      "subagent_executions",
+      "CREATE INDEX subagent_completion_queue ON subagent_executions(completion_state,settled_at,run_id)"
+    ],
+    [
+      "index",
+      "subagent_conversation_page",
+      "subagent_conversation_order",
+      "CREATE INDEX subagent_conversation_page ON subagent_conversation_order(subagent_id,seq)"
+    ],
+    [
+      "index",
+      "subagent_conversations_character",
+      "subagent_conversations",
+      "CREATE INDEX subagent_conversations_character ON subagent_conversations(character_id,created_at,subagent_id)"
+    ],
+    [
+      "index",
+      "subagent_event_fifo",
+      "subagent_events",
+      "CREATE INDEX subagent_event_fifo ON subagent_events(character_id,seq)"
+    ],
+    [
+      "index",
+      "subagent_one_active_execution",
+      "subagent_executions",
+      "CREATE UNIQUE INDEX subagent_one_active_execution ON subagent_executions(subagent_id) WHERE settled_at IS NULL"
+    ],
+    [
+      "index",
+      "subagent_one_open_wait",
+      "subagent_input_waits",
+      "CREATE UNIQUE INDEX subagent_one_open_wait ON subagent_input_waits(work_input_id) WHERE state='open'"
+    ],
+    [
+      "index",
+      "subagent_work_executions",
+      "subagent_executions",
+      "CREATE INDEX subagent_work_executions ON subagent_executions(work_input_id,settled_at,run_id)"
+    ],
+    [
+      "index",
+      "timeline_primary_source_members",
+      "timeline_messages",
+      "CREATE INDEX timeline_primary_source_members ON timeline_messages(primary_source_id,seq) WHERE primary_source_id IS NOT NULL"
+    ],
+    [
+      "table",
+      "approval_decisions",
+      "approval_decisions",
+      "CREATE TABLE approval_decisions (\n      decision_id           TEXT PRIMARY KEY,\n      binding_revision      INTEGER NOT NULL CHECK (binding_revision > 0),\n      binding_digest        TEXT NOT NULL UNIQUE\n                            CHECK (length(binding_digest) = 64 AND binding_digest = lower(binding_digest)\n                                   AND binding_digest NOT GLOB '*[^0-9a-f]*'),\n      capability_id         TEXT NOT NULL,\n      owner_host_id         TEXT NOT NULL,\n      subject_id            TEXT,\n      subject_revision      TEXT,\n      descriptor_revision   INTEGER NOT NULL CHECK (descriptor_revision > 0),\n      classifier_id         TEXT NOT NULL,\n      classifier_revision   INTEGER NOT NULL CHECK (classifier_revision > 0),\n      cell_key               TEXT NOT NULL,\n      decision_scope_digest TEXT NOT NULL\n                            CHECK (length(decision_scope_digest) = 64\n                                   AND decision_scope_digest = lower(decision_scope_digest)\n                                   AND decision_scope_digest NOT GLOB '*[^0-9a-f]*'),\n      disclosure_revision   INTEGER NOT NULL CHECK (disclosure_revision > 0),\n      provenance            TEXT NOT NULL CHECK (provenance IN ('operator', 'legacy-reconfirmation')),\n      created_at            TEXT NOT NULL,\n      updated_at            TEXT NOT NULL,\n      CHECK ((subject_id IS NULL) = (subject_revision IS NULL))\n    ) STRICT"
+    ],
+    [
+      "table",
+      "approval_state",
+      "approval_state",
+      "CREATE TABLE approval_state (\n      singleton_id                 INTEGER PRIMARY KEY CHECK (singleton_id = 1),\n      approval_generation          INTEGER NOT NULL CHECK (approval_generation > 0),\n      governance_registry_revision INTEGER NOT NULL CHECK (governance_registry_revision > 0),\n      disclosure_revision          INTEGER NOT NULL CHECK (disclosure_revision > 0),\n      updated_at                   TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "auxiliary_model_calls",
+      "auxiliary_model_calls",
+      "CREATE TABLE auxiliary_model_calls (\n call_id TEXT PRIMARY KEY,\n task_id TEXT,\n source TEXT NOT NULL CHECK(source IN ('utility','image-description','screenshot-description')),\n label TEXT NOT NULL,\n provider TEXT NOT NULL,\n model_id TEXT NOT NULL,\n started_at TEXT NOT NULL,\n finished_at TEXT,\n updated_at TEXT NOT NULL,\n status TEXT NOT NULL CHECK(status IN ('started','completed','failed','cancelled','interrupted')),\n response_id TEXT,\n input_tokens INTEGER CHECK(input_tokens IS NULL OR (input_tokens>=0 AND input_tokens<=9007199254740991)),\n no_cache_tokens INTEGER CHECK(no_cache_tokens IS NULL OR (no_cache_tokens>=0 AND no_cache_tokens<=9007199254740991)),\n cache_read_tokens INTEGER CHECK(cache_read_tokens IS NULL OR (cache_read_tokens>=0 AND cache_read_tokens<=9007199254740991)),\n cache_write_tokens INTEGER CHECK(cache_write_tokens IS NULL OR (cache_write_tokens>=0 AND cache_write_tokens<=9007199254740991)),\n output_tokens INTEGER CHECK(output_tokens IS NULL OR (output_tokens>=0 AND output_tokens<=9007199254740991)),\n reasoning_tokens INTEGER CHECK(reasoning_tokens IS NULL OR (reasoning_tokens>=0 AND reasoning_tokens<=9007199254740991)),\n total_tokens INTEGER CHECK(total_tokens IS NULL OR (total_tokens>=0 AND total_tokens<=9007199254740991))\n, operation_json TEXT) STRICT"
+    ],
+    [
+      "table",
+      "cache_usage_baselines",
+      "cache_usage_baselines",
+      "CREATE TABLE cache_usage_baselines (\n character_id TEXT PRIMARY KEY,\n summary_revision INTEGER NOT NULL CHECK(summary_revision>0),\n operation_id TEXT NOT NULL,\n summary_committed_at TEXT NOT NULL,\n boundary TEXT NOT NULL CHECK(boundary IN ('captured','historical')),\n observed_requests INTEGER NOT NULL CHECK(observed_requests>=0 AND observed_requests<=9007199254740991),\n paired_requests INTEGER NOT NULL CHECK(paired_requests>=0 AND paired_requests<=observed_requests),\n input_tokens INTEGER NOT NULL CHECK(input_tokens>=0 AND input_tokens<=9007199254740991),\n cache_read_tokens INTEGER NOT NULL CHECK(cache_read_tokens>=0 AND cache_read_tokens<=input_tokens)\n, population TEXT) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_authority_epochs",
+      "canonical_memory_authority_epochs",
+      "CREATE TABLE canonical_memory_authority_epochs (\n epoch_id TEXT PRIMARY KEY, provider_id TEXT NOT NULL, provider_lineage_id TEXT NOT NULL,\n status TEXT NOT NULL CHECK(status IN ('active','closed')), predecessor_epoch_id TEXT REFERENCES canonical_memory_authority_epochs(epoch_id),\n started_at TEXT NOT NULL, ended_at TEXT, reason TEXT NOT NULL CHECK(reason IN ('initial-local','planned-switch','emergency-takeover')),\n CHECK(length(epoch_id)>0 AND length(provider_id)>0 AND length(provider_lineage_id)>0),\n CHECK((status='active' AND ended_at IS NULL) OR (status='closed' AND ended_at IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_authority_state",
+      "canonical_memory_authority_state",
+      "CREATE TABLE canonical_memory_authority_state (singleton INTEGER PRIMARY KEY CHECK(singleton=1), active_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id), updated_at TEXT NOT NULL) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_banks",
+      "canonical_memory_banks",
+      "CREATE TABLE canonical_memory_banks (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id), bank_id TEXT NOT NULL,\n scope_kind TEXT NOT NULL CHECK(scope_kind IN ('global','character')), character_id TEXT, name TEXT NOT NULL,\n disposition_json TEXT NOT NULL CHECK(json_valid(disposition_json) AND json_type(disposition_json)='object'), mission TEXT NOT NULL, config_json TEXT NOT NULL CHECK(json_valid(config_json) AND json_type(config_json)='object'),\n revision INTEGER NOT NULL CHECK(revision>=1), created_at TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(authority_epoch_id,bank_id),\n CHECK((scope_kind='global' AND character_id IS NULL) OR (scope_kind='character' AND character_id IS NOT NULL AND length(character_id)>0))\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_derived",
+      "canonical_memory_derived",
+      "CREATE TABLE canonical_memory_derived (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, object_id TEXT NOT NULL, kind TEXT NOT NULL CHECK(kind IN ('mental_model','directive')), payload_json TEXT NOT NULL CHECK(json_valid(payload_json) AND json_type(payload_json)='object'), object_revision INTEGER NOT NULL CHECK(object_revision>=1), PRIMARY KEY(authority_epoch_id,bank_id,kind,object_id), FOREIGN KEY(authority_epoch_id,bank_id) REFERENCES canonical_memory_banks(authority_epoch_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_fts",
+      "canonical_memory_fts",
+      "CREATE VIRTUAL TABLE canonical_memory_fts USING fts5(authority_epoch_id UNINDEXED, bank_id UNINDEXED, memory_id UNINDEXED, text, context, search_terms, tokenize='unicode61')"
+    ],
+    [
+      "table",
+      "canonical_memory_fts_config",
+      "canonical_memory_fts_config",
+      "CREATE TABLE 'canonical_memory_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID"
+    ],
+    [
+      "table",
+      "canonical_memory_fts_content",
+      "canonical_memory_fts_content",
+      "CREATE TABLE 'canonical_memory_fts_content'(id INTEGER PRIMARY KEY, c0, c1, c2, c3, c4, c5)"
+    ],
+    [
+      "table",
+      "canonical_memory_fts_data",
+      "canonical_memory_fts_data",
+      "CREATE TABLE 'canonical_memory_fts_data'(id INTEGER PRIMARY KEY, block BLOB)"
+    ],
+    [
+      "table",
+      "canonical_memory_fts_docsize",
+      "canonical_memory_fts_docsize",
+      "CREATE TABLE 'canonical_memory_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)"
+    ],
+    [
+      "table",
+      "canonical_memory_fts_idx",
+      "canonical_memory_fts_idx",
+      "CREATE TABLE 'canonical_memory_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID"
+    ],
+    [
+      "table",
+      "canonical_memory_ingestion_cursors",
+      "canonical_memory_ingestion_cursors",
+      "CREATE TABLE canonical_memory_ingestion_cursors (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n character_id TEXT NOT NULL, through_seq INTEGER NOT NULL CHECK(through_seq>=0),\n eligibility_start_seq INTEGER NOT NULL CHECK(eligibility_start_seq>=1), updated_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,character_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_ingestion_spans",
+      "canonical_memory_ingestion_spans",
+      "CREATE TABLE canonical_memory_ingestion_spans (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n character_id TEXT NOT NULL, span_id TEXT NOT NULL, from_seq INTEGER NOT NULL CHECK(from_seq>=0),\n through_seq INTEGER NOT NULL CHECK(through_seq>from_seq), source_hash TEXT NOT NULL,\n source_json TEXT NOT NULL CHECK(json_valid(source_json)),\n gate_json TEXT CHECK(gate_json IS NULL OR json_valid(gate_json)),\n extraction_json TEXT CHECK(extraction_json IS NULL OR json_valid(extraction_json)),\n bank_receipts_json TEXT NOT NULL DEFAULT '{}' CHECK(json_valid(bank_receipts_json)),\n state TEXT NOT NULL CHECK(state IN ('pending','complete')), revision INTEGER NOT NULL CHECK(revision>0),\n created_at TEXT NOT NULL, updated_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,character_id,span_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_operation_receipts",
+      "canonical_memory_operation_receipts",
+      "CREATE TABLE \"canonical_memory_operation_receipts\" (\n authority_epoch_id TEXT NOT NULL, request_id TEXT NOT NULL,\n operation TEXT NOT NULL CHECK(operation IN ('retain','edit','invalidate','restore','maintenance')),\n request_hash TEXT NOT NULL, result_json TEXT NOT NULL CHECK(json_valid(result_json) AND json_type(result_json)='object'),\n created_at TEXT NOT NULL, PRIMARY KEY(authority_epoch_id,request_id),\n FOREIGN KEY(authority_epoch_id) REFERENCES canonical_memory_authority_epochs(epoch_id),\n CHECK(length(request_id)>0 AND length(request_hash)=64)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_policy",
+      "canonical_memory_policy",
+      "CREATE TABLE canonical_memory_policy (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, memory_id TEXT NOT NULL, layer_id TEXT NOT NULL, importance INTEGER NOT NULL CHECK(importance BETWEEN 1 AND 10), visibility TEXT NOT NULL CHECK(visibility IN ('pinned','retrieved','mood-gated','hidden')), disclosure TEXT, origin TEXT NOT NULL CHECK(origin IN ('self','observed')), emotional_weight REAL, retention_json TEXT NOT NULL CHECK(json_valid(retention_json) AND json_type(retention_json)='object'), policy_version INTEGER NOT NULL CHECK(policy_version>=1), updated_at TEXT NOT NULL, PRIMARY KEY(authority_epoch_id,bank_id,memory_id), FOREIGN KEY(authority_epoch_id,bank_id,memory_id) REFERENCES canonical_memory_units(authority_epoch_id,bank_id,memory_id) ON DELETE CASCADE\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_primary_commits",
+      "canonical_memory_primary_commits",
+      "CREATE TABLE canonical_memory_primary_commits (\n timeline_seq INTEGER PRIMARY KEY REFERENCES timeline_messages(seq) ON DELETE CASCADE,\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n character_id TEXT NOT NULL, entry_id TEXT NOT NULL UNIQUE, entry_digest TEXT NOT NULL,\n committed_through_seq INTEGER NOT NULL CHECK(committed_through_seq>=timeline_seq),\n ingestion_span_id TEXT, run_id TEXT, committed_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_retired_sources",
+      "canonical_memory_retired_sources",
+      "CREATE TABLE canonical_memory_retired_sources (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, document_id TEXT NOT NULL,\n last_revision INTEGER NOT NULL CHECK(last_revision>=1), deleted_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,bank_id,document_id),\n FOREIGN KEY(authority_epoch_id,bank_id) REFERENCES canonical_memory_banks(authority_epoch_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_revision_snapshots",
+      "canonical_memory_revision_snapshots",
+      "CREATE TABLE \"canonical_memory_revision_snapshots\" (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, memory_id TEXT NOT NULL,\n revision INTEGER NOT NULL CHECK(revision>=1),\n record_json TEXT NOT NULL CHECK(json_valid(record_json) AND json_type(record_json)='object'),\n created_at TEXT NOT NULL, PRIMARY KEY(authority_epoch_id,bank_id,memory_id,revision),\n FOREIGN KEY(authority_epoch_id,bank_id) REFERENCES canonical_memory_banks(authority_epoch_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_sources",
+      "canonical_memory_sources",
+      "CREATE TABLE canonical_memory_sources (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, document_id TEXT NOT NULL, content_hash TEXT, retained_text TEXT, context TEXT,\n tags_json TEXT NOT NULL CHECK(json_valid(tags_json) AND json_type(tags_json)='array'), metadata_json TEXT NOT NULL CHECK(json_valid(metadata_json) AND json_type(metadata_json)='object'), observation_scopes_json TEXT CHECK(observation_scopes_json IS NULL OR (json_valid(observation_scopes_json) AND json_type(observation_scopes_json) IN ('text','array'))),\n provenance_json TEXT NOT NULL CHECK(json_valid(provenance_json) AND json_type(provenance_json)='object'), revision INTEGER NOT NULL CHECK(revision>=1), created_at TEXT NOT NULL, updated_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,bank_id,document_id), FOREIGN KEY(authority_epoch_id,bank_id) REFERENCES canonical_memory_banks(authority_epoch_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_unit_sources",
+      "canonical_memory_unit_sources",
+      "CREATE TABLE canonical_memory_unit_sources (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, memory_id TEXT NOT NULL, source_memory_id TEXT NOT NULL, PRIMARY KEY(authority_epoch_id,bank_id,memory_id,source_memory_id),\n FOREIGN KEY(authority_epoch_id,bank_id,memory_id) REFERENCES canonical_memory_units(authority_epoch_id,bank_id,memory_id),\n FOREIGN KEY(authority_epoch_id,bank_id,source_memory_id) REFERENCES canonical_memory_units(authority_epoch_id,bank_id,memory_id), CHECK(memory_id<>source_memory_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "canonical_memory_units",
+      "canonical_memory_units",
+      "CREATE TABLE canonical_memory_units (\n authority_epoch_id TEXT NOT NULL, bank_id TEXT NOT NULL, memory_id TEXT NOT NULL, document_id TEXT, chunk_id TEXT, text TEXT NOT NULL, context TEXT,\n fact_type TEXT NOT NULL CHECK(fact_type IN ('world','experience','observation')), state TEXT NOT NULL CHECK(state IN ('valid','invalidated')),\n revision INTEGER NOT NULL CHECK(revision>=1), tags_json TEXT NOT NULL CHECK(json_valid(tags_json) AND json_type(tags_json)='array'), metadata_json TEXT NOT NULL CHECK(json_valid(metadata_json) AND json_type(metadata_json)='object'), entities_json TEXT NOT NULL CHECK(json_valid(entities_json) AND json_type(entities_json)='array'), observation_scopes_json TEXT CHECK(observation_scopes_json IS NULL OR (json_valid(observation_scopes_json) AND json_type(observation_scopes_json) IN ('text','array'))),\n event_date TEXT, occurred_start TEXT, occurred_end TEXT, mentioned_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, edited_at TEXT, consolidated_at TEXT, consolidation_failed_at TEXT, invalidation_reason TEXT, invalidated_at TEXT,\n proof_count INTEGER NOT NULL CHECK(proof_count>=1), PRIMARY KEY(authority_epoch_id,bank_id,memory_id),\n FOREIGN KEY(authority_epoch_id,bank_id) REFERENCES canonical_memory_banks(authority_epoch_id,bank_id),\n FOREIGN KEY(authority_epoch_id,bank_id,document_id) REFERENCES canonical_memory_sources(authority_epoch_id,bank_id,document_id),\n CHECK(length(memory_id)>0 AND length(text)>0),\n CHECK((state='valid' AND invalidated_at IS NULL AND invalidation_reason IS NULL) OR (state='invalidated' AND invalidated_at IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "config",
+      "config",
+      "CREATE TABLE config (\n      key        TEXT PRIMARY KEY,\n      value      TEXT NOT NULL,\n      updated_at TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "conversation_compaction_events",
+      "conversation_compaction_events",
+      "CREATE TABLE conversation_compaction_events (\n      event_id          INTEGER PRIMARY KEY AUTOINCREMENT,\n      operation_id      TEXT NOT NULL REFERENCES conversation_compaction_operations(operation_id),\n      operation_seq     INTEGER NOT NULL CHECK(operation_seq >= 1),\n      character_id      TEXT NOT NULL CHECK(length(character_id) BETWEEN 1 AND 64),\n      attempt_no        INTEGER NOT NULL CHECK(attempt_no >= 1),\n      kind              TEXT NOT NULL CHECK(kind IN (\n        'started','flush_completed','summary_generated','committed','failed','cancelled','abandoned'\n      )),\n      occurred_at       TEXT NOT NULL,\n      selected_through  INTEGER NOT NULL CHECK(selected_through >= 1),\n      before_tokens     INTEGER NOT NULL CHECK(before_tokens >= 0),\n      summary_revision  INTEGER CHECK(summary_revision IS NULL OR summary_revision >= 1),\n      flush_status      TEXT CHECK(flush_status IS NULL OR flush_status IN ('success','not_required')),\n      writes            INTEGER CHECK(writes IS NULL OR writes >= 0),\n      output_chars      INTEGER CHECK(output_chars IS NULL OR output_chars >= 0),\n      failure_code      TEXT CHECK(failure_code IS NULL OR failure_code IN (\n        'LEGACY_FLUSH_FAILED','MEMORY_AUTHORITY_FENCED','MEMORY_FLUSH_INCOMPLETE','MEMORY_FLUSH_FAILED',\n        'HINDSIGHT_RUNTIME_UNAVAILABLE','SUMMARY_GENERATION_FAILED','SUMMARY_EMPTY','SOURCE_STALE',\n        'SUMMARY_CONFLICT','COMPACTION_INTERNAL_ERROR','LEASE_EXPIRED'\n      )),\n      lease_fence       INTEGER NOT NULL CHECK(lease_fence >= 1),\n      provider          TEXT NOT NULL CHECK(length(provider) BETWEEN 1 AND 100),\n      model_id          TEXT NOT NULL CHECK(length(model_id) BETWEEN 1 AND 200),\n      run_id            TEXT CHECK(run_id IS NULL OR length(run_id) BETWEEN 1 AND 100),\n      attempt_id        TEXT CHECK(attempt_id IS NULL OR length(attempt_id) BETWEEN 1 AND 100),\n      UNIQUE(operation_id, operation_seq),\n      CHECK(attempt_id IS NULL OR run_id IS NOT NULL),\n      CHECK((kind IN ('failed','abandoned') AND failure_code IS NOT NULL)\n        OR (kind NOT IN ('failed','abandoned') AND failure_code IS NULL)),\n      CHECK((kind = 'flush_completed' AND flush_status IS NOT NULL) OR (kind <> 'flush_completed' AND flush_status IS NULL)),\n      CHECK((kind = 'summary_generated' AND output_chars IS NOT NULL) OR (kind <> 'summary_generated' AND output_chars IS NULL)),\n      CHECK((kind = 'committed' AND summary_revision IS NOT NULL) OR (kind <> 'committed' AND summary_revision IS NULL))\n    ) STRICT"
+    ],
+    [
+      "table",
+      "conversation_compaction_operations",
+      "conversation_compaction_operations",
+      "CREATE TABLE conversation_compaction_operations (\n      operation_id               TEXT PRIMARY KEY CHECK(length(operation_id) BETWEEN 1 AND 100),\n      character_id               TEXT NOT NULL CHECK(length(character_id) BETWEEN 1 AND 64),\n      run_id                     TEXT CHECK(run_id IS NULL OR length(run_id) BETWEEN 1 AND 100),\n      attempt_id                 TEXT CHECK(attempt_id IS NULL OR length(attempt_id) BETWEEN 1 AND 100),\n      reason                     TEXT NOT NULL CHECK(reason IN ('pressure')),\n      state                      TEXT NOT NULL CHECK(state IN ('open','committed','failed','cancelled','abandoned')),\n      attempt_no                 INTEGER NOT NULL CHECK(attempt_no >= 1),\n      selected_from_seq          INTEGER NOT NULL CHECK(selected_from_seq >= 1),\n      selected_through_seq       INTEGER NOT NULL CHECK(selected_through_seq >= selected_from_seq),\n      captured_tail_seq          INTEGER NOT NULL CHECK(captured_tail_seq >= selected_through_seq),\n      expected_summary_revision  INTEGER NOT NULL CHECK(expected_summary_revision >= 0),\n      expected_summary_through   INTEGER NOT NULL CHECK(expected_summary_through >= 0),\n      source_digest              TEXT NOT NULL CHECK(\n        length(source_digest) = 64 AND source_digest = lower(source_digest)\n        AND source_digest NOT GLOB '*[^0-9a-f]*'\n      ),\n      before_tokens              INTEGER NOT NULL CHECK(before_tokens >= 0),\n      provider                   TEXT NOT NULL CHECK(length(provider) BETWEEN 1 AND 100),\n      model_id                   TEXT NOT NULL CHECK(length(model_id) BETWEEN 1 AND 200),\n      lease_owner                TEXT CHECK(lease_owner IS NULL OR length(lease_owner) BETWEEN 1 AND 100),\n      lease_fence                INTEGER NOT NULL CHECK(lease_fence >= 1),\n      lease_expires_at           TEXT,\n      failure_code               TEXT CHECK(failure_code IS NULL OR failure_code IN (\n        'LEGACY_FLUSH_FAILED','MEMORY_AUTHORITY_FENCED','MEMORY_FLUSH_INCOMPLETE','MEMORY_FLUSH_FAILED',\n        'HINDSIGHT_RUNTIME_UNAVAILABLE','SUMMARY_GENERATION_FAILED','SUMMARY_EMPTY','SOURCE_STALE',\n        'SUMMARY_CONFLICT','COMPACTION_INTERNAL_ERROR','LEASE_EXPIRED'\n      )),\n      committed_summary_revision INTEGER CHECK(committed_summary_revision IS NULL OR committed_summary_revision >= 1),\n      started_at                 TEXT NOT NULL,\n      updated_at                 TEXT NOT NULL,\n      terminal_at                TEXT,\n      CHECK(attempt_id IS NULL OR run_id IS NOT NULL),\n      CHECK(selected_from_seq = expected_summary_through + 1),\n      CHECK(\n        (expected_summary_revision = 0 AND expected_summary_through = 0)\n        OR\n        (expected_summary_revision >= 1 AND expected_summary_through >= 1)\n      ),\n      CHECK(\n        (state = 'open' AND lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL AND terminal_at IS NULL)\n        OR\n        (state <> 'open' AND lease_owner IS NULL AND lease_expires_at IS NULL AND terminal_at IS NOT NULL)\n      ),\n      CHECK(\n        (state = 'committed' AND committed_summary_revision IS NOT NULL AND failure_code IS NULL)\n        OR\n        (state <> 'committed' AND committed_summary_revision IS NULL)\n      ),\n      CHECK(\n        (state IN ('failed','abandoned') AND failure_code IS NOT NULL)\n        OR\n        (state NOT IN ('failed','abandoned') AND failure_code IS NULL)\n      )\n    ) STRICT"
+    ],
+    [
+      "table",
+      "conversation_summary",
+      "conversation_summary",
+      "CREATE TABLE conversation_summary (\n      character_id  TEXT PRIMARY KEY,\n      through_seq   INTEGER NOT NULL,\n      text          TEXT NOT NULL,\n      updated_at    TEXT NOT NULL\n    , revision INTEGER NOT NULL DEFAULT 1 CHECK(revision >= 1), last_operation_id TEXT CHECK(last_operation_id IS NULL OR length(last_operation_id) BETWEEN 1 AND 100), source_from_seq INTEGER CHECK(source_from_seq IS NULL OR source_from_seq >= 1), source_through_seq INTEGER CHECK(source_through_seq IS NULL OR source_through_seq >= 1), source_digest TEXT CHECK(source_digest IS NULL OR (\n        length(source_digest) = 64 AND source_digest = lower(source_digest)\n        AND source_digest NOT GLOB '*[^0-9a-f]*'\n      )), captured_tail_seq INTEGER CHECK(captured_tail_seq IS NULL OR captured_tail_seq >= 1)) STRICT"
+    ],
+    [
+      "table",
+      "core_process_generations",
+      "core_process_generations",
+      "CREATE TABLE core_process_generations (\n      generation_id TEXT PRIMARY KEY,\n      started_at TEXT NOT NULL,\n      finished_at TEXT,\n      status TEXT NOT NULL CHECK (status IN ('running','completed','gone')),\n      scanned_count INTEGER NOT NULL DEFAULT 0,\n      classified_count INTEGER NOT NULL DEFAULT 0\n    ) STRICT"
+    ],
+    [
+      "table",
+      "delivery_presentations",
+      "delivery_presentations",
+      "CREATE TABLE delivery_presentations (\n delivery_id TEXT PRIMARY KEY REFERENCES run_deliveries(delivery_id),\n presented_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "governance_cell_overrides",
+      "governance_cell_overrides",
+      "CREATE TABLE governance_cell_overrides (\n      cell_key            TEXT NOT NULL,\n      level               TEXT NOT NULL CHECK (level IN ('strict', 'standard', 'relaxed')),\n      posture             TEXT NOT NULL CHECK (posture IN ('auto', 'ask', 'deny')),\n      descriptor_revision INTEGER NOT NULL CHECK (descriptor_revision > 0),\n      updated_at          TEXT NOT NULL,\n      PRIMARY KEY (cell_key, level)\n    ) STRICT"
+    ],
+    [
+      "table",
+      "governance_policy",
+      "governance_policy",
+      "CREATE TABLE governance_policy (\n      singleton_id      INTEGER PRIMARY KEY CHECK (singleton_id = 1),\n      level             TEXT NOT NULL CHECK (level IN ('strict', 'standard', 'relaxed')),\n      policy_generation INTEGER NOT NULL CHECK (policy_generation > 0),\n      registry_revision INTEGER NOT NULL CHECK (registry_revision > 0),\n      updated_at        TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_command_bodies",
+      "hindsight_application_command_bodies",
+      "CREATE TABLE hindsight_application_command_bodies (\n provider_lineage TEXT NOT NULL, bank_id TEXT NOT NULL, bank_generation TEXT NOT NULL,\n body_id TEXT NOT NULL, ref_bytes BLOB NOT NULL, ref_bytes_hash TEXT NOT NULL CHECK(length(ref_bytes_hash)=64),\n body_bytes BLOB NOT NULL CHECK(length(body_bytes)>0),\n PRIMARY KEY(provider_lineage,bank_id,bank_generation,body_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_command_jobs",
+      "hindsight_application_command_jobs",
+      "CREATE TABLE hindsight_application_command_jobs (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n bank_id TEXT NOT NULL, request_id TEXT NOT NULL,\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n operation_id TEXT NOT NULL UNIQUE,\n intent_bytes BLOB NOT NULL, intent_bytes_hash TEXT NOT NULL CHECK(length(intent_bytes_hash)=64),\n intent_hash TEXT NOT NULL CHECK(length(intent_hash)=64),\n request_bytes BLOB NOT NULL, request_bytes_hash TEXT NOT NULL CHECK(length(request_bytes_hash)=64),\n state TEXT NOT NULL CHECK(state IN ('prepared','dispatched','completed','refused')),\n revision INTEGER NOT NULL CHECK(revision>=1),\n prepared_at TEXT NOT NULL, dispatched_at TEXT, updated_at TEXT NOT NULL,\n receipt_bytes BLOB, receipt_bytes_hash TEXT CHECK(receipt_bytes_hash IS NULL OR length(receipt_bytes_hash)=64),\n PRIMARY KEY(authority_epoch_id,bank_id,request_id),\n CHECK((state='prepared' AND dispatched_at IS NULL) OR (state<>'prepared' AND dispatched_at IS NOT NULL)),\n CHECK((state IN ('prepared','dispatched') AND receipt_bytes IS NULL AND receipt_bytes_hash IS NULL)\n    OR (state IN ('completed','refused') AND receipt_bytes IS NOT NULL AND receipt_bytes_hash IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_artifacts",
+      "hindsight_application_replica_artifacts",
+      "CREATE TABLE hindsight_application_replica_artifacts (\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n bank_id TEXT NOT NULL, artifact_key TEXT NOT NULL CHECK(json_valid(artifact_key) AND json_type(artifact_key)='array'),\n artifact_kind TEXT NOT NULL CHECK(artifact_kind IN ('bank','source','memory','block')),\n revision INTEGER NOT NULL CHECK(revision BETWEEN 1 AND 9007199254740991), body_id TEXT NOT NULL,\n record_hash TEXT NOT NULL CHECK(length(record_hash)=64), artifact_bytes BLOB NOT NULL,\n bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64), tombstoned INTEGER NOT NULL CHECK(tombstoned IN (0,1)),\n PRIMARY KEY(provider_lineage,bank_generation,application_id,bank_id,artifact_key,revision),\n FOREIGN KEY(provider_lineage,bank_generation,application_id,bank_id,body_id)\n   REFERENCES hindsight_application_replica_bodies(provider_lineage,bank_generation,application_id,bank_id,body_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_block_restores",
+      "hindsight_application_replica_block_restores",
+      "CREATE TABLE hindsight_application_replica_block_restores (\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n bank_id TEXT NOT NULL, block_key TEXT NOT NULL CHECK(json_valid(block_key) AND json_type(block_key)='array'),\n body_id TEXT NOT NULL, block_revision INTEGER NOT NULL CHECK(block_revision BETWEEN 1 AND 9007199254740991),\n restored_bytes BLOB NOT NULL, bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64),\n PRIMARY KEY(provider_lineage,bank_generation,application_id,bank_id,block_key),\n FOREIGN KEY(provider_lineage,bank_generation,application_id,bank_id,body_id)\n   REFERENCES hindsight_application_replica_bodies(provider_lineage,bank_generation,application_id,bank_id,body_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_bodies",
+      "hindsight_application_replica_bodies",
+      "CREATE TABLE hindsight_application_replica_bodies (\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n bank_id TEXT NOT NULL, body_id TEXT NOT NULL, body_schema TEXT NOT NULL,\n descriptor_json TEXT NOT NULL CHECK(json_valid(descriptor_json) AND json_type(descriptor_json)='object'),\n body_bytes BLOB NOT NULL, total_bytes INTEGER NOT NULL CHECK(total_bytes BETWEEN 1 AND 9007199254740991),\n bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64),\n PRIMARY KEY(provider_lineage,bank_generation,application_id,bank_id,body_id),\n CHECK(length(body_bytes)=total_bytes)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_checkpoints",
+      "hindsight_application_replica_checkpoints",
+      "CREATE TABLE hindsight_application_replica_checkpoints (\n bank_id TEXT PRIMARY KEY, provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL,\n application_id TEXT NOT NULL CHECK(application_id='taki'), authority_epoch_id TEXT NOT NULL,\n native_cursor INTEGER NOT NULL CHECK(native_cursor BETWEEN 0 AND 9007199254740991),\n state_cursor INTEGER NOT NULL CHECK(state_cursor BETWEEN 0 AND 9007199254740991),\n checkpoint_json TEXT NOT NULL CHECK(json_valid(checkpoint_json) AND json_type(checkpoint_json)='object'),\n checkpoint_hash TEXT NOT NULL CHECK(length(checkpoint_hash)=64), bank_deleted INTEGER NOT NULL CHECK(bank_deleted IN (0,1))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_heads",
+      "hindsight_application_replica_heads",
+      "CREATE TABLE hindsight_application_replica_heads (\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n bank_id TEXT NOT NULL, object_key TEXT NOT NULL CHECK(json_valid(object_key) AND json_type(object_key)='array'),\n object_kind TEXT NOT NULL CHECK(object_kind IN ('bank','document','memory_unit','mental_model','directive')),\n head_bytes BLOB NOT NULL, bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64), body_id TEXT,\n binding_state TEXT NOT NULL CHECK(binding_state IN ('binding_missing','bound','rebind_required','tombstoned','not_applicable')),\n bound_artifact_key TEXT, bound_artifact_revision INTEGER,\n assessment_state TEXT CHECK(assessment_state IS NULL OR assessment_state IN ('not_required','due','failed','assessed')),\n next_attempt_at TEXT, observed_state_cursor INTEGER NOT NULL CHECK(observed_state_cursor BETWEEN 0 AND 9007199254740991),\n projection_hash TEXT CHECK(projection_hash IS NULL OR length(projection_hash)=64),\n PRIMARY KEY(provider_lineage,bank_generation,application_id,bank_id,object_key),\n CHECK((bound_artifact_key IS NULL)=(bound_artifact_revision IS NULL)),\n FOREIGN KEY(provider_lineage,bank_generation,application_id,bank_id,body_id)\n   REFERENCES hindsight_application_replica_bodies(provider_lineage,bank_generation,application_id,bank_id,body_id),\n FOREIGN KEY(provider_lineage,bank_generation,application_id,bank_id,bound_artifact_key,bound_artifact_revision)\n   REFERENCES hindsight_application_replica_artifacts(provider_lineage,bank_generation,application_id,bank_id,artifact_key,revision)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_projections",
+      "hindsight_application_replica_projections",
+      "CREATE TABLE hindsight_application_replica_projections (\n bank_id TEXT NOT NULL, object_kind TEXT NOT NULL CHECK(object_kind IN ('bank','document','memory_unit','mental_model','directive')),\n object_id TEXT NOT NULL, namespace_json TEXT NOT NULL CHECK(json_valid(namespace_json) AND json_type(namespace_json)='object'),\n object_revision INTEGER NOT NULL CHECK(object_revision BETWEEN 1 AND 9007199254740991),\n operation TEXT NOT NULL CHECK(operation IN ('upsert','tombstone')),\n record_bytes BLOB NOT NULL, bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64),\n record_hash TEXT NOT NULL CHECK(length(record_hash)=64),\n source_cursor INTEGER CHECK(source_cursor IS NULL OR source_cursor BETWEEN 0 AND 9007199254740991),\n unit_state TEXT CHECK(unit_state IS NULL OR unit_state IN ('valid','invalidated')),\n visibility TEXT CHECK(visibility IS NULL OR visibility IN ('pinned','retrieved','mood-gated','hidden')),\n PRIMARY KEY(bank_id,object_kind,object_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_publication_pages",
+      "hindsight_application_replica_publication_pages",
+      "CREATE TABLE hindsight_application_replica_publication_pages (\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n bank_id TEXT NOT NULL, publication_kind TEXT NOT NULL, publication_id TEXT NOT NULL,\n page_number INTEGER NOT NULL CHECK(page_number BETWEEN 0 AND 9007199254740991),\n page_bytes BLOB NOT NULL, bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64),\n PRIMARY KEY(provider_lineage,bank_generation,application_id,bank_id,publication_kind,publication_id,page_number),\n FOREIGN KEY(provider_lineage,bank_generation,application_id,bank_id,publication_kind,publication_id)\n   REFERENCES hindsight_application_replica_publications(provider_lineage,bank_generation,application_id,bank_id,publication_kind,publication_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_replica_publications",
+      "hindsight_application_replica_publications",
+      "CREATE TABLE hindsight_application_replica_publications (\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL, application_id TEXT NOT NULL CHECK(application_id='taki'),\n bank_id TEXT NOT NULL, publication_kind TEXT NOT NULL CHECK(publication_kind IN ('snapshot','event')),\n publication_id TEXT NOT NULL, record_hash TEXT NOT NULL CHECK(length(record_hash)=64),\n manifest_bytes BLOB NOT NULL, bytes_sha256 TEXT NOT NULL CHECK(length(bytes_sha256)=64),\n PRIMARY KEY(provider_lineage,bank_generation,application_id,bank_id,publication_kind,publication_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_application_runtime_admission",
+      "hindsight_application_runtime_admission",
+      "CREATE TABLE hindsight_application_runtime_admission (\n authority_epoch_id TEXT NOT NULL,\n config_fingerprint TEXT NOT NULL CHECK(length(config_fingerprint)=64),\n provider_lineage TEXT NOT NULL,\n manifest_json TEXT NOT NULL CHECK(json_valid(manifest_json) AND json_type(manifest_json)='object'),\n evidence_hash TEXT NOT NULL CHECK(length(evidence_hash)=64),\n admitted_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,config_fingerprint)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_authority_activation_receipts",
+      "hindsight_authority_activation_receipts",
+      "CREATE TABLE hindsight_authority_activation_receipts (\n transaction_id TEXT PRIMARY KEY,\n run_id TEXT NOT NULL UNIQUE REFERENCES memory_migration_runs(run_id),\n predecessor_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n hindsight_epoch_id TEXT NOT NULL UNIQUE REFERENCES canonical_memory_authority_epochs(epoch_id),\n provider_lineage TEXT NOT NULL,\n config_fingerprint TEXT NOT NULL CHECK(length(config_fingerprint)=64 AND config_fingerprint NOT GLOB '*[^a-f0-9]*'),\n checkpoint_set_digest TEXT NOT NULL CHECK(length(checkpoint_set_digest)=64 AND checkpoint_set_digest NOT GLOB '*[^a-f0-9]*'),\n bank_count INTEGER NOT NULL CHECK(bank_count>=1),\n lease_fence INTEGER NOT NULL CHECK(lease_fence>=1),\n committed_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_authority_bank_receipts",
+      "hindsight_authority_bank_receipts",
+      "CREATE TABLE hindsight_authority_bank_receipts (\n transaction_id TEXT NOT NULL REFERENCES hindsight_authority_activation_receipts(transaction_id) ON DELETE CASCADE,\n bank_id TEXT NOT NULL,\n snapshot_id TEXT NOT NULL,\n bank_generation TEXT NOT NULL,\n replica_epoch_id TEXT NOT NULL,\n end_cursor INTEGER NOT NULL CHECK(end_cursor>=0),\n manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64 AND manifest_digest NOT GLOB '*[^a-f0-9]*'),\n template_digest TEXT NOT NULL CHECK(length(template_digest)=64 AND template_digest NOT GLOB '*[^a-f0-9]*'),\n PRIMARY KEY(transaction_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_bank_setup",
+      "hindsight_bank_setup",
+      "CREATE TABLE hindsight_bank_setup (\n canonical_identity TEXT PRIMARY KEY, scope_kind TEXT NOT NULL CHECK(scope_kind IN ('global','character')),\n external_bank_id TEXT NOT NULL UNIQUE, template_revision TEXT NOT NULL,\n template_digest TEXT NOT NULL CHECK(length(template_digest)=64),\n status TEXT NOT NULL CHECK(status IN ('pending','dry-run-ok','applied','verified','failed')),\n operation_ids_json TEXT NOT NULL CHECK(json_valid(operation_ids_json) AND json_type(operation_ids_json)='array'),\n last_verified_at TEXT,\n last_error_json TEXT CHECK(last_error_json IS NULL OR (json_valid(last_error_json) AND json_type(last_error_json)='object')),\n updated_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_connection_state",
+      "hindsight_connection_state",
+      "CREATE TABLE hindsight_connection_state (\n singleton INTEGER PRIMARY KEY CHECK(singleton=1), revision INTEGER NOT NULL CHECK(revision>=0),\n phase TEXT NOT NULL CHECK(phase IN ('disabled','unconfigured','ready-to-validate','validating','compatible','validating-templates','initializing-banks','applying-templates','waiting-template-operations','configured','failed')),\n last_successful_phase TEXT, config_fingerprint TEXT CHECK(config_fingerprint IS NULL OR length(config_fingerprint)=64),\n attempt_id TEXT CHECK(attempt_id IS NULL OR length(attempt_id)<=240),\n compatibility_json TEXT CHECK(compatibility_json IS NULL OR (json_valid(compatibility_json) AND json_type(compatibility_json)='object')),\n model_health TEXT NOT NULL CHECK(model_health IN ('not-run','running','healthy','degraded','failed')),\n latest_error_json TEXT CHECK(latest_error_json IS NULL OR (json_valid(latest_error_json) AND json_type(latest_error_json)='object')),\n last_attempt_at TEXT, last_success_at TEXT, updated_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_current_captures",
+      "hindsight_current_captures",
+      "CREATE TABLE hindsight_current_captures (\n capture_id TEXT PRIMARY KEY CHECK(length(capture_id)=64),\n run_id TEXT NOT NULL REFERENCES hindsight_cutover_runs(run_id),\n manifest_id TEXT NOT NULL UNIQUE REFERENCES hindsight_local_coverage_manifests(manifest_id),\n manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64), local_epoch_id TEXT NOT NULL,\n capture_json TEXT NOT NULL CHECK(json_valid(capture_json))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_current_import_evidence",
+      "hindsight_current_import_evidence",
+      "CREATE TABLE hindsight_current_import_evidence (\n evidence_id TEXT PRIMARY KEY CHECK(length(evidence_id)=64),\n preparation_id TEXT NOT NULL UNIQUE REFERENCES hindsight_current_preparations(preparation_id),\n result_hash TEXT NOT NULL CHECK(length(result_hash)=64), evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_current_native_invalidations",
+      "hindsight_current_native_invalidations",
+      "CREATE TABLE hindsight_current_native_invalidations (\n invalidation_id TEXT PRIMARY KEY CHECK(length(invalidation_id)=64),\n observation_key TEXT NOT NULL UNIQUE CHECK(length(observation_key)=64),\n preparation_id TEXT NOT NULL REFERENCES hindsight_current_preparations(preparation_id),\n candidate_id TEXT REFERENCES hindsight_current_verification_candidates(candidate_id),\n scope TEXT NOT NULL CHECK(scope IN ('preparation','candidate')),\n observation_json TEXT NOT NULL CHECK(json_valid(observation_json)),\n CHECK(scope='preparation' OR candidate_id IS NOT NULL)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_current_preparations",
+      "hindsight_current_preparations",
+      "CREATE TABLE hindsight_current_preparations (\n preparation_id TEXT PRIMARY KEY CHECK(length(preparation_id)=64),\n capture_id TEXT NOT NULL REFERENCES hindsight_current_captures(capture_id),\n operation_id TEXT NOT NULL UNIQUE CHECK(length(operation_id)=36),\n bank_id TEXT NOT NULL, source_bank_id TEXT NOT NULL, preparation_json TEXT NOT NULL CHECK(json_valid(preparation_json)),\n UNIQUE(capture_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_current_verification_candidates",
+      "hindsight_current_verification_candidates",
+      "CREATE TABLE hindsight_current_verification_candidates (\n candidate_id TEXT PRIMARY KEY CHECK(length(candidate_id)=64),\n verification_id TEXT NOT NULL UNIQUE CHECK(length(verification_id)=36),\n preparation_id TEXT NOT NULL REFERENCES hindsight_current_preparations(preparation_id),\n candidate_json TEXT NOT NULL CHECK(json_valid(candidate_json))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_current_verification_evidence",
+      "hindsight_current_verification_evidence",
+      "CREATE TABLE hindsight_current_verification_evidence (\n evidence_id TEXT PRIMARY KEY CHECK(length(evidence_id)=64),\n preparation_id TEXT NOT NULL REFERENCES hindsight_current_preparations(preparation_id),\n certificate_hash TEXT NOT NULL CHECK(length(certificate_hash)=64),\n snapshot_id TEXT NOT NULL, manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64),\n evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json)), UNIQUE(preparation_id,snapshot_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_cutover_local_coverage",
+      "hindsight_cutover_local_coverage",
+      "CREATE TABLE hindsight_cutover_local_coverage (\n run_id TEXT PRIMARY KEY REFERENCES hindsight_cutover_runs(run_id),\n manifest_id TEXT NOT NULL,\n selection_lease_fence INTEGER NOT NULL CHECK(selection_lease_fence>=0),\n selected_at TEXT NOT NULL,\n ready_manifest_id TEXT,\n FOREIGN KEY(run_id,manifest_id) REFERENCES hindsight_local_coverage_manifests(run_id,manifest_id),\n FOREIGN KEY(run_id,ready_manifest_id) REFERENCES hindsight_local_coverage_manifests(run_id,manifest_id),\n CHECK(ready_manifest_id IS NULL OR ready_manifest_id=manifest_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_cutover_runs",
+      "hindsight_cutover_runs",
+      "CREATE TABLE hindsight_cutover_runs (\n run_id TEXT PRIMARY KEY REFERENCES memory_migration_runs(run_id),\n expected_predecessor_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n phase TEXT NOT NULL CHECK(phase IN ('importing','replica-verified','ready','activated','failed')),\n status TEXT NOT NULL CHECK(status IN ('running','ready','completed','failed')),\n config_fingerprint TEXT CHECK(config_fingerprint IS NULL OR (length(config_fingerprint)=64 AND config_fingerprint NOT GLOB '*[^a-f0-9]*')),\n checkpoint_set_digest TEXT CHECK(checkpoint_set_digest IS NULL OR (length(checkpoint_set_digest)=64 AND checkpoint_set_digest NOT GLOB '*[^a-f0-9]*')),\n lease_owner TEXT,\n lease_fence INTEGER NOT NULL DEFAULT 0 CHECK(lease_fence>=0),\n lease_expires_at TEXT,\n created_at TEXT NOT NULL,\n updated_at TEXT NOT NULL,\n CHECK((lease_owner IS NULL AND lease_expires_at IS NULL) OR (lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL)),\n CHECK((phase='importing' AND status='running' AND config_fingerprint IS NULL AND checkpoint_set_digest IS NULL)\n    OR (phase='replica-verified' AND status='running' AND config_fingerprint IS NULL AND checkpoint_set_digest IS NULL)\n    OR (phase='ready' AND status='ready' AND config_fingerprint IS NOT NULL AND checkpoint_set_digest IS NOT NULL)\n    OR (phase='activated' AND status='completed' AND config_fingerprint IS NOT NULL AND checkpoint_set_digest IS NOT NULL)\n    OR (phase='failed' AND status='failed'))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_import_facts",
+      "hindsight_import_facts",
+      "CREATE TABLE hindsight_import_facts (\n run_id TEXT NOT NULL,\n source_id TEXT NOT NULL,\n fact_ordinal INTEGER NOT NULL CHECK(fact_ordinal>=0),\n fact_id TEXT NOT NULL,\n revision INTEGER NOT NULL CHECK(revision>=1),\n payload_hash TEXT NOT NULL CHECK(length(payload_hash)=64 AND payload_hash NOT GLOB '*[^a-f0-9]*'),\n PRIMARY KEY(run_id,source_id,fact_ordinal),\n UNIQUE(run_id,fact_id),\n FOREIGN KEY(run_id,source_id) REFERENCES hindsight_import_operations(run_id,source_id) ON DELETE CASCADE\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_import_operations",
+      "hindsight_import_operations",
+      "CREATE TABLE hindsight_import_operations (\n run_id TEXT NOT NULL,\n source_id TEXT NOT NULL,\n bank_id TEXT NOT NULL,\n document_id TEXT NOT NULL,\n operation_identity TEXT NOT NULL,\n remote_operation_id TEXT NOT NULL,\n content_identity TEXT NOT NULL CHECK(length(content_identity)=71 AND substr(content_identity,1,7)='sha256:' AND substr(content_identity,8) NOT GLOB '*[^a-f0-9]*'),\n provider_content_hash TEXT NOT NULL CHECK(length(provider_content_hash)=64 AND provider_content_hash NOT GLOB '*[^a-f0-9]*'),\n lease_fence INTEGER NOT NULL CHECK(lease_fence>=1),\n attempt_no INTEGER NOT NULL DEFAULT 0 CHECK(attempt_no>=0),\n status TEXT NOT NULL CHECK(status IN ('pending','submitted','processing','completed','mapped','failed','cancelled','conflict','excluded')),\n operation_result_hash TEXT CHECK(operation_result_hash IS NULL OR (length(operation_result_hash)=64 AND operation_result_hash NOT GLOB '*[^a-f0-9]*')),\n derived_unit_count INTEGER CHECK(derived_unit_count IS NULL OR derived_unit_count>=0),\n extraction_error_count INTEGER CHECK(extraction_error_count IS NULL OR extraction_error_count>=0),\n mapping_complete INTEGER NOT NULL DEFAULT 0 CHECK(mapping_complete IN (0,1)),\n zero_fact_allowed INTEGER NOT NULL DEFAULT 0 CHECK(zero_fact_allowed IN (0,1)),\n diagnostic_code TEXT CHECK(diagnostic_code IS NULL OR length(diagnostic_code)<=64),\n updated_at TEXT NOT NULL,\n PRIMARY KEY(run_id,source_id),\n FOREIGN KEY(run_id,source_id) REFERENCES memory_migration_sources(run_id,source_id) ON DELETE CASCADE,\n UNIQUE(run_id,operation_identity),\n UNIQUE(run_id,remote_operation_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_ingestion_cursors",
+      "hindsight_ingestion_cursors",
+      "CREATE TABLE hindsight_ingestion_cursors (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n character_id TEXT NOT NULL, through_seq INTEGER NOT NULL CHECK(through_seq>=0),\n eligibility_start_seq INTEGER NOT NULL CHECK(eligibility_start_seq>=1), updated_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,character_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_ingestion_primary_commits",
+      "hindsight_ingestion_primary_commits",
+      "CREATE TABLE hindsight_ingestion_primary_commits (\n timeline_seq INTEGER PRIMARY KEY REFERENCES timeline_messages(seq) ON DELETE CASCADE,\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n character_id TEXT NOT NULL, entry_id TEXT NOT NULL UNIQUE, entry_digest TEXT NOT NULL CHECK(length(entry_digest)=64),\n committed_through_seq INTEGER NOT NULL CHECK(committed_through_seq>=timeline_seq),\n ingestion_span_id TEXT, run_id TEXT, committed_at TEXT NOT NULL,\n FOREIGN KEY(authority_epoch_id,character_id,ingestion_span_id)\n  REFERENCES hindsight_ingestion_spans(authority_epoch_id,character_id,span_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_ingestion_spans",
+      "hindsight_ingestion_spans",
+      "CREATE TABLE hindsight_ingestion_spans (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n provider_lineage_id TEXT NOT NULL, character_id TEXT NOT NULL, span_id TEXT NOT NULL,\n from_seq INTEGER NOT NULL CHECK(from_seq>=0), through_seq INTEGER NOT NULL CHECK(through_seq>from_seq),\n source_hash TEXT NOT NULL CHECK(length(source_hash)=64), source_json TEXT NOT NULL CHECK(json_valid(source_json)),\n gate_json TEXT CHECK(gate_json IS NULL OR json_valid(gate_json)),\n batches_json TEXT NOT NULL CHECK(json_valid(batches_json) AND json_type(batches_json)='array'),\n receipts_json TEXT NOT NULL CHECK(json_valid(receipts_json) AND json_type(receipts_json)='array'),\n state TEXT NOT NULL CHECK(state IN ('pending','complete')), revision INTEGER NOT NULL CHECK(revision>=1),\n created_at TEXT NOT NULL, updated_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,character_id,span_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_local_coverage_manifests",
+      "hindsight_local_coverage_manifests",
+      "CREATE TABLE hindsight_local_coverage_manifests (\n manifest_id TEXT PRIMARY KEY CHECK(length(manifest_id) BETWEEN 1 AND 256),\n run_id TEXT NOT NULL REFERENCES hindsight_cutover_runs(run_id),\n local_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n manifest_version INTEGER NOT NULL CHECK(manifest_version>=1),\n schema_version INTEGER NOT NULL CHECK(schema_version=1),\n captured_at TEXT NOT NULL,\n content_digest TEXT NOT NULL CHECK(length(content_digest)=64 AND content_digest NOT GLOB '*[^a-f0-9]*'),\n source_revision_fence TEXT NOT NULL CHECK(length(source_revision_fence)=64 AND source_revision_fence NOT GLOB '*[^a-f0-9]*'),\n manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64 AND manifest_digest NOT GLOB '*[^a-f0-9]*'),\n manifest_json TEXT NOT NULL CHECK(json_valid(manifest_json) AND json_type(manifest_json)='object'\n   AND json_array_length(manifest_json,'$.records')<=100000 AND json_array_length(manifest_json,'$.catchUp')<=100000),\n UNIQUE(run_id,manifest_version), UNIQUE(run_id,manifest_id),\n UNIQUE(run_id,captured_at,content_digest)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_memory_write_intents",
+      "hindsight_memory_write_intents",
+      "CREATE TABLE hindsight_memory_write_intents (\n sequence INTEGER PRIMARY KEY AUTOINCREMENT,\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n bank_id TEXT NOT NULL, request_id TEXT NOT NULL,\n provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL,\n intent_hash TEXT NOT NULL CHECK(length(intent_hash)=64),\n native_operation_id TEXT,\n state TEXT NOT NULL CHECK(state IN ('pending','completed')),\n revision INTEGER NOT NULL CHECK(revision>=1),\n payload_bytes BLOB NOT NULL,\n payload_hash TEXT NOT NULL CHECK(length(payload_hash)=64),\n UNIQUE(authority_epoch_id,bank_id,request_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_policy_work",
+      "hindsight_policy_work",
+      "CREATE TABLE hindsight_policy_work (\n authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n bank_id TEXT NOT NULL, provider_lineage TEXT NOT NULL, bank_generation TEXT NOT NULL,\n work_id TEXT NOT NULL, work_kind TEXT NOT NULL CHECK(work_kind IN ('policy','block')),\n target_bytes BLOB NOT NULL, target_bytes_hash TEXT NOT NULL CHECK(length(target_bytes_hash)=64),\n state TEXT NOT NULL CHECK(state IN ('ready','claimed','saved','completed','superseded')),\n revision INTEGER NOT NULL CHECK(revision>=1), claims INTEGER NOT NULL CHECK(claims>=0),\n claim_token TEXT, claim_until TEXT, next_attempt_at TEXT,\n prompt_version TEXT, prompt_hash TEXT CHECK(prompt_hash IS NULL OR length(prompt_hash)=64),\n result_bytes BLOB, result_bytes_hash TEXT CHECK(result_bytes_hash IS NULL OR length(result_bytes_hash)=64),\n command_request_id TEXT NOT NULL,\n last_failure TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, finished_at TEXT,\n PRIMARY KEY(authority_epoch_id,bank_id,work_id),\n CHECK((claim_token IS NULL)=(claim_until IS NULL)),\n CHECK((prompt_version IS NULL)=(prompt_hash IS NULL)),\n CHECK((result_bytes IS NULL)=(result_bytes_hash IS NULL)),\n CHECK(state<>'claimed' OR claim_token IS NOT NULL),\n CHECK(state NOT IN ('saved','completed') OR result_bytes IS NOT NULL)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_checkpoints",
+      "hindsight_replica_checkpoints",
+      "CREATE TABLE hindsight_replica_checkpoints (\n bank_id TEXT PRIMARY KEY,\n replica_epoch_id TEXT NOT NULL,\n provider_lineage TEXT NOT NULL,\n bank_generation TEXT NOT NULL,\n snapshot_id TEXT NOT NULL,\n end_cursor INTEGER NOT NULL CHECK(end_cursor>=0),\n manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64 AND manifest_digest NOT GLOB '*[^a-f0-9]*'),\n captured_at TEXT NOT NULL,\n snapshot_expires_at TEXT NOT NULL,\n published_at TEXT NOT NULL,\n staging_id TEXT NOT NULL UNIQUE REFERENCES hindsight_replica_staging_runs(staging_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_records",
+      "hindsight_replica_records",
+      "CREATE TABLE hindsight_replica_records (\n bank_id TEXT NOT NULL,\n replica_epoch_id TEXT NOT NULL,\n object_kind TEXT NOT NULL CHECK(object_kind IN ('bank','document','memory_unit','mental_model','directive')),\n object_id TEXT NOT NULL,\n object_revision INTEGER NOT NULL CHECK(object_revision>=1),\n payload_hash TEXT NOT NULL CHECK(length(payload_hash)=64 AND payload_hash NOT GLOB '*[^a-f0-9]*'),\n payload_json TEXT NOT NULL CHECK(json_valid(payload_json) AND json_type(payload_json)='object'),\n PRIMARY KEY(bank_id,object_kind,object_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_staging_records",
+      "hindsight_replica_staging_records",
+      "CREATE TABLE hindsight_replica_staging_records (\n staging_id TEXT NOT NULL REFERENCES hindsight_replica_staging_runs(staging_id) ON DELETE CASCADE,\n page_number INTEGER NOT NULL CHECK(page_number>=0),\n record_ordinal INTEGER NOT NULL CHECK(record_ordinal>=0),\n object_kind TEXT NOT NULL CHECK(object_kind IN ('bank','document','memory_unit','mental_model','directive')),\n object_id TEXT NOT NULL,\n object_revision INTEGER NOT NULL CHECK(object_revision>=1),\n payload_hash TEXT NOT NULL CHECK(length(payload_hash)=64 AND payload_hash NOT GLOB '*[^a-f0-9]*'),\n payload_json TEXT NOT NULL CHECK(json_valid(payload_json) AND json_type(payload_json)='object'),\n PRIMARY KEY(staging_id,page_number,record_ordinal),\n UNIQUE(staging_id,object_kind,object_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_staging_runs",
+      "hindsight_replica_staging_runs",
+      "CREATE TABLE hindsight_replica_staging_runs (\n staging_id TEXT PRIMARY KEY,\n run_id TEXT NOT NULL REFERENCES memory_migration_runs(run_id) ON DELETE CASCADE,\n replica_epoch_id TEXT NOT NULL,\n provider_lineage TEXT NOT NULL,\n bank_id TEXT NOT NULL,\n bank_generation TEXT NOT NULL,\n snapshot_id TEXT NOT NULL,\n end_cursor INTEGER NOT NULL CHECK(end_cursor>=0),\n manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64 AND manifest_digest NOT GLOB '*[^a-f0-9]*'),\n manifest_json TEXT NOT NULL CHECK(json_valid(manifest_json) AND json_type(manifest_json)='object'),\n snapshot_expires_at TEXT NOT NULL,\n status TEXT NOT NULL CHECK(status IN ('building','verified','published','failed')),\n created_at TEXT NOT NULL,\n updated_at TEXT NOT NULL,\n UNIQUE(run_id,bank_id,snapshot_id),\n UNIQUE(replica_epoch_id,bank_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_checkpoints",
+      "hindsight_replica_sync_checkpoints",
+      "CREATE TABLE hindsight_replica_sync_checkpoints (\n  bank_id TEXT PRIMARY KEY CHECK(length(bank_id) BETWEEN 1 AND 256),\n  provider_lineage_id TEXT NOT NULL,\n  bank_generation TEXT NOT NULL,\n  authority_epoch_id TEXT NOT NULL CHECK(length(authority_epoch_id) BETWEEN 1 AND 256),\n  replica_epoch_id TEXT NOT NULL,\n  end_cursor INTEGER NOT NULL CHECK(end_cursor >= 0),\n  snapshot_id TEXT NOT NULL,\n  snapshot_cursor INTEGER NOT NULL CHECK(snapshot_cursor >= 0 AND snapshot_cursor <= end_cursor),\n  snapshot_manifest_digest TEXT NOT NULL CHECK(length(snapshot_manifest_digest)=64 AND snapshot_manifest_digest NOT GLOB '*[^0-9a-f]*'),\n  manifest_digest TEXT NOT NULL CHECK(length(manifest_digest)=64 AND manifest_digest NOT GLOB '*[^0-9a-f]*'),\n  verified_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_fts",
+      "hindsight_replica_sync_fts",
+      "CREATE VIRTUAL TABLE hindsight_replica_sync_fts USING fts5(\n  bank_id UNINDEXED, object_id UNINDEXED, text, context, disclosure, search_terms, tokenize='unicode61'\n)"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_fts_config",
+      "hindsight_replica_sync_fts_config",
+      "CREATE TABLE 'hindsight_replica_sync_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_fts_content",
+      "hindsight_replica_sync_fts_content",
+      "CREATE TABLE 'hindsight_replica_sync_fts_content'(id INTEGER PRIMARY KEY, c0, c1, c2, c3, c4, c5)"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_fts_data",
+      "hindsight_replica_sync_fts_data",
+      "CREATE TABLE 'hindsight_replica_sync_fts_data'(id INTEGER PRIMARY KEY, block BLOB)"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_fts_docsize",
+      "hindsight_replica_sync_fts_docsize",
+      "CREATE TABLE 'hindsight_replica_sync_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_fts_idx",
+      "hindsight_replica_sync_fts_idx",
+      "CREATE TABLE 'hindsight_replica_sync_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_leases",
+      "hindsight_replica_sync_leases",
+      "CREATE TABLE hindsight_replica_sync_leases (\n  bank_id TEXT PRIMARY KEY CHECK(length(bank_id) BETWEEN 1 AND 256),\n  run_id TEXT NOT NULL UNIQUE,\n  owner_id TEXT NOT NULL CHECK(length(owner_id) BETWEEN 1 AND 256),\n  fence INTEGER NOT NULL CHECK(fence >= 1),\n  expires_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_records",
+      "hindsight_replica_sync_records",
+      "CREATE TABLE hindsight_replica_sync_records (\n  bank_id TEXT NOT NULL CHECK(length(bank_id) BETWEEN 1 AND 256),\n  object_kind TEXT NOT NULL CHECK(object_kind IN ('bank','document','memory_unit','mental_model','directive')),\n  object_id TEXT NOT NULL CHECK(length(object_id) BETWEEN 1 AND 256),\n  object_revision INTEGER NOT NULL CHECK(object_revision >= 1),\n  operation TEXT NOT NULL CHECK(operation IN ('upsert','tombstone')),\n  record_json TEXT NOT NULL CHECK(json_valid(record_json) AND json_type(record_json)='object'),\n  record_hash TEXT NOT NULL CHECK(length(record_hash)=64 AND record_hash NOT GLOB '*[^0-9a-f]*'),\n  source_cursor INTEGER CHECK(source_cursor IS NULL OR source_cursor >= 1),\n  PRIMARY KEY(bank_id,object_kind,object_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_schedule",
+      "hindsight_replica_sync_schedule",
+      "CREATE TABLE hindsight_replica_sync_schedule (\n  bank_id TEXT PRIMARY KEY CHECK(length(bank_id) BETWEEN 1 AND 256),\n  version INTEGER NOT NULL CHECK(version >= 1),\n  state_json TEXT NOT NULL CHECK(json_valid(state_json) AND json_type(state_json)='object' AND length(state_json) <= 16384)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_replica_sync_snapshot_cache",
+      "hindsight_replica_sync_snapshot_cache",
+      "CREATE TABLE hindsight_replica_sync_snapshot_cache (\n  bank_id TEXT NOT NULL CHECK(length(bank_id) BETWEEN 1 AND 256),\n  provider_lineage_id TEXT NOT NULL,\n  bank_generation TEXT NOT NULL,\n  object_kind TEXT NOT NULL CHECK(object_kind IN ('bank','document','memory_unit','mental_model','directive')),\n  object_id TEXT NOT NULL CHECK(length(object_id) BETWEEN 1 AND 256),\n  page_hash TEXT NOT NULL CHECK(length(page_hash)=64 AND page_hash NOT GLOB '*[^0-9a-f]*'),\n  record_json TEXT NOT NULL CHECK(json_valid(record_json) AND json_type(record_json)='object'),\n  record_hash TEXT NOT NULL CHECK(length(record_hash)=64 AND record_hash NOT GLOB '*[^0-9a-f]*'),\n  PRIMARY KEY(bank_id,provider_lineage_id,bank_generation,page_hash)\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_source_evidence",
+      "hindsight_source_evidence",
+      "CREATE TABLE hindsight_source_evidence (\n  evidence_id TEXT PRIMARY KEY CHECK(length(evidence_id)=64 AND evidence_id NOT GLOB '*[^0-9a-f]*'),\n  schema_version INTEGER NOT NULL CHECK(schema_version=1),\n  local_epoch_id TEXT NOT NULL CHECK(length(local_epoch_id) BETWEEN 1 AND 256),\n  bank_id TEXT NOT NULL CHECK(length(bank_id) BETWEEN 1 AND 256),\n  document_id TEXT NOT NULL CHECK(length(document_id) BETWEEN 1 AND 256),\n  source_revision INTEGER NOT NULL CHECK(source_revision>=1),\n  source_hash TEXT NOT NULL CHECK(length(source_hash)=64 AND source_hash NOT GLOB '*[^0-9a-f]*'),\n  retained_text_hash TEXT CHECK(retained_text_hash IS NULL OR (length(retained_text_hash)=64 AND retained_text_hash NOT GLOB '*[^0-9a-f]*')),\n  source_json TEXT NOT NULL,\n  native_item_json TEXT,\n  native_item_hash TEXT CHECK(native_item_hash IS NULL OR (length(native_item_hash)=64 AND native_item_hash NOT GLOB '*[^0-9a-f]*')),\n  unit_count INTEGER NOT NULL CHECK(unit_count>=0),\n  gap_count INTEGER NOT NULL CHECK(gap_count>=0),\n  gaps_json TEXT NOT NULL CHECK(json_valid(gaps_json) AND json_type(gaps_json)='array'),\n  UNIQUE(evidence_id,bank_id,document_id),\n  CHECK((native_item_json IS NULL)=(native_item_hash IS NULL)),\n  CHECK((gap_count=0)=(native_item_json IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_source_object_bindings",
+      "hindsight_source_object_bindings",
+      "CREATE TABLE hindsight_source_object_bindings (\n  binding_id TEXT NOT NULL UNIQUE CHECK(length(binding_id)=64 AND binding_id NOT GLOB '*[^0-9a-f]*'),\n  schema_version INTEGER NOT NULL CHECK(schema_version=1),\n  evidence_id TEXT NOT NULL,\n  source_bank_id TEXT NOT NULL CHECK(length(source_bank_id) BETWEEN 1 AND 256),\n  bank_scope_json TEXT NOT NULL CHECK(json_valid(bank_scope_json) AND json_type(bank_scope_json)='object'),\n  source_document_id TEXT NOT NULL,\n  source_memory_id TEXT,\n  provider_lineage_id TEXT NOT NULL CHECK(length(provider_lineage_id)=36),\n  bank_generation TEXT NOT NULL CHECK(length(bank_generation)=36),\n  bank_id TEXT NOT NULL CHECK(length(bank_id) BETWEEN 1 AND 256),\n  object_kind TEXT NOT NULL CHECK(object_kind IN ('document','memory_unit')),\n  object_id TEXT NOT NULL CHECK(length(object_id) BETWEEN 1 AND 256),\n  object_revision INTEGER NOT NULL CHECK(object_revision>=1),\n  native_payload_hash TEXT NOT NULL CHECK(length(native_payload_hash)=64 AND native_payload_hash NOT GLOB '*[^0-9a-f]*'),\n  operation_id TEXT NOT NULL CHECK(length(operation_id)=36),\n  request_hash TEXT NOT NULL CHECK(length(request_hash)=64 AND request_hash NOT GLOB '*[^0-9a-f]*'),\n  result_hash TEXT NOT NULL CHECK(length(result_hash)=64 AND result_hash NOT GLOB '*[^0-9a-f]*'),\n  native_receipt_hash TEXT NOT NULL CHECK(length(native_receipt_hash)=64 AND native_receipt_hash NOT GLOB '*[^0-9a-f]*'),\n  native_through_cursor INTEGER NOT NULL CHECK(native_through_cursor>=0),\n  observation_kind TEXT NOT NULL CHECK(observation_kind IN ('snapshot','journal')),\n  observation_id TEXT NOT NULL CHECK(length(observation_id)=36),\n  observed_cursor INTEGER NOT NULL CHECK(observed_cursor>=native_through_cursor),\n  confirmed_at TEXT NOT NULL,\n  PRIMARY KEY(provider_lineage_id,bank_generation,bank_id,object_kind,object_id,object_revision),\n  UNIQUE(evidence_id,source_memory_id,provider_lineage_id,bank_generation,operation_id),\n  FOREIGN KEY(evidence_id,source_bank_id,source_document_id) REFERENCES hindsight_source_evidence(evidence_id,bank_id,document_id),\n  FOREIGN KEY(evidence_id,source_memory_id) REFERENCES hindsight_source_unit_evidence(evidence_id,memory_id),\n  CHECK((object_kind='document' AND source_memory_id IS NULL AND object_id=source_document_id)\n    OR (object_kind='memory_unit' AND source_memory_id IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "hindsight_source_unit_evidence",
+      "hindsight_source_unit_evidence",
+      "CREATE TABLE hindsight_source_unit_evidence (\n  evidence_id TEXT NOT NULL REFERENCES hindsight_source_evidence(evidence_id),\n  memory_id TEXT NOT NULL CHECK(length(memory_id) BETWEEN 1 AND 256),\n  unit_revision INTEGER NOT NULL CHECK(unit_revision>=1),\n  record_hash TEXT NOT NULL CHECK(length(record_hash)=64 AND record_hash NOT GLOB '*[^0-9a-f]*'),\n  record_json TEXT NOT NULL,\n  PRIMARY KEY(evidence_id,memory_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_backoff_resets",
+      "initiative_backoff_resets",
+      "CREATE TABLE initiative_backoff_resets (\n character_id TEXT PRIMARY KEY CHECK(length(character_id) BETWEEN 1 AND 200),\n timeline_seq INTEGER NOT NULL CHECK(timeline_seq>=0),\n reset_at TEXT NOT NULL,\n reason TEXT NOT NULL CHECK(reason IN ('user-engagement','operator'))\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_feedback",
+      "initiative_feedback",
+      "CREATE TABLE initiative_feedback (\n delivery_id TEXT PRIMARY KEY REFERENCES run_deliveries(delivery_id),\n timeline_seq INTEGER NOT NULL UNIQUE REFERENCES timeline_messages(seq),\n character_id TEXT NOT NULL,\n published_at TEXT NOT NULL,\n deadline_at TEXT NOT NULL CHECK(deadline_at > published_at),\n opportunity_ms INTEGER NOT NULL DEFAULT 0 CHECK(opportunity_ms BETWEEN 0 AND 120000),\n intervals_json TEXT NOT NULL DEFAULT '[]' CHECK(length(intervals_json) <= 16384 AND json_valid(intervals_json)),\n disposition TEXT CHECK(disposition IN ('engaged','weak_non_engagement','unknown')),\n settled_at TEXT,\n CHECK((disposition IS NULL AND settled_at IS NULL) OR (disposition IS NOT NULL AND settled_at IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_intentions",
+      "initiative_intentions",
+      "CREATE TABLE initiative_intentions (\n intention_id TEXT PRIMARY KEY CHECK(length(intention_id) BETWEEN 1 AND 200),\n character_id TEXT NOT NULL CHECK(length(character_id) BETWEEN 1 AND 200),\n source_key TEXT NOT NULL UNIQUE CHECK(length(source_key)=64),\n source_json TEXT NOT NULL CHECK(json_valid(source_json) AND length(source_json)<=4096),\n source_run_id TEXT NOT NULL REFERENCES runs(run_id),\n purpose TEXT CHECK(purpose IS NULL OR length(purpose) BETWEEN 1 AND 1000),\n reported_event_time TEXT CHECK(reported_event_time IS NULL OR length(reported_event_time) BETWEEN 1 AND 200),\n not_before TEXT NOT NULL,\n expires_at TEXT NOT NULL CHECK(expires_at>not_before),\n state TEXT NOT NULL CHECK(state IN ('active','claimed','terminal')),\n canonical_run_key TEXT CHECK(canonical_run_key IS NULL OR length(canonical_run_key) BETWEEN 1 AND 256),\n run_id TEXT REFERENCES runs(run_id),\n disposition TEXT CHECK(disposition IN ('silent','express','speak','completed','failed','cancelled','expired','source_invalidated','unknown')),\n created_at TEXT NOT NULL,\n terminal_at TEXT,\n CHECK((state='terminal' AND disposition IS NOT NULL AND terminal_at IS NOT NULL AND purpose IS NULL AND reported_event_time IS NULL)\n   OR (state<>'terminal' AND disposition IS NULL AND terminal_at IS NULL AND purpose IS NOT NULL)),\n CHECK(state<>'claimed' OR canonical_run_key IS NOT NULL),\n CHECK(state<>'active' OR (canonical_run_key IS NULL AND run_id IS NULL)),\n CHECK(run_id IS NULL OR canonical_run_key IS NOT NULL)\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_model_opportunities",
+      "initiative_model_opportunities",
+      "CREATE TABLE initiative_model_opportunities (\n opportunity_key TEXT PRIMARY KEY,\n run_id TEXT UNIQUE REFERENCES runs(run_id),\n state TEXT NOT NULL CHECK(state IN ('reserved','charged','released')),\n reserved_at TEXT NOT NULL,\n expires_at TEXT NOT NULL,\n charged_at TEXT,\n CHECK((state='charged' AND charged_at IS NOT NULL AND run_id IS NOT NULL)\n   OR (state IN ('reserved','released') AND charged_at IS NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_policy_facts",
+      "initiative_policy_facts",
+      "CREATE TABLE initiative_policy_facts (\n seq INTEGER PRIMARY KEY, character_id TEXT NOT NULL, reason TEXT NOT NULL CHECK(reason IN\n ('disabled','busy','stale','expired','suppressed','budget','gap','accepted')), occurred_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_wake_claims",
+      "initiative_wake_claims",
+      "CREATE TABLE initiative_wake_claims (\n source_key TEXT PRIMARY KEY CHECK(length(source_key) BETWEEN 1 AND 200),\n opportunity_id TEXT NOT NULL UNIQUE CHECK(length(opportunity_id) BETWEEN 1 AND 200),\n canonical_key TEXT NOT NULL UNIQUE CHECK(length(canonical_key) BETWEEN 1 AND 200),\n character_id TEXT NOT NULL,\n pattern_refs_json TEXT NOT NULL CHECK(json_valid(pattern_refs_json) AND length(pattern_refs_json)<=4096),\n created_at TEXT NOT NULL,\n expires_at TEXT NOT NULL CHECK(expires_at>created_at),\n run_id TEXT REFERENCES runs(run_id),\n disposition TEXT NOT NULL CHECK(disposition IN ('pending','admitted','retired')),\n CHECK(disposition!='admitted' OR run_id IS NOT NULL)\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_wake_counters",
+      "initiative_wake_counters",
+      "CREATE TABLE initiative_wake_counters (\n character_id TEXT NOT NULL, bucket TEXT NOT NULL, reason TEXT NOT NULL,\n count INTEGER NOT NULL CHECK(count>0),\n PRIMARY KEY(character_id,bucket,reason)\n) STRICT"
+    ],
+    [
+      "table",
+      "initiative_wake_evaluations",
+      "initiative_wake_evaluations",
+      "CREATE TABLE initiative_wake_evaluations (\n seq INTEGER PRIMARY KEY AUTOINCREMENT,\n character_id TEXT NOT NULL,\n reason TEXT NOT NULL,\n source TEXT NOT NULL,\n matched_count INTEGER NOT NULL CHECK(matched_count BETWEEN 0 AND 4),\n occurred_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "interaction_pattern_commands",
+      "interaction_pattern_commands",
+      "CREATE TABLE interaction_pattern_commands (\n command_key TEXT PRIMARY KEY CHECK(length(command_key)=64),\n character_id TEXT NOT NULL,\n request_digest TEXT NOT NULL CHECK(length(request_digest)=64),\n pattern_id TEXT NOT NULL REFERENCES interaction_patterns(pattern_id),\n created_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "interaction_pattern_primary_sources",
+      "interaction_pattern_primary_sources",
+      "CREATE TABLE interaction_pattern_primary_sources (\n run_id TEXT PRIMARY KEY REFERENCES runs(run_id),\n character_id TEXT NOT NULL,\n timeline_seq INTEGER NOT NULL CHECK(timeline_seq>0),\n timeline_id TEXT NOT NULL CHECK(length(timeline_id) BETWEEN 1 AND 200),\n source_digest TEXT NOT NULL CHECK(length(source_digest)=64),\n created_at TEXT NOT NULL,\n UNIQUE(character_id,timeline_seq)\n) STRICT"
+    ],
+    [
+      "table",
+      "interaction_pattern_reviews",
+      "interaction_pattern_reviews",
+      "CREATE TABLE interaction_pattern_reviews (\n revision_id TEXT PRIMARY KEY REFERENCES interaction_pattern_revisions(revision_id),\n reviewer_key TEXT NOT NULL CHECK(length(reviewer_key) BETWEEN 1 AND 240),\n accepted_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "interaction_pattern_revisions",
+      "interaction_pattern_revisions",
+      "CREATE TABLE interaction_pattern_revisions (\n revision_id TEXT PRIMARY KEY CHECK(length(revision_id) BETWEEN 1 AND 200),\n pattern_id TEXT NOT NULL REFERENCES interaction_patterns(pattern_id),\n base_version INTEGER NOT NULL CHECK(base_version BETWEEN 0 AND 9007199254740991),\n definition_json TEXT NOT NULL CHECK(json_valid(definition_json) AND length(definition_json)<=16384),\n origin_json TEXT NOT NULL CHECK(json_valid(origin_json) AND length(origin_json)<=1024),\n changes_json TEXT NOT NULL CHECK(json_valid(changes_json) AND length(changes_json)<=512),\n author_key TEXT NOT NULL CHECK(length(author_key) BETWEEN 1 AND 240),\n source_run_id TEXT REFERENCES runs(run_id),\n source_key TEXT NOT NULL UNIQUE,\n created_at TEXT NOT NULL,\n UNIQUE(pattern_id,base_version)\n) STRICT"
+    ],
+    [
+      "table",
+      "interaction_patterns",
+      "interaction_patterns",
+      "CREATE TABLE interaction_patterns (\n pattern_id TEXT PRIMARY KEY CHECK(length(pattern_id) BETWEEN 1 AND 200),\n character_id TEXT NOT NULL CHECK(length(character_id) BETWEEN 1 AND 200),\n state TEXT NOT NULL CHECK(state IN ('proposed','active','paused','retired')),\n version INTEGER NOT NULL CHECK(version BETWEEN 1 AND 9007199254740991),\n effective_revision_id TEXT REFERENCES interaction_pattern_revisions(revision_id),\n candidate_revision_id TEXT REFERENCES interaction_pattern_revisions(revision_id),\n seed_key TEXT,\n created_at TEXT NOT NULL,\n updated_at TEXT NOT NULL,\n UNIQUE(character_id,seed_key),\n CHECK(state NOT IN ('active','paused') OR effective_revision_id IS NOT NULL)\n) STRICT"
+    ],
+    [
+      "table",
+      "mcp_desired_servers",
+      "mcp_desired_servers",
+      "CREATE TABLE mcp_desired_servers (\n      server_id       TEXT PRIMARY KEY,\n      owner_host_id   TEXT NOT NULL,\n      config          TEXT NOT NULL,\n      enabled         INTEGER NOT NULL CHECK (enabled IN (0, 1)),\n      selected_tools  TEXT NOT NULL,\n      config_revision INTEGER NOT NULL CHECK (config_revision > 0),\n      created_at      TEXT NOT NULL,\n      updated_at      TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "memory_authority_selection",
+      "memory_authority_selection",
+      "CREATE TABLE memory_authority_selection (\n singleton INTEGER PRIMARY KEY CHECK(singleton=1),\n mode TEXT NOT NULL CHECK(mode IN ('legacy-markdown','canonical-local','hindsight')),\n active_epoch_id TEXT,\n verified_snapshot_id TEXT,\n activation_transaction_id TEXT,\n provider_lineage_id TEXT,\n replica_checkpoint_digest TEXT CHECK(replica_checkpoint_digest IS NULL OR (length(replica_checkpoint_digest)=64 AND replica_checkpoint_digest NOT GLOB '*[^a-f0-9]*')),\n updated_at TEXT NOT NULL,\n CHECK((mode='legacy-markdown' AND active_epoch_id IS NULL AND verified_snapshot_id IS NULL AND activation_transaction_id IS NULL AND provider_lineage_id IS NULL AND replica_checkpoint_digest IS NULL)\n    OR (mode='canonical-local' AND active_epoch_id IS NOT NULL AND verified_snapshot_id IS NOT NULL AND activation_transaction_id IS NOT NULL AND provider_lineage_id IS NULL AND replica_checkpoint_digest IS NULL)\n    OR (mode='hindsight' AND active_epoch_id IS NOT NULL AND verified_snapshot_id IS NULL AND activation_transaction_id IS NOT NULL AND provider_lineage_id IS NOT NULL AND replica_checkpoint_digest IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_auto_state",
+      "memory_auto_state",
+      "CREATE TABLE memory_auto_state (\n      character_id       TEXT PRIMARY KEY,\n      last_episodic_seq  INTEGER NOT NULL DEFAULT 0,\n      last_flush_seq     INTEGER NOT NULL DEFAULT 0\n    , last_tidy_at TEXT) STRICT"
+    ],
+    [
+      "table",
+      "memory_entries",
+      "memory_entries",
+      "CREATE TABLE memory_entries (\n      path         TEXT PRIMARY KEY,\n      id           TEXT NOT NULL,\n      layer        TEXT NOT NULL,\n      character_id TEXT,\n      importance   INTEGER NOT NULL,\n      status       TEXT NOT NULL,\n      created_at   TEXT NOT NULL,\n      expires_at   TEXT,\n      content_hash TEXT NOT NULL\n    , origin TEXT NOT NULL DEFAULT 'self', updated_at TEXT) STRICT"
+    ],
+    [
+      "table",
+      "memory_events",
+      "memory_events",
+      "CREATE TABLE memory_events (\n      id           INTEGER PRIMARY KEY AUTOINCREMENT,\n      kind         TEXT NOT NULL,\n      character_id TEXT NOT NULL,\n      turn_seq     INTEGER,\n      entry_id     TEXT,\n      created_at   TEXT NOT NULL\n    , count INTEGER) STRICT"
+    ],
+    [
+      "table",
+      "memory_fts",
+      "memory_fts",
+      "CREATE VIRTUAL TABLE memory_fts USING fts5(path UNINDEXED, disclosure, content, search_terms, tokenize='unicode61')"
+    ],
+    [
+      "table",
+      "memory_fts_config",
+      "memory_fts_config",
+      "CREATE TABLE 'memory_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID"
+    ],
+    [
+      "table",
+      "memory_fts_content",
+      "memory_fts_content",
+      "CREATE TABLE 'memory_fts_content'(id INTEGER PRIMARY KEY, c0, c1, c2, c3)"
+    ],
+    [
+      "table",
+      "memory_fts_data",
+      "memory_fts_data",
+      "CREATE TABLE 'memory_fts_data'(id INTEGER PRIMARY KEY, block BLOB)"
+    ],
+    [
+      "table",
+      "memory_fts_docsize",
+      "memory_fts_docsize",
+      "CREATE TABLE 'memory_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)"
+    ],
+    [
+      "table",
+      "memory_fts_idx",
+      "memory_fts_idx",
+      "CREATE TABLE 'memory_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID"
+    ],
+    [
+      "table",
+      "memory_migration_activation_receipts",
+      "memory_migration_activation_receipts",
+      "CREATE TABLE memory_migration_activation_receipts (\n run_id TEXT PRIMARY KEY REFERENCES memory_migration_runs(run_id), transaction_id TEXT NOT NULL UNIQUE,\n snapshot_id TEXT NOT NULL, manifest_digest TEXT NOT NULL, readiness_digest TEXT NOT NULL, epoch_id TEXT NOT NULL,\n lease_fence INTEGER NOT NULL CHECK(lease_fence>=1), committed_at TEXT NOT NULL,\n marker_mode TEXT NOT NULL CHECK(marker_mode='canonical-local')\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_migration_attempts",
+      "memory_migration_attempts",
+      "CREATE TABLE memory_migration_attempts (\n run_id TEXT NOT NULL, source_id TEXT NOT NULL, attempt_no INTEGER NOT NULL CHECK(attempt_no>=1), phase TEXT NOT NULL,\n lease_fence INTEGER NOT NULL CHECK(lease_fence>=1), started_at TEXT NOT NULL, finished_at TEXT,\n diagnostic_code TEXT, diagnostic_detail TEXT CHECK(diagnostic_detail IS NULL OR length(diagnostic_detail)<=512),\n PRIMARY KEY(run_id,source_id,attempt_no),\n FOREIGN KEY(run_id,source_id) REFERENCES memory_migration_sources(run_id,source_id) ON DELETE CASCADE\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_migration_exclusions",
+      "memory_migration_exclusions",
+      "CREATE TABLE memory_migration_exclusions (\n run_id TEXT NOT NULL, source_id TEXT NOT NULL, snapshot_id TEXT NOT NULL, raw_sha256 TEXT NOT NULL,\n relative_path TEXT NOT NULL, reason TEXT NOT NULL CHECK(length(reason) BETWEEN 1 AND 512), operator_actor TEXT NOT NULL,\n created_at TEXT NOT NULL, PRIMARY KEY(run_id,source_id),\n FOREIGN KEY(run_id,source_id) REFERENCES memory_migration_sources(run_id,source_id) ON DELETE CASCADE\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_migration_results",
+      "memory_migration_results",
+      "CREATE TABLE memory_migration_results (\n run_id TEXT NOT NULL, source_id TEXT NOT NULL, result_ordinal INTEGER NOT NULL CHECK(result_ordinal>=0),\n memory_id TEXT NOT NULL, revision INTEGER NOT NULL CHECK(revision>=1), result_payload_hash TEXT NOT NULL CHECK(length(result_payload_hash)=64),\n PRIMARY KEY(run_id,source_id,result_ordinal), UNIQUE(run_id,memory_id),\n FOREIGN KEY(run_id,source_id) REFERENCES memory_migration_sources(run_id,source_id) ON DELETE CASCADE\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_migration_runs",
+      "memory_migration_runs",
+      "CREATE TABLE memory_migration_runs (\n run_id TEXT PRIMARY KEY, snapshot_id TEXT NOT NULL, epoch_id TEXT,\n phase TEXT NOT NULL CHECK(phase IN ('snapshotted','normalized','staged','verified','activated','failed')),\n status TEXT NOT NULL CHECK(status IN ('running','ready','completed','failed')),\n requested_at TEXT NOT NULL, updated_at TEXT NOT NULL, lease_owner TEXT,\n lease_fence INTEGER NOT NULL DEFAULT 0 CHECK(lease_fence>=0), lease_expires_at TEXT,\n verified_manifest_digest TEXT, readiness_digest TEXT, activation_transaction_id TEXT,\n CHECK(length(run_id)>0 AND length(snapshot_id)>0),\n CHECK((lease_owner IS NULL AND lease_expires_at IS NULL) OR (lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_migration_sources",
+      "memory_migration_sources",
+      "CREATE TABLE memory_migration_sources (\n run_id TEXT NOT NULL REFERENCES memory_migration_runs(run_id) ON DELETE CASCADE,\n source_id TEXT NOT NULL, kind TEXT NOT NULL CHECK(kind IN ('entry','block')), relative_path TEXT NOT NULL,\n raw_sha256 TEXT NOT NULL CHECK(length(raw_sha256)=64), byte_length INTEGER NOT NULL CHECK(byte_length>=0),\n normalized_hash TEXT, content_hash TEXT, phase TEXT NOT NULL,\n disposition TEXT NOT NULL CHECK(disposition IN ('pending','normalized','staged','verified','converted-zero','converted-one','converted-many','excluded','failed')),\n canonical_source_id TEXT, document_id TEXT, operation_id TEXT, result_count INTEGER NOT NULL DEFAULT 0 CHECK(result_count>=0),\n duplicate_source_id TEXT, diagnostic_code TEXT, updated_at TEXT NOT NULL,\n PRIMARY KEY(run_id,source_id), UNIQUE(run_id,relative_path,raw_sha256)\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_operations",
+      "memory_operations",
+      "CREATE TABLE memory_operations (\n operation_id TEXT PRIMARY KEY,\n kind TEXT NOT NULL,\n family TEXT NOT NULL,\n state TEXT NOT NULL,\n reason TEXT,\n authority_epoch_id TEXT,\n request_json TEXT NOT NULL CHECK(json_valid(request_json)),\n producer_json TEXT CHECK(producer_json IS NULL OR json_valid(producer_json)),\n result_json TEXT CHECK(result_json IS NULL OR json_valid(result_json)),\n error_code TEXT,\n owner_boot_id TEXT NOT NULL,\n created_at TEXT NOT NULL,\n updated_at TEXT NOT NULL,\n terminal_at TEXT\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_tidy_block_reviews",
+      "memory_tidy_block_reviews",
+      "CREATE TABLE memory_tidy_block_reviews (\n authority_epoch_id TEXT NOT NULL,\n character_id TEXT NOT NULL,\n block_id TEXT NOT NULL,\n revision INTEGER NOT NULL CHECK(revision >= 0),\n reviewed_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,character_id,block_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_tidy_retry",
+      "memory_tidy_retry",
+      "CREATE TABLE memory_tidy_retry (\n authority_epoch_id TEXT NOT NULL,\n character_id TEXT NOT NULL,\n pending INTEGER NOT NULL CHECK(pending IN (0,1)),\n failures INTEGER NOT NULL CHECK(failures >= 0),\n retry_at TEXT,\n PRIMARY KEY(authority_epoch_id,character_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "memory_tidy_reviews",
+      "memory_tidy_reviews",
+      "CREATE TABLE memory_tidy_reviews (\n authority_epoch_id TEXT NOT NULL,\n character_id TEXT NOT NULL,\n bank_id TEXT NOT NULL,\n memory_id TEXT NOT NULL,\n revision INTEGER NOT NULL CHECK(revision >= 1),\n reviewed_at TEXT NOT NULL,\n PRIMARY KEY(authority_epoch_id,character_id,bank_id,memory_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "migrations",
+      "migrations",
+      "CREATE TABLE migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL) STRICT"
+    ],
+    [
+      "table",
+      "model_profile_secrets",
+      "model_profile_secrets",
+      "CREATE TABLE model_profile_secrets (\n  secret_ref TEXT PRIMARY KEY,\n  slot TEXT NOT NULL CHECK(slot IN ('main','utility')),\n  created_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "model_profiles",
+      "model_profiles",
+      "CREATE TABLE model_profiles (\n  slot TEXT PRIMARY KEY CHECK(slot IN ('main','utility')),\n  revision INTEGER NOT NULL CHECK(revision > 0),\n  draft_json TEXT NOT NULL,\n  applied_json TEXT,\n  application_state TEXT NOT NULL CHECK(application_state IN ('applied','draft','failed')),\n  issues_json TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "pending_memory",
+      "pending_memory",
+      "CREATE TABLE pending_memory (\n  sequence INTEGER PRIMARY KEY AUTOINCREMENT,\n  authority_epoch_id TEXT NOT NULL REFERENCES canonical_memory_authority_epochs(epoch_id),\n  bank_id TEXT NOT NULL CHECK(length(bank_id) BETWEEN 1 AND 256),\n  operation_id TEXT NOT NULL CHECK(length(operation_id) BETWEEN 1 AND 256),\n  operation_kind TEXT NOT NULL CHECK(operation_kind IN ('retain','edit','invalidate','restore')),\n  intent_hash TEXT NOT NULL CHECK(length(intent_hash)=64 AND intent_hash NOT GLOB '*[^0-9a-f]*'),\n  phase TEXT NOT NULL CHECK(phase IN ('queued','submitted','awaiting_derived','awaiting_pull','completed','superseded','failed','outcome_unknown','cancelled')),\n  version INTEGER NOT NULL CHECK(version >= 1),\n  state_json TEXT NOT NULL CHECK(json_valid(state_json) AND json_type(state_json)='object' AND length(CAST(state_json AS BLOB)) <= 2097152),\n  UNIQUE(authority_epoch_id,bank_id,operation_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "primary_conversation_sources",
+      "primary_conversation_sources",
+      "CREATE TABLE primary_conversation_sources (\n source_id TEXT PRIMARY KEY, character_id TEXT NOT NULL,\n original_user_id TEXT NOT NULL UNIQUE, original_user_seq INTEGER NOT NULL UNIQUE CHECK(original_user_seq>0),\n original_user_digest TEXT NOT NULL CHECK(length(original_user_digest)=64), run_id TEXT,\n memory_json TEXT CHECK(memory_json IS NULL OR json_valid(memory_json)),\n state TEXT NOT NULL CHECK(state IN ('open','retained','retracted')),\n through_seq INTEGER, source_digest TEXT, created_at TEXT NOT NULL, closed_at TEXT,\n CHECK((state='open' AND closed_at IS NULL AND through_seq IS NULL AND source_digest IS NULL)\n   OR (state='retracted' AND closed_at IS NOT NULL AND through_seq IS NULL AND source_digest IS NULL)\n   OR (state='retained' AND closed_at IS NOT NULL AND through_seq IS NOT NULL AND source_digest IS NOT NULL\n     AND through_seq>=original_user_seq AND length(source_digest)=64))\n) STRICT"
+    ],
+    [
+      "table",
+      "privacy_pause_state",
+      "privacy_pause_state",
+      "CREATE TABLE privacy_pause_state (\n      id     INTEGER PRIMARY KEY CHECK (id = 1),\n      paused INTEGER NOT NULL,\n      until  INTEGER\n    ) STRICT"
+    ],
+    [
+      "table",
+      "run_attempts",
+      "run_attempts",
+      "CREATE TABLE run_attempts (\n      attempt_id TEXT PRIMARY KEY,\n      run_id TEXT NOT NULL REFERENCES runs(run_id),\n      ordinal INTEGER NOT NULL,\n      state TEXT NOT NULL,\n      state_version INTEGER NOT NULL DEFAULT 0,\n      provider TEXT NOT NULL,\n      model_id TEXT NOT NULL,\n      snapshot_id TEXT NOT NULL REFERENCES run_snapshots(snapshot_id),\n      retry_reason TEXT,\n      started_at TEXT,\n      deadline_at TEXT,\n      settled_at TEXT,\n      outcome TEXT,\n      retryability TEXT,\n      result_summary TEXT,\n      error_code TEXT,\n      UNIQUE(run_id, ordinal)\n    ) STRICT"
+    ],
+    [
+      "table",
+      "run_deliveries",
+      "run_deliveries",
+      "CREATE TABLE run_deliveries (\n delivery_id TEXT PRIMARY KEY, run_id TEXT NOT NULL UNIQUE REFERENCES runs(run_id),\n attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id), character_id TEXT NOT NULL,\n delivery_class TEXT NOT NULL CHECK(delivery_class IN ('class_a','class_b')),\n version INTEGER NOT NULL DEFAULT 0 CHECK(version >= 0), decision_json TEXT NOT NULL,\n expires_at TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN\n ('staged','held','dispatch_committed','sent','unknown','no_target','expired','suppressed')),\n continuation TEXT NOT NULL CHECK(continuation IN ('none','pending','waiting','running','completed','failed','unknown','expired')),\n primary_version INTEGER NOT NULL CHECK(primary_version >= 0), timeline_seq INTEGER UNIQUE REFERENCES timeline_messages(seq),\n charged_at TEXT, charge_timezone TEXT, created_at TEXT NOT NULL\n, \"source_context_json\" TEXT) STRICT"
+    ],
+    [
+      "table",
+      "run_effects",
+      "run_effects",
+      "CREATE TABLE run_effects (\n      effect_id TEXT PRIMARY KEY,\n      run_id TEXT NOT NULL REFERENCES runs(run_id),\n      attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id),\n      schema_version TEXT NOT NULL,\n      kind TEXT NOT NULL,\n      state TEXT NOT NULL,\n      state_version INTEGER NOT NULL DEFAULT 0,\n      source_ref_json TEXT NOT NULL,\n      executor_ref_json TEXT,\n      input_digest TEXT,\n      replay_posture TEXT NOT NULL,\n      captured_generation_ref TEXT,\n      idempotency_key TEXT,\n      reserved_result_ref TEXT,\n      reserved_usage_ref TEXT,\n      started_at TEXT,\n      settled_at TEXT,\n      outcome TEXT,\n      error_code TEXT,\n      summary TEXT,\n      created_at TEXT NOT NULL,\n      updated_at TEXT NOT NULL, approval_ref_json TEXT,\n      UNIQUE(run_id, attempt_id, effect_id),\n      UNIQUE(run_id, idempotency_key)\n    ) STRICT"
+    ],
+    [
+      "table",
+      "run_events",
+      "run_events",
+      "CREATE TABLE run_events (\n event_id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(run_id), attempt_id TEXT,\n seq INTEGER NOT NULL, schema_version TEXT NOT NULL, category TEXT NOT NULL, kind TEXT NOT NULL,\n occurred_at TEXT NOT NULL, source TEXT NOT NULL, correlation_json TEXT, payload_json TEXT NOT NULL,\n UNIQUE(run_id, seq), FOREIGN KEY(attempt_id) REFERENCES run_attempts(attempt_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "run_messages",
+      "run_messages",
+      "CREATE TABLE run_messages (\n seq INTEGER PRIMARY KEY AUTOINCREMENT,\n run_id TEXT NOT NULL REFERENCES runs(run_id) ON DELETE CASCADE,\n attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id),\n step_number INTEGER NOT NULL CHECK(step_number>=0),\n message_index INTEGER NOT NULL CHECK(message_index>=0),\n entry_kind TEXT NOT NULL CHECK(entry_kind IN ('input','output','partial')),\n role TEXT NOT NULL CHECK(role IN ('user','assistant','tool')),\n content TEXT NOT NULL,\n parts_json TEXT CHECK(parts_json IS NULL OR json_valid(parts_json)),\n source_context_json TEXT CHECK(source_context_json IS NULL OR json_valid(source_context_json)),\n input_id TEXT REFERENCES subagent_inputs(input_id) ON DELETE CASCADE,\n model_effect_id TEXT REFERENCES run_effects(effect_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,\n model_input_digest TEXT,\n batch_digest TEXT NOT NULL,\n created_at TEXT NOT NULL,\n CHECK((entry_kind='input' AND input_id IS NOT NULL AND model_effect_id IS NOT NULL AND model_input_digest IS NOT NULL)\n   OR (entry_kind<>'input' AND input_id IS NULL AND model_effect_id IS NULL AND model_input_digest IS NULL)),\n CHECK(entry_kind<>'partial' OR (role='assistant' AND parts_json IS NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "run_receipts",
+      "run_receipts",
+      "CREATE TABLE run_receipts (\n      receipt_id TEXT PRIMARY KEY,\n      run_id TEXT NOT NULL UNIQUE REFERENCES runs(run_id),\n      state TEXT NOT NULL,\n      outcome TEXT,\n      retryability TEXT,\n      reason TEXT,\n      action TEXT,\n      attempt_count INTEGER NOT NULL,\n      snapshot_id TEXT NOT NULL,\n      summary TEXT,\n      created_at TEXT NOT NULL,\n      updated_at TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "run_snapshots",
+      "run_snapshots",
+      "CREATE TABLE run_snapshots (\n      snapshot_id TEXT PRIMARY KEY,\n      run_id TEXT NOT NULL UNIQUE,\n      schema_version TEXT NOT NULL,\n      manifest_json TEXT NOT NULL,\n      manifest_digest TEXT NOT NULL,\n      captured_at TEXT NOT NULL,\n      created_at TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "run_usage",
+      "run_usage",
+      "CREATE TABLE run_usage (\n      usage_id TEXT PRIMARY KEY,\n      run_id TEXT NOT NULL REFERENCES runs(run_id),\n      attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id),\n      effect_id TEXT NOT NULL UNIQUE REFERENCES run_effects(effect_id),\n      schema_version TEXT NOT NULL,\n      provider TEXT NOT NULL,\n      model_id TEXT NOT NULL,\n      quality TEXT NOT NULL,\n      input_tokens INTEGER,\n      output_tokens INTEGER,\n      total_tokens INTEGER,\n      recorded_at TEXT NOT NULL\n    , input_no_cache_tokens INTEGER, cache_read_tokens INTEGER, cache_write_tokens INTEGER, output_text_tokens INTEGER, reasoning_tokens INTEGER, cache_read_observed INTEGER CHECK(cache_read_observed IN (0,1))) STRICT"
+    ],
+    [
+      "table",
+      "runs",
+      "runs",
+      "CREATE TABLE runs (\n      run_id TEXT PRIMARY KEY,\n      character_id TEXT NOT NULL,\n      trigger_request_id TEXT NOT NULL,\n      idempotency_key TEXT NOT NULL UNIQUE,\n      request_hash TEXT NOT NULL,\n      initiator TEXT NOT NULL,\n      provenance_json TEXT NOT NULL,\n      task_id TEXT,\n      parent_run_id TEXT,\n      delivery_class TEXT NOT NULL,\n      state TEXT NOT NULL,\n      state_version INTEGER NOT NULL DEFAULT 0,\n      snapshot_id TEXT NOT NULL REFERENCES run_snapshots(snapshot_id),\n      active_attempt_id TEXT,\n      queued_at TEXT NOT NULL,\n      started_at TEXT,\n      deadline_at TEXT,\n      terminal_at TEXT,\n      cancel_requested_at TEXT,\n      cancel_reason TEXT,\n      outcome TEXT,\n      retryability TEXT,\n      receipt_id TEXT,\n      operation_phase TEXT NOT NULL DEFAULT 'admitted',\n      operation_json TEXT NOT NULL DEFAULT '{}',\n      created_at TEXT NOT NULL,\n      updated_at TEXT NOT NULL\n    , recovery_generation TEXT, recovery_classification TEXT, recovered_at TEXT, budget_limit INTEGER CHECK (budget_limit IS NULL OR budget_limit BETWEEN 0 AND 10000000), budget_used INTEGER NOT NULL DEFAULT 0 CHECK (budget_used BETWEEN 0 AND 10000000), \"initiative_timezone\" TEXT) STRICT"
+    ],
+    [
+      "table",
+      "schedule_occurrences",
+      "schedule_occurrences",
+      "CREATE TABLE schedule_occurrences (\n    task_id TEXT NOT NULL REFERENCES scheduled_tasks(task_id), scheduled_for TEXT NOT NULL, task_revision INTEGER NOT NULL,\n    control_input TEXT, fired_at TEXT, late INTEGER NOT NULL DEFAULT 0 CHECK (late IN (0,1)),\n    state TEXT NOT NULL CHECK (state IN ('pending','admitted','terminal','missed')), run_id TEXT,\n    created_at TEXT NOT NULL, updated_at TEXT NOT NULL, character_id TEXT NOT NULL DEFAULT '',\n    PRIMARY KEY (task_id, scheduled_for), UNIQUE(run_id)\n  ) STRICT"
+    ],
+    [
+      "table",
+      "scheduled_tasks",
+      "scheduled_tasks",
+      "CREATE TABLE scheduled_tasks (\n    task_id TEXT PRIMARY KEY, character_id TEXT NOT NULL, name TEXT NOT NULL, control_input TEXT NOT NULL,\n    pattern_json TEXT NOT NULL, timezone_json TEXT NOT NULL, enabled INTEGER NOT NULL CHECK (enabled IN (0,1)),\n    state TEXT NOT NULL CHECK (state IN ('active','paused','completed','deleted')), revision INTEGER NOT NULL CHECK (revision > 0),\n    next_run_at TEXT, last_run_id TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL\n  ) STRICT"
+    ],
+    [
+      "table",
+      "search_projection_policy",
+      "search_projection_policy",
+      "CREATE TABLE search_projection_policy (\n  index_name TEXT NOT NULL CHECK(index_name IN ('memory_fts','canonical_memory_fts')),\n  authority_epoch_id TEXT NOT NULL,\n  tokenizer_version TEXT NOT NULL,\n  stoplist INTEGER NOT NULL CHECK(stoplist IN (0,1)),\n  PRIMARY KEY(index_name, authority_epoch_id),\n  CHECK((index_name='memory_fts' AND authority_epoch_id='') OR\n    (index_name='canonical_memory_fts' AND length(authority_epoch_id)>0))\n) STRICT"
+    ],
+    [
+      "table",
+      "skill_packages",
+      "skill_packages",
+      "CREATE TABLE skill_packages (\n      package_id TEXT PRIMARY KEY,\n      skill_name TEXT,\n      description TEXT,\n      owner_host_id TEXT NOT NULL,\n      content_hash TEXT,\n      lifecycle_state TEXT NOT NULL CHECK (lifecycle_state IN ('active','quarantined','rejected')),\n      enabled INTEGER NOT NULL CHECK (enabled IN (0,1)),\n      source_kind TEXT NOT NULL CHECK (source_kind IN ('directory','zip','legacy-directory')),\n      source_locator TEXT NOT NULL,\n      trust TEXT NOT NULL CHECK (trust IN ('bundled-reviewed','operator-local','external-archive','legacy-local','blocked')),\n      scan_version TEXT NOT NULL,\n      scan_verdict TEXT NOT NULL CHECK (scan_verdict IN ('passed','review','rejected')),\n      scan_findings TEXT NOT NULL,\n      failure_reason TEXT,\n      config_revision INTEGER NOT NULL CHECK (config_revision > 0),\n      created_at TEXT NOT NULL,\n      updated_at TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "slot_window_state",
+      "slot_window_state",
+      "CREATE TABLE slot_window_state (\n      slot              TEXT PRIMARY KEY,\n      effective_window  INTEGER NOT NULL,\n      factor            REAL NOT NULL,\n      updated_at        TEXT NOT NULL\n    ) STRICT"
+    ],
+    [
+      "table",
+      "sqlite_sequence",
+      "sqlite_sequence",
+      "CREATE TABLE sqlite_sequence(name,seq)"
+    ],
+    [
+      "table",
+      "subagent_checkins",
+      "subagent_checkins",
+      "CREATE TABLE subagent_checkins (\n event_id TEXT PRIMARY KEY REFERENCES subagent_input_waits(event_id),\n work_input_id TEXT NOT NULL REFERENCES subagent_work_progress(work_input_id),\n interval_start_steps INTEGER NOT NULL, completed_steps INTEGER NOT NULL,\n model_effect_id TEXT NOT NULL REFERENCES subagent_task_steps(model_effect_id),\n checkin_json TEXT NOT NULL, UNIQUE(work_input_id,interval_start_steps)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_context_summaries",
+      "subagent_context_summaries",
+      "CREATE TABLE subagent_context_summaries (\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id), revision INTEGER NOT NULL,\n subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id), source_from_seq INTEGER NOT NULL,\n through_seq INTEGER NOT NULL, source_digest TEXT NOT NULL, summary_text TEXT NOT NULL,\n run_id TEXT NOT NULL REFERENCES runs(run_id), attempt_id TEXT NOT NULL, created_at TEXT NOT NULL,\n PRIMARY KEY(work_input_id,revision)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_context_summary_failures",
+      "subagent_context_summary_failures",
+      "CREATE TABLE subagent_context_summary_failures (\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id), revision INTEGER NOT NULL,\n source_digest TEXT NOT NULL, code TEXT NOT NULL, created_at TEXT NOT NULL,\n PRIMARY KEY(work_input_id,revision,source_digest)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_context_summary_intents",
+      "subagent_context_summary_intents",
+      "CREATE TABLE subagent_context_summary_intents (\n effect_id TEXT PRIMARY KEY REFERENCES run_effects(effect_id) DEFERRABLE INITIALLY DEFERRED,\n work_input_id TEXT NOT NULL, revision INTEGER NOT NULL, source_digest TEXT NOT NULL, step_number INTEGER NOT NULL,\n FOREIGN KEY(work_input_id,revision) REFERENCES subagent_context_summaries(work_input_id,revision)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_controls",
+      "subagent_controls",
+      "CREATE TABLE subagent_controls (\n control_id TEXT PRIMARY KEY, subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id),\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id), origin TEXT NOT NULL CHECK(origin IN ('user','parent')),\n action TEXT NOT NULL CHECK(action='stop'), control_version INTEGER NOT NULL, created_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_conversation_order",
+      "subagent_conversation_order",
+      "CREATE TABLE subagent_conversation_order (\n seq INTEGER PRIMARY KEY AUTOINCREMENT, subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id),\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id),\n source_kind TEXT NOT NULL CHECK(source_kind IN ('input','message','event','control')),\n source_id TEXT NOT NULL, created_at TEXT NOT NULL, historical_order INTEGER NOT NULL CHECK(historical_order IN (0,1)),\n UNIQUE(source_kind,source_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_conversations",
+      "subagent_conversations",
+      "CREATE TABLE subagent_conversations (\n subagent_id TEXT PRIMARY KEY,\n character_id TEXT NOT NULL,\n created_by_run_id TEXT NOT NULL REFERENCES runs(run_id),\n label TEXT NOT NULL,\n initial_context_json TEXT NOT NULL CHECK(json_valid(initial_context_json)),\n initial_context_digest TEXT NOT NULL,\n stop_origin TEXT CHECK(stop_origin IN ('user','parent')),\n control_version INTEGER NOT NULL DEFAULT 0 CHECK(control_version>=0),\n next_input_seq INTEGER NOT NULL DEFAULT 1 CHECK(next_input_seq>0),\n active_run_id TEXT UNIQUE REFERENCES runs(run_id),\n created_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_event_actions",
+      "subagent_event_actions",
+      "CREATE TABLE subagent_event_actions (\n event_id TEXT PRIMARY KEY REFERENCES subagent_events(event_id),\n operation_key TEXT NOT NULL,\n consumer_id TEXT NOT NULL REFERENCES subagent_inbox_consumers(consumer_id),\n model_effect_id TEXT NOT NULL REFERENCES run_effects(effect_id),\n invocation_id TEXT NOT NULL,\n tool_call_id TEXT NOT NULL,\n action_json TEXT NOT NULL CHECK(json_valid(action_json)),\n action_digest TEXT NOT NULL,\n result_json TEXT NOT NULL CHECK(json_valid(result_json)),\n created_at TEXT NOT NULL,\n UNIQUE(consumer_id,operation_key)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_event_frontiers",
+      "subagent_event_frontiers",
+      "CREATE TABLE subagent_event_frontiers (\n event_id TEXT PRIMARY KEY REFERENCES subagent_events(event_id), through_work_seq INTEGER CHECK(through_work_seq>0)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_events",
+      "subagent_events",
+      "CREATE TABLE subagent_events (\n seq INTEGER PRIMARY KEY AUTOINCREMENT,\n event_id TEXT NOT NULL UNIQUE,\n character_id TEXT NOT NULL,\n subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id),\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id),\n kind TEXT NOT NULL CHECK(kind IN ('message','needs_input','final','interrupted')),\n producer_run_id TEXT NOT NULL REFERENCES runs(run_id),\n producer_attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id),\n producer_key TEXT NOT NULL,\n body TEXT,\n body_digest TEXT NOT NULL,\n source_context_json TEXT NOT NULL CHECK(json_valid(source_context_json)),\n eligible INTEGER NOT NULL CHECK(eligible IN (0,1)),\n suppression_reason TEXT,\n accepted_at TEXT NOT NULL,\n UNIQUE(producer_run_id,producer_attempt_id,producer_key),\n CHECK((eligible=1 AND suppression_reason IS NULL) OR (eligible=0 AND suppression_reason IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_executions",
+      "subagent_executions",
+      "CREATE TABLE subagent_executions (\n run_id TEXT PRIMARY KEY REFERENCES runs(run_id) ON DELETE CASCADE,\n subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id) ON DELETE CASCADE,\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id) ON DELETE CASCADE,\n trigger_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id),\n admission_digest TEXT NOT NULL,\n completion_policy TEXT NOT NULL CHECK(completion_policy IN ('record_only','request_parent')),\n through_work_seq INTEGER NOT NULL CHECK(through_work_seq>0),\n work_token_json TEXT NOT NULL CHECK(json_valid(work_token_json)),\n proposal_json TEXT CHECK(proposal_json IS NULL OR json_valid(proposal_json)),\n proposal_attempt_id TEXT REFERENCES run_attempts(attempt_id),\n proposal_digest TEXT,\n proposal_token_digest TEXT,\n terminal_messages_json TEXT CHECK(terminal_messages_json IS NULL OR json_valid(terminal_messages_json)),\n terminal_messages_attempt_id TEXT REFERENCES run_attempts(attempt_id),\n result_json TEXT CHECK(result_json IS NULL OR json_valid(result_json)),\n result_digest TEXT,\n settled_at TEXT,\n completion_state TEXT NOT NULL CHECK(completion_state IN ('not_requested','pending','deferred','admitted','withheld')),\n completion_reason TEXT CHECK(completion_reason IN ('foreground_busy','source_unavailable','authority_unavailable','superseded','source_retired','expired')),\n parent_run_id TEXT UNIQUE REFERENCES runs(run_id),\n parent_admission_digest TEXT,\n parent_proposal_json TEXT CHECK(parent_proposal_json IS NULL OR json_valid(parent_proposal_json)),\n parent_proposal_attempt_id TEXT REFERENCES run_attempts(attempt_id),\n parent_proposal_digest TEXT,\n parent_terminal_messages_json TEXT CHECK(parent_terminal_messages_json IS NULL OR json_valid(parent_terminal_messages_json)),\n parent_terminal_messages_attempt_id TEXT REFERENCES run_attempts(attempt_id),\n parent_result_json TEXT CHECK(parent_result_json IS NULL OR json_valid(parent_result_json)),\n parent_result_digest TEXT,\n parent_settled_at TEXT,\n publication_json TEXT CHECK(publication_json IS NULL OR json_valid(publication_json)),\n CHECK((result_json IS NULL AND result_digest IS NULL AND settled_at IS NULL)\n   OR (result_json IS NOT NULL AND result_digest IS NOT NULL AND settled_at IS NOT NULL)),\n CHECK((parent_result_json IS NULL AND parent_result_digest IS NULL AND parent_settled_at IS NULL)\n   OR (parent_result_json IS NOT NULL AND parent_result_digest IS NOT NULL AND parent_settled_at IS NOT NULL)),\n CHECK(parent_run_id IS NULL OR completion_state='admitted')\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_inbox_consumers",
+      "subagent_inbox_consumers",
+      "CREATE TABLE subagent_inbox_consumers (\n consumer_id TEXT PRIMARY KEY,\n character_id TEXT NOT NULL,\n run_id TEXT NOT NULL REFERENCES runs(run_id),\n attempt_id TEXT NOT NULL UNIQUE REFERENCES run_attempts(attempt_id),\n mode TEXT NOT NULL CHECK(mode IN ('foreground','idle')),\n state TEXT NOT NULL CHECK(state IN ('claimed','delivered','reconciliation_needed','settled','released')),\n projection_json TEXT NOT NULL CHECK(json_valid(projection_json)),\n projection_digest TEXT NOT NULL,\n terminal_messages_json TEXT CHECK(terminal_messages_json IS NULL OR json_valid(terminal_messages_json)),\n created_at TEXT NOT NULL,\n settled_at TEXT\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_inbox_deliveries",
+      "subagent_inbox_deliveries",
+      "CREATE TABLE subagent_inbox_deliveries (\n consumer_id TEXT NOT NULL REFERENCES subagent_inbox_consumers(consumer_id),\n model_effect_id TEXT NOT NULL REFERENCES run_effects(effect_id) DEFERRABLE INITIALLY DEFERRED,\n model_input_digest TEXT NOT NULL,\n step_number INTEGER NOT NULL CHECK(step_number>=0),\n projection_digest TEXT NOT NULL,\n created_at TEXT NOT NULL,\n PRIMARY KEY(consumer_id,model_effect_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_inbox_members",
+      "subagent_inbox_members",
+      "CREATE TABLE subagent_inbox_members (\n consumer_id TEXT NOT NULL REFERENCES subagent_inbox_consumers(consumer_id),\n event_id TEXT NOT NULL REFERENCES subagent_events(event_id),\n event_digest TEXT NOT NULL,\n PRIMARY KEY(consumer_id,event_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_inbox_resumes",
+      "subagent_inbox_resumes",
+      "CREATE TABLE subagent_inbox_resumes (\n previous_consumer_id TEXT NOT NULL REFERENCES subagent_inbox_consumers(consumer_id),\n operation_key TEXT NOT NULL, consumer_id TEXT NOT NULL UNIQUE REFERENCES subagent_inbox_consumers(consumer_id),\n PRIMARY KEY(previous_consumer_id,operation_key)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_inbox_retry_failures",
+      "subagent_inbox_retry_failures",
+      "CREATE TABLE subagent_inbox_retry_failures (\n character_id TEXT PRIMARY KEY, failed_at TEXT NOT NULL\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_input_waits",
+      "subagent_input_waits",
+      "CREATE TABLE subagent_input_waits (\n event_id TEXT PRIMARY KEY REFERENCES subagent_events(event_id),\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id),\n state TEXT NOT NULL CHECK(state IN ('open','answered')),\n answer_input_id TEXT UNIQUE REFERENCES subagent_inputs(input_id),\n CHECK((state='open' AND answer_input_id IS NULL) OR (state='answered' AND answer_input_id IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_inputs",
+      "subagent_inputs",
+      "CREATE TABLE subagent_inputs (\n input_id TEXT PRIMARY KEY,\n subagent_id TEXT NOT NULL REFERENCES subagent_conversations(subagent_id) ON DELETE CASCADE,\n input_seq INTEGER NOT NULL CHECK(input_seq>0),\n work_input_id TEXT NOT NULL REFERENCES subagent_inputs(input_id) ON DELETE CASCADE,\n work_seq INTEGER NOT NULL CHECK(work_seq>0),\n operation_key TEXT NOT NULL,\n request_digest TEXT NOT NULL,\n input_kind TEXT NOT NULL CHECK(input_kind IN ('work','message','continue')),\n sender_kind TEXT NOT NULL CHECK(sender_kind IN ('parent','user','core')),\n sender_run_id TEXT REFERENCES runs(run_id),\n sender_owner_ref TEXT,\n direction_text TEXT NOT NULL,\n materials_json TEXT NOT NULL CHECK(json_valid(materials_json)),\n tool_selection_json TEXT CHECK(tool_selection_json IS NULL OR json_valid(tool_selection_json)),\n completion_policy TEXT NOT NULL CHECK(completion_policy IN ('record_only','request_parent')),\n work_expires_at TEXT,\n consumed_run_id TEXT REFERENCES runs(run_id),\n consumed_attempt_id TEXT REFERENCES run_attempts(attempt_id),\n consumed_step INTEGER CHECK(consumed_step>=0),\n consumed_effect_id TEXT REFERENCES run_effects(effect_id) DEFERRABLE INITIALLY DEFERRED,\n reply_acceptance_json TEXT CHECK(reply_acceptance_json IS NULL OR json_valid(reply_acceptance_json)),\n created_at TEXT NOT NULL, validity_json TEXT CHECK(validity_json IS NULL OR json_valid(validity_json)), reply_to_event_id TEXT,\n UNIQUE(subagent_id,input_seq), UNIQUE(work_input_id,work_seq), UNIQUE(subagent_id,operation_key),\n CHECK((input_kind='work' AND work_input_id=input_id AND work_seq=1)\n   OR (input_kind<>'work' AND work_input_id<>input_id AND work_seq>1 AND tool_selection_json IS NULL AND reply_acceptance_json IS NULL)),\n CHECK((sender_kind='user' AND sender_run_id IS NULL AND sender_owner_ref IS NULL)\n   OR (sender_kind='parent' AND sender_run_id IS NOT NULL AND sender_owner_ref IS NULL)\n   OR (sender_kind='core' AND sender_run_id IS NULL AND sender_owner_ref IS NOT NULL)),\n CHECK((consumed_run_id IS NULL AND consumed_attempt_id IS NULL AND consumed_step IS NULL AND consumed_effect_id IS NULL)\n   OR (consumed_run_id IS NOT NULL AND consumed_attempt_id IS NOT NULL AND consumed_step IS NOT NULL AND consumed_effect_id IS NOT NULL))\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_message_presentation",
+      "subagent_message_presentation",
+      "CREATE TABLE subagent_message_presentation (\n message_seq INTEGER PRIMARY KEY REFERENCES run_messages(seq),\n references_json TEXT NOT NULL CHECK(json_valid(references_json))\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_primary_speech",
+      "subagent_primary_speech",
+      "CREATE TABLE subagent_primary_speech (\n consumer_id TEXT NOT NULL REFERENCES subagent_inbox_consumers(consumer_id),\n timeline_id TEXT NOT NULL REFERENCES timeline_messages(id), text_digest TEXT NOT NULL,\n PRIMARY KEY(consumer_id,timeline_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_speech_publications",
+      "subagent_speech_publications",
+      "CREATE TABLE subagent_speech_publications (\n event_id TEXT PRIMARY KEY REFERENCES subagent_event_actions(event_id), action_id TEXT NOT NULL,\n result_json TEXT NOT NULL CHECK(json_valid(result_json))\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_task_steps",
+      "subagent_task_steps",
+      "CREATE TABLE subagent_task_steps (\n model_effect_id TEXT PRIMARY KEY REFERENCES run_effects(effect_id) DEFERRABLE INITIALLY DEFERRED,\n work_input_id TEXT NOT NULL REFERENCES subagent_work_progress(work_input_id),\n run_id TEXT NOT NULL REFERENCES runs(run_id), attempt_id TEXT NOT NULL REFERENCES run_attempts(attempt_id),\n step_number INTEGER NOT NULL CHECK(step_number>=0), completed_ordinal INTEGER,\n UNIQUE(work_input_id,completed_ordinal)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_tool_results",
+      "subagent_tool_results",
+      "CREATE TABLE subagent_tool_results (\n run_id TEXT NOT NULL REFERENCES runs(run_id), attempt_id TEXT NOT NULL, step_number INTEGER NOT NULL,\n tool_call_id TEXT NOT NULL, tool_name TEXT NOT NULL, output_json TEXT NOT NULL, materials_json TEXT NOT NULL,\n PRIMARY KEY(run_id,attempt_id,step_number,tool_call_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_user_attention",
+      "subagent_user_attention",
+      "CREATE TABLE subagent_user_attention (\n event_id TEXT PRIMARY KEY REFERENCES subagent_events(event_id), resolved_input_id TEXT REFERENCES subagent_inputs(input_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_work_progress",
+      "subagent_work_progress",
+      "CREATE TABLE subagent_work_progress (\n work_input_id TEXT PRIMARY KEY REFERENCES subagent_inputs(input_id),\n completed_steps INTEGER NOT NULL DEFAULT 0 CHECK(completed_steps>=0),\n interval_start_steps INTEGER NOT NULL DEFAULT 0 CHECK(interval_start_steps>=0),\n interval_steps INTEGER NOT NULL CHECK(interval_steps>0), parent_approval_limit INTEGER NOT NULL CHECK(parent_approval_limit>=0),\n consecutive_parent_approvals INTEGER NOT NULL DEFAULT 0 CHECK(consecutive_parent_approvals>=0),\n tracking TEXT NOT NULL CHECK(tracking IN ('work_start','post_upgrade')),\n last_user_input_id TEXT REFERENCES subagent_inputs(input_id)\n) STRICT"
+    ],
+    [
+      "table",
+      "subagent_work_routes",
+      "subagent_work_routes",
+      "CREATE TABLE subagent_work_routes (\n work_input_id TEXT PRIMARY KEY REFERENCES subagent_inputs(input_id),\n parent_run_id TEXT NOT NULL REFERENCES runs(run_id),\n route_kind TEXT NOT NULL CHECK(route_kind IN ('generic','source_owned')),\n parent_tools_json TEXT CHECK(parent_tools_json IS NULL OR json_valid(parent_tools_json))\n) STRICT"
+    ],
+    [
+      "table",
+      "taki_memory_blocks",
+      "taki_memory_blocks",
+      "CREATE TABLE taki_memory_blocks (\n block_row_id INTEGER PRIMARY KEY, block_id TEXT NOT NULL, scope_kind TEXT NOT NULL CHECK(scope_kind IN ('global','character')), character_id TEXT, content TEXT NOT NULL, revision INTEGER NOT NULL CHECK(revision>=1), updated_at TEXT NOT NULL,\n CHECK((scope_kind='global' AND character_id IS NULL) OR (scope_kind='character' AND character_id IS NOT NULL AND length(character_id)>0))\n) STRICT"
+    ],
+    [
+      "table",
+      "timeline_messages",
+      "timeline_messages",
+      "CREATE TABLE \"timeline_messages\" (\n      seq          INTEGER PRIMARY KEY AUTOINCREMENT,\n      id           TEXT NOT NULL UNIQUE,\n      character_id TEXT NOT NULL,\n      role         TEXT NOT NULL CHECK (role IN ('user','assistant','tool')),\n      content      TEXT NOT NULL,\n      parts        TEXT,\n      created_at   TEXT NOT NULL\n    , presentation TEXT, \"source_context_json\" TEXT, primary_source_id TEXT REFERENCES primary_conversation_sources(source_id))"
+    ],
+    [
+      "table",
+      "user_timezone",
+      "user_timezone",
+      "CREATE TABLE user_timezone (\n    singleton_id INTEGER PRIMARY KEY CHECK (singleton_id=1), timezone TEXT NOT NULL,\n    revision INTEGER NOT NULL CHECK (revision > 0), updated_at TEXT NOT NULL\n  , mode TEXT NOT NULL DEFAULT 'fixed' CHECK(mode IN ('fixed','follow-primary-device')), authority_device_id TEXT, confirmed_at TEXT, source TEXT NOT NULL DEFAULT 'bootstrap' CHECK(source IN ('bootstrap','operator','device')), source_device_id TEXT) STRICT"
+    ],
+    [
+      "trigger",
+      "conversation_compaction_events_no_delete",
+      "conversation_compaction_events",
+      "CREATE TRIGGER conversation_compaction_events_no_delete\n      BEFORE DELETE ON conversation_compaction_events\n      BEGIN SELECT RAISE(ABORT, 'conversation compaction events are append-only'); END"
+    ],
+    [
+      "trigger",
+      "conversation_compaction_events_no_update",
+      "conversation_compaction_events",
+      "CREATE TRIGGER conversation_compaction_events_no_update\n      BEFORE UPDATE ON conversation_compaction_events\n      BEGIN SELECT RAISE(ABORT, 'conversation compaction events are append-only'); END"
+    ],
+    [
+      "trigger",
+      "delivery_source_context_immutable",
+      "run_deliveries",
+      "CREATE TRIGGER delivery_source_context_immutable BEFORE UPDATE OF source_context_json ON run_deliveries\nWHEN NEW.source_context_json IS NOT OLD.source_context_json\nBEGIN SELECT RAISE(ABORT, 'delivery source context is immutable'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_captures_no_delete",
+      "hindsight_current_captures",
+      "CREATE TRIGGER hindsight_current_captures_no_delete BEFORE DELETE ON hindsight_current_captures\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_captures_no_replace",
+      "hindsight_current_captures",
+      "CREATE TRIGGER hindsight_current_captures_no_replace BEFORE INSERT ON hindsight_current_captures\n WHEN EXISTS(SELECT 1 FROM hindsight_current_captures WHERE capture_id=NEW.capture_id OR manifest_id=NEW.manifest_id)\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_captures_no_update",
+      "hindsight_current_captures",
+      "CREATE TRIGGER hindsight_current_captures_no_update BEFORE UPDATE ON hindsight_current_captures\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_import_evidence_no_delete",
+      "hindsight_current_import_evidence",
+      "CREATE TRIGGER hindsight_current_import_evidence_no_delete BEFORE DELETE ON hindsight_current_import_evidence\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_import_evidence_no_replace",
+      "hindsight_current_import_evidence",
+      "CREATE TRIGGER hindsight_current_import_evidence_no_replace BEFORE INSERT ON hindsight_current_import_evidence\n WHEN EXISTS(SELECT 1 FROM hindsight_current_import_evidence WHERE evidence_id=NEW.evidence_id OR preparation_id=NEW.preparation_id)\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_import_evidence_no_update",
+      "hindsight_current_import_evidence",
+      "CREATE TRIGGER hindsight_current_import_evidence_no_update BEFORE UPDATE ON hindsight_current_import_evidence\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_native_invalidations_no_delete",
+      "hindsight_current_native_invalidations",
+      "CREATE TRIGGER hindsight_current_native_invalidations_no_delete BEFORE DELETE ON hindsight_current_native_invalidations\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_native_invalidations_no_replace",
+      "hindsight_current_native_invalidations",
+      "CREATE TRIGGER hindsight_current_native_invalidations_no_replace BEFORE INSERT ON hindsight_current_native_invalidations\n WHEN EXISTS(SELECT 1 FROM hindsight_current_native_invalidations WHERE invalidation_id=NEW.invalidation_id OR observation_key=NEW.observation_key)\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_native_invalidations_no_update",
+      "hindsight_current_native_invalidations",
+      "CREATE TRIGGER hindsight_current_native_invalidations_no_update BEFORE UPDATE ON hindsight_current_native_invalidations\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_preparations_no_delete",
+      "hindsight_current_preparations",
+      "CREATE TRIGGER hindsight_current_preparations_no_delete BEFORE DELETE ON hindsight_current_preparations\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_preparations_no_replace",
+      "hindsight_current_preparations",
+      "CREATE TRIGGER hindsight_current_preparations_no_replace BEFORE INSERT ON hindsight_current_preparations\n WHEN EXISTS(SELECT 1 FROM hindsight_current_preparations WHERE preparation_id=NEW.preparation_id OR operation_id=NEW.operation_id OR (capture_id=NEW.capture_id AND bank_id=NEW.bank_id))\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_preparations_no_update",
+      "hindsight_current_preparations",
+      "CREATE TRIGGER hindsight_current_preparations_no_update BEFORE UPDATE ON hindsight_current_preparations\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_verification_candidates_no_delete",
+      "hindsight_current_verification_candidates",
+      "CREATE TRIGGER hindsight_current_verification_candidates_no_delete BEFORE DELETE ON hindsight_current_verification_candidates\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_verification_candidates_no_replace",
+      "hindsight_current_verification_candidates",
+      "CREATE TRIGGER hindsight_current_verification_candidates_no_replace BEFORE INSERT ON hindsight_current_verification_candidates\n WHEN EXISTS(SELECT 1 FROM hindsight_current_verification_candidates WHERE candidate_id=NEW.candidate_id OR verification_id=NEW.verification_id)\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_verification_candidates_no_update",
+      "hindsight_current_verification_candidates",
+      "CREATE TRIGGER hindsight_current_verification_candidates_no_update BEFORE UPDATE ON hindsight_current_verification_candidates\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_verification_evidence_no_delete",
+      "hindsight_current_verification_evidence",
+      "CREATE TRIGGER hindsight_current_verification_evidence_no_delete BEFORE DELETE ON hindsight_current_verification_evidence\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_verification_evidence_no_replace",
+      "hindsight_current_verification_evidence",
+      "CREATE TRIGGER hindsight_current_verification_evidence_no_replace BEFORE INSERT ON hindsight_current_verification_evidence\n WHEN EXISTS(SELECT 1 FROM hindsight_current_verification_evidence WHERE evidence_id=NEW.evidence_id OR (preparation_id=NEW.preparation_id AND snapshot_id=NEW.snapshot_id))\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_current_verification_evidence_no_update",
+      "hindsight_current_verification_evidence",
+      "CREATE TRIGGER hindsight_current_verification_evidence_no_update BEFORE UPDATE ON hindsight_current_verification_evidence\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_CURRENT_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_local_coverage_immutable_delete",
+      "hindsight_local_coverage_manifests",
+      "CREATE TRIGGER hindsight_local_coverage_immutable_delete\n BEFORE DELETE ON hindsight_local_coverage_manifests\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_LOCAL_COVERAGE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_local_coverage_immutable_insert",
+      "hindsight_local_coverage_manifests",
+      "CREATE TRIGGER hindsight_local_coverage_immutable_insert\n BEFORE INSERT ON hindsight_local_coverage_manifests\n WHEN EXISTS (SELECT 1 FROM hindsight_local_coverage_manifests old\n   WHERE old.manifest_id=NEW.manifest_id\n     OR (old.run_id=NEW.run_id AND old.manifest_version=NEW.manifest_version)\n     OR (old.run_id=NEW.run_id AND old.captured_at=NEW.captured_at AND old.content_digest=NEW.content_digest))\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_LOCAL_COVERAGE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_local_coverage_immutable_update",
+      "hindsight_local_coverage_manifests",
+      "CREATE TRIGGER hindsight_local_coverage_immutable_update\n BEFORE UPDATE ON hindsight_local_coverage_manifests\n BEGIN SELECT RAISE(ABORT,'HINDSIGHT_LOCAL_COVERAGE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_bindings_no_delete",
+      "hindsight_source_object_bindings",
+      "CREATE TRIGGER hindsight_source_bindings_no_delete BEFORE DELETE ON hindsight_source_object_bindings\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_BINDING_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_bindings_no_replace",
+      "hindsight_source_object_bindings",
+      "CREATE TRIGGER hindsight_source_bindings_no_replace BEFORE INSERT ON hindsight_source_object_bindings\n  WHEN EXISTS(SELECT 1 FROM hindsight_source_object_bindings WHERE binding_id=NEW.binding_id OR\n    (provider_lineage_id=NEW.provider_lineage_id AND bank_generation=NEW.bank_generation AND bank_id=NEW.bank_id\n     AND object_kind=NEW.object_kind AND object_id=NEW.object_id AND object_revision=NEW.object_revision) OR\n    (evidence_id=NEW.evidence_id AND source_memory_id=NEW.source_memory_id AND provider_lineage_id=NEW.provider_lineage_id\n     AND bank_generation=NEW.bank_generation AND operation_id=NEW.operation_id))\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_BINDING_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_bindings_no_update",
+      "hindsight_source_object_bindings",
+      "CREATE TRIGGER hindsight_source_bindings_no_update BEFORE UPDATE ON hindsight_source_object_bindings\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_BINDING_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_evidence_no_delete",
+      "hindsight_source_evidence",
+      "CREATE TRIGGER hindsight_source_evidence_no_delete BEFORE DELETE ON hindsight_source_evidence\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_evidence_no_replace",
+      "hindsight_source_evidence",
+      "CREATE TRIGGER hindsight_source_evidence_no_replace BEFORE INSERT ON hindsight_source_evidence\n  WHEN EXISTS(SELECT 1 FROM hindsight_source_evidence WHERE evidence_id=NEW.evidence_id)\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_evidence_no_update",
+      "hindsight_source_evidence",
+      "CREATE TRIGGER hindsight_source_evidence_no_update BEFORE UPDATE ON hindsight_source_evidence\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_unit_evidence_no_append",
+      "hindsight_source_unit_evidence",
+      "CREATE TRIGGER hindsight_source_unit_evidence_no_append BEFORE INSERT ON hindsight_source_unit_evidence\n  WHEN (SELECT count(*) FROM hindsight_source_unit_evidence WHERE evidence_id=NEW.evidence_id)\n    >= (SELECT unit_count FROM hindsight_source_evidence WHERE evidence_id=NEW.evidence_id)\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_unit_evidence_no_delete",
+      "hindsight_source_unit_evidence",
+      "CREATE TRIGGER hindsight_source_unit_evidence_no_delete BEFORE DELETE ON hindsight_source_unit_evidence\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_unit_evidence_no_replace",
+      "hindsight_source_unit_evidence",
+      "CREATE TRIGGER hindsight_source_unit_evidence_no_replace BEFORE INSERT ON hindsight_source_unit_evidence\n  WHEN EXISTS(SELECT 1 FROM hindsight_source_unit_evidence WHERE evidence_id=NEW.evidence_id AND memory_id=NEW.memory_id)\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "hindsight_source_unit_evidence_no_update",
+      "hindsight_source_unit_evidence",
+      "CREATE TRIGGER hindsight_source_unit_evidence_no_update BEFORE UPDATE ON hindsight_source_unit_evidence\n  BEGIN SELECT RAISE(ABORT,'HINDSIGHT_SOURCE_EVIDENCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "initiative_intention_identity_immutable",
+      "initiative_intentions",
+      "CREATE TRIGGER initiative_intention_identity_immutable BEFORE UPDATE OF\n intention_id,character_id,source_key,source_json,source_run_id,not_before,expires_at,created_at ON initiative_intentions\n BEGIN SELECT RAISE(ABORT,'immutable Intention source opportunity'); END"
+    ],
+    [
+      "trigger",
+      "initiative_intention_insert_run_scope",
+      "initiative_intentions",
+      "CREATE TRIGGER initiative_intention_insert_run_scope BEFORE INSERT ON initiative_intentions\n WHEN NEW.run_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM runs\n   WHERE run_id=NEW.run_id AND character_id=NEW.character_id AND initiator='heartbeat'\n     AND idempotency_key=NEW.canonical_run_key)\n BEGIN SELECT RAISE(ABORT,'foreign Intention Run'); END"
+    ],
+    [
+      "trigger",
+      "initiative_intention_run_scope",
+      "initiative_intentions",
+      "CREATE TRIGGER initiative_intention_run_scope BEFORE UPDATE OF run_id ON initiative_intentions\n WHEN NEW.run_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM runs\n   WHERE run_id=NEW.run_id AND character_id=NEW.character_id AND initiator='heartbeat'\n     AND idempotency_key=NEW.canonical_run_key)\n BEGIN SELECT RAISE(ABORT,'foreign Intention Run'); END"
+    ],
+    [
+      "trigger",
+      "initiative_intention_source_scope",
+      "initiative_intentions",
+      "CREATE TRIGGER initiative_intention_source_scope BEFORE INSERT ON initiative_intentions\n WHEN NOT EXISTS(SELECT 1 FROM runs WHERE run_id=NEW.source_run_id\n   AND character_id=NEW.character_id AND initiator='primary')\n BEGIN SELECT RAISE(ABORT,'foreign Intention source Run'); END"
+    ],
+    [
+      "trigger",
+      "initiative_intention_terminal_immutable",
+      "initiative_intentions",
+      "CREATE TRIGGER initiative_intention_terminal_immutable BEFORE UPDATE ON initiative_intentions\n WHEN OLD.state='terminal'\n BEGIN SELECT RAISE(ABORT,'terminal Intention cannot be rearmed'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_command_immutable_delete",
+      "interaction_pattern_commands",
+      "CREATE TRIGGER interaction_pattern_command_immutable_delete BEFORE DELETE ON interaction_pattern_commands\n BEGIN SELECT RAISE(ABORT,'immutable Pattern command'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_command_immutable_update",
+      "interaction_pattern_commands",
+      "CREATE TRIGGER interaction_pattern_command_immutable_update BEFORE UPDATE ON interaction_pattern_commands\n BEGIN SELECT RAISE(ABORT,'immutable Pattern command'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_effective_review",
+      "interaction_patterns",
+      "CREATE TRIGGER interaction_pattern_effective_review BEFORE UPDATE OF effective_revision_id ON interaction_patterns\n WHEN NEW.effective_revision_id IS NOT NULL AND NOT EXISTS (\n  SELECT 1 FROM interaction_pattern_reviews WHERE revision_id=NEW.effective_revision_id)\n BEGIN SELECT RAISE(ABORT,'unreviewed effective Pattern revision'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_identity_immutable",
+      "interaction_patterns",
+      "CREATE TRIGGER interaction_pattern_identity_immutable BEFORE UPDATE OF pattern_id,character_id,seed_key,created_at ON interaction_patterns\n BEGIN SELECT RAISE(ABORT,'immutable Pattern identity'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_review_immutable_delete",
+      "interaction_pattern_reviews",
+      "CREATE TRIGGER interaction_pattern_review_immutable_delete BEFORE DELETE ON interaction_pattern_reviews\n BEGIN SELECT RAISE(ABORT,'immutable Pattern review'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_review_immutable_update",
+      "interaction_pattern_reviews",
+      "CREATE TRIGGER interaction_pattern_review_immutable_update BEFORE UPDATE ON interaction_pattern_reviews\n BEGIN SELECT RAISE(ABORT,'immutable Pattern review'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_revision_immutable_delete",
+      "interaction_pattern_revisions",
+      "CREATE TRIGGER interaction_pattern_revision_immutable_delete BEFORE DELETE ON interaction_pattern_revisions\n BEGIN SELECT RAISE(ABORT,'immutable Pattern revision'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_revision_immutable_update",
+      "interaction_pattern_revisions",
+      "CREATE TRIGGER interaction_pattern_revision_immutable_update BEFORE UPDATE ON interaction_pattern_revisions\n BEGIN SELECT RAISE(ABORT,'immutable Pattern revision'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_revision_scope",
+      "interaction_patterns",
+      "CREATE TRIGGER interaction_pattern_revision_scope BEFORE UPDATE OF effective_revision_id,candidate_revision_id ON interaction_patterns\n WHEN (NEW.effective_revision_id IS NOT NULL AND NOT EXISTS (\n  SELECT 1 FROM interaction_pattern_revisions WHERE revision_id=NEW.effective_revision_id AND pattern_id=NEW.pattern_id))\n OR (NEW.candidate_revision_id IS NOT NULL AND NOT EXISTS (\n  SELECT 1 FROM interaction_pattern_revisions WHERE revision_id=NEW.candidate_revision_id AND pattern_id=NEW.pattern_id))\n BEGIN SELECT RAISE(ABORT,'foreign Pattern revision'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_source_immutable_delete",
+      "interaction_pattern_primary_sources",
+      "CREATE TRIGGER interaction_pattern_source_immutable_delete BEFORE DELETE ON interaction_pattern_primary_sources\n BEGIN SELECT RAISE(ABORT,'immutable Pattern source'); END"
+    ],
+    [
+      "trigger",
+      "interaction_pattern_source_immutable_update",
+      "interaction_pattern_primary_sources",
+      "CREATE TRIGGER interaction_pattern_source_immutable_update BEFORE UPDATE ON interaction_pattern_primary_sources\n BEGIN SELECT RAISE(ABORT,'immutable Pattern source'); END"
+    ],
+    [
+      "trigger",
+      "pending_memory_identity_immutable",
+      "pending_memory",
+      "CREATE TRIGGER pending_memory_identity_immutable BEFORE UPDATE OF authority_epoch_id,bank_id,operation_id,operation_kind,intent_hash ON pending_memory\nBEGIN SELECT RAISE(ABORT, 'pending memory identity is immutable'); END"
+    ],
+    [
+      "trigger",
+      "primary_conversation_source_immutable",
+      "primary_conversation_sources",
+      "CREATE TRIGGER primary_conversation_source_immutable BEFORE UPDATE ON primary_conversation_sources\n WHEN OLD.state<>'open' OR NEW.source_id IS NOT OLD.source_id OR NEW.character_id IS NOT OLD.character_id\n OR NEW.original_user_id IS NOT OLD.original_user_id OR NEW.original_user_seq IS NOT OLD.original_user_seq\n OR NEW.original_user_digest IS NOT OLD.original_user_digest OR NEW.run_id IS NOT OLD.run_id\n OR NEW.memory_json IS NOT OLD.memory_json OR NEW.created_at IS NOT OLD.created_at OR NEW.state='open'\n BEGIN SELECT RAISE(ABORT,'PRIMARY_SOURCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "primary_conversation_source_no_delete",
+      "primary_conversation_sources",
+      "CREATE TRIGGER primary_conversation_source_no_delete BEFORE DELETE ON primary_conversation_sources\n BEGIN SELECT RAISE(ABORT,'PRIMARY_SOURCE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "run_effects_attempt_lineage",
+      "run_effects",
+      "CREATE TRIGGER run_effects_attempt_lineage\n    BEFORE INSERT ON run_effects\n    WHEN NOT EXISTS (SELECT 1 FROM run_attempts WHERE attempt_id=NEW.attempt_id AND run_id=NEW.run_id)\n    BEGIN SELECT RAISE(ABORT, 'RUN_EFFECT_ATTEMPT_LINEAGE_MISMATCH'); END"
+    ],
+    [
+      "trigger",
+      "run_events_attempt_lineage",
+      "run_events",
+      "CREATE TRIGGER run_events_attempt_lineage\nBEFORE INSERT ON run_events\nWHEN NEW.attempt_id IS NOT NULL AND NOT EXISTS (\n  SELECT 1 FROM run_attempts WHERE attempt_id=NEW.attempt_id AND run_id=NEW.run_id\n)\nBEGIN\n SELECT RAISE(ABORT, 'RUN_EVENT_ATTEMPT_LINEAGE_MISMATCH');\nEND"
+    ],
+    [
+      "trigger",
+      "run_events_immutable_delete",
+      "run_events",
+      "CREATE TRIGGER run_events_immutable_delete\nBEFORE DELETE ON run_events\nBEGIN\n SELECT RAISE(ABORT, 'RUN_EVENT_IMMUTABLE');\nEND"
+    ],
+    [
+      "trigger",
+      "run_events_immutable_update",
+      "run_events",
+      "CREATE TRIGGER run_events_immutable_update\nBEFORE UPDATE ON run_events\nBEGIN\n SELECT RAISE(ABORT, 'RUN_EVENT_IMMUTABLE');\nEND"
+    ],
+    [
+      "trigger",
+      "run_messages_immutable",
+      "run_messages",
+      "CREATE TRIGGER run_messages_immutable BEFORE UPDATE ON run_messages BEGIN SELECT RAISE(ABORT,'RUN_MESSAGE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "run_usage_lineage",
+      "run_usage",
+      "CREATE TRIGGER run_usage_lineage\n    BEFORE INSERT ON run_usage\n    WHEN NOT EXISTS (\n      SELECT 1 FROM run_effects WHERE effect_id=NEW.effect_id AND run_id=NEW.run_id AND attempt_id=NEW.attempt_id\n    )\n    BEGIN SELECT RAISE(ABORT, 'RUN_USAGE_EFFECT_LINEAGE_MISMATCH'); END"
+    ],
+    [
+      "trigger",
+      "subagent_action_immutable",
+      "subagent_event_actions",
+      "CREATE TRIGGER subagent_action_immutable BEFORE UPDATE ON subagent_event_actions BEGIN SELECT RAISE(ABORT,'SUBAGENT_ACTION_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_answer_immutable",
+      "subagent_input_waits",
+      "CREATE TRIGGER subagent_answer_immutable BEFORE UPDATE ON subagent_input_waits WHEN OLD.state='answered'\n BEGIN SELECT RAISE(ABORT,'SUBAGENT_ANSWER_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_checkin_immutable",
+      "subagent_checkins",
+      "CREATE TRIGGER subagent_checkin_immutable BEFORE UPDATE ON subagent_checkins\n BEGIN SELECT RAISE(ABORT,'SUBAGENT_CHECKIN_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_child_result_immutable",
+      "subagent_executions",
+      "CREATE TRIGGER subagent_child_result_immutable BEFORE UPDATE OF result_json,result_digest,settled_at\n ON subagent_executions WHEN OLD.settled_at IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_RESULT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_consumer_identity_immutable",
+      "subagent_inbox_consumers",
+      "CREATE TRIGGER subagent_consumer_identity_immutable BEFORE UPDATE OF consumer_id,character_id,run_id,attempt_id,mode,projection_json,projection_digest,created_at\n ON subagent_inbox_consumers BEGIN SELECT RAISE(ABORT,'SUBAGENT_CONSUMER_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_context_immutable",
+      "subagent_conversations",
+      "CREATE TRIGGER subagent_context_immutable BEFORE UPDATE OF subagent_id,character_id,created_by_run_id,label,initial_context_json,initial_context_digest,created_at\n ON subagent_conversations BEGIN SELECT RAISE(ABORT,'SUBAGENT_CONTEXT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_control_immutable",
+      "subagent_controls",
+      "CREATE TRIGGER subagent_control_immutable BEFORE UPDATE ON subagent_controls BEGIN SELECT RAISE(ABORT,'SUBAGENT_CONTROL_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_delivery_immutable",
+      "subagent_inbox_deliveries",
+      "CREATE TRIGGER subagent_delivery_immutable BEFORE UPDATE ON subagent_inbox_deliveries BEGIN SELECT RAISE(ABORT,'SUBAGENT_DELIVERY_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_event_frontier_immutable",
+      "subagent_event_frontiers",
+      "CREATE TRIGGER subagent_event_frontier_immutable BEFORE UPDATE ON subagent_event_frontiers BEGIN SELECT RAISE(ABORT,'SUBAGENT_EVENT_FRONTIER_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_event_immutable",
+      "subagent_events",
+      "CREATE TRIGGER subagent_event_immutable BEFORE UPDATE ON subagent_events BEGIN SELECT RAISE(ABORT,'SUBAGENT_EVENT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_execution_identity_immutable",
+      "subagent_executions",
+      "CREATE TRIGGER subagent_execution_identity_immutable BEFORE UPDATE OF run_id,subagent_id,work_input_id,trigger_input_id,admission_digest,completion_policy\n ON subagent_executions BEGIN SELECT RAISE(ABORT,'SUBAGENT_EXECUTION_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_first_receipt_immutable",
+      "subagent_inputs",
+      "CREATE TRIGGER subagent_first_receipt_immutable BEFORE UPDATE OF consumed_run_id,consumed_attempt_id,consumed_step,consumed_effect_id\n ON subagent_inputs WHEN OLD.consumed_run_id IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_RECEIPT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_inbox_resume_immutable",
+      "subagent_inbox_resumes",
+      "CREATE TRIGGER subagent_inbox_resume_immutable BEFORE UPDATE ON subagent_inbox_resumes\n BEGIN SELECT RAISE(ABORT,'SUBAGENT_INBOX_RESUME_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_input_immutable",
+      "subagent_inputs",
+      "CREATE TRIGGER subagent_input_immutable BEFORE UPDATE OF input_id,subagent_id,input_seq,work_input_id,work_seq,operation_key,request_digest,input_kind,sender_kind,sender_run_id,sender_owner_ref,direction_text,materials_json,tool_selection_json,completion_policy,work_expires_at,created_at\n ON subagent_inputs BEGIN SELECT RAISE(ABORT,'SUBAGENT_INPUT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_member_immutable",
+      "subagent_inbox_members",
+      "CREATE TRIGGER subagent_member_immutable BEFORE UPDATE ON subagent_inbox_members BEGIN SELECT RAISE(ABORT,'SUBAGENT_MEMBER_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_order_control",
+      "subagent_controls",
+      "CREATE TRIGGER subagent_order_control AFTER INSERT ON subagent_controls BEGIN\n INSERT INTO subagent_conversation_order(subagent_id,work_input_id,source_kind,source_id,created_at,historical_order)\n VALUES(NEW.subagent_id,NEW.work_input_id,'control',NEW.control_id,NEW.created_at,0); END"
+    ],
+    [
+      "trigger",
+      "subagent_order_event",
+      "subagent_events",
+      "CREATE TRIGGER subagent_order_event AFTER INSERT ON subagent_events BEGIN\n INSERT INTO subagent_conversation_order(subagent_id,work_input_id,source_kind,source_id,created_at,historical_order)\n VALUES(NEW.subagent_id,NEW.work_input_id,'event',NEW.event_id,NEW.accepted_at,0); END"
+    ],
+    [
+      "trigger",
+      "subagent_order_immutable",
+      "subagent_conversation_order",
+      "CREATE TRIGGER subagent_order_immutable BEFORE UPDATE ON subagent_conversation_order BEGIN SELECT RAISE(ABORT,'SUBAGENT_ORDER_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_order_input",
+      "subagent_inputs",
+      "CREATE TRIGGER subagent_order_input AFTER INSERT ON subagent_inputs BEGIN\n INSERT INTO subagent_conversation_order(subagent_id,work_input_id,source_kind,source_id,created_at,historical_order)\n VALUES(NEW.subagent_id,NEW.work_input_id,'input',NEW.input_id,NEW.created_at,0); END"
+    ],
+    [
+      "trigger",
+      "subagent_order_message",
+      "run_messages",
+      "CREATE TRIGGER subagent_order_message AFTER INSERT ON run_messages WHEN NEW.entry_kind<>'input' BEGIN\n INSERT INTO subagent_conversation_order(subagent_id,work_input_id,source_kind,source_id,created_at,historical_order)\n SELECT subagent_id,work_input_id,'message',CAST(NEW.seq AS TEXT),NEW.created_at,0 FROM subagent_executions WHERE run_id=NEW.run_id; END"
+    ],
+    [
+      "trigger",
+      "subagent_parent_link_immutable",
+      "subagent_executions",
+      "CREATE TRIGGER subagent_parent_link_immutable BEFORE UPDATE OF parent_run_id,parent_admission_digest\n ON subagent_executions WHEN OLD.parent_run_id IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_PARENT_LINK_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_parent_result_immutable",
+      "subagent_executions",
+      "CREATE TRIGGER subagent_parent_result_immutable BEFORE UPDATE OF parent_result_json,parent_result_digest,parent_settled_at\n ON subagent_executions WHEN OLD.parent_settled_at IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_RESULT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_presentation_immutable",
+      "subagent_message_presentation",
+      "CREATE TRIGGER subagent_presentation_immutable BEFORE UPDATE ON subagent_message_presentation\n BEGIN SELECT RAISE(ABORT,'SUBAGENT_PRESENTATION_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_primary_speech_immutable",
+      "subagent_primary_speech",
+      "CREATE TRIGGER subagent_primary_speech_immutable BEFORE UPDATE ON subagent_primary_speech BEGIN SELECT RAISE(ABORT,'SUBAGENT_SPEECH_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_reply_binding_immutable",
+      "subagent_inputs",
+      "CREATE TRIGGER subagent_reply_binding_immutable BEFORE UPDATE OF reply_acceptance_json\n ON subagent_inputs WHEN OLD.reply_acceptance_json IS NOT NULL BEGIN SELECT RAISE(ABORT,'SUBAGENT_REPLY_BINDING_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_route_immutable",
+      "subagent_work_routes",
+      "CREATE TRIGGER subagent_route_immutable BEFORE UPDATE ON subagent_work_routes BEGIN SELECT RAISE(ABORT,'SUBAGENT_ROUTE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_summary_failure_immutable",
+      "subagent_context_summary_failures",
+      "CREATE TRIGGER subagent_summary_failure_immutable BEFORE UPDATE ON subagent_context_summary_failures BEGIN SELECT RAISE(ABORT,'SUBAGENT_SUMMARY_FAILURE_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_summary_immutable",
+      "subagent_context_summaries",
+      "CREATE TRIGGER subagent_summary_immutable BEFORE UPDATE ON subagent_context_summaries BEGIN SELECT RAISE(ABORT,'SUBAGENT_SUMMARY_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_summary_intent_immutable",
+      "subagent_context_summary_intents",
+      "CREATE TRIGGER subagent_summary_intent_immutable BEFORE UPDATE ON subagent_context_summary_intents BEGIN SELECT RAISE(ABORT,'SUBAGENT_SUMMARY_INTENT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_tool_result_immutable",
+      "subagent_tool_results",
+      "CREATE TRIGGER subagent_tool_result_immutable BEFORE UPDATE ON subagent_tool_results BEGIN SELECT RAISE(ABORT,'SUBAGENT_TOOL_RESULT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "subagent_validity_immutable",
+      "subagent_inputs",
+      "CREATE TRIGGER subagent_validity_immutable BEFORE UPDATE OF validity_json,reply_to_event_id ON subagent_inputs\n BEGIN SELECT RAISE(ABORT,'SUBAGENT_INPUT_IMMUTABLE'); END"
+    ],
+    [
+      "trigger",
+      "timeline_primary_source_delete",
+      "timeline_messages",
+      "CREATE TRIGGER timeline_primary_source_delete BEFORE DELETE ON timeline_messages\n WHEN OLD.primary_source_id IS NOT NULL AND NOT EXISTS (\n   SELECT 1 FROM primary_conversation_sources s WHERE s.source_id=OLD.primary_source_id\n   AND s.state='retracted' AND s.original_user_id=OLD.id\n )\n BEGIN SELECT RAISE(ABORT,'PRIMARY_SOURCE_MEMBERSHIP'); END"
+    ],
+    [
+      "trigger",
+      "timeline_primary_source_identity",
+      "timeline_messages",
+      "CREATE TRIGGER timeline_primary_source_identity BEFORE UPDATE OF id,seq,character_id,role ON timeline_messages\n WHEN OLD.primary_source_id IS NOT NULL AND\n (NEW.id IS NOT OLD.id OR NEW.seq IS NOT OLD.seq OR NEW.character_id IS NOT OLD.character_id OR NEW.role IS NOT OLD.role)\n BEGIN SELECT RAISE(ABORT,'PRIMARY_SOURCE_MEMBERSHIP'); END"
+    ],
+    [
+      "trigger",
+      "timeline_primary_source_insert",
+      "timeline_messages",
+      "CREATE TRIGGER timeline_primary_source_insert BEFORE INSERT ON timeline_messages\n WHEN NEW.primary_source_id IS NOT NULL AND NOT EXISTS (\n   SELECT 1 FROM primary_conversation_sources s WHERE s.source_id=NEW.primary_source_id\n   AND s.state='open' AND s.character_id=NEW.character_id AND NEW.role IN ('assistant','tool')\n )\n BEGIN SELECT RAISE(ABORT,'PRIMARY_SOURCE_MEMBERSHIP'); END"
+    ],
+    [
+      "trigger",
+      "timeline_primary_source_link",
+      "timeline_messages",
+      "CREATE TRIGGER timeline_primary_source_link BEFORE UPDATE OF primary_source_id ON timeline_messages\n WHEN NEW.primary_source_id IS NOT OLD.primary_source_id AND\n (OLD.primary_source_id IS NOT NULL OR NOT EXISTS (\n   SELECT 1 FROM primary_conversation_sources s WHERE s.source_id=NEW.primary_source_id\n   AND s.state='open' AND s.character_id=NEW.character_id AND NEW.seq>=s.original_user_seq\n   AND (NEW.role<>'user' OR NEW.id=s.original_user_id)\n ))\n BEGIN SELECT RAISE(ABORT,'PRIMARY_SOURCE_MEMBERSHIP'); END"
+    ],
+    [
+      "trigger",
+      "timeline_source_context_immutable",
+      "timeline_messages",
+      "CREATE TRIGGER timeline_source_context_immutable BEFORE UPDATE OF source_context_json ON timeline_messages\nWHEN NEW.source_context_json IS NOT OLD.source_context_json\nBEGIN SELECT RAISE(ABORT, 'timeline source context is immutable'); END"
+    ]
+  ]
+}

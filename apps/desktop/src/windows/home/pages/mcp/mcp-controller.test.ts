@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import type { McpListResult } from "@taki/shared";
+import type { ExtensionChanged, McpListResult } from "@taki/shared";
 import { createMcpController, type McpPageClient } from "./mcp-controller.ts";
 import { emptyDraft, type McpServerDraft } from "./mcp-state.ts";
 
 const NOW = "2026-08-16T00:00:00.000Z";
 const HOST = "11111111-1111-4111-8111-111111111111";
+const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 function servers(...ids: string[]): McpListResult {
   return {
@@ -25,6 +26,8 @@ function servers(...ids: string[]): McpListResult {
 function client(behavior: Partial<Record<keyof McpPageClient, (...args: unknown[]) => unknown>>): McpPageClient & { calls: string[] } {
   const calls: string[] = [];
   const base = {
+    subscribeExtensions: async () => "supported" as const,
+    onExtensionChanged: () => () => undefined,
     mcpList: async () => { calls.push("mcpList"); return servers("github"); },
     mcpAdd: async () => { calls.push("mcpAdd"); return { server: servers("github", "added").servers[1]! }; },
     mcpEdit: async () => { calls.push("mcpEdit"); return { server: servers("github").servers[0]! }; },
@@ -42,7 +45,203 @@ function client(behavior: Partial<Record<keyof McpPageClient, (...args: unknown[
   return Object.assign(base, { calls });
 }
 
+describe("MCP subscribed read lifecycle", () => {
+  it("withholds a save notification until post-write reconciliation and drops a retired completion", async () => {
+    let finish!: (value: McpListResult) => void;
+    const pending = new Promise<McpListResult>((resolve) => { finish = resolve; });
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockReturnValueOnce(pending);
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read }));
+    await controller.refresh();
+    const done = controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1);
+    await flush();
+    expect(sink.feedback).not.toHaveBeenCalled();
+    controller.replace(client({}));
+    finish(servers("github"));
+    expect(await done).toEqual({ ok: false });
+    expect(sink.feedback).not.toHaveBeenCalled();
+  });
+
+  it("delivers a saved outcome once and never echoes it in later snapshots", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({}));
+    await controller.refresh();
+    await controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1);
+    await controller.refresh();
+    await controller.invalidate();
+    expect(sink.feedback).toHaveBeenCalledTimes(1);
+    expect(sink.feedback).toHaveBeenCalledWith(expect.objectContaining({ kind: "saved" }));
+    expect(sink.loaded.mock.calls.every(([, feedback]) => feedback?.kind !== "saved")).toBe(true);
+  });
+
+  it("coalesces successful mutation hints and settlement into one list read", async () => {
+    const handlers = new Set<(event: ExtensionChanged) => void>();
+    let finish!: (value: Awaited<ReturnType<McpPageClient["mcpAdd"]>>) => void;
+    const write = new Promise<Awaited<ReturnType<McpPageClient["mcpAdd"]>>>((resolve) => { finish = resolve; });
+    const read = vi.fn(async () => servers("github"));
+    const active = client({ mcpList: read, mcpAdd: () => write });
+    active.onExtensionChanged = (handler) => { handlers.add(handler); return () => { handlers.delete(handler); }; };
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(active);
+    await controller.refresh();
+    const done = controller.add({ ...emptyDraft(), serverId: "added", command: "node" });
+    for (const revision of [1, 2, 2]) for (const handler of handlers) handler({ revision, targets: ["mcp"] });
+    expect(read).toHaveBeenCalledTimes(1);
+    finish({ server: servers("added").servers[0]! });
+    expect(await done).toEqual({ ok: true, committedRevision: 1 });
+    expect(read).toHaveBeenCalledTimes(2);
+    controller.setVisible(false);
+    controller.setVisible(true);
+    await flush();
+    expect(read).toHaveBeenCalledTimes(2);
+    controller.dispose();
+    expect(handlers.size).toBe(0);
+  });
+
+  it("distinguishes setup failure from an older Core and keeps either path deliberately retryable", async () => {
+    const read = vi.fn(async () => servers("github"));
+    const active = client({ mcpList: read });
+    active.subscribeExtensions = vi.fn().mockRejectedValueOnce(new Error("forbidden")).mockResolvedValue("supported");
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), observation: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(active);
+    await controller.refresh();
+    expect(read).not.toHaveBeenCalled();
+    expect(sink.observation).toHaveBeenLastCalledWith("failure");
+    expect(sink.loadFailed).toHaveBeenCalledTimes(1);
+    await controller.refresh();
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(sink.observation).toHaveBeenLastCalledWith("live");
+    const legacy = client({ mcpList: read });
+    legacy.subscribeExtensions = async () => "unsupported";
+    controller.replace(legacy);
+    await controller.refresh();
+    expect(sink.observation).toHaveBeenLastCalledWith("unsupported");
+    const count = read.mock.calls.length;
+    controller.setVisible(false);
+    await controller.refresh();
+    expect(read).toHaveBeenCalledTimes(count);
+    controller.setVisible(true);
+    await flush();
+    expect(read).toHaveBeenCalledTimes(count + 1);
+    controller.dispose();
+  });
+});
+
 describe("mcp controller", () => {
+  it.each(["saved", "partial"])("retires a %s editor outcome when its client changes during post-write reconciliation", async (outcome) => {
+    let resolve!: (value: McpListResult) => void;
+    const postWrite = new Promise<McpListResult>((accept) => { resolve = accept; });
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockReturnValueOnce(postWrite);
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const old = client({ mcpList: read,
+      mcpEdit: async () => ({ server: { ...servers("github").servers[0]!, configRevision: 8 } }),
+      ...(outcome === "partial" ? { secretSet: async () => { throw new Error("catalog locked"); } } : {}),
+    });
+    const controller = createMcpController(sink);
+    controller.replace(old);
+    await controller.refresh();
+    const done = controller.edit({ ...emptyDraft(), serverId: "github", command: "node",
+      fields: [{ id: 1, name: "TOKEN", value: "new-value", storedSecretRef: "mcp.github.env.TOKEN" }],
+    }, 7);
+    await flush();
+    expect(read).toHaveBeenCalledTimes(2);
+    controller.replace(client({}));
+    await controller.refresh();
+    resolve(servers("github"));
+    expect(await done).toEqual({ ok: false });
+    controller.dispose();
+  });
+
+  it("restores after hide/show during an accepted write's pending reconciliation", async () => {
+    let resolve!: (value: McpListResult) => void;
+    const postWrite = new Promise<McpListResult>((accept) => { resolve = accept; });
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockReturnValueOnce(postWrite).mockResolvedValue(servers("fresh"));
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    const active = client({ mcpList: read });
+    controller.replace(active);
+    await controller.refresh();
+    const done = controller.add({ ...emptyDraft(), serverId: "new", command: "node" });
+    await new Promise((accept) => setImmediate(accept));
+    controller.setVisible(false);
+    controller.setVisible(true);
+    resolve(servers("retired"));
+    await done;
+    expect(read).toHaveBeenCalledTimes(3);
+    expect(active.calls.filter((name) => name === "mcpAdd")).toHaveLength(1);
+    expect(sink.loaded.mock.calls.at(-1)?.[0]).toEqual(servers("fresh").servers);
+  });
+
+  it("retires success even when replacement occurs during the final hide/show reconciliation", async () => {
+    let finishPostWrite!: (value: McpListResult) => void;
+    let finishRestore!: (value: McpListResult) => void;
+    const postWrite = new Promise<McpListResult>((resolve) => { finishPostWrite = resolve; });
+    const restore = new Promise<McpListResult>((resolve) => { finishRestore = resolve; });
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockReturnValueOnce(postWrite).mockReturnValueOnce(restore);
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read }));
+    await controller.refresh();
+    const done = controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1);
+    await flush();
+    controller.setVisible(false);
+    controller.setVisible(true);
+    finishPostWrite(servers("old"));
+    await flush();
+    expect(read).toHaveBeenCalledTimes(3);
+    controller.replace(client({}));
+    await controller.refresh();
+    finishRestore(servers("old"));
+    expect(await done).toEqual({ ok: false });
+    controller.dispose();
+  });
+
+  it("joins coincident demand and folds an invalidation burst into one trailing read", async () => {
+    let resolve!: (value: McpListResult) => void;
+    const pending = new Promise<McpListResult>((accept) => { resolve = accept; });
+    const read = vi.fn().mockReturnValueOnce(pending).mockResolvedValue(servers("fresh"));
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read }));
+    const done = controller.refresh();
+    void controller.refresh();
+    await new Promise((accept) => setImmediate(accept));
+    expect(read).toHaveBeenCalledTimes(1);
+    void controller.invalidate();
+    void controller.invalidate();
+    resolve(servers("old"));
+    await done;
+    expect(read).toHaveBeenCalledTimes(2);
+    expect(sink.loaded).toHaveBeenCalledExactlyOnceWith(servers("fresh").servers, undefined);
+  });
+
+  it("keeps its mutation lock and outcome while hidden, then performs one demand read", async () => {
+    let resolve!: (value: { server: McpListResult["servers"][number] }) => void;
+    const pending = new Promise<{ server: McpListResult["servers"][number] }>((accept) => { resolve = accept; });
+    const write = vi.fn(() => pending);
+    const read = vi.fn(async () => servers("github"));
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn(), mutationSettled: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read, mcpAdd: write }));
+    await controller.refresh();
+    const done = controller.add({ ...emptyDraft(), serverId: "new", command: "node" });
+    controller.setVisible(false);
+    await controller.invalidate();
+    expect(await controller.add({ ...emptyDraft(), serverId: "new", command: "node" })).toEqual({ ok: false });
+    resolve({ server: servers("new").servers[0]! });
+    expect(await done).toEqual({ ok: true, committedRevision: 1 });
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(sink.feedback).toHaveBeenCalledWith(expect.objectContaining({ kind: "saved" }));
+    controller.setVisible(true);
+    await controller.refresh();
+    expect(read).toHaveBeenCalledTimes(2);
+  });
+
   it("loads on replace and ignores results from a retired client generation", async () => {
     const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
     const controller = createMcpController(sink);
@@ -117,6 +316,25 @@ describe("mcp controller", () => {
     expect(last).toMatchObject({ kind: "conflict" });
   });
 
+  it("retains conflict diagnostics honestly when the required read-back also fails", async () => {
+    const failure = new Error("MCP list unavailable");
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockRejectedValueOnce(failure);
+    const edit = vi.fn(async () => {
+      throw Object.assign(new Error("conflict"), { data: { code: "MCP_CONFIG_CONFLICT" } });
+    });
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read, mcpEdit: edit }));
+    await controller.refresh();
+    expect(await controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1)).toEqual({ ok: false });
+    expect(sink.feedback).toHaveBeenCalledExactlyOnceWith({ kind: "conflict", message: "配置已在别处修改；请核对当前状态后重试。" });
+    expect(sink.loadFailed).toHaveBeenCalledExactlyOnceWith(failure, servers("github").servers);
+    expect(edit).toHaveBeenCalledTimes(1);
+    expect(read).toHaveBeenCalledTimes(2);
+    expect(sink.loaded).toHaveBeenCalledTimes(1);
+    controller.dispose();
+  });
+
   it("reports a committed revision and keeps an error feedback when post-edit secret rotation fails", async () => {
     const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
     const controller = createMcpController(sink);
@@ -137,6 +355,29 @@ describe("mcp controller", () => {
     expect(result).toEqual({ ok: false, committedRevision: 8 });
     expect(sink.mutationFailed).toHaveBeenCalledWith(expect.objectContaining({ message: "catalog locked" }));
     expect(sink.loaded.mock.calls.at(-1)?.[1]).toMatchObject({ kind: "error" });
+  });
+
+  it("keeps successful diagnostic feedback useful and bound to the requested server", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    const testRequest = vi.fn(async () => ({
+      status: "ok" as const,
+      toolNames: ["get_issue", "search_issues"],
+      skipped: [{ toolName: "legacy_issue", code: "UNION_UNSUPPORTED" as const, path: "properties.format" }],
+      pages: 2,
+      durationMs: 35,
+    }));
+    const stub = client({ mcpTest: testRequest });
+    controller.replace(stub);
+    await controller.refresh();
+    await controller.test("github");
+    expect(testRequest).toHaveBeenCalledTimes(1);
+    expect(testRequest).toHaveBeenCalledWith({ serverId: "github" });
+    expect(sink.loaded).toHaveBeenLastCalledWith(servers("github").servers, {
+      kind: "tested",
+      message: "github 测试通过：2 个工具，耗时 35 毫秒，跳过 1 个",
+    });
+    expect(stub.calls.filter((name) => name === "mcpList")).toHaveLength(2);
   });
 
   it("renders test outcome facts and does not report a failed candidate as success", async () => {

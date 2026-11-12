@@ -8,6 +8,11 @@ Posture ordering is `auto < ask < deny`. A Host may preserve or increase that or
 Standard MCP and portable `SKILL.md` packages remain ecosystem formats. Their adapters resolve canonical identity but
 do not create extension-specific authority.
 
+Readable names and approval copy follow [Operation Presentation](./operation-presentation.md).
+Approval construction and final revalidation read classifier identity/revision from the active service
+registry; non-MCP does not imply `fixed-risk` (`write_file` uses `workspace-path`). Labels never become
+binding keys or change decision usability.
+
 ## Scenario: Global policy, Host projection, and final enforcement
 
 ### 1. Scope / Trigger
@@ -220,9 +225,10 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
   refetches Core truth.
 - Permission snapshots stay in component/controller memory. They never enter `localStorage`, Zustand persistence,
   `useCachedFetch`, or the page-cache allow-list.
-- Home renders factory, override, effective posture, override mode, generation, loading/reconnecting/read/validation
+- Home renders factory, override, effective posture, override mode, loading/reconnecting/read/validation
   failure, saved, conflict, second-confirm, reset, and immutable states. It may state globally that Hosts can tighten;
-  it must not invent a per-row Host constraint that Core did not return.
+  it must not invent a per-row Host constraint that Core did not return. Generation/revision values remain internal
+  inputs for CAS and freshness checks; G4 excludes their primary, expanded, copy and accessible presentation.
 
 #### Slice 3 / canonical Approval seam
 
@@ -251,8 +257,9 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
 - `completed ⟺ ask ⟺ authorization lineage` is enforced cross-language (Zod `superRefine` plus Rust
   `validate_lineage`) and pinned by golden fixtures; a completed ask-class frame without valid lineage converts to a
   denial.
-- Unattended turns construct tools without interactive context; their `ask` fails closed (`APPROVAL_REQUIRED`) with
-  a bounded reason and raises no ambient prompt on any socket.
+- Unattended turns construct tools without an operator connection and raise no ambient prompt. Core/MCP `ask`
+  can consume an exact current durable grant through the read-only authority check below; otherwise it returns
+  `APPROVAL_REQUIRED`. Host `ask` retains its existing challenge/authorization behavior.
 - Pending raw input never reaches logs, audit, timeline, caches, error payloads, or the wire. Migration
   `016-timeline-input-scrub` idempotently removes historical tool-call `input` from timeline parts with
   `secure_delete` zeroing; timeline writes strip input and reads re-sanitize.
@@ -359,4 +366,76 @@ match effective {
     Ask => approval_required_without_execution(cell),
     Deny => denied_without_execution(cell),
 }
+```
+
+## Captured unattended tool execution (2026-10-18)
+
+### 1. Scope / Trigger
+
+Use when an existing admitted Run executes captured Core/MCP/Host closures without an operator socket,
+including deterministic evidence preparation before the Agent. No media-specific permission path is introduced.
+
+### 2. Signatures
+
+`ApprovalInteractionService.hasDurableAuthority(binding: ApprovalDecisionBinding): boolean` delegates to the
+existing usable durable-decision matcher. `bindCapturedToolExecution(tools, execution)` accepts a
+`GovernedEffectContext` containing exact Run/Attempt/Effect owner, optional observer and cancellation signal.
+`governedExecutionContext(options)` reads its process-private options metadata. No protocol or database schema changes.
+
+### 3. Contracts
+
+- Core/MCP wrappers first evaluate current governance. Explicit deny never reaches approval lookup. An unattended
+  ask can execute only with an exact usable durable grant; once/session decisions cannot authorize background work.
+  Host/subject/config revision/classifier/binding mismatches and revoked grants remain denied without a prompt.
+- Bind execution metadata to the original captured closures, preserving descriptor sidecars and the admitted
+  context. The binder creates no Effect, registry, connection, permission or native retry. The existing governed
+  wrapper/broker owns exactly one Effect at dispatch and its terminal outcome.
+- The execution failure bracket surrounds the actual closure invocation as well as its awaited result. A synchronous
+  throw and an asynchronous rejection both settle that Effect once with the existing failure/cancellation semantics,
+  then propagate the original error. `Promise.resolve(execute(...)).catch(...)` is insufficient because argument
+  evaluation can throw before the handler exists. Keep intent hooks, observer binding and settlement outside that
+  catch: their authority/persistence failures must not be disguised as ordinary tool failures or retried settlement.
+  `governed-tool.test.ts` covers both execution forms, cancellation and those separate failure boundaries.
+- ChatAgent binds the captured bag for each actual Attempt before merging/disclosure/captured Skill loading.
+  InitiativeRuntime binds a derived bag for `prepareInput`, which runs before ChatAgent. Source/authority checks
+  retain the original context; admission snapshots are not recaptured.
+- Host extension routes forward the bound Run/Attempt and signal. Root wiring must preserve those fields instead
+  of overwriting them with absent interactive fields. Existing broker ownership and Host generation fences remain.
+- Combine caller and Run cancellation. Pre-dispatch abort creates no side effect; cooperative pending reads cancel
+  their wait. An uncooperative side effect cancelled after dispatch retains `OUTCOME_UNKNOWN`.
+- Installed `@ai-sdk/mcp` cancellation stops its local request wait, not remote computation. `CANCELLED` therefore
+  never means BiliNote's task was cancelled. Native request identity and reconciliation rules remain authoritative.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required outcome |
+| --- | --- |
+| Current exact durable Core/MCP grant | Original closure executes, no operator prompt |
+| Missing/session/once/revoked/wrong-binding grant | `APPROVAL_REQUIRED`, no native dispatch |
+| Current governance deny | `GOVERNANCE_DENIED`, even with a stored grant |
+| Captured SDK/direct/extension call | Exactly one Effect for the executing Run/Attempt |
+| Pre-aborted Run or caller | Cancelled, no dispatch |
+| Host preflight abort | No execute message; pending broker state settles |
+| Uncooperative dispatched Host side effect | Unknown outcome; never silently replay |
+
+### 5. Good / Base / Bad Cases
+
+- Good: a previously authorized probe executes inside an admitted initiative Run using its captured MCP generation.
+- Base: an unapproved background action refuses quietly.
+- Bad: fabricate an operator connection, widen MCP policy for the feature, or replace old closures with a fresh catalog.
+
+### 6. Tests Required
+
+Cover exact/absent/once/session/revoked/wrong-Host/tool/revision/deny authority, immutable tool metadata, caller and
+Run abort, real in-memory MCP/Host one-Effect attribution, preflight cancellation and post-dispatch unknown outcome.
+Exercise both actual SDK invocation and InitiativeRuntime pre-Agent preparation; assertions on a mocked tool bag alone
+do not establish production execution binding.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: an unattended call loses Run identity when the interactive owner is absent.
+routeCapability(deps, { ...request, runId: interactive?.runId });
+// Correct: preserve the trusted execution binding supplied through captured tool options.
+routeCapability(deps, { ...request, runId: request.runId ?? interactive?.runId });
 ```

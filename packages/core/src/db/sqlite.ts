@@ -1,8 +1,7 @@
 /**
  * INPUT:  a db file path (or ':memory:') + an ordered migration list
- * OUTPUT: Database with SQL/transaction/backup operations and read-only actual transaction state; toSafeInteger helper
+ * OUTPUT: Database with SQL/transaction/after-commit/backup operations and read-only transaction state
  * POS:    core/db — the ONLY module importing node:sqlite; repos receive this wrapper, never DatabaseSync; no fs here
- *         (backupTo writes only the path its caller owns)
  */
 import { backup, DatabaseSync, type StatementSync } from "node:sqlite";
 import { pathToFileURL } from "node:url";
@@ -26,16 +25,14 @@ export interface SqlStatement {
 export interface Database {
   /** Actual SQLite state, including transactions entered through exec(); false after close. */
   readonly isTransaction: boolean;
+  /** Online rowid-preserving copy; the caller owns a fresh destination path. */
+  backupTo(path: string): Promise<number>;
   exec(sql: string): void;
   prepare(sql: string): SqlStatement;
   /** BEGIN/COMMIT around fn, ROLLBACK on throw. Synchronous only — never await inside fn. */
   transaction(fn: () => void): void;
-  /**
-   * Online page copy through this connection; resolves with the page count. Same-connection writes during the copy are
-   * reflected and rowids are kept (VACUUM INTO may renumber implicit rowids that Core orders by). An existing file at
-   * `path` is overwritten, so the caller owns a fresh path and removes it on failure.
-   */
-  backupTo(path: string): Promise<number>;
+  /** Process notifications only, after the outermost successful commit; rollback discards them. */
+  afterCommit(callback: () => void): void;
   close(): void;
 }
 
@@ -44,33 +41,52 @@ export interface OpenDatabaseOptions {
   migrations: Migration[];
   /** Reports which versions were applied this boot (empty when already up to date); main logs it. */
   onMigrated?: (applied: number[]) => void;
+  onAfterCommitError?: (error: unknown) => void;
 }
 
 export function openDatabase(options: OpenDatabaseOptions): Database {
   const raw = new DatabaseSync(options.path);
-  // WAL gives the single-writer core non-blocking readers (no-op on :memory:); FKs default on, set for clarity.
-  raw.exec("PRAGMA journal_mode = WAL");
-  raw.exec("PRAGMA foreign_keys = ON");
-  const db = wrap(raw);
-  const applied = runMigrations(db, options.migrations);
-  options.onMigrated?.(applied);
-  return db;
+  try {
+    // WAL gives the single-writer core non-blocking readers (no-op on :memory:); FKs default on, set for clarity.
+    raw.exec("PRAGMA journal_mode = WAL");
+    raw.exec("PRAGMA foreign_keys = ON");
+    const db = wrap(raw, options.onAfterCommitError);
+    const applied = runMigrations(db, options.migrations);
+    options.onMigrated?.(applied);
+    return db;
+  } catch (error) {
+    // A refused boot never transfers connection ownership to its caller. Release
+    // the file immediately so a stopped-copy retry/cleanup cannot retain its lock.
+    raw.close();
+    throw error;
+  }
 }
 
 /** Inspect a completed immutable backup only; never use this for a live database with a WAL. */
 export function openReadonlyDatabase(path: string): Database {
-  // SQLite's immutable URI avoids creating WAL/SHM sidecars beside a sealed WAL-mode backup. Read-only alone
-  // still creates them, and a live database would require its WAL rather than this standalone-file contract.
   const uri = pathToFileURL(path); uri.searchParams.set("immutable", "1");
   return wrap(new DatabaseSync(uri.href, { readOnly: true }));
 }
 
-function wrap(raw: DatabaseSync): Database {
+interface TransactionState {
+  depth: number;
+  frames: Array<Array<() => void>>;
+  ready: Array<() => void>;
+  draining: boolean;
+  onError?: (error: unknown) => void;
+}
+
+function wrap(raw: DatabaseSync, onError?: (error: unknown) => void): Database {
   let closed = false;
-  const transactionState = { depth: 0 };
+  const transactionState: TransactionState = { depth: 0, frames: [], ready: [], draining: false, onError };
   const assertActive = () => assertActiveTransaction(raw, transactionState.depth);
   return {
     get isTransaction() { return raw.isOpen && raw.isTransaction; },
+    backupTo: async (path) => {
+      // A copy outlives this callback; a wrapper transaction cannot supply its committed boundary.
+      if (transactionState.depth > 0) throw new Error("sqlite backup cannot start inside a transaction");
+      return backup(raw, path);
+    },
     exec(sql) {
       assertActive();
       raw.exec(sql);
@@ -80,10 +96,13 @@ function wrap(raw: DatabaseSync): Database {
       return wrapStatement(raw.prepare(sql), assertActive);
     },
     transaction: (fn) => runTransaction(raw, transactionState, fn),
-    backupTo: async (path) => {
-      // A copy started inside a synchronous transaction outlives its callback, so no single committed state would bound it.
-      if (transactionState.depth > 0) throw new Error("sqlite backup cannot start inside a transaction");
-      return backup(raw, path);
+    afterCommit(callback) {
+      assertActive();
+      const frame = transactionState.frames.at(-1);
+      if (frame) { frame.push(callback); return; }
+      if (raw.isTransaction) throw new Error("sqlite afterCommit requires wrapper-managed transactions");
+      transactionState.ready.push(callback);
+      drainCommitted(transactionState);
     },
     // Idempotent: shutdown and test teardown may both close; node:sqlite throws on a double raw close.
     close() {
@@ -94,12 +113,14 @@ function wrap(raw: DatabaseSync): Database {
   };
 }
 
-function runTransaction(raw: DatabaseSync, state: { depth: number }, fn: () => void): void {
+function runTransaction(raw: DatabaseSync, state: TransactionState, fn: () => void): void {
   assertActiveTransaction(raw, state.depth);
   const parentDepth = state.depth;
   const savepoint = `taki_nested_${parentDepth}`;
   raw.exec(parentDepth === 0 ? "BEGIN" : `SAVEPOINT ${savepoint}`);
   state.depth = parentDepth + 1;
+  const callbacks: Array<() => void> = [];
+  state.frames.push(callbacks);
   try {
     fn();
     assertActiveTransaction(raw, state.depth);
@@ -114,7 +135,29 @@ function runTransaction(raw: DatabaseSync, state: { depth: number }, fn: () => v
     throw error;
   } finally {
     state.depth = parentDepth;
+    state.frames.pop();
   }
+  const parent = state.frames.at(-1);
+  if (parent) parent.push(...callbacks);
+  else {
+    state.ready.push(...callbacks);
+    drainCommitted(state);
+  }
+}
+
+function drainCommitted(state: TransactionState): void {
+  if (state.draining) return;
+  state.draining = true;
+  try {
+    while (state.ready.length > 0) {
+      const callback = state.ready.shift();
+      try { callback?.(); }
+      catch (error) {
+        try { state.onError?.(error); }
+        catch { /* A diagnostic sink cannot prevent later committed cleanup. */ }
+      }
+    }
+  } finally { state.draining = false; }
 }
 
 function assertActiveTransaction(raw: DatabaseSync, depth: number): void {

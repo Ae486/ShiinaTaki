@@ -1,0 +1,92 @@
+{
+  "kind": "baseline-prealignment-gate",
+  "currentSession": "01a1cf67-4df4-7c42-af1c-51885631386c",
+  "authority": {
+    "sourceSession": "01a1ca07-857f-7ec2-9adb-11c14229c334",
+    "userItems": [
+      1466,
+      1480,
+      2091
+    ],
+    "scope": "Owner approved G engineering integration, verification, baseline commit and gated alignment of both original branches; main owns Hindsight and T4 owns other mechanisms",
+    "excluded": [
+      "push/release",
+      "real-profile rollout",
+      "paid provider invocation",
+      "original task archive"
+    ]
+  },
+  "originals": [
+    {
+      "root": "H:/TakiAgent",
+      "head": "9b98794a673efb561682b9fd451fe1da2db95086",
+      "clean": true,
+      "localPackageSource": "H:\\QQMessageMonitor\\packages\\management-client\\artifacts\\qqmm-management-client-0.1.0.tgz",
+      "nativeCrate": "H:\\QQMessageMonitor\\packages\\management-native"
+    },
+    {
+      "root": "H:/TakiAgent-worktrees/t4",
+      "head": "63faf8119be1747b685aacf43529d754626ab35c",
+      "clean": true,
+      "localPackageSource": "H:\\QQMessageMonitor\\packages\\management-client\\artifacts\\qqmm-management-client-0.1.0.tgz",
+      "nativeCrate": "H:\\QQMessageMonitor\\packages\\management-native"
+    }
+  ],
+  "originalMatchingWatchers": [],
+  "unrelatedRepositoryCwdHelpers": [
+    {
+      "pid": 14564,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 22572,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 23040,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 25012,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 27824,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 30152,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 35712,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 36048,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    },
+    {
+      "pid": 36656,
+      "name": "node.exe",
+      "cwd": "H:/TakiAgent"
+    }
+  ],
+  "qqClientSha256": "6da16e0723e3f01f44c2fee1e5835f6b90433b7075f16c22978271eb96c3ed78",
+  "connectedJourney": "24/24 pass; read-back matched Taki and Native current manifests",
+  "currentProcessE2E": "26/26 pass; 10 files; 184.358 seconds",
+  "qualityReview": "final-continuation-check-20261112.md; current lint and all seven typechecks passed",
+  "sourceChangeDuringContinuation": "No production source changes; task documents, E2E evidence and selective artifact ignore rules only",
+  "openProductFollowups": [
+    "HS-START-01 embedding preparation after startup",
+    "HS-START-02 reranking preparation after startup"
+  ]
+}

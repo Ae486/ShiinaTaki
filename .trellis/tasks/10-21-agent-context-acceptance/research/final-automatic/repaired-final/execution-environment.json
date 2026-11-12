@@ -1,0 +1,16 @@
+{
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "node": "v24.18.0",
+  "pnpm": "10.22.0",
+  "strippedEnvironmentPrefixes": [
+    "TAKI_",
+    "OPENAI_",
+    "ANTHROPIC_",
+    "RUN_LIVE_"
+  ],
+  "testTemp": "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-agent-context-acceptance\\research\\final-automatic\\repaired-final\\tmp",
+  "wholeSuiteMaxWorkers": 4,
+  "e2eMaxWorkers": 2,
+  "liveEnabled": false,
+  "credentialsFileLoaded": false
+}

@@ -42,6 +42,9 @@ impl KeyringStore {
         Self { service: KEYRING_SERVICE.to_string() }
     }
 
+    /// Explicit isolated Shell profiles cannot reuse the daily profile's Node token or attachment credential.
+    pub(crate) fn with_service(service: String) -> Self { Self { service } }
+
     fn entry(&self, key: &str) -> Result<keyring_core::Entry, String> {
         #[cfg(windows)]
         {
@@ -61,6 +64,15 @@ impl Default for KeyringStore {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Preserve the literal-path namespace used by existing explicit Shell profiles (T4-D83).
+pub(crate) fn shell_store(data_dir: &std::path::Path) -> KeyringStore {
+    if std::env::var_os("TAKI_SHELL_DATA_DIR").is_some() {
+        use sha2::{Digest, Sha256};
+        let suffix = format!("{:x}", Sha256::digest(data_dir.to_string_lossy().as_bytes()));
+        KeyringStore::with_service(format!("TakiAgent-{}", &suffix[..24]))
+    } else { KeyringStore::new() }
 }
 
 impl SecretStore for KeyringStore {

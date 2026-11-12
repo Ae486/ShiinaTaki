@@ -1,5 +1,10 @@
 # Hindsight usable delivery execution plan
 
+2026-11-12 integration continuation: the active engineering work is in `G:/TakiAgent-integration`, under
+`11-11-main-t4-baseline-integration`. Read [the Hindsight change handoff](../08-09-hindsight-memory-provider/research/main-t4-integration-20261112.md)
+and [startup configuration blocker ledger](../08-09-hindsight-memory-provider/research/startup-configuration-blockers.md)
+before resuming a specialized Hindsight increment. Original-data and parent acceptance remain open.
+
 **Current plan (2026-11-07):** follow [the phase plan](research/phase-plan-20261107.md): complete path and
 blocking performance first, then optimization with simplification, user experience and stress testing.
 The sections below remain the requirement and evidence history.

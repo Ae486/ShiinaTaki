@@ -7,6 +7,7 @@ import { openDatabase, type Database } from "./sqlite.ts";
 import { createTimelineRepo, type TimelineRepo } from "./timeline-repo.ts";
 import { cleanupLegacyMigrationFixtures, createLegacyMigrationFixture } from "../memory/legacy-migration/legacy-migration-fixture.ts";
 import { createHindsightActivationHarness, type HindsightActivationHarness } from "../memory/hindsight-activation/hindsight-activation-fixture.ts";
+import { canonicalLocalMemoryFlushPort } from "../memory/memory-flush-port.ts";
 
 const NOW = "2026-09-22T00:00:00.000Z";
 const opened: Database[] = []; const harnesses: HindsightActivationHarness[] = [];
@@ -154,7 +155,7 @@ describe("trusted primary group custody", () => {
     expect(group(fixture.db, finalized.groupId).assigned_epoch_id).toBe(next);
   });
 
-  it("makes source flush refuse retirement of unfinalized members below the baseline and assistant-only gaps", () => {
+  it("makes source flush refuse retirement of unfinalized members below the baseline and assistant-only gaps", async () => {
     const { db, timeline } = memory();
     const custody = custodyOf(db);
     const early = custody.begin({ characterId: "taki", repo: timeline });
@@ -164,12 +165,31 @@ describe("trusted primary group custody", () => {
     const sources = createCanonicalIngestionSourceRepo(db);
     sources.initializeBaseline({ epochId: epoch, characterId: "taki", throughSeq: first.seq, now: NOW });
     const scope = { epochId: epoch, characterId: "taki" };
-    expect(() => sources.advanceCoverage({ ...scope, throughSeq: first.seq, now: NOW })).toThrow("MEMORY_INGESTION_INCOMPLETE");
+    const flush = canonicalLocalMemoryFlushPort({ async run(input) {
+      const range = { ...scope, throughSeq: input.throughSeq };
+      return { writes: 0, throughSeq: sources.advanceCoverage({ ...range, now: NOW }),
+        eligibilityStartSeq: sources.eligibilityStartSeq(scope), hasApplicableSource: sources.hasApplicableSource(range),
+        coverageGap: sources.coverageGap(range) };
+    } });
+    const request = { characterId: "taki", fromSeq: 0, throughSeq: first.seq, operationId: "retirement" };
+    expect(sources.coverageGap({ ...scope, throughSeq: first.seq }))
+      .toEqual({ seq: first.seq, code: "MEMORY_INGESTION_INCOMPLETE" });
+    expect(sources.advanceCoverage({ ...scope, throughSeq: first.seq, now: NOW })).toBe(0);
+    expect(await flush.prepareRetirement(request)).toEqual({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" });
+    expect(sources.cursor(scope)).toBe(0);
     early.finalize();
     expect(sources.advanceCoverage({ ...scope, throughSeq: first.seq, now: NOW })).toBe(0);
+    expect(sources.coverageGap({ ...scope, throughSeq: first.seq })).toBeUndefined();
+    expect(await flush.prepareRetirement(request))
+      .toEqual({ status: "not_required", reason: "before_canonical_ingestion_eligibility" });
     const gap = custody.begin({ characterId: "taki", repo: timeline });
     const only = gap.repo.append(assistant("assistant-only member"));
-    expect(() => sources.advanceCoverage({ ...scope, throughSeq: only.seq, now: NOW })).toThrow("MEMORY_INGESTION_INCOMPLETE");
+    expect(sources.coverageGap({ ...scope, throughSeq: only.seq }))
+      .toEqual({ seq: only.seq, code: "MEMORY_INGESTION_INCOMPLETE" });
+    expect(sources.advanceCoverage({ ...scope, throughSeq: only.seq, now: NOW })).toBe(0);
+    expect(await flush.prepareRetirement({ ...request, throughSeq: only.seq }))
+      .toEqual({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" });
+    expect(sources.cursor(scope)).toBe(0);
   });
 
   it("assigns new groups to the Hindsight epoch after COMMIT and routes their witnesses by the assigned epoch's provider", async () => {

@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Locked renderer stack, load/teardown order, generation-split param API, BanG Dream model facts"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Size/responsibility guard, perf and test rules for apps/desktop"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Where things live; the lab is the sanctioned exception (isolated under apps/desktop/lab/)"}
+{"file": "docs/TTS-INTERFACE.md", "reason": "Reserved OpenAI-compatible local-TTS wire contract the second speech provider implements"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/mouth-pose-capability-2026-09-08.md", "reason": "Check visible geometry rather than parameter readback alone, and preserve static-pose versus speech-timing boundaries"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/reference-mouth-control-2026-09-08.md", "reason": "Reference mouth-shape labels do not establish local rig mappings or Chinese phoneme alignment"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/realtime-mouth-provider-options-2026-09-09.md", "reason": "Verify provider cues belong to the exact audio stream and check C2/C3/MotionSync integration boundaries"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/realtime-mouth-design-2026-09-09.md", "reason": "Review source/clock/profile/writer separation, lifecycle fallbacks and acceptance metrics"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/phase4-fish-live-findings-2026-09-10.md", "reason": "Live Fish proxy synthesis and native Cubism 3 playback evidence; no perceptual acceptance claim"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/phase4-fish-mouth-automation-2026-09-10.md", "reason": "Automated real-Fish native/custom C2/C3 mouth metrics, static pose evidence and optimization gates"}
+{"file": ".trellis/tasks/09-03-avatar-presentation-lab/research/panel-integration-findings-2026-09-18.md", "reason": "Do not relabel automated ranges as perceptual acceptance; native-tuned is the comparison baseline"}

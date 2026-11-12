@@ -1,175 +1,230 @@
 /**
- * INPUT:  the engine's TidyEngineView + auto-state/events repos + the UtilitySlot + MemoryConfig + a Logger
- * OUTPUT: createTidyPass(deps) -> { maybeRun, runNow }; TidyRunOutcome; TIDY_SYSTEM_PROMPT
- * POS:    core/memory — the model-led store maintenance pass (rc Part A clean-room): write-count trigger + operator
- *         invocation over ONE execute path; deterministic report in, tool edits out; a clean store costs ZERO model
- *         calls; the watermark advances only on success. Runs serially on the utility slot (T5-R11)
+ * INPUT:  scoped views, checkpoints, Utility Slot, admission-captured configuration and operation progress
+ * OUTPUT: finite backlog draining with fresh queued batches, independent limits and truthful recovery
+ * POS:    core/memory — maintenance producer; durable operation ownership remains separate
  */
-import { ToolLoopAgent, hasToolCall, isStepCount } from "ai";
-import type { MemoryTidyDefects } from "@taki/shared";
+import type { MemoryTidyOutcome, MemoryTidyProgress, MemoryTidyFailureReason } from "@taki/shared";
 import type { MemoryConfig } from "../config/memory-config.ts";
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { MemoryEventsRepo } from "../db/memory-events-repo.ts";
+import type { MemoryTidyReviewRepo } from "../db/memory-tidy-review-repo.ts";
 import type { TidyEngineView } from "./memory-engine.ts";
-import { buildTidyReport } from "./tidy-report.ts";
-import { FINISH_TOOL_NAME } from "./tidy-tools.ts";
-import type { UtilitySlot, UtilityUsage } from "./utility-slot.ts";
-import { MEMORY_VOICE_RULE } from "./write-convention.ts";
+import { buildTidyReport, type TidyReport } from "./tidy-report.ts";
+import { runTidyAgent, type TidyBatchRun } from "./tidy-agent-runner.ts";
+import { automaticTidyAllowed, canonicalTidyReport, checkpointTidyBatch, tidyMemoryKey } from "./tidy-coverage.ts";
+import { captureUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
+import { estimateToolSchemaTokens } from "../agents/request-measurement.ts";
+import { estimateTokens } from "./token-estimator.ts";
+import { TIDY_INPUT_FRAMING, TIDY_SYSTEM_PROMPT } from "./tidy-prompt.ts";
 
-/**
- * The six refinement principles, clean-room from Letta's voice-sleeptime prompt (rc A4) — the best single source of
- * adaptable wording for "rewrite memory well".
- */
-const REFINEMENT_PRINCIPLES = [
-  "- Integrate: merge new facts into what you already hold instead of piling up fragments.",
-  "- Update: remove or correct outdated or contradictory information — never leave two conflicting versions live.",
-  "- Organize: group related information logically (preferences, background, ongoing goals, interaction styles).",
-  "- Infer sensibly: light, well-supported inferences are welcome, but do not invent unsupported details.",
-  "- Be precise: absolute dates and times only, never relative words.",
-  "- Be comprehensive and concise: aim for high recall and readability.",
-].join("\n");
-
-// Tool-granularity doctrine (rc A5 docstring discipline) — the cheapest defence against a runaway whole-block rewrite.
-const GRANULARITY_RULE =
-  "Use the precise row tools (memory_reinforce / memory_archive_supersede / memory_set_disclosure / memory_refile) " +
-  "for narrow edits to single memories. Use block_rethink only for sweeping changes to a whole block — never for a " +
-  "small fix.";
-
-// The two standing block duties: R14 (index = recall triggers, never bulk content) + M-D4 (user-model = patterns and
-// well-supported inferences; the Identity Card wins every conflict — R7; recurring feedback consolidates into a rule).
-const BLOCK_DUTIES =
-  "Two blocks are yours to keep current with block_rethink:\n" +
-  "- memory-index: a compact per-layer index of what your memory HOLDS — recall triggers worded the way the question " +
-  "would be asked ('用户问自己叫什么'), never the memories themselves. Do not index what is already always visible.\n" +
-  "- user-model: your consolidated understanding of the user — patterns you have noticed and well-supported " +
-  "inferences, dated absolutely. The user's own card wins every conflict, so never restate or contradict it. When " +
-  "the same kind of feedback keeps recurring, consolidate it into one standing rule here.";
-
-// Batch-2 F6: the chat prompt trims an over-budget block and its rendered used number can still sit over the limit.
-const BUDGET_EXPECTATION =
-  "A block's size may read over its budget — over-budget blocks are trimmed in the live prompt, not broken. Treat " +
-  "the numbers as a signal to consolidate, not an emergency.";
-
-// The do-nothing permission (rc A4, verbatim in spirit) — the R15 write gate's maintenance twin.
-const FINISH_RULE =
-  `If there are no meaningful updates to make, call ${FINISH_TOOL_NAME} immediately. Not every observation warrants ` +
-  `an edit — be selective, but also aim for high recall. When your edits are done, call ${FINISH_TOOL_NAME}.`;
-
-export const TIDY_SYSTEM_PROMPT = [
-  "You run in the background, organizing and maintaining your own long-term memory between conversations. Your goal " +
-    "is a store that is comprehensive, readable, and up to date.",
-  REFINEMENT_PRINCIPLES,
-  MEMORY_VOICE_RULE,
-  GRANULARITY_RULE,
-  BLOCK_DUTIES,
-  BUDGET_EXPECTATION,
-  FINISH_RULE,
-].join("\n\n");
-
-// rc A2: the input arrives as a role:user message wrapped in a system-reminder — she is NOT the primary agent, no
-// user is present, and machine self-narration is already forbidden by the base prompt, so: tool calls only.
-const INPUT_FRAMING =
-  "You are reviewing your own memory store after the conversations already happened — you are NOT the primary " +
-  "agent, and no user is present. The report below was computed mechanically from the store: its facts are facts, " +
-  "but every flagged candidate is a question for your judgment, never a verdict. Produce no user-visible text — " +
-  `respond only with tool calls, and end by calling ${FINISH_TOOL_NAME}.`;
-
-export interface TidyRunOutcome {
-  /** "failed" never crosses the WS surface — the method throws on it (the protocol result is clean|ran). */
-  status: "clean" | "ran" | "failed";
-  defects: MemoryTidyDefects;
-  edits: number;
-  steps: number;
-  usage: UtilityUsage;
-}
-
+export { TIDY_SYSTEM_PROMPT } from "./tidy-prompt.ts";
+export type TidyRunOutcome = MemoryTidyOutcome;
+export interface TidyRunOptions { onProgress?: (progress: MemoryTidyProgress) => void; }
 export interface TidyPass {
-  /** The write-count trigger (auto-memory seam): below threshold = return silently, not even the report SQL. */
   maybeRun(characterId: string): Promise<void>;
-  /** The operator path (WS memory.tidy): bypasses the count check; a clean store still costs zero model calls. */
-  runNow(characterId: string): Promise<TidyRunOutcome>;
+  runNow(characterId: string, options?: TidyRunOptions): Promise<TidyRunOutcome>;
 }
-
-/** Narrow logger seam (auto-memory precedent); counts/ids only — memory content never enters a log line. */
-export interface TidyLogger {
-  info(obj: object, msg: string): void;
-  warn(obj: object, msg: string): void;
-}
-
+export interface TidyLogger { info(obj: object, msg: string): void; warn(obj: object, msg: string): void; }
 export interface TidyPassDeps {
-  view: TidyEngineView;
-  autoState: MemoryAutoRepo;
-  events: MemoryEventsRepo;
-  slot: UtilitySlot;
-  config: MemoryConfig;
-  logger: TidyLogger;
+  view: TidyEngineView; autoState: MemoryAutoRepo; events: MemoryEventsRepo;
+  slot: UtilitySlot; config: MemoryConfig; logger: TidyLogger;
+  captureConfig?: () => MemoryConfig;
+  checkpoints?: MemoryTidyReviewRepo;
+  requestRun?: (characterId: string) => Promise<void>;
+  /** Override the per-batch deadline for transport tests. Production uses the configured batch timeout. */
+  timeoutMs?: number;
 }
+interface Execution {
+  progress: MemoryTidyProgress; recovered: number; skipped: number; report: TidyReport; outcome?: TidyBatchRun;
+  startedAt: string; pending?: Set<string>;
+  captured: boolean;
+  admissionFailed?: boolean;
+}
+interface Work { characterId: string; options: TidyRunOptions; state: Execution; signal: AbortSignal; }
 
-export function createTidyPass(deps: TidyPassDeps): TidyPass {
-  return {
-    async maybeRun(characterId) {
-      const { lastTidyAt } = deps.autoState.get(characterId);
-      if (deps.view.countSince(characterId, lastTidyAt) < deps.config.tidyWriteThreshold) return;
-      await execute(deps, characterId, lastTidyAt);
-    },
-    runNow(characterId) {
-      const { lastTidyAt } = deps.autoState.get(characterId);
-      return execute(deps, characterId, lastTidyAt);
-    },
+export function createTidyPass(deps: TidyPassDeps): TidyPass & { stop(): Promise<void> } {
+  const inflight = new Map<string, Promise<TidyRunOutcome>>();
+  const shutdown = new AbortController();
+  const runNow: TidyPass["runNow"] = (characterId, options = {}) => {
+    if (shutdown.signal.aborted) return Promise.reject(new Error("MEMORY_PROVIDER_UNAVAILABLE"));
+    const old = inflight.get(characterId);
+    if (old) return old;
+    let config: MemoryConfig;
+    try { config = { ...(deps.captureConfig?.() ?? deps.config) }; }
+    catch (error) { return Promise.reject(error); }
+    const task = execute({ ...deps, config }, { characterId, options, signal: shutdown.signal });
+    inflight.set(characterId, task);
+    void task.finally(() => { if (inflight.get(characterId) === task) inflight.delete(characterId); }).catch(() => undefined);
+    return task;
   };
+  return { runNow, async stop() {
+    shutdown.abort();
+    await Promise.allSettled([...inflight.values()]);
+  }, async maybeRun(characterId) {
+    if (shutdown.signal.aborted) return;
+    if (deps.slot.available?.() === false) return;
+    if (!shouldRun({ ...deps, config: deps.captureConfig?.() ?? deps.config }, characterId)) return;
+    if (deps.requestRun) await deps.requestRun(characterId);
+    else await runNow(characterId);
+  } };
 }
 
-async function execute(deps: TidyPassDeps, characterId: string, lastTidyAt: string | null): Promise<TidyRunOutcome> {
-  // The watermark advances to the pass's START time: a write landing while the model runs stays > mark and is
-  // picked up by the next trigger instead of being skipped forever.
-  const startedAt = new Date().toISOString();
-  const startedMs = Date.now();
-  const view = deps.view.captureReview?.(characterId) ?? deps.view;
-  const report = buildTidyReport(view, { characterId, lastTidyAt }, deps.config);
-  if (!report.hasWork) {
-    // rc §135: clean store + no new writes = ZERO model calls — return before any agent exists.
-    return { status: "clean", defects: report.defects, edits: 0, steps: 0, usage: deps.slot.usage() };
+function shouldRun(deps: TidyPassDeps, characterId: string): boolean {
+  if (!deps.checkpoints) return deps.view.countSince(characterId, deps.autoState.get(characterId).lastTidyAt) >= deps.config.tidyWriteThreshold;
+  const coverage = deps.checkpoints.read(characterId);
+  const report = reportFor(deps, deps.view, { characterId });
+  return report.hasWork && automaticTidyAllowed({ coverage, candidates: report.remaining ?? 0, threshold: deps.config.tidyWriteThreshold });
+}
+
+function reportFor(deps: TidyPassDeps, view: TidyEngineView, input: {
+  characterId: string; candidateKeys?: Set<string>; reportTokenBudget?: number;
+}): TidyReport {
+  const { characterId } = input;
+  const lastTidyAt = deps.autoState.get(characterId).lastTidyAt;
+  return deps.checkpoints
+    ? canonicalTidyReport({ view, ...input, lastTidyAt, config: deps.config, coverage: deps.checkpoints.read(characterId) })
+    : buildTidyReport(view, { characterId, lastTidyAt }, deps.config);
+}
+
+async function execute(deps: TidyPassDeps, input: Omit<Work, "state">): Promise<TidyRunOutcome> {
+  const { characterId, options, signal } = input;
+  // This cheap clean check admits no snapshot: non-clean work is recaptured when its queued task starts.
+  let preview: TidyReport;
+  try { preview = reportFor(deps, deps.view, { characterId }); }
+  catch (error) {
+    // Legacy has no later captured read: retain its explicit retirement/error contract before admission.
+    if (!deps.view.captureReview) throw error;
+    preview = { defects: { missingDisclosure: 0, overBudget: 0, stale: 0, nearDuplicate: 0, misfiled: 0 },
+      hasWork: true, newWrites: 0, text: "" };
   }
-
-  const progress = { edits: 0, steps: 0 };
-  const result = await deps.slot.run("tidy", () => runAgent({ ...deps, view }, { characterId, reportText: report.text, progress }));
-  if (result === undefined || view.reviewHealthy?.() === false) {
-    // The slot already warned with the error; the watermark stays put so the next trigger retries (auto-memory's
-    // failure convention).
-    deps.logger.warn({ characterId }, "tidy pass failed; watermark not advanced");
-    return { status: "failed", defects: report.defects, edits: progress.edits, steps: progress.steps, usage: deps.slot.usage() };
+  if (!preview.hasWork) {
+    deps.checkpoints?.succeeded(characterId);
+    return { status: "clean", defects: preview.defects, edits: 0, steps: 0, usage: deps.slot.usage(), remaining: 0, reviewed: 0, nextAction: "none" };
   }
-
-  const edits = countEdits(result.toolResults);
-  const steps = result.steps.length;
-  deps.autoState.setTidy(characterId, startedAt);
-  deps.events.record({ kind: "tidy", characterId, count: edits });
-  deps.logger.info(
-    { characterId, defects: report.defects, edits, steps, durationMs: Date.now() - startedMs },
-    "tidy pass completed",
-  );
-  return { status: "ran", defects: report.defects, edits, steps, usage: deps.slot.usage() };
+  deps = { ...deps, slot: captureUtilitySlot(deps.slot) };
+  const state: Execution = { progress: { edits: 0, steps: 0, reviewed: 0, remaining: null }, recovered: 0, skipped: 0, report: preview,
+    startedAt: "", captured: false };
+  const work: Work = { characterId, options, state, signal };
+  do {
+    state.outcome = undefined;
+    const settled = await deps.slot.run("tidy", async () => {
+      if (signal.aborted) return undefined;
+      try { await runQueued(deps, work); }
+      catch (error) {
+        if (!state.captured) { state.admissionFailed = true; throw error; }
+        state.outcome = emptyFailure("execution-failed");
+      }
+      // Slot accounting owns each dispatched batch, never the cumulative operation totals.
+      return { usage: state.outcome ? state.outcome.usage : { inputTokens: 0, outputTokens: 0 } };
+    });
+    if (state.admissionFailed) throw new Error("MEMORY_PROVIDER_UNAVAILABLE");
+    if (!settled) state.outcome = emptyFailure("unfinished");
+    if (state.outcome?.reason || !deps.checkpoints) break;
+  } while (state.pending && state.pending.size > 0);
+  return settle(deps, work);
 }
 
-function runAgent(deps: TidyPassDeps, input: { characterId: string; reportText: string; progress: { edits: number; steps: number } }) {
-  const agent = new ToolLoopAgent({
-    model: deps.slot.model,
-    instructions: TIDY_SYSTEM_PROMPT,
-    tools: deps.view.createTools(input.characterId),
-    // Count completed steps as they happen: a later failed CAS or model call does not undo earlier durable edits.
-    onStepEnd: (step) => { input.progress.steps += 1; input.progress.edits += countEdits(step.toolResults); },
-    // Structural exit (rc A2): the finish tool ends the loop, the step cap ends a runaway. Names verified against
-    // the installed ai@7.0.17 types (hasToolCall + isStepCount; stopWhen takes an array).
-    stopWhen: [hasToolCall(FINISH_TOOL_NAME), isStepCount(deps.config.tidyMaxSteps)],
-  });
-  return agent.generate({ prompt: `<system-reminder>\n${INPUT_FRAMING}\n</system-reminder>\n\n${input.reportText}` });
+async function runQueued(deps: TidyPassDeps, work: Work): Promise<void> {
+  const { state, characterId, options } = work;
+  const deadline = Date.now() + (deps.timeoutMs ?? deps.config.tidyBatchTimeoutMs);
+  if (!state.startedAt) state.startedAt = new Date().toISOString();
+  const baseEdits = state.progress.edits;
+  const baseSteps = state.progress.steps;
+  const view = deps.view.captureReview?.(characterId, { modelReferences: true,
+    intentionsDefaultDays: deps.config.intentionsDefaultDays,
+    onEdits: (edits) => options.onProgress?.({ ...state.progress, edits: baseEdits + edits }) }) ?? deps.view;
+  const initial = reportFor(deps, view, { characterId });
+  const continuing = state.pending !== undefined;
+  if (deps.checkpoints) {
+    const eligible = new Set(initial.candidateIds?.map(tidyMemoryKey));
+    state.pending = state.pending === undefined ? eligible : new Set([...state.pending].filter((key) => eligible.has(key)));
+  }
+  state.captured = true;
+  state.progress.remaining = initial.remaining ?? null;
+  options.onProgress?.({ ...state.progress });
+  // Departed or externally reviewed identities cannot keep this operation alive through new Block changes.
+  if (continuing && state.pending?.size === 0) return;
+  const tools = view.createTools(characterId);
+  const overhead = estimateTokens(TIDY_SYSTEM_PROMPT + `\n<system-reminder>\n${TIDY_INPUT_FRAMING}\n</system-reminder>\n\n`)
+    + await estimateToolSchemaTokens(tools, Object.keys(tools)) + 16;
+  const report = reportFor(deps, view, { characterId, candidateKeys: state.pending,
+    reportTokenBudget: deps.config.tidyInputTokens - overhead });
+  if (state.progress.steps === 0) state.report = report;
+  if (!report.hasWork) { state.pending?.clear(); return; }
+  if (report.inputTooLarge) { state.outcome = emptyFailure("input-too-large"); return; }
+  deps.checkpoints?.begin(characterId);
+  view.setVisibleReferences?.(report.reviewedIds ?? view.listActive(characterId).map((row) => row.id));
+  const batch = await runTidyAgent({ view, characterId, report: report.text, model: deps.slot.model, logger: deps.logger,
+    tools, signal: work.signal, maxSteps: deps.config.tidyMaxSteps, totalMs: Math.max(1, deadline - Date.now()),
+    onStep: (steps, edits) => {
+      state.progress = { ...state.progress, steps: baseSteps + steps, edits: baseEdits + edits };
+      options.onProgress?.({ ...state.progress });
+    } });
+  state.outcome = batch;
+  state.progress.edits = baseEdits + batch.edits;
+  state.progress.steps = baseSteps + batch.steps;
+  state.recovered += batch.recoveredIssues;
+  state.skipped += batch.skippedIssues;
+  if (batch.reason || !deps.checkpoints) return;
+  completeBatch(deps, work, { view, report });
+  for (const id of report.reviewedIds ?? []) state.pending?.delete(tidyMemoryKey(id));
 }
 
-// Successful MUTATING tool results only: finish is a no-op terminal, and a refused/failed op is not an edit.
-function countEdits(toolResults: Array<{ toolName: string; output: unknown }>): number {
-  return toolResults.filter((entry) => entry.toolName !== FINISH_TOOL_NAME && isOkResult(entry.output)).length;
+function completeBatch(deps: TidyPassDeps, work: Work, input: { view: TidyEngineView; report: TidyReport }): void {
+  const { state, characterId, options } = work;
+  const { view, report } = input;
+  const reviewed = state.progress.reviewed + (report.reviewedIds?.length ?? 0);
+  checkpointTidyBatch({ repo: deps.checkpoints!, view, characterId, shown: report.reviewedIds ?? [], at: new Date().toISOString(),
+    onCommitted: () => {
+      const remaining = reportFor(deps, deps.view, { characterId }).remaining ?? 0;
+      options.onProgress?.({ ...state.progress, reviewed, remaining });
+    } });
+  state.progress = { ...state.progress, reviewed, remaining: reportFor(deps, deps.view, { characterId }).remaining ?? 0 };
+  deps.checkpoints!.continued(characterId);
 }
 
-function isOkResult(output: unknown): boolean {
-  return typeof output === "object" && output !== null && "ok" in output && output.ok === true;
+function settle(deps: TidyPassDeps, work: Work): TidyRunOutcome {
+  const { state, characterId } = work;
+  const reason = state.outcome?.reason;
+  const extra = deps.checkpoints ? { reviewed: state.progress.reviewed,
+    ...(state.progress.remaining === null ? {} : { remaining: state.progress.remaining }) } : {};
+  if (reason) {
+    let retryAt: string | null = null;
+    let nextAction: NonNullable<TidyRunOutcome["nextAction"]> = reason === "unfinished" ? "continue" : "retry";
+    if (deps.checkpoints && reason !== "unfinished") {
+      try {
+        const retry = deps.checkpoints.failed(characterId, new Date().toISOString());
+        retryAt = retry.retryAt;
+        if (retry.failures > 0 && retry.retryAt === null) nextAction = "manual-retry";
+      }
+      catch { /* Authority retirement cannot write retry metadata into a retired provider. */ }
+    }
+    const outcome: TidyRunOutcome = { status: state.progress.edits > 0 ? "partial" : "failed", defects: state.report.defects,
+      edits: state.progress.edits, steps: state.progress.steps, usage: deps.slot.usage(), reason,
+      issues: state.outcome?.issues ?? [], issueCount: state.outcome?.issueCount ?? 0, recoveredIssues: state.recovered,
+      skippedIssues: state.skipped,
+      ...extra, nextAction: reason === "input-too-large" ? "check-settings" : nextAction, retryAt };
+    safeLog(deps.logger, "warn", { characterId, reason, edits: outcome.edits, steps: outcome.steps, issues: outcome.issues, issueCount: outcome.issueCount });
+    return outcome;
+  }
+  const pending = deps.checkpoints && reportFor(deps, deps.view, { characterId }).hasWork;
+  if (pending) deps.checkpoints?.continued(characterId);
+  else deps.checkpoints?.succeeded(characterId);
+  const status = state.progress.steps === 0 ? "clean" : "ran";
+  if (status === "ran") {
+    deps.autoState.setTidy(characterId, state.startedAt);
+    deps.events.record({ kind: "tidy", characterId, count: state.progress.edits });
+  }
+  safeLog(deps.logger, "info", { characterId, edits: state.progress.edits, steps: state.progress.steps });
+  return { status, defects: state.report.defects, edits: state.progress.edits, steps: state.progress.steps, usage: deps.slot.usage(),
+    ...extra, recoveredIssues: state.recovered, skippedIssues: state.skipped, nextAction: pending ? "continue" : "none", retryAt: null };
+}
+
+function emptyFailure(reason: MemoryTidyFailureReason): TidyBatchRun {
+  return { edits: 0, steps: 0, issues: [], issueCount: 0, recoveredIssues: 0, skippedIssues: 0, reason };
+}
+
+function safeLog(logger: TidyLogger, level: "info" | "warn", details: object): void {
+  try { logger[level](details, level === "info" ? "tidy pass completed" : "tidy pass failed; watermark not advanced"); }
+  catch { /* Optional diagnostics do not govern completion or induce another model call. */ }
 }

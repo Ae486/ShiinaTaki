@@ -10,6 +10,9 @@ export const ErrorCodeSchema = z.enum([
   // Auth/dispatch failures (ADR 0004): ride error.data.code on a JSON_RPC_APP_ERROR response.
   "PAIRING_REQUIRED",
   "AUTH_FAILED",
+  "LOCAL_AUTH_REQUIRED",
+  "LOCAL_AUTH_UNAVAILABLE",
+  "LOCAL_AUTH_FAILED",
   "NOT_AUTHENTICATED",
   "ALREADY_CONNECTED",
   "FORBIDDEN",
@@ -42,5 +45,7 @@ export const ErrorCodeSchema = z.enum([
   // Tool execution outcomes are structured model-readable failures, not JSON-RPC envelope codes.
   "GOVERNANCE_DENIED",
   "APPROVAL_REQUIRED",
+  // A presentation tool whose Avatar Command the Pet UI's engine refused (reason rides beside it); normal, never retried.
+  "AVATAR_REJECTED",
 ]);
 export type ErrorCode = z.infer<typeof ErrorCodeSchema>;

@@ -1,0 +1,63 @@
+warning: linker stdout: 正在创建库 G:\TakiAgent-integration\apps\desktop\src-tauri\target\debug\deps\taki_desktop_lib.dll.lib 和对象 G:\TakiAgent-integration\apps\desktop\src-tauri\target\debug\deps\taki_desktop_lib.dll.exp
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `taki-desktop` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized] target(s) in 35.58s
+        Info Looking up installed tauri packages to check mismatched versions...
+        Warn The bundle identifier "cc.shiinataki.app" set in `"tauri.conf.json" identifier` ends with `.app`. This is not recommended because it conflicts with the application bundle extension on macOS.
+     Running beforeBuildCommand `pnpm build`
+
+> @taki/desktop@0.0.0 build G:\TakiAgent-integration\apps\desktop
+> vite build
+
+vite v8.1.3 building client environment for production...
+[2Ktransforming...<script src="/vendor/live2d/live2dcubismcore.min.js"> in "/pet.html" can't be bundled without type="module" attribute
+<script src="/vendor/live2d/live2d.min.js"> in "/pet.html" can't be bundled without type="module" attribute
+✓ 1763 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   0.56 kB │ gzip:   0.31 kB
+dist/home.html                                    0.98 kB │ gzip:   0.49 kB
+dist/pet.html                                     1.99 kB │ gzip:   0.81 kB
+dist/assets/home-B1beSu8r.css                    29.83 kB │ gzip:   5.87 kB
+dist/assets/styles-BolyEvyp.css                  55.54 kB │ gzip:  10.51 kB
+dist/assets/webworkerAll-Cr7XbsDB.js              0.05 kB │ gzip:   0.06 kB
+dist/assets/init-Be_d6Hio.js                      0.11 kB │ gzip:   0.10 kB
+dist/assets/browserAll-B8KqbNJ9.js                0.22 kB │ gzip:   0.16 kB
+dist/assets/rolldown-runtime-QTnfLwEv.js          0.69 kB │ gzip:   0.42 kB
+dist/assets/use-committed-exposure-CZE7bQip.js    1.18 kB │ gzip:   0.70 kB
+dist/assets/main-BSHx7i4r.js                      1.55 kB │ gzip:   0.83 kB
+dist/assets/canvasUtils-NYDebSyR.js               6.01 kB │ gzip:   2.02 kB
+dist/assets/GpuStencilModesToPixi-dwvgL6gZ.js    10.55 kB │ gzip:   2.80 kB
+dist/assets/lib-CGX3gxIB.js                      26.64 kB │ gzip:   7.08 kB
+dist/assets/GCManagedHash-Bhl_KYCc.js            26.70 kB │ gzip:   9.33 kB
+dist/assets/Filter-Bl0i_YIN.js                   38.74 kB │ gzip:  11.02 kB
+dist/assets/RenderTargetSystem-DvK9k3uK.js       51.75 kB │ gzip:  14.54 kB
+dist/assets/Shader-CjXiywt1.js                   62.51 kB │ gzip:  20.78 kB
+dist/assets/markdown-view-7jJGRhDT.js           154.94 kB │ gzip:  46.25 kB
+dist/assets/styles-BTRX_LWm.js                  193.62 kB │ gzip:  61.14 kB
+dist/assets/use-surface-presence-Au2C5_Hx.js    518.93 kB │ gzip: 142.33 kB
+dist/assets/home-qSOcIXtn.js                    633.82 kB │ gzip: 186.43 kB
+dist/assets/pet-2hHe0rx2.js                     637.92 kB │ gzip: 174.22 kB
+
+✓ built in 1.10s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+   Compiling tauri v2.11.5
+   Compiling tauri-macros v2.6.3
+   Compiling tauri-plugin-fs v2.5.1
+   Compiling tauri-plugin-opener v2.5.4
+   Compiling tauri-plugin-dialog v2.7.1
+   Compiling tauri-plugin-window-state v2.4.1
+   Compiling taki-desktop v0.0.0 (G:\TakiAgent-integration\apps\desktop\src-tauri)
+warning: linker stdout: 正在创建库 G:\TakiAgent-integration\apps\desktop\src-tauri\target\debug\deps\taki_desktop_lib.dll.lib 和对象 G:\TakiAgent-integration\apps\desktop\src-tauri\target\debug\deps\taki_desktop_lib.dll.exp
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `taki-desktop` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized] target(s) in 1m 00s
+       Built application at: G:\TakiAgent-integration\apps\desktop\src-tauri\target\debug\taki-desktop.exe

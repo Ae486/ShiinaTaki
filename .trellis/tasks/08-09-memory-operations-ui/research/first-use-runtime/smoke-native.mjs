@@ -188,7 +188,7 @@ export function spawnNative({ root, pgPort, port, apiKey, realModels }) {
     TAKI_REAL_OBSERVATIONS: realModels.observationFile, TAKI_REAL_ADMISSION_STOP: realModels.admissionStopFile,
   });
   const launcher = realModels ? fileURLToPath(new URL("./real-model-native-launcher.py", import.meta.url)) : LAUNCHER;
-  const child = spawn(PYTHON, [launcher], { cwd: root, env, stdio: ["ignore", out, out], windowsHide: true });
+  const child = spawn(PYTHON, ["-B", launcher], { cwd: root, env, stdio: ["ignore", out, out], windowsHide: true });
   closeSync(out);
   const native = { child, port, log, egressLog, stopFile, pid: child.pid, exit: null };
   child.once("exit", (code, signal) => { native.exit = { code, signal }; });

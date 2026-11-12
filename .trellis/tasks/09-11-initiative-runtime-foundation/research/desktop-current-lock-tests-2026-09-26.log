@@ -1,0 +1,13 @@
+
+> @taki/desktop@0.0.0 test H:\TakiAgent-worktrees\t4\apps\desktop
+> vitest run --passWithNoTests "--maxWorkers=4"
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop
+
+
+ Test Files  178 passed (178)
+      Tests  1067 passed (1067)
+   Start at  19:35:27
+   Duration  43.05s (transform 18.87s, setup 0ms, import 79.31s, tests 10.07s, environment 29ms)
+

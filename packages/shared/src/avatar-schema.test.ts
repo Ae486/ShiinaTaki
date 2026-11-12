@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   AVATAR_METHODS,
   AvatarCommandSchema,
+  AvatarOutcomeParamsSchema,
+  AvatarOutcomeResultSchema,
+  AvatarOutcomeSchema,
+  AvatarRejectReasonSchema,
   AvatarReportParamsSchema,
   AvatarReportResultSchema,
   AvatarSubscribeParamsSchema,
@@ -9,11 +13,12 @@ import {
 } from "./avatar-schema.ts";
 
 describe("AVATAR_METHODS", () => {
-  it("exposes the three avatar method names", () => {
+  it("exposes the four avatar method names", () => {
     expect(AVATAR_METHODS).toEqual({
       subscribe: "avatar.subscribe",
       report: "avatar.report",
       command: "avatar.command",
+      outcome: "avatar.outcome",
     });
   });
 });
@@ -62,20 +67,50 @@ describe("AvatarReportParamsSchema", () => {
 
 describe("AvatarCommandSchema", () => {
   it("parses an expression command without motion knobs", () => {
-    const command = { characterId: "taki", kind: "expression", name: "shame01" };
+    const command = { characterId: "taki", commandId: "cmd-1", kind: "expression", name: "shame01" };
     expect(AvatarCommandSchema.parse(command)).toEqual(command);
   });
 
   it("parses a motion command carrying priority + loop", () => {
-    const command = { characterId: "taki", kind: "motion", name: "angry01", priority: "force", loop: false };
+    const command = { characterId: "taki", commandId: "cmd-2", kind: "motion", name: "angry01", priority: "force", loop: false };
     expect(AvatarCommandSchema.parse(command)).toEqual(command);
   });
 
+  it("requires a non-empty Core-generated commandId", () => {
+    expect(AvatarCommandSchema.safeParse({ characterId: "taki", kind: "expression", name: "x" }).success).toBe(false);
+    expect(AvatarCommandSchema.safeParse({ characterId: "taki", commandId: "", kind: "expression", name: "x" }).success).toBe(false);
+  });
+
   it("rejects an unknown kind, an empty name, and an unknown priority", () => {
-    expect(AvatarCommandSchema.safeParse({ characterId: "taki", kind: "wave", name: "x" }).success).toBe(false);
-    expect(AvatarCommandSchema.safeParse({ characterId: "taki", kind: "motion", name: "" }).success).toBe(false);
-    expect(
-      AvatarCommandSchema.safeParse({ characterId: "taki", kind: "motion", name: "x", priority: "urgent" }).success,
-    ).toBe(false);
+    const base = { characterId: "taki", commandId: "cmd" };
+    expect(AvatarCommandSchema.safeParse({ ...base, kind: "wave", name: "x" }).success).toBe(false);
+    expect(AvatarCommandSchema.safeParse({ ...base, kind: "motion", name: "" }).success).toBe(false);
+    expect(AvatarCommandSchema.safeParse({ ...base, kind: "motion", name: "x", priority: "urgent" }).success).toBe(false);
+  });
+});
+
+describe("avatar outcome schemas", () => {
+  it("enumerates the five Presentation Outcomes and five reject reasons", () => {
+    expect(AvatarOutcomeSchema.options).toEqual(["applied", "rejected", "superseded", "not_rendered", "unknown"]);
+    expect(AvatarRejectReasonSchema.options).toEqual(["motion_busy", "speaking", "already_active", "unknown_name", "unavailable"]);
+  });
+
+  it("accepts an applied report and a rejected report with a reason", () => {
+    const applied = { characterId: "taki", commandId: "cmd", outcome: "applied" };
+    expect(AvatarOutcomeParamsSchema.parse(applied)).toEqual(applied);
+    const rejected = { characterId: "taki", commandId: "cmd", outcome: "rejected", reason: "motion_busy" };
+    expect(AvatarOutcomeParamsSchema.parse(rejected)).toEqual(rejected);
+  });
+
+  it("refuses the Core-derived outcomes and unknown reasons on the wire", () => {
+    const base = { characterId: "taki", commandId: "cmd" };
+    expect(AvatarOutcomeParamsSchema.safeParse({ ...base, outcome: "not_rendered" }).success).toBe(false);
+    expect(AvatarOutcomeParamsSchema.safeParse({ ...base, outcome: "unknown" }).success).toBe(false);
+    expect(AvatarOutcomeParamsSchema.safeParse({ ...base, outcome: "rejected", reason: "tired" }).success).toBe(false);
+    expect(AvatarOutcomeParamsSchema.safeParse({ ...base, commandId: "", outcome: "applied" }).success).toBe(false);
+  });
+
+  it("round-trips the ok result", () => {
+    expect(AvatarOutcomeResultSchema.parse({ status: "ok" })).toEqual({ status: "ok" });
   });
 });

@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "Home registry opens private conversation with distinct queued and consumed receipts",
+    "held same-child refresh keeps draft and transcript nodes with immediately disabled actions"
+  ],
+  "artifacts": "H:\\TakiAgent-worktrees\\t4\\.trellis\\tasks\\10-21-agent-delegation-runtime\\research\\s7-recovery\\native\\2026-10-23T01-44-49-385Z",
+  "directory": "G:\\Temp\\taki-s7-subagent-native-E5FMvh",
+  "scope": "Actual WebView2 and production Home/WsClient/controller. Shared-validated scripted child RPC state; no model, real Runtime execution or owner acceptance.",
+  "calls": [
+    {
+      "method": "subagent.stop",
+      "params": {
+        "characterId": "taki",
+        "target": {
+          "subagentId": "00000000-0000-4000-8000-000000000001",
+          "workInputId": "00000000-0000-4000-8000-000000000011",
+          "expectedControlVersion": 2,
+          "expectedRunId": "run-child-a"
+        }
+      }
+    }
+  ],
+  "guiOutput": ""
+}

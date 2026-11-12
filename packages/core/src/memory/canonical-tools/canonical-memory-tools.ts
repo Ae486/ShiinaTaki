@@ -1,17 +1,16 @@
 /**
- * INPUT:  async MemoryCoordinator, trusted scope-to-Bank router, and current layer registry
+ * INPUT:  async MemoryCoordinator, trusted Bank router, layer registry and optional captured retention policy
  * OUTPUT: capability-filtered Hindsight-aligned canonical ToolSet
  * POS:    core/memory/canonical-tools — marker-selected canonical runtime; never assembled beside legacy tools
  */
 import { randomUUID } from "node:crypto";
-import { HindsightMemoryMutationEnvelopeV1Schema, HindsightMemoryRecallEnvelopeV1Schema, MemoryErrorEnvelopeSchema, RecallEnvelopeSchema, hindsightApplicationWireJson,
-  type EditableMemoryPatch, type MemoryProviderCapabilities, type MemoryResult, type RecallResult, type TakiMemoryPolicyProjection } from "@taki/shared";
+import { HindsightMemoryRecallEnvelopeV1Schema, MemoryErrorEnvelopeSchema, RecallEnvelopeSchema,
+  type EditableMemoryPatch, type MemoryProviderCapabilities, type MemoryResult, type RecallResult } from "@taki/shared";
 import type { ToolSet } from "ai";
 import type { MemoryAuthorityEpoch } from "@taki/shared";
-import { DEFAULT_INTENTIONS_DAYS } from "../../config/memory-config.ts";
-import { fenceUntrusted } from "../../agents/untrusted-fence.ts";
+import { canonicalLayerRetention } from "../canonical-layer-policy.ts";
 import type { MemoryCoordinator } from "../memory-coordinator.ts";
-import { WRITABLE_LAYER_IDS, getLayer, type MemoryLayerDefinition } from "../layer-registry.ts";
+import { WRITABLE_LAYER_IDS, getLayer } from "../layer-registry.ts";
 import { createInvalidateMemoryTool, type InvalidateMemoryToolInput } from "./invalidate-memory-tool.ts";
 import { createRecallTool } from "./recall-tool.ts";
 import { createReflectTool } from "./reflect-tool.ts";
@@ -22,15 +21,17 @@ import { attachMemoryEffectMetadata, deriveMemoryBranchRequestId } from "./memor
 import { effectExecutionContext } from "../../governance/governed-tool.ts";
 import { freezeMemoryCapabilities, memoryCapabilityDigest, sameStableMemoryCapabilities } from "../memory-capability-snapshot.ts";
 import { recallMatchesNamespace, selectMemoryRecall } from "../memory-recall-selection.ts";
+import { memoryToolModelOutput } from "./memory-tool-model-output.ts";
 
 export interface MemoryToolBankRouter { globalBankId(): string; characterBankId(): string; characterId(): string; }
-interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRouter; authority?: MemoryAuthorityEpoch; capabilityDigest?: string }
+interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRouter; authority?: MemoryAuthorityEpoch; capabilityDigest?: string; intentionsDefaultDays?: number }
 interface CapturedToolDeps extends ToolDeps { capabilities: MemoryProviderCapabilities }
 type RecallToolInput = { query: string; scope: "global" | "character" | "both"; limit: number; maxTokens: number };
 interface RecallBranch { scope: "global" | "character"; bankId: string; result: MemoryResult<RecallResult> }
 
 export async function createCanonicalMemoryTools(deps: ToolDeps): Promise<ToolSet> {
-  return createCanonicalMemoryToolsWithCapabilities(deps, await deps.coordinator.capabilities());
+  const captured = { ...deps };
+  return createCanonicalMemoryToolsWithCapabilities(captured, await captured.coordinator.capabilities());
 }
 
 export function createCanonicalMemoryToolsWithCapabilities(input: ToolDeps, capabilities: Awaited<ReturnType<MemoryCoordinator["capabilities"]>>): ToolSet {
@@ -46,25 +47,26 @@ export function createCanonicalMemoryToolsWithCapabilities(input: ToolDeps, capa
   if (caps.retain) tools.retain = memoryTool(createRetainTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, options) => safely(() => retain(deps, input, options))), "retain", deps, caps);
   if (caps.recall) {
     const recallTool = createRecallTool((input, options) => safely(() => recall(deps, input, options)));
-    recallTool.toModelOutput = ({ output }: { output: unknown }) => ({ type: "text", value: fencedRecallOutput(output, caps.providerId === "hindsight") });
     tools.recall = memoryTool(recallTool, "recall", deps, caps);
   }
   if (caps.edit) tools.update_memory = memoryTool(createUpdateMemoryTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, options) => safely(() => updateMemory(deps, input, options))), "edit", deps, caps);
   if (caps.invalidate) tools.invalidate_memory = memoryTool(createInvalidateMemoryTool((input, options) => safely(() => invalidateMemory(deps, input, options))), "invalidate", deps, caps);
   if (caps.restore) tools.restore_memory = memoryTool(createRestoreMemoryTool((input, options) => safely(() => restoreMemory(deps, input, options))), "restore", deps, caps);
   if (caps.reflect) tools.reflect = memoryTool(createReflectTool((input, options) => safely(() => deps.coordinator.reflect({ bankId: bank(deps.router, input.scope), query: input.query, budget: input.budget, maxTokens: input.maxTokens }, callOptions(deps, options)))), "reflect", deps, caps);
-  if (caps.providerId === "hindsight") {
-    // The SDK's default JSON output is recursively serialized by the model client and Timeline. Keep the
-    // complete execute result, but supply those consumers a text model view. A mutation receipt does not authorize
-    // recall of its target: hidden/mood-gated/invalidated records and Pending patches must not re-enter the prompt.
-    for (const [name, value] of Object.entries(tools)) {
-      if (name !== "recall") value.toModelOutput = ({ output }: { output: unknown }) => ({ type: "text" as const,
-        value: fencedHindsightOutput(name === "reflect" || name === "retain" ? output : hindsightMutationModelView(output),
-          `explicit-memory-${name}`) });
-    }
+  for (const [operation, value] of Object.entries(tools)) {
+    value.toModelOutput = ({ input, output }: { input: unknown; output: unknown }) => memoryToolModelOutput(output, {
+      operation, hindsight: caps.providerId === "hindsight", routes: { global, character }, scope: modelInputScope(input),
+    });
   }
   for (const value of Object.values(tools)) Object.freeze(value);
   return Object.freeze(tools);
+}
+
+function modelInputScope(input: unknown) {
+  if (typeof input !== "object" || input === null) return undefined;
+  if ("scope" in input && (input.scope === "global" || input.scope === "character" || input.scope === "both")) return input.scope;
+  const ownership = "layer" in input && typeof input.layer === "string" ? getLayer(input.layer)?.ownership : undefined;
+  return ownership === "per-character" ? "character" : ownership;
 }
 
 async function retain(deps: ToolDeps, input: { content: string; layer: string; context: string | null }, options?: unknown) {
@@ -74,7 +76,8 @@ async function retain(deps: ToolDeps, input: { content: string; layer: string; c
     bankId, content: input.content, context: input.context, timestamp: null, tags: [], entities: [], metadata: {},
     observationScopes: null, documentId: null, strategy: null, updateMode: "replace",
     provenance: { actor: "agent", origin: "explicit-agent", characterId: deps.router.characterId(), timelineFromSeq: null, timelineToSeq: null, capturedAt, sanitized: true, sourceRef: null },
-    policy: { layerId: input.layer, importance: 5, visibility: layer.recallPolicy, disclosure: null, origin: "self", emotionalWeight: null, retention: retentionFor(layer, capturedAt), policyVersion: 1 },
+    policy: { layerId: input.layer, importance: 5, visibility: layer.recallPolicy, disclosure: null, origin: "self", emotionalWeight: null,
+      retention: canonicalLayerRetention({ layer, at: capturedAt, intentionsDefaultDays: deps.intentionsDefaultDays }), policyVersion: 1 },
   }, callOptions(deps, options));
 }
 
@@ -134,58 +137,12 @@ function recallAuthorityFailure(result: MemoryResult<RecallResult>): MemoryResul
       retryable: false, nextAction: "check-provider" } });
 }
 
-function fencedRecallOutput(output: unknown, hindsight: boolean): string {
-  // Execute retains the canonical structured result; only model-facing text is escaped and fenced.
-  // The D77 serializer preserves deep values that JSON.stringify cannot traverse. Invalid data throws;
-  // emitting an empty string would falsely present a successful but missing memory result.
-  if (hindsight) return fencedHindsightOutput(output, "explicit-memory-recall");
-  const json = JSON.stringify(output) ?? "";
-  const content = json.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-  return fenceUntrusted({ source: "explicit-memory-recall", content });
-}
-
-function fencedHindsightOutput(output: unknown, source: string): string {
-  const content = hindsightApplicationWireJson(output).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-  return fenceUntrusted({ source, content });
-}
-
-function hindsightMutationModelView(output: unknown): unknown {
-  const parsed = HindsightMemoryMutationEnvelopeV1Schema.safeParse(output);
-  if (!parsed.success) {
-    // The outer governance wrapper can return a bounded denial instead of a MemoryResult. Preserve its
-    // real error disposition without serializing arbitrary additional fields from an unvalidated result.
-    if (typeof output === "object" && output !== null && "ok" in output && output.ok === false
-      && "code" in output && typeof output.code === "string" && "message" in output && typeof output.message === "string") {
-      return { ok: false, code: output.code, message: output.message };
-    }
-    return fallbackEnvelope();
-  }
-  const result = parsed.data;
-  if (!result.ok) return result;
-  const data = result.data;
-  if (data.outcome === "pending") {
-    const { pending } = data; const request = pending.operation.request;
-    return { ...result, data: { outcome: data.outcome, operationId: pending.operationId, phase: pending.phase,
-      kind: request.kind, bankId: pending.bankId, memoryId: request.memoryId, expectedRevision: request.expectedRevision } };
-  }
-  const unit = data.record?.unit;
-  return { ...result, data: { outcome: data.outcome,
-    ...(unit ? { bankId: unit.bankId, memoryId: unit.memoryId, revision: unit.revision, state: unit.state } : {}) } };
-}
-
 function updateMemory(deps: ToolDeps, input: UpdateMemoryToolInput & { patch: EditableMemoryPatch }, options?: unknown) {
   return deps.coordinator.mutate({ kind: "edit", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, patch: input.patch }, callOptions(deps, options));
 }
 function invalidateMemory(deps: ToolDeps, input: InvalidateMemoryToolInput, options?: unknown) { return deps.coordinator.mutate({ kind: "invalidate", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, reason: input.reason }, callOptions(deps, options)); }
 function restoreMemory(deps: ToolDeps, input: RestoreMemoryToolInput, options?: unknown) { return deps.coordinator.mutate({ kind: "restore", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision }, callOptions(deps, options)); }
 function bank(router: MemoryToolBankRouter, scope: "global" | "character"): string { return scope === "global" ? router.globalBankId() : router.characterBankId(); }
-
-function retentionFor(layer: MemoryLayerDefinition, capturedAt: string): TakiMemoryPolicyProjection["retention"] {
-  if (layer.retention === "permanent") return { kind: "permanent" };
-  if (layer.retention === "expiring") return { kind: "expiring", expiresAt: new Date(Date.parse(capturedAt) + DEFAULT_INTENTIONS_DAYS * 86_400_000).toISOString() };
-  if ("rollingDays" in layer.retention) return { kind: "rolling-window", days: layer.retention.rollingDays };
-  return { kind: "importance-decay", archiveBelowImportance: layer.retention.archiveBelowImportance, afterDays: layer.retention.afterDays };
-}
 
 function combineVectorState(left: RecallResult["vectorState"], right: RecallResult["vectorState"]): RecallResult["vectorState"] {
   if (left === "degraded" || right === "degraded") return "degraded";

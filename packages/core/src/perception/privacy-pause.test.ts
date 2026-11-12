@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createPrivacyPause, type PrivacyPauseState, type PrivacyPauseStore } from "./privacy-pause.ts";
 
 function pauseAt(start: number) {
@@ -83,6 +83,43 @@ describe("createPrivacyPause", () => {
 // A pause is a withdrawal of consent. If it evaporated on a restart, a crash/upgrade/reboot would silently resume
 // observation while the card still reported "not paused" — the one failure mode this state must not have.
 describe("createPrivacyPause persistence", () => {
+  it("observes successful changed writes after persistence, never hydration or duplicate values", () => {
+    const { store, saved } = fakeStore({ paused: true, until: null });
+    const observed: Array<{ live: PrivacyPauseState; persisted: PrivacyPauseState | undefined }> = [];
+    const onChange = vi.fn(() => { observed.push({ live: pause.state(), persisted: saved() }); });
+    const pause = createPrivacyPause({ now: () => 1_000, store, onChange });
+    expect(onChange).not.toHaveBeenCalled();
+    pause.pauseUntilResumed();
+    expect(onChange).not.toHaveBeenCalled();
+    pause.pauseUntil(5_000);
+    pause.resume();
+    expect(observed).toEqual([
+      { live: { paused: true, until: 5_000 }, persisted: { paused: true, until: 5_000 } },
+      { live: { paused: false, until: null }, persisted: { paused: false, until: null } },
+    ]);
+    expect(onChange.mock.calls).toEqual([[], []]);
+  });
+
+  it("failed persistence neither changes the live pause nor publishes a successful transition", () => {
+    const onChange = vi.fn();
+    const pause = createPrivacyPause({
+      now: () => 1_000,
+      store: { load: () => ({ paused: true, until: null }), save: () => { throw new Error("write failed"); } },
+      onChange,
+    });
+    expect(() => pause.resume()).toThrow("write failed");
+    expect(pause.state()).toEqual({ paused: true, until: null });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("a failed observer cannot turn a committed pause operation into a write failure", () => {
+    const { store, saved } = fakeStore();
+    const pause = createPrivacyPause({ store, onChange: () => { throw new Error("observer retired"); } });
+    expect(() => pause.pauseUntilResumed()).not.toThrow();
+    expect(saved()).toEqual({ paused: true, until: null });
+    expect(pause.state()).toEqual(saved());
+  });
+
   it("survives a restart: an indefinite pause is still paused after re-construction", () => {
     const { store, saved } = fakeStore();
     createPrivacyPause({ now: () => 1000, store }).pauseUntilResumed();

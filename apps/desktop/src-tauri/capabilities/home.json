@@ -3,5 +3,5 @@
   "identifier": "home",
   "description": "Home window: left menu + pages (chat / settings / operations / perception / costume). Talks to the Core over its own operator WS (browser WebSocket, web-platform file input); events only for home:navigate + pet:costume-result inbound and pet:costume-switch + pet:costume-cancel outbound",
   "windows": ["home"],
-  "permissions": ["core:event:default"]
+  "permissions": ["core:event:default", "core:window:allow-is-visible", "core:window:allow-is-minimized", "core:window:allow-is-focused", "allow-browser-attachment-setup", "allow-browser-attachment-pair", "allow-qqmm-open", "allow-qqmm-request", "allow-qqmm-close"]
 }

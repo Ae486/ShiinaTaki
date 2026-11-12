@@ -68,7 +68,7 @@ describe("real Core/Host Effect lifecycle", () => {
         awaitApprovalRequest(operator),
         drive.then((result) => { throw new Error(`drive settled before Approval: ${JSON.stringify(result)}`); }),
       ]);
-      expect(prompt.presentation.capabilityLabel).toBe("exec");
+      expect(prompt.presentation.capabilityLabel).toBe("执行命令");
       const waitingDb = new DatabaseSync(`${stack.coreDataDir}/taki.db`, { readOnly: true });
       let waitingEffectId = "";
       let waitingRunId: string;

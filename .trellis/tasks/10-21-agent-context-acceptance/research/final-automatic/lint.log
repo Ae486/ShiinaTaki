@@ -1,0 +1,11 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent-worktrees\t4
+> eslint .
+
+
+H:\TakiAgent-worktrees\t4\packages\core\src\agents\turn-registry.ts
+  20:8  error  Function 'createTurnRegistry' has too many lines (65). Maximum allowed is 50  max-lines-per-function
+
+✖ 1 problem (1 error, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

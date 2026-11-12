@@ -23,7 +23,8 @@ describe("memory-unavailable Hindsight Run", () => {
     expect(BASE_SYSTEM_PROMPT).toContain("Memory (non-negotiable):");
     expect(MEMORY_UNAVAILABLE_SYSTEM_PROMPT).not.toContain("Memory (non-negotiable):");
     expect(MEMORY_UNAVAILABLE_SYSTEM_PROMPT).not.toContain("memory_search");
-    expect(MEMORY_UNAVAILABLE_SYSTEM_PROMPT).toContain("only an actual tool-result is.");
+    expect(MEMORY_UNAVAILABLE_SYSTEM_PROMPT).toContain("without a matching tool-result supporting that outcome");
+    expect(MEMORY_UNAVAILABLE_SYSTEM_PROMPT).toContain("Errors, refusals and unknowns are not success");
     expect(MEMORY_UNAVAILABLE_SYSTEM_PROMPT.length).toBeGreaterThan(BASE_SYSTEM_PROMPT.length / 2);
   });
 });

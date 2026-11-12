@@ -10,7 +10,11 @@ import { canonicalJson, canonicalPayloadHash } from "../memory/legacy-migration/
 import { HindsightIngestionCoverageSchema, type HindsightIngestionBatch, type HindsightIngestionCoverage,
   type HindsightIngestionScope } from "../memory/hindsight/hindsight-ingestion-contract.ts";
 
-export interface HindsightIngestionDurabilityDeps extends HindsightIngestionBankReader { pending: Pick<PendingMemoryRepo, "get"> }
+export interface HindsightIngestionDurabilityDeps extends HindsightIngestionBankReader {
+  pending: Pick<PendingMemoryRepo, "get">;
+  captureBinding?(input: { batch: HindsightIngestionBatch; receipt: HindsightIngestionCoverage }):
+    Pick<HindsightIngestionCoverage, "sourceBinding" | "memoryBindings"> | undefined;
+}
 type BatchInput = HindsightIngestionScope & { batch: HindsightIngestionBatch };
 
 export function pendingHindsightSourceCoverage(deps: HindsightIngestionDurabilityDeps, input: BatchInput): HindsightIngestionCoverage | undefined {
@@ -42,9 +46,13 @@ export function captureHindsightSourceCoverage(deps: HindsightIngestionDurabilit
   if (!result?.ok || result.providerId !== "hindsight" || result.authorityEpochId !== input.epochId
     || result.requestId !== batch.requestId || result.data.status !== "completed"
     || !result.capabilities.retain || !result.capabilities.idempotentWrites
-    || result.data.documentId !== batch.request.documentId) throw new Error("MEMORY_INGESTION_RECEIPT_UNPROVEN");
-  return HindsightIngestionCoverageSchema.parse({ bankId: batch.bank.bankId, requestId: batch.requestId,
+    || result.data.documentId !== batch.request.documentId) {
+    if (durable) return durable;
+    throw new Error("MEMORY_INGESTION_RECEIPT_UNPROVEN");
+  }
+  const receipt = HindsightIngestionCoverageSchema.parse({ bankId: batch.bank.bankId, requestId: batch.requestId,
     status: "confirmed", evidence: { kind: "provider", result: result.data } });
+  return HindsightIngestionCoverageSchema.parse({ ...receipt, ...deps.captureBinding?.({ batch, receipt }) });
 }
 
 export function assertHindsightSourceCoverage(deps: HindsightIngestionDurabilityDeps,

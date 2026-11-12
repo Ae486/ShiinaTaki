@@ -1,0 +1,19 @@
+{
+  "id": "a2-self-report",
+  "stage": "initial-started",
+  "question": "我被裁员了，我的项目也停了。请简短确认你理解的是谁的事情。",
+  "summary": null,
+  "followup": "仅根据当前提供的对话记录，回顾一下：谁失业了、谁的项目停了？",
+  "sourceRows": [],
+  "finalReplay": [],
+  "utilityUsage": {
+    "calls": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "usageUnknown": 0
+  },
+  "usage": [],
+  "compaction": [],
+  "memoryFlush": "unexercised: no canonical witness callbacks installed; test-controlled flush seam",
+  "primaryWitnessCount": 0
+}

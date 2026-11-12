@@ -1,0 +1,15 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "--filter",
+    "@taki/e2e",
+    "exec",
+    "vitest",
+    "run",
+    "src/initiative-runtime.e2e.test.ts"
+  ],
+  "startedAt": "2026-09-21T11:11:59.812059+00:00",
+  "seconds": 53.547,
+  "exitCode": 0,
+  "log": "e2e-runtime-resumed-2026-09-21.log"
+}

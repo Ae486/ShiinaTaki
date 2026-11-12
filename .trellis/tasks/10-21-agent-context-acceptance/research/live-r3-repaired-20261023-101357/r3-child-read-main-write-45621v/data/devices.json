@@ -1,0 +1,11 @@
+{
+  "devices": [
+    {
+      "deviceId": "18da7f5d-4f46-4290-83ea-ecbe1c523d9a",
+      "deviceName": "Agent context acceptance",
+      "role": "operator",
+      "tokenHash": "Q/9lgU/KBuJebCg6eYODKvEQrjlbbIRAhyBBYdvuaG8=",
+      "pairedAt": "2026-10-23T02:14:05.932Z"
+    }
+  ]
+}

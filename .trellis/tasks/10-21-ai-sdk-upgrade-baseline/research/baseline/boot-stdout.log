@@ -1,0 +1,9 @@
+{"level":30,"time":1792588821955,"pid":31136,"hostname":"tianxuanji","mod":"db","applied":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55],"msg":"migrations applied"}
+{"level":30,"time":1792588821965,"pid":31136,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1792588821974,"pid":31136,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"locked","keySource":"none","msg":"secret catalog opened"}
+{"level":30,"time":1792588821987,"pid":31136,"hostname":"tianxuanji","mod":"memory","upserted":0,"deleted":0,"total":0,"invalid":[],"msg":"memory index reconciled from workspace"}
+{"level":30,"time":1792588821997,"pid":31136,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":40,"time":1792588821998,"pid":31136,"hostname":"tianxuanji","mod":"secrets","health":"locked","msg":"secret migration skipped: catalog not readable; plaintext source untouched"}
+{"level":30,"time":1792588821999,"pid":31136,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1792588822016,"pid":31136,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1792588822086,"pid":31136,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":3646,"msg":"ws server listening"}

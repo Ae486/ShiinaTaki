@@ -10,11 +10,11 @@ import {
 } from "./monitor-labels.ts";
 
 describe("monitor labels", () => {
-  it("maps known wire values to Chinese and falls back to the raw string for unknown values", () => {
+  it("maps known wire values to Chinese and keeps unknown system values out of visible copy", () => {
     expect(wireLabel("queued")).toBe("排队中");
     expect(wireLabel("deadline_exceeded")).toBe("超过截止时间");
     expect(wireLabel("tool")).toBe("工具");
-    expect(wireLabel("brand-new-wire-value")).toBe("brand-new-wire-value");
+    expect(wireLabel("brand-new-wire-value")).toBe("未知");
   });
 
   it("supplements wire values the shared map does not cover yet", () => {
@@ -35,9 +35,9 @@ describe("monitor labels", () => {
     expect(attemptGroupLabel(2)).toBe("尝试 2");
   });
 
-  it("maps connection kinds with a raw fallback", () => {
+  it("maps connection kinds with a Chinese fallback", () => {
     expect(connectionKindLabel("reconnecting")).toBe("重连中");
     expect(connectionKindLabel("connected")).toBe("已连接");
-    expect(connectionKindLabel("future-kind")).toBe("future-kind");
+    expect(connectionKindLabel("future-kind")).toBe("连接状态未知");
   });
 });

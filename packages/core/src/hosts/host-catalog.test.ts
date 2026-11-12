@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { HostCatalogPublishParams } from "@taki/shared";
 import { createHostCatalogStore } from "./host-catalog.ts";
 
@@ -23,6 +23,43 @@ function catalog(overrides: Partial<HostCatalogPublishParams> = {}): HostCatalog
 const provenance = { hostId: HOST, protocolVersion: 2, catalogSchemaVersion: 2, connectionGeneration: 1 };
 
 describe("HostCatalogStore", () => {
+  it("observes only accepted live sets and actual matching deletions after the new snapshot is visible", () => {
+    const observations: { targets: readonly string[]; generations: number[]; readiness: string[] }[] = [];
+    const store = createHostCatalogStore({ onChange: (targets) => {
+      observations.push({ targets: [...targets], generations: store.list().map((entry) => entry.connectionGeneration), readiness: store.list().map((entry) => entry.readiness) });
+    } });
+    store.publish(catalog(), provenance);
+    const captured = store.get(HOST)!;
+    store.publish(catalog({ catalogGeneration: 2, readiness: "unavailable" }), provenance);
+    store.publish(catalog({ catalogGeneration: 1 }), provenance);
+    store.publish(catalog({ hostId: "22222222-2222-4222-8222-222222222222" }), provenance);
+    store.publish(catalog({ connectionGeneration: 2 }), { ...provenance, connectionGeneration: 2 });
+    store.retire(HOST, 1);
+    store.retire("missing", 2);
+    expect(store.get(HOST)?.connectionGeneration).toBe(2);
+    store.retire(HOST, 2);
+    store.retire(HOST, 2);
+    expect(observations).toEqual([
+      { targets: ["extension-status"], generations: [1], readiness: ["ready"] },
+      { targets: ["extension-status"], generations: [1], readiness: ["unavailable"] },
+      { targets: ["extension-status"], generations: [2], readiness: ["ready"] },
+      { targets: ["extension-status"], generations: [], readiness: [] },
+    ]);
+    expect(captured.readiness).toBe("ready");
+    expect(Object.isFrozen(captured)).toBe(true);
+  });
+
+  it("keeps publication and retirement independent of observer failures and emits nothing for reads", () => {
+    const onChange = vi.fn(() => { throw new Error("observer failed"); });
+    const store = createHostCatalogStore({ onChange });
+    expect(store.publish(catalog(), provenance)).toEqual({ accepted: true });
+    store.get(HOST); store.list(); store.hostsForCapability("screenshot");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(() => store.retire(HOST, 1)).not.toThrow();
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(store.list()).toEqual([]);
+  });
+
   it("atomically publishes a complete routable snapshot", () => {
     const store = createHostCatalogStore();
     expect(store.publish(catalog(), provenance)).toEqual({ accepted: true });

@@ -1,42 +1,59 @@
 # shared/src/
+- governance-historical-v1.ts — frozen evidenced revision1 descriptors for durable Approval compatibility
+- governance-historical-v3.ts — frozen main revision3 descriptors for durable Approval compatibility
+- governance-registry-history.ts — exact current/evidenced historical registry resolver; unknown revisions stay unavailable
 - hindsight-deployment-schema.ts — strict C2a plan, current inject checkpoint, fixed registration and value-free original-resource status.
-- hindsight-custody-schema.ts — strict fixed-slot C1 prepare/invocation/result protocol and budgets; no values or deployment authority.; D108: finite C1 request/result, fixed slot selection and safe preparation status; no deployment evidence.
-- hindsight-installation-schema.ts — complete compiled artifact, external runtime/owner registration and separate Node enrollment/credential contracts.; D108: protected registration, compiled artifact manifests and separate Node enrollment credentials; platform adapters establish actual trust.
+- hindsight-custody-schema.ts — strict fixed-slot C1 prepare/invocation/result protocol, finite budgets and safe preparation status; no values or deployment evidence
+- hindsight-installation-schema.ts — complete compiled artifact/runtime/owner registration and separate Node enrollment/credential contracts; platform adapters establish actual trust
 - memory-transition-candidate-schema.ts — complete Local/native evidence, stable mappings and immutable candidate/common-baseline contracts
 - memory-transition-preparation-schema.ts — exact prepared delta/result and genuinely unused native scope inventory
 - memory-transition-source-schema.ts — explicit Source aliases, ordered version references, immutable upload attempts and current awaiting-source disposition evidence
 - hindsight-transition-source-schema.ts — separately negotiated executor-owned Source byte-upload wire contracts
+- model-capability-schema.ts — operator-only configured identity, optional maintained names/canonical links/provider logos/limits, nullable capability declarations and independent adapter support
+- cache-usage-schema.ts — summary-window cache counts, coverage and typed whole-snapshot operator subscriptions; no payloads or client-owned counters
+- run-work-schema.ts — bounded accepted-work transition contracts and strict v3 lifecycle events; no publication authority
+- prepared-publication-schema.ts — explicit finite/until-cancelled accepted-source/Class A scope, finite candidate freshness and reference-only publication/edit data; serialized scope is not a grant
+- co-watching-publication-schema.ts — isolated M51 accepted Co-Watching classification data for the business adapter; no public RPC or acceptance authority
+- interaction-pattern-schema.ts / interaction-pattern-protocol.ts — finite definitions, immutable reviews, strict lifecycle/CAS and data-free invalidations
+- initiative-wake-schema.ts — strict accepted finite wake-source envelopes and bounded deterministic same-Monitor policy facts
+- initiative-setup-schema.ts — explicit Skill/seed setup with actual config/source readiness
 - effect-lifecycle-schema.ts — closed provider-neutral effect current-state and authoritative aggregate/cache/reasoning usage contracts with replay/redaction bounds
 - harness-schema.ts — strict provider-neutral Trigger Request, Run/Attempt, immutable authority/capability snapshot, Receipt, and run.status contracts
-- observability-schema.ts — bounded monitor mode, real-field Run query, Chinese semantic trajectory, inspector, and live notification contracts
-- observability-presentation.ts — closed English-wire to Simplified-Chinese Monitor presentation mapper
+- observability-schema.ts — bounded Run queries, independent forward/tail/before cursors, exact machine-only correlation, captured names, typed semantic Inspector sections, and live notification contracts
+- observability-presentation.ts — English-wire to Chinese Monitor labels and omission-preserving usage/cache detail projection
 - scheduled-task-schema.ts — canonical durable schedule definitions and operator management protocol
-- index.ts — package public entry; named cross-package protocol exports, with D78 composition-only schemas kept in their defining modules; D108: public named protocol exports, including policy-review status
+- index.ts — sole package public entry; grouped named source-bearing re-exports preserve the complete main/T4 protocol, vocabulary and historical governance API without implementation logic
+- user-timezone-schema.ts — validated IANA User Timezone state, honest confirmation/source metadata and connection-bound operator read/update/report contracts
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
 - host-control-schema.ts — canonical Execution Host negotiation/catalog/control/cancel/settlement schemas, distinct DENIED vs APPROVAL_REQUIRED failures, exact acknowledgement union, and frozen method names
 - host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
-- connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
-- chat-schema.ts — CHAT_METHODS + chat.send { messageId, runId } acknowledgement, legacy/exact-run cancel, delta/complete/error schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
-- timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended/removed schemas (ADR 0005); parts = structured tool-call/result + image fidelity; removed = cancel-retract push
+- connect-schema.ts — role/handshake schemas, socket-bound local admission challenge/proof transcript, operator display echo and separate Host negotiation
+- chat-schema.ts — chat methods including ordered activity/read, accepted send identity, legacy cancellation/events, and in-flight image input
+- chat-activity-schema.ts — strict ordered language/tool events, real phase/outcome vocabulary, bounded recovery snapshots and incremental UTF-8 accounting
+- timeline-presentation-schema.ts — independently validated batch coverage and consistent canonical item references; corrupt references fall back without hiding history or losing handoff identity
+- timeline-schema.ts — canonical Timeline history, optional source/presentation metadata, trusted byte-free tool-result image refs, complete batch commits and compatible append/remove notifications
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
 - timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
 - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
-- avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command schemas (LLM-driven expression/motion push); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
+- avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command/outcome schemas (LLM-driven expression/motion push, Core-generated commandId, Pet-reported Presentation Outcome); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
 - character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror
 - approval-decision-schema.ts — canonical current/stored Approval binding revisions, fixed-order serializers, durable rows, safe labels, and list usability schemas
-- approval-schema.ts — strict canonical approval.request/respond/closed/list/revoke envelopes with bounded redacted presentation and explicit choices
+- approval-schema.ts — canonical Approval envelopes, optional complete-command marker, dual-unit chunk bounds and exact literal reconstruction
 - approval-api.ts — focused named public facade for canonical Approval schemas, serializers, and types
 - legacy-approval-schema.ts — compatibility-only LegacyApproval* MCP prompt schemas used by dormant Core and CLI code
 - permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures
 - governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
-- extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, and call-result schemas
-- governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
+- extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, optional exact MCP toolName disclosure, and call-result schemas
+- extension-change-schema.ts — strict operator-only aggregate subscription, unique closed change targets and process-local invalidation revision; no source content or Rust mirror
+- governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers, including distinct fixed Core delegation management, inspection and result cells
 - governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
 - governance-api.ts — focused named public facade for governance and permission exports
-- perception-schema.ts — PERCEPTION_METHODS + Privacy Pause state/set + activity-card schemas (current/recent/samplingStatus/pauseState) (T3b; panel UI at #26); operator-only, NO Rust mirror
+- governance-presentation.ts — exact-key Chinese capability/cell descriptions, including delegation and analysis query/Co-Watching controls, and posture/override labels; separate from authority and safe for unknown historical keys
+- tool-presentation.ts — fixed/MCP readable names including analysis, recommendation preparation and Co-Watching, bounded labels and frozen own-key snapshots; unknown routing keys stay unresolved
+- perception-schema.ts — strict operator Privacy Pause/card reads and writer plus opt-in subscribe/changed schemas; changes carry only a process-local invalidation revision, with no Rust mirror
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
@@ -50,26 +67,26 @@
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
 - memory-replica-request-schema.ts — durable exact claim and immutable success/failure/waiting evidence independent of latest Bank status
-- memory-replica-schedule-schema.ts — durable Bank configuration, fenced runs and accepted waiting with next action and preserved failure backoff
+- memory-replica-schedule-schema.ts — durable Bank configuration, fenced runs and exact terminal waiting/next-action history with retained failure backoff and truthful status
 - pending-memory-schema.ts — immutable write intents, legacy phases, versioned factual proof/dispatch state, and unconfirmed overlays
 - hindsight-native-result-schema.ts — tracked native commands, immutable paged full results, and compact G1 receipt contracts
 - hindsight-native-proof-encoding.ts — portable typed hash fields and UTF-8 serialization, independent of legacy local hashes
 - hindsight-journal-schema.ts — complete Hindsight transaction batches, per-change lineage, cursor windows, and unique object transitions
 - memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
 - hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts
+- run-event-schema.ts — versioned durable Run/Event contracts with exact model/invocation/context/governance association, captured tool names and real processing-start timing
 - hindsight-local-coverage-schema.ts — complete current Local manifest witnesses, bounded change comparisons and truthful cutover coverage status
 - hindsight-source-evidence-schema.ts — versioned typed source/unit evidence, representation gaps and exact native-object confirmation contracts
 - hindsight-current-capture-schema.ts — complete typed current Local state and an explicit disposition for every frozen witness
 - hindsight-current-canonical-schema.ts — existing Canonical constraints with lossless JSON validators for the new D78 adapter
 - hindsight-json-schema.ts — bounded own-key JSON validation preserving prototype-shaped keys as inert data
 - hindsight-current-state-schema.ts — mirrored D78 structured transfer, stable native object mappings and typed refusal contracts
-- hindsight-current-state-encoding.ts — separate tagged JSON/binary64 codec; validated scalar comparison preserves unsigned UTF-8 key ordering without repeated encoding allocations
+- hindsight-current-state-encoding.ts — separate tagged JSON/binary64 codec; validated scalar comparison preserves unsigned UTF-8 key ordering and cross-language integrity without repeated encoding allocations
 - hindsight-native-snapshot-schema.ts — strict original logical snapshot wire envelopes and bounded structured payload values
 - hindsight-current-evidence-schema.ts — immutable D78 preparation and validated current import evidence contracts
 - hindsight-cutover-verification-schema.ts — finite native requirement/input/action/model/certificate evidence and retained-snapshot binding
 - hindsight-current-status-schema.ts — versioned durable current-import/verification counts, independent of historical B2 counters
 - hindsight-current-invalidation-schema.ts — authenticated native drift observations, exact proof bindings and exclusion of transport uncertainty
-- run-event-schema.ts — versioned durable Run/Event contracts, including model/tool/context/governance observability facts
 - hindsight-application-artifact-schema.ts — typed application bodies, bindings, immutable CAS commands and historical receipts
 - hindsight-application-body-schema.ts — bounded multipart wire schemas with separate byte and semantic checksums
 - hindsight-application-content-schema.ts — the matching typed application body without treating arbitrary JSON as another protocol
@@ -83,7 +100,7 @@
 - hindsight-memory-consumer-schema.ts — versioned consumer validators that preserve supported JSON and all factual result references
 - hindsight-native-runtime-schema.ts — validated native fields, preserving omitted values, nulls, and typed JSON
 - memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
-- memory-operation-schema.ts — Core-minted durable operation and operator method contracts; terminal waiting requires exact replica.sync evidence and releases the operation family (NO Rust mirror)
+- memory-operation-schema.ts — complete Core-minted operation request/producer/result and operator method contracts; exact replica waiting evidence, Local Tidy/index arms and kind-bound dispatch ownership; no Rust mirror
 - memory-transition-schema.ts — strict transition directions, expected source/baseline identity, durable proof/receipt/result and explicit recovery contracts
 - memory-transition-template-schema.ts — optional versioned Core template/default/hold commitment and immutable W2 association with authenticated per-Bank backup observations.
 - memory-transition-queue-schema.ts — normalized queued write custody, bounded caller identity, fresh target request identity and separate queued/unknown/factual outcomes
@@ -96,7 +113,7 @@
 - memory-local-onboarding-schema.ts — operator preview/discovery, actionable runtime/custody status, exclusion and invalidation contracts
 - memory-hindsight-operation-schema.ts — hindsight.activate command (new/resume/recover), Core-minted producer identity + per-Bank progress, outcome and the closed activation error-code set
 - memory-activation-schema.ts — strict activation status/actions, including installed-runtime recovery only for matching terminal receipt/epoch/transaction and incomplete producer preparation
-- memory-authority-status-schema.ts — strict composite status with current authority identity, separate authority_invalid/evidence_invalid diagnostics, replica/Pending and lifecycle evidence; D108: composite authority/runtime/setup/replica/operations and optional policy-review contract
+- memory-authority-status-schema.ts — strict composite current-authority/runtime/setup/replica/Pending/lifecycle/operation/policy-review status, distinct authority_invalid/evidence_invalid diagnostics and truthful unknown derived freshness
 - memory-hindsight-lifecycle-schema.ts — Hindsight Bank readiness (ready/syncing/provisioning/failed/not_provisioned) and the memory.authority.status `hindsight` section: live connection config/drift/admission time, per-scope readiness, Core-derived actions, the nullable `backup` block; bank.provision / connection.revalidate request, producer (Core-stamped operator/automatic origin), result and closed lifecycle error codes
 - hindsight-backup-schema.ts — explicit v1/v2 backup aggregates, closed pair failures, the `hindsight.backup` status block, backup.capture/admit/verify and emergency evidence
 - hindsight-backup-v1-schema.ts — unchanged strict historical request/proof/archive/manifest contracts, common custody and version-specific staged metadata bases
@@ -115,9 +132,38 @@
 - memory-template-operation-schema.ts — exact preview references, original-plan recovery, producer phases, truthful partial/unbound outcomes and closed errors
 - memory-template-schema.ts — operator preview/detail/status methods with bounded desired/applied/bound state, timestamped rollout child records and recovery availability
 - memory-template-derived-schema.ts — exact single-child observation request and observed-at, stale or unavailable result contracts
-- hindsight-custody-schema.ts — strict fixed-slot C1 prepare/invocation/result protocol and budgets; no values or deployment authority.
-- hindsight-installation-schema.ts — complete compiled artifact, external runtime/owner registration and separate Node enrollment/credential contracts.
 - host-input-encoding.ts — boot-free canonical input serialization shared by Core, installed Host and Rust parity fixtures.
 - hindsight-candidate-domain-schema.ts — strict candidate request, original dispatch, restore receipt and durable evidence contracts; exported through the candidate-domain subpath.
 - memory-replica-rpc-schema.ts — complete per-Bank schedule configuration and thin configuration invalidation; no durable operation or scheduler-run push.
 - memory-policy-review-schema.ts — single zod review-status definition with unknown counts and durable catch-up notice identity
+- initiative-schema.ts — bounded selected context, object-root tool input, strict decisions, delivery state/source sidecars and policy diagnostics
+- initiative-event-schema.ts — strict v2 initiative/delivery business facts; existing v1 event decoder and legacy Monitor projections remain supported
+- presence-schema.ts — bounded authenticated source reports, input age, refusal vocabulary and independent aggregate presence facts
+- timeline-presentation-report-schema.ts — ordinary committed Timeline exposure by source and sequence, without reading acknowledgements
+- initiative-intention-schema.ts — bounded automatic plan/source/lifecycle/refusal contracts separate from factual Memory and Scheduled Tasks
+- initiative-backoff-schema.ts — semantic qualified-feedback policy status and strict operator read/reset/invalidation contracts
+- browser-playback-schema.ts — selected player observations, opaque Chromium document tokens and strict paired-Host report/read contracts; no consent or credential fields
+- co-watching-schema.ts — bounded acceptance/invitation, retained native requests, paused child/work references, plan proposals and versioned operator read/control contracts
+- co-watching-analysis-read-schema.ts — bounded analysis/original-result read pages, exact reference/view/offset selections and closed failures without watching acceptance
+- co-watching-invitation-schema.ts — committed invitation projections and exact operator accept/defer command/results; observation never grants consent
+- media-access-schema.ts — exact native Bilibili part and bounded video-byte access evidence, without analysis or consent
+- media-analysis-schema.ts — independent URL answers and bounded selected recommendation preparation/status/cancellation without playback consent
+- context-source-schema.ts — optional retained material descriptions, generation origins and exact material references
+- run-message-schema.ts — private visible native messages and exact model-intent receipt coordinates
+- subagent-schema.ts — immutable child context, work-scoped inputs, tool selection, trusted scope and control data
+- subagent-result-schema.ts — separate proposals, canonical child/parent terminal reports and completion/publication projections
+- subagent-api-schema.ts — paged child history/result/control projections, exact target CAS, optional subscription invalidations and exported parameter/result types
+- subagent-tool-schema.ts — model delegation/context/material/tool selection, compact worker versus explicit diagnostic inspection, optional legacy pagination field, and child/parent results without publication authority
+
+- subagent-inbox-schema.ts — private event/wait contracts, flat model handling intents and unchanged durable actions/operator reconciliation
+- subagent-conversation-schema.ts — continuous private history, full-batch presentation and bounded body/activity APIs
+- subagent-validity-schema.ts — explicit generic until-cancelled versus finite source validity
+
+- subagent-progress-schema.ts — captured work intervals, runtime check-in sidecars and complete/partial child token usage
+- subagent-attention-schema.ts — bounded durable operator attention and explicit pre-intent retry contracts
+- auxiliary-usage-schema.ts — nullable observed auxiliary calls, optional explicit operation link, keyset query and whole-filter aggregates
+- maintenance-operation-ref-schema.ts — strict tidy/compact identity and Character correlation; independent of Utility task IDs
+- maintenance-monitor-schema.ts — bounded query-echoing background Monitor snapshots, independent subscription and honest progress coverage
+- request-attribution-schema.ts — bounded category/origin conservation, per-Effect dispatch measurements, real-window snapshots and latest-primary observation with distinct optional response model identity
+- memory-tidy-diagnostics-schema.ts — safe bounded partial/failed maintenance details, including an actionable indivisible-input budget failure, on the existing JSON-RPC error path
+- memory-tidy-outcome-schema.ts — full durable tidy outcomes and content-free committed/review progress on the existing operation channel

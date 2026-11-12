@@ -1,0 +1,60 @@
+{
+  "version": "0.3.205",
+  "source_path": "/opt/taki-openbili/src/openbiliclaw/__init__.py",
+  "source_sha256": "1cdd7c916faa24a09977eabf5a514d424363ab152d29aacecd5f07e2c1782c3b",
+  "source_files_verified": 294,
+  "auth_enabled": true,
+  "trust_loopback": false,
+  "scheduler_enabled": false,
+  "model_instances": 0,
+  "table_counts": {
+    "recommendations": 0,
+    "events": 0,
+    "content_cache": 0
+  },
+  "ping": {
+    "http_status": 200,
+    "status": "ok",
+    "reason": null,
+    "degraded": true,
+    "initialized": null,
+    "source": null,
+    "total": null
+  },
+  "anonymous_peek": {
+    "http_status": 401,
+    "status": null,
+    "reason": "auth_required",
+    "degraded": null,
+    "initialized": null,
+    "source": null,
+    "total": null
+  },
+  "authenticated_peek": {
+    "http_status": 503,
+    "status": "degraded",
+    "reason": "llm_registry_unavailable",
+    "degraded": null,
+    "initialized": null,
+    "source": null,
+    "total": null
+  },
+  "authenticated_profile": {
+    "http_status": 503,
+    "status": "degraded",
+    "reason": "llm_registry_unavailable",
+    "degraded": null,
+    "initialized": null,
+    "source": null,
+    "total": null
+  },
+  "authenticated_feedback": {
+    "http_status": 503,
+    "status": "degraded",
+    "reason": "llm_registry_unavailable",
+    "degraded": null,
+    "initialized": null,
+    "source": null,
+    "total": null
+  }
+}

@@ -1,6 +1,8 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { createUserTimezoneRepo } from "../db/user-timezone-repo.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { streamingMockModel } from "../testing/mock-language-model.ts";
+import { createUserTimezoneService } from "../time/user-timezone-service.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import { createChatAgent } from "./chat-agent.ts";
 
@@ -11,8 +13,19 @@ function fresh(): CompanionFixture {
   return f;
 }
 afterEach(() => {
+  vi.restoreAllMocks();
   for (const f of fixtures.splice(0)) f.cleanup();
 });
+
+function userTimezone(fixture: CompanionFixture) {
+  return createUserTimezoneService({
+    db: fixture.db,
+    repo: createUserTimezoneRepo(fixture.db),
+    schedules: { recomputeUserTimezone: () => undefined },
+    isOperatorDevice: () => true,
+    logger: { warn: vi.fn() },
+  });
+}
 
 async function drain(stream: AsyncIterable<string>): Promise<string> {
   let text = "";
@@ -40,6 +53,55 @@ function lastUserText(model: MockWithCalls, call: number): string {
 }
 
 describe("chat-agent time injection (Q4: day line in instructions, time line in the tail)", () => {
+  it("uses persisted User Timezone for the provider's day and time instead of the Core host zone", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-09-28T10:40:45.678Z"));
+    const f = fresh();
+    const timezone = userTimezone(f);
+    expect(timezone.timezone()).toBe("UTC");
+    const readTimezone = vi.fn(timezone.timezone);
+    const model = streamingMockModel(["ok"]);
+    const deps = { model, store: f.conversation, memory: f.memory, userTimezone: readTimezone };
+    const agent = createChatAgent(deps);
+
+    await drain(agent.stream({ characterId: "taki", message: "What time is it?" }));
+
+    expect(systemText(model, 0)).toContain("Today is Monday, 2026-09-28.");
+    expect(lastUserText(model, 0)).toContain("Current local time: 10:40.");
+    expect(systemText(model, 0)).toContain("User timezone: UTC.");
+    expect(readTimezone).toHaveBeenCalledOnce();
+  });
+
+  it("captures one zone across awaited recall and reads a committed zone change on the next turn", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-09-28T00:30:00.000Z"));
+    const f = fresh();
+    const timezone = userTimezone(f);
+    const operator = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    expect(timezone.update({ expectedRevision: 1, mode: "fixed", timezone: "America/New_York" }, operator).status).toBe("accepted");
+    const readTimezone = vi.fn(timezone.timezone);
+    const model = streamingMockModel(["ok"]);
+    const recall = vi.fn(async () => {
+      if (timezone.timezone() !== "UTC") {
+        expect(timezone.update({ expectedRevision: 2, mode: "fixed", timezone: "UTC" }, operator).status).toBe("accepted");
+      }
+      return "";
+    });
+    const deps = { model, store: f.conversation, memory: f.memory, userTimezone: readTimezone,
+      runContext: () => ({ automaticMemoryRecall: recall }) };
+    const agent = createChatAgent(deps);
+
+    await drain(agent.stream({ characterId: "taki", message: "first" }));
+    expect(systemText(model, 0)).toContain("Today is Sunday, 2026-09-27.");
+    expect(systemText(model, 0)).toContain("User timezone: America/New_York.");
+    expect(lastUserText(model, 0)).toContain("Current local time: 20:30.");
+    expect(readTimezone).toHaveBeenCalledOnce();
+
+    await drain(agent.stream({ characterId: "taki", message: "second" }));
+    expect(systemText(model, 1)).toContain("Today is Monday, 2026-09-28.");
+    expect(systemText(model, 1)).toContain("User timezone: UTC.");
+    expect(lastUserText(model, 1)).toContain("Current local time: 00:30.");
+    expect(readTimezone).toHaveBeenCalledTimes(2);
+  });
+
   it("keeps the day-date line after the base prompt and moves the time line into the turn-context tail", async () => {
     const f = fresh();
     const model = streamingMockModel(["ok"]);

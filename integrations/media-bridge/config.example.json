@@ -1,0 +1,15 @@
+{
+  "backend_url": "http://127.0.0.1:8483",
+  "expected_service_instance_id": "00000000-0000-4000-8000-000000000001",
+  "provider_id": "replace-with-native-provider-id",
+  "model_name": "deepseek-flash",
+  "auth_token_env": null,
+  "total_timeout_seconds": 30,
+  "control_response_bytes": 131072,
+  "result_response_bytes": 16777216,
+  "generation_defaults": {
+    "quality": "medium",
+    "output_format": "media_v1",
+    "video_understanding": false
+  }
+}

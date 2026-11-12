@@ -57,7 +57,7 @@ describe("chat-agent turn lifecycle (D1)", () => {
     const system = model.doStreamCalls[0]?.prompt?.[0];
     expect(system?.role).toBe("system");
     const text = JSON.stringify(system);
-    expect(text).toContain("Never claim you ran a tool");
+    expect(text).toContain("Never claim you personally ran a tool");
     // Base prompt leads; the extra (skills) section follows it.
     expect(text.indexOf("Never claim")).toBeLessThan(text.indexOf("SKILLS"));
     expect(BASE_SYSTEM_PROMPT).toContain("tool-result");

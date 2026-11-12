@@ -1,22 +1,32 @@
 /**
- * INPUT:  none (page root); reads the pause state + activity card through usePerception.
- * OUTPUT: <PerceptionPage> — Privacy Pause controls, the sampling + activity cards, and a pointer row naming the knobs
- *         on the settings page that govern retention.
- * POS:    ui/windows/home/pages/perception — presentational. It shows ONLY what perception.* and the knob registry
- *         already expose; nothing about observation is invented client-side. Loading rides the shared Skeleton, the
- *         failed read carries a retry, and the settings pointer is the ActionButton link tone (batch-2).
+ * INPUT:  coherent Perception read state, qualified pause evidence and explicit pause/refresh actions.
+ * OUTPUT: truthful sampling/activity/Privacy Pause cards with retained content and local retry paths.
+ * POS:    Home Perception presentation — no capture, liveness or pause authority is inferred from clocks or stale data.
  */
 
 import { useHomeStore } from "../../home-store.ts";
 import { ActionButton } from "../../action-button.tsx";
+import { ReadObservationNotice } from "../../read-observation-notice.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Skeleton } from "@/components/ui/skeleton.js";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import { PauseControls } from "./pause-controls.tsx";
 import { activityRows, samplingRows } from "./perception-view.ts";
 import { usePerception } from "./use-perception.ts";
+import { BrowserAttachmentCard } from "./browser-attachment-card.tsx";
+import { CoWatchingCard } from "./co-watching-card.tsx";
 
 const RETENTION_KNOBS = ["TAKI_AMBIENT_SCREENSHOT", "TAKI_AMBIENT_SCREENSHOT_RETENTION", "TAKI_ATTACHMENT_TTL_DAYS"];
+
+function SamplingStatus({ stale, refreshing }: { stale: boolean; refreshing: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
+      {stale && !refreshing && <span className="whitespace-nowrap text-warn-strong" title="上次采样调度信息，当前状态尚未确认。">状态待确认</span>}
+      <PendingIndicator active={refreshing} label={stale ? "正在重新确认采样状态" : "正在更新采样状态"} />
+    </span>
+  );
+}
 
 function RetentionCard({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
@@ -44,6 +54,7 @@ export function PerceptionPage() {
     <>
       <PageHeader title="感知与隐私" hint="暂停观察、查看采样与活动记录，以及留存策略的去处。" busy={perception.refreshing} />
       <PageBody>
+        <ReadObservationNotice observation={perception.observation} onRefresh={perception.refresh} disabled={!perception.connectionReady} />
         {perception.error && (
           <PageAlert action={{ label: "重试", onClick: () => void perception.refresh() }}>{perception.error}</PageAlert>
         )}
@@ -51,14 +62,22 @@ export function PerceptionPage() {
           pause={perception.pause}
           connectionReady={perception.connectionReady}
           onSet={(params) => void perception.setPause(params)}
+          read={{ loading: perception.loading, refreshing: perception.refreshing, pending: perception.pending, stale: perception.stale }}
         />
-        <PageCard title="采样状态">
-          {perception.card ? <LabeledRows rows={samplingRows(perception.card)} /> : <Skeleton lines={3} />}
+        <PageCard title="采样状态" action={<SamplingStatus stale={perception.stale && perception.card !== null} refreshing={perception.refreshing} />}>
+          {perception.card && <LabeledRows rows={samplingRows(perception.card)} />}
+          {!perception.card && perception.loading && <Skeleton lines={3} />}
+          {!perception.card && !perception.loading && <p className="text-xs text-text-secondary">采样调度状态尚未确认。</p>}
         </PageCard>
         <PageCard title="活动卡片">
-          <LabeledRows rows={perception.card ? activityRows(perception.card) : []} empty="暂无活动记录" />
+          {perception.card && <LabeledRows rows={activityRows(perception.card)} empty="暂无活动记录" />}
+          {!perception.card && perception.loading && <Skeleton lines={3} />}
+          {!perception.card && !perception.loading && <p className="text-xs text-text-secondary">活动记录尚未读取。</p>}
         </PageCard>
         <RetentionCard onOpenSettings={() => navigate("settings")} />
+        <BrowserAttachmentCard />
+        <CoWatchingCard />
+        <div className="flex justify-end"><ActionButton disabled={!perception.connectionReady} onClick={() => void perception.refresh()}>刷新状态</ActionButton></div>
       </PageBody>
     </>
   );

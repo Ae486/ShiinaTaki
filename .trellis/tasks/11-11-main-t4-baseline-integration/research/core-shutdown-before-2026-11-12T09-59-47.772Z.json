@@ -1,0 +1,45 @@
+{
+  "phase": "before",
+  "root": "G:/taki-codex-work/integration-core-shutdown-U6A064",
+  "node": "v24.18.0",
+  "helperSha256": "86c9f743f2bf4bb34a7cf8d3888b40a170de635afa507131e5114548b034a9ef",
+  "productionSha256": "0069ee2a0ddab4bdc4b88099af18742249b9a82f536c994866489ce0fbd0f52d",
+  "shutdownBudgetMs": 60000,
+  "resourcesAfterProductionClose": [
+    {
+      "kind": "shutdown-observation",
+      "exitCode": 0,
+      "ipcConnected": true,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap"
+      ],
+      "profile": "G:\\taki-codex-work\\integration-core-shutdown-U6A064\\core-data\\os-profile"
+    }
+  ],
+  "providerRequests": 0,
+  "status": "passed",
+  "corePid": 23712,
+  "corePort": 8314,
+  "authenticatedPeerOpenAtShutdown": true,
+  "shutdownMs": 60051,
+  "exit": {
+    "code": null,
+    "signal": "SIGTERM",
+    "egress": {
+      "allowed": {},
+      "refused": []
+    },
+    "forced": true
+  },
+  "operatorClosed": true,
+  "shutdownHandlerCalls": 1,
+  "mcpClosed": true,
+  "shutdownFailure": false,
+  "coreExited": true,
+  "providerClosed": true,
+  "productionUnchanged": true,
+  "helperUnchanged": true,
+  "durationMs": 64531
+}

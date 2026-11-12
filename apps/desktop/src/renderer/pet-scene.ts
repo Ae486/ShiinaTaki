@@ -5,7 +5,7 @@
  *         returns its re-read vocabulary), reportSnapshot (truthful live vocabulary/costume identity),
  *         abortSwitch (mark an in-flight switch stale so a late model self-discards),
  *         and idempotent dispose (Live2D child before Pixi ticker). The scene may boot MODEL-LESS (initial source unreachable —
- *         normal in a packaged build, where the dev route does not exist): the stage runs empty, avatar methods no-op,
+ *         normal in a packaged build, where the dev route does not exist): its ticker pauses, avatar methods no-op,
  *         and the first switchCostume (initial-costume promotion) attaches a model. The click-through alpha mask
  *         refreshes every MASK_REFRESH_FRAME_INTERVAL-th governed frame and is forced at silhouette jumps
  *         (attach/switch, rebuild, canvas resize) — see the P1c staleness note below.
@@ -21,6 +21,7 @@ import { renderActivityFor, type AvatarState } from "./state-machine.ts";
 import { loadCharacterModel, DEV_MODEL_SOURCE, type CostumeSource } from "./live2d/load-character-model.ts";
 import { createIdleMotionScheduler, type IdleMotionScheduler } from "./live2d/idle-motion.ts";
 import { createAvatarController, type AvatarController } from "./live2d/avatar-controller.ts";
+import type { AvatarOutcomeReport } from "./live2d/avatar-commands.ts";
 import { reloadModel } from "./live2d/costume-switch.ts";
 import { readVocabulary, type AvatarVocabulary } from "./live2d/model-vocabulary.ts";
 import type { ClickRegion } from "./live2d/click-regions.ts";
@@ -57,9 +58,10 @@ export type PetScene = {
   // Truthful live-scene snapshot for generation restoration. The optional costume comes from the source that actually
   // attached; it is never inferred from last-costume persistence or a click intent.
   reportSnapshot: () => AvatarVocabulary & { costume?: string };
-  // Applies an LLM-driven avatar command (validated vs the vocabulary); an unknown name fires onVocabularyDrift so the
-  // caller re-reports the live inventory (self-heal, 1b). F3.
-  applyAvatarCommand: (command: AvatarCommand, onVocabularyDrift?: () => void) => void;
+  // Applies an LLM-driven avatar command (validated vs the vocabulary) and resolves its Presentation Outcome report;
+  // an unknown name fires onVocabularyDrift so the caller re-reports the live inventory (self-heal, 1b). Model-less
+  // scene → rejected/unavailable. F3 / D80.
+  applyAvatarCommand: (command: AvatarCommand, onVocabularyDrift?: () => void) => Promise<AvatarOutcomeReport>;
   // Reacts to a click at canvas-local px (region reaction) and returns the region hit for the caller's precedence. F4.
   handleClick: (x: number, y: number) => ClickRegion | null;
   // Gaze follow: point the model at a canvas-local cursor position (clamped + delta-gated). F4.
@@ -86,6 +88,7 @@ interface SceneModel {
 
 interface SwitchContext {
   app: Application;
+  governor: RenderGovernor;
   center: { x: number; y: number };
   characterId: string;
   slot: { current: SceneModel | null }; // mutated in place so the scene's delegating methods see the new costume
@@ -98,7 +101,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   const characterId = options.characterId ?? "taki";
   const app = await createStage(host);
 
-  const governor = new RenderGovernor(app.ticker);
+  const governor = new RenderGovernor(app.ticker, undefined, false);
   governor.setThrottling(options.renderThrottling ?? true);
 
   // Stable across costume swaps (the pet window is fixed-size); the avatar controller needs it for gaze + click math.
@@ -114,7 +117,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   const maskRefresher = createFrameGatedRefresher(() => mask.refresh(), MASK_REFRESH_FRAME_INTERVAL);
   app.ticker.add(maskRefresher.tick);
 
-  const ctx: SwitchContext = { app, center, characterId, slot, seq: { current: 0 }, forceMaskRefresh: () => maskRefresher.force() };
+  const ctx: SwitchContext = { app, governor, center, characterId, slot, seq: { current: 0 }, forceMaskRefresh: () => maskRefresher.force() };
 
   // Prime the bitmap at scene (re)build so samples never wait N frames for the first gated refresh. The initial
   // attach below (when the model loads) forces again with the model on stage — one extra boot readback, negligible.
@@ -144,7 +147,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   try {
     attachModel(ctx, await loadCharacterModel(app, options.modelSource ?? DEV_MODEL_SOURCE), null);
   } catch (error) {
-    console.warn("[pet-scene] initial model unavailable; stage runs model-less until a costume attaches", error);
+    console.warn("[pet-scene] initial model unavailable; rendering paused until a costume attaches", error);
   }
 
   return {
@@ -158,7 +161,9 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
       const vocabulary = current.avatar.vocabulary;
       return current.costume === null ? vocabulary : { ...vocabulary, costume: current.costume };
     },
-    applyAvatarCommand: (command, onVocabularyDrift) => slot.current?.avatar.applyCommand(command, onVocabularyDrift),
+    applyAvatarCommand: (command, onVocabularyDrift) =>
+      slot.current?.avatar.applyCommand(command, onVocabularyDrift)
+        ?? Promise.resolve({ outcome: "rejected", reason: "unavailable" }),
     handleClick: (x, y) => slot.current?.avatar.reactToClick(x, y) ?? null,
     focusAt: (x, y) => slot.current?.avatar.focusAt(x, y),
     handleProximity: (x, y) => slot.current?.avatar.handleProximity(x, y),
@@ -177,6 +182,7 @@ function createSceneDisposer(ctx: SwitchContext, teardownMask: () => void): () =
   return () => {
     if (disposed) return;
     disposed = true;
+    ctx.governor.setRenderable(false);
     abortSwitch(ctx);
     ctx.slot.current?.idle.dispose();
     teardownMask();
@@ -225,4 +231,5 @@ function attachModel(ctx: SwitchContext, model: Live2DModel, costume: string | n
     costume,
   };
   ctx.forceMaskRefresh();
+  ctx.governor.setRenderable(true);
 }

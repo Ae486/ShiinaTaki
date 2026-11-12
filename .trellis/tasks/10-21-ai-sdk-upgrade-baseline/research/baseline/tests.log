@@ -1,0 +1,459 @@
+Scope: 5 of 6 workspace projects
+packages/shared test$ vitest run
+packages/shared test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+packages/shared test:  Test Files  75 passed (75)
+packages/shared test:       Tests  674 passed (674)
+packages/shared test:    Start at  21:24:16
+packages/shared test:    Duration  7.23s (transform 38.13s, setup 0ms, import 72.02s, tests 2.34s, environment 13ms)
+packages/shared test: Done
+apps/desktop test$ vitest run --passWithNoTests
+apps/cli test$ vitest run
+packages/core test$ vitest run
+apps/cli test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/cli
+packages/core test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+apps/desktop test:  RUN  v4.1.10 H:/TakiAgent-worktrees/t4/apps/desktop
+apps/cli test:  Test Files  8 passed (8)
+apps/cli test:       Tests  50 passed (50)
+apps/cli test:    Start at  21:24:24
+apps/cli test:    Duration  4.66s (transform 11.55s, setup 0ms, import 16.84s, tests 1.15s, environment 3ms)
+apps/cli test: Done
+packages/core test:  ❯ src/db/hindsight-application-command-repo.test.ts (29 tests | 1 failed) 28227ms
+packages/core test:      × counts the command body in the ceiling and deduplicates repeated direct references by immutable ID 7090ms
+packages/core test:  ❯ src/db/hindsight-memory-write-repo.test.ts (7 tests | 1 failed) 28184ms
+packages/core test:      × keeps the first target and stable terminal result through duplicate requests and a database reopen 17895ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts (9 tests | 1 failed) 19457ms
+packages/core test:      × captures an unseeded Run and then automatically recalls both Banks without an enlarged budget or pre-sync 5183ms
+packages/core test:  ❯ src/db/hindsight-application-replica-repo.test.ts (31 tests | 1 failed) 39196ms
+packages/core test:      × keyset-scans past ineligible due work before applying the maintenance limit 5871ms
+packages/core test:  ❯ src/co-watching/media-analysis-runtime.test.ts (27 tests | 2 failed) 35986ms
+packages/core test:    × enforces the shared 64-job global bound without starting any extra native work 5755ms
+packages/core test:    × prepares through actual chat.send and ChatAgent with separate transport, trigger and committed Timeline identities 1851ms
+packages/core test:  ❯ src/memory/initiative-memory-assembly.test.ts (15 tests | 2 failed) 34353ms
+packages/core test:      × honors all four scope selections under hindsight while preserving primary assembly 5634ms
+packages/core test:      × freezes selected hindsight projections before later Block edits 6639ms
+apps/desktop test:  Test Files  202 passed (202)
+apps/desktop test:       Tests  1214 passed (1214)
+apps/desktop test:    Start at  21:24:25
+apps/desktop test:    Duration  86.18s (transform 513.65s, setup 0ms, import 1302.10s, tests 29.86s, environment 32ms)
+apps/desktop test: Done
+packages/core test:  ❯ src/perception/privacy-pause-writer.test.ts (2 tests | 1 failed) 19487ms
+packages/core test:      × finds pause mutations only in the operator-only perception.pauseSet method 18678ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-application-transport.test.ts (14 tests | 1 failed) 16335ms
+packages/core test:      × round-trips a body larger than one HTTP response with exact original characters and complete parts 11665ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts (12 tests | 7 failed) 65722ms
+packages/core test:      × retains the immutable primary receipt policy baseline before any later source-state lookup 9639ms
+packages/core test:      × keeps confirmed primary evidence under its Hindsight authority during a verified outage 5589ms
+packages/core test:      × keeps a temporarily unbound unchanged unit unavailable without terminal source withdrawal 5603ms
+packages/core test:      × reads verified direct records with offline=false and preserves degraded truth 7378ms
+packages/core test:      × reads verified direct records with offline=true and preserves degraded truth 5497ms
+packages/core test:      × withdraws held text after an app-only policy edit even when native revision remains unchanged 5621ms
+packages/core test:      × closes held direct-unit evidence after verified invalidate 5565ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts (13 tests | 9 failed) 76201ms
+packages/core test:      × keeps neutral facts usable while proposals are saved and counts assessment only after application 6970ms
+packages/core test:      × persists a real model failure and retries after the saved deadline without making native memory Pending 11156ms
+packages/core test:      × recovers a lost commit acknowledgement after SQLite reopen without a second model call or command 6038ms
+packages/core test:      × keeps a remote receipt pending until the matching application projection actually exists 5568ms
+packages/core test:      × filters hidden, invalidated, expired and mood-gated candidates before the report limit and actual model input 5760ms
+packages/core test:      × refuses the user card and restores a background Block through its preserved artifact identity and exact revision 5754ms
+packages/core test:      × serializes simultaneous Global and Character reviews through one Utility Slot without cross-scope model input 8125ms
+packages/core test:      × preserves an existing pin=true without letting automatic assessment create or increase it 5168ms
+packages/core test:      × shares the configured model-step ceiling across Bank reviews and leaves the remaining Bank retryable 5521ms
+packages/core test:  ❯ src/memory/hindsight-runtime-composition.test.ts (22 tests | 4 failed) 73993ms
+packages/core test:      × constructs selected Hindsight with seeded=false, then hydrates real policy without a Utility model or Legacy fallback 7630ms
+packages/core test:      × constructs selected Hindsight with seeded=true, then hydrates real policy without a Utility model or Legacy fallback 6254ms
+packages/core test:      × admits known pins and neutral facts while excluding hidden and other-Character data before consumer delivery 6808ms
+packages/core test:      × keeps a captured prompt immutable while a later Run sees the new application policy 5231ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-memory-writes.test.ts (18 tests | 3 failed) 79896ms
+packages/core test:      × rolls back every intent on native preflight overflow or an application outbox failure 6592ms
+packages/core test:      × keeps a compound parent pending after G1 completion until its exact policy event is applied 5593ms
+packages/core test:      × resumes a persisted compound parent after restart from its existing G1 and application receipt identities 5304ms
+packages/core test:  ❯ src/memory/hindsight/hindsight-derived-input-admission.test.ts (26 tests | 8 failed) 105954ms
+packages/core test:      × admits assessed observations with 'one source' and offline=false to Recall and automatic recall 10188ms
+packages/core test:      × admits assessed observations with 'one source' and offline=true to Recall and automatic recall 5611ms
+packages/core test:      × admits assessed observations with 'multiple sources' and offline=false to Recall and automatic recall 7934ms
+packages/core test:      × admits assessed observations with 'multiple sources' and offline=true to Recall and automatic recall 5551ms
+packages/core test:      × admits assessed observations with 'no declared sources' and offline=false to Recall and automatic recall 6864ms
+packages/core test:      × admits observations with 'one source' to actual curator model input without inventing an assessment 10848ms
+packages/core test:      × admits observations with 'multiple sources' to actual curator model input without inventing an assessment 9262ms
+packages/core test:      × admits observations with 'no declared sources' to actual curator model input without inventing an assessment 5461ms
+packages/core test: ⎯⎯⎯⎯⎯⎯ Failed Tests 41 ⎯⎯⎯⎯⎯⎯⎯
+packages/core test:  FAIL  src/co-watching/media-analysis-runtime.test.ts > enforces the shared 64-job global bound without starting any extra native work
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/co-watching/media-analysis-runtime.test.ts:430:1
+packages/core test:     428| });
+packages/core test:     429|
+packages/core test:     430| it("enforces the shared 64-job global bound without starting any extra…
+packages/core test:        | ^
+packages/core test:     431|   const f = await fixture(); const releases: Array<() => void> = [];
+packages/core test:     432|   try {
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/41]⎯
+packages/core test:  FAIL  src/co-watching/media-analysis-runtime.test.ts > prepares through actual chat.send and ChatAgent with separate transport, trigger and committed Timeline identities
+packages/core test: AssertionError: expected 'running' to be 'completed' // Object.is equality
+packages/core test: Expected: "completed"
+packages/core test: Received: "running"
+packages/core test:  ❯ src/co-watching/media-analysis-runtime.test.ts:475:69
+packages/core test:     473|   { connection: f.interactive.connection, notify, close() {}, onClose(…
+packages/core test:     474|   const ack = ChatSendResultSchema.parse(JsonRpcSuccessResponseSchema.…
+packages/core test:     475|   await vi.waitFor(() => expect(f.runs.status(ack.runId).run.state).to…
+packages/core test:        |                                                                     ^
+packages/core test:     476|   const entries = f.timeline.latestAscending("taki", 20); const userEn…
+packages/core test:     477|   expect(new Set([ack.messageId, f.runs.status(ack.runId).run.triggerR…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/41]⎯
+packages/core test:  FAIL  src/db/hindsight-application-command-repo.test.ts > durable application command preparation > counts the command body in the ceiling and deduplicates repeated direct references by immutable ID
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/db/hindsight-application-command-repo.test.ts:103:3
+packages/core test:     101|   });
+packages/core test:     102|
+packages/core test:     103|   it("counts the command body in the ceiling and deduplicates repeated…
+packages/core test:        |   ^
+packages/core test:     104|     const f = fixture(); const input = applicationCommandTestInput();
+packages/core test:     105|     expect(f.repo.prepare({ ...input, bodies: [input.bodies[0]!, input…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/41]⎯
+packages/core test:  FAIL  src/db/hindsight-application-replica-repo.test.ts > D77 application replica publication > keyset-scans past ineligible due work before applying the maintenance limit
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/db/hindsight-application-replica-repo.test.ts:296:3
+packages/core test:     294|   });
+packages/core test:     295|
+packages/core test:     296|   it("keyset-scans past ineligible due work before applying the mainte…
+packages/core test:        |   ^
+packages/core test:     297|     const f = fixture(); const hidden = Array.from({ length: 35 }, (_,…
+packages/core test:     298|       payload: { memory_id: `a-hidden-${String(index).padStart(2, "0")…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/41]⎯
+packages/core test:  FAIL  src/db/hindsight-memory-write-repo.test.ts > D77 whole-write journal with real SQLite > keeps the first target and stable terminal result through duplicate requests and a database reopen
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/db/hindsight-memory-write-repo.test.ts:30:3
+packages/core test:      28|
+packages/core test:      29| describe("D77 whole-write journal with real SQLite", () => {
+packages/core test:      30|   it("keeps the first target and stable terminal result through duplic…
+packages/core test:        |   ^
+packages/core test:      31|     const directory = mkdtempSync(join(ownedRuntime, "write-repo-")); …
+packages/core test:      32|     const path = join(directory, "fixture.sqlite"); const bank = write…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/41]⎯
+packages/core test:  FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > constructs selected Hindsight with seeded=false, then hydrates real policy without a Utility model or Legacy fallback
+packages/core test:  FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > constructs selected Hindsight with seeded=true, then hydrates real policy without a Utility model or Legacy fallback
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight-runtime-composition.test.ts:61:25
+packages/core test:      59|   });
+packages/core test:      60|
+packages/core test:      61|   it.each([false, true])("constructs selected Hindsight with seeded=%s…
+packages/core test:        |                         ^
+packages/core test:      62|     const model = failingGenerateModel(new Error("unexpected policy mo…
+packages/core test:      63|     expect(runtime.selected.legacy).toBeNull(); expect(runtime.selecte…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/41]⎯
+packages/core test:  FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > admits known pins and neutral facts while excluding hidden and other-Character data before consumer delivery
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight-runtime-composition.test.ts:79:3
+packages/core test:      77|   });
+packages/core test:      78|
+packages/core test:      79|   it("admits known pins and neutral facts while excluding hidden and o…
+packages/core test:        |   ^
+packages/core test:      80|     const model = failingGenerateModel(new Error("unexpected policy mo…
+packages/core test:      81|     const banks = [knownPinBank("GLOBAL_PIN_FACT"),
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/41]⎯
+packages/core test:  FAIL  src/memory/hindsight-runtime-composition.test.ts > production Hindsight runtime composition > keeps a captured prompt immutable while a later Run sees the new application policy
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight-runtime-composition.test.ts:94:3
+packages/core test:      92|   });
+packages/core test:      93|
+packages/core test:      94|   it("keeps a captured prompt immutable while a later Run sees the new…
+packages/core test:        |   ^
+packages/core test:      95|     const banks = [knownPinBank("CAPTURED_PIN_FACT"),
+packages/core test:      96|       curatorTestBank({ bankId: "bank-taki", characterId: "taki" })];
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/41]⎯
+packages/core test:  FAIL  src/memory/initiative-memory-assembly.test.ts > provider-neutral captured initiative Memory Blocks > honors all four scope selections under hindsight while preserving primary assembly
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/initiative-memory-assembly.test.ts:37:53
+packages/core test:      35|
+packages/core test:      36| describe("provider-neutral captured initiative Memory Blocks", () => {
+packages/core test:      37|   it.each(["local", "legacy", "hindsight"] as const)("honors all four …
+packages/core test:        |                                                     ^
+packages/core test:      38|     const { f, model } = fixture(mode); blocks(f, mode);
+packages/core test:      39|     const runtime = f.compose(); const captured = await runtime.captur…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/41]⎯
+packages/core test:  FAIL  src/memory/initiative-memory-assembly.test.ts > provider-neutral captured initiative Memory Blocks > freezes selected hindsight projections before later Block edits
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/initiative-memory-assembly.test.ts:57:53
+packages/core test:      55|   });
+packages/core test:      56|
+packages/core test:      57|   it.each(["local", "legacy", "hindsight"] as const)("freezes selected…
+packages/core test:        |                                                     ^
+packages/core test:      58|     const { f } = fixture(mode); blocks(f, mode); const runtime = f.co…
+packages/core test:      59|     const first = await runtime.captureRun("taki"); const selected = f…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/41]⎯
+packages/core test:  FAIL  src/perception/privacy-pause-writer.test.ts > privacy pause has exactly one production writer > finds pause mutations only in the operator-only perception.pauseSet method
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/perception/privacy-pause-writer.test.ts:54:3
+packages/core test:      52|
+packages/core test:      53| describe("privacy pause has exactly one production writer", () => {
+packages/core test:      54|   it("finds pause mutations only in the operator-only perception.pause…
+packages/core test:        |   ^
+packages/core test:      55|     expect(pauseWriters()).toEqual([ONLY_WRITER]);
+packages/core test:      56|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-application-transport.test.ts > D77 authenticated multipart transfer > round-trips a body larger than one HTTP response with exact original characters and complete parts
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-application-transport.test.ts:58:3
+packages/core test:      56|
+packages/core test:      57| describe("D77 authenticated multipart transfer", () => {
+packages/core test:      58|   it("round-trips a body larger than one HTTP response with exact orig…
+packages/core test:        |   ^
+packages/core test:      59|     const value = block("😀".repeat(140000) + "\0\ud800");
+packages/core test:      60|     const body = applicationTestBody("application-block.v1", value);
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits assessed observations with 'one source' and offline=false to Recall and automatic recall
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits assessed observations with 'one source' and offline=true to Recall and automatic recall
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits assessed observations with 'multiple sources' and offline=false to Recall and automatic recall
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits assessed observations with 'multiple sources' and offline=true to Recall and automatic recall
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits assessed observations with 'no declared sources' and offline=false to Recall and automatic recall
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-derived-input-admission.test.ts:65:104
+packages/core test:      63|
+packages/core test:      64| describe("ordinary observation eligibility at final Core consumers", (…
+packages/core test:      65|   it.each(sourceReferences.flatMap((entry) => [false, true].map((offli…
+packages/core test:        |                                                                                                        ^
+packages/core test:      66|     "admits assessed observations with $name and offline=$offline to R…
+packages/core test:      67|       const bank = observationBank({ sources, assessed: true }); const…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits observations with 'one source' to actual curator model input without inventing an assessment
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits observations with 'multiple sources' to actual curator model input without inventing an assessment
+packages/core test:  FAIL  src/memory/hindsight/hindsight-derived-input-admission.test.ts > ordinary observation eligibility at final Core consumers > admits observations with 'no declared sources' to actual curator model input without inventing an assessment
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-derived-input-admission.test.ts:101:28
+packages/core test:      99|   });
+packages/core test:     100|
+packages/core test:     101|   it.each(sourceReferences)("admits observations with $name to actual …
+packages/core test:        |                            ^
+packages/core test:     102|     const bank = observationBank({ sources });
+packages/core test:     103|     const model = scriptedGenerateModel([{ kind: "tool", toolCallId: "…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts > foreground Hindsight Recall lifetime > captures an unseeded Run and then automatically recalls both Banks without an enlarged budget or pre-sync
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts:97:3
+packages/core test:      95|   });
+packages/core test:      96|
+packages/core test:      97|   it("captures an unseeded Run and then automatically recalls both Ban…
+packages/core test:        |   ^
+packages/core test:      98|     const f = fixture(false); const budgets = slowClient(f); const sub…
+packages/core test:      99|     expect(subsystem.state.runtime.connection.requestTimeoutMs).toBe(H…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > retains the immutable primary receipt policy baseline before any later source-state lookup
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts:102:3
+packages/core test:     100|
+packages/core test:     101| describe("Hindsight selected initiative evidence under actual runtime …
+packages/core test:     102|   it("retains the immutable primary receipt policy baseline before any…
+packages/core test:        |   ^
+packages/core test:     103|     const f = await primarySourceFixture();
+packages/core test:     104|     curatorTestRemotePolicy(f.bank, "ingested-memory", (body) => ({ ..…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > keeps confirmed primary evidence under its Hindsight authority during a verified outage
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts:110:3
+packages/core test:     108|   });
+packages/core test:     109|
+packages/core test:     110|   it("keeps confirmed primary evidence under its Hindsight authority d…
+packages/core test:        |   ^
+packages/core test:     111|     const f = await primarySourceFixture();
+packages/core test:     112|     expect(f.sourceState(f.witness)).toBe("current"); f.f.remote.contr…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > keeps a temporarily unbound unchanged unit unavailable without terminal source withdrawal
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts:126:3
+packages/core test:     124|   });
+packages/core test:     125|
+packages/core test:     126|   it("keeps a temporarily unbound unchanged unit unavailable without t…
+packages/core test:        |   ^
+packages/core test:     127|     const f = await primarySourceFixture(); const replica = f.f.replic…
+packages/core test:     128|     const original = f.bank.native.find((entry) => entry.head.object_i…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > reads verified direct records with offline=false and preserves degraded truth
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > reads verified direct records with offline=true and preserves degraded truth
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts:140:25
+packages/core test:     138|     expect(f.sourceState(f.witness)).toBe("unavailable");
+packages/core test:     139|   });
+packages/core test:     140|   it.each([false, true])("reads verified direct records with offline=%…
+packages/core test:        |                         ^
+packages/core test:     141|     const f = fixture(); const runtime = f.compose(); let captured = a…
+packages/core test:     142|     f.remote.control.offline = offline;
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > withdraws held text after an app-only policy edit even when native revision remains unchanged
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts:155:3
+packages/core test:     153|   });
+packages/core test:     154|
+packages/core test:     155|   it("withdraws held text after an app-only policy edit even when nati…
+packages/core test:        |   ^
+packages/core test:     156|     const f = fixture(); const runtime = f.compose(); const captured =…
+packages/core test:     157|     const recalled = createInitiativeMemoryRecall(captured, { query: "…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-initiative-memory.test.ts > Hindsight selected initiative evidence under actual runtime composition > closes held direct-unit evidence after verified invalidate
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-initiative-memory.test.ts:165:53
+packages/core test:     163|   });
+packages/core test:     164|
+packages/core test:     165|   it.each(["edit", "invalidate", "delete"] as const)("closes held dire…
+packages/core test:        |                                                     ^
+packages/core test:     166|     const f = fixture(); const runtime = f.compose(); const captured =…
+packages/core test:     167|     const recalled = createInitiativeMemoryRecall(captured, { query: "…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-memory-writes.test.ts > D77 whole-write gateway and recovery > rolls back every intent on native preflight overflow or an application outbox failure
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-memory-writes.test.ts:69:3
+packages/core test:      67|   });
+packages/core test:      68|
+packages/core test:      69|   it("rolls back every intent on native preflight overflow or an appli…
+packages/core test:        |   ^
+packages/core test:      70|     const native = fixture();
+packages/core test:      71|     // The raw Pending intent is below its own byte cap. Encoding nest…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-memory-writes.test.ts > D77 whole-write gateway and recovery > keeps a compound parent pending after G1 completion until its exact policy event is applied
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-memory-writes.test.ts:99:3
+packages/core test:      97|   });
+packages/core test:      98|
+packages/core test:      99|   it("keeps a compound parent pending after G1 completion until its ex…
+packages/core test:        |   ^
+packages/core test:     100|     const f = fixture(); f.control.replayNative = true; f.control.pull…
+packages/core test:     101|     const request = mutation(f, true); const first = await f.writes.mu…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-memory-writes.test.ts > D77 whole-write gateway and recovery > resumes a persisted compound parent after restart from its existing G1 and application receipt identities
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-memory-writes.test.ts:132:3
+packages/core test:     130|   });
+packages/core test:     131|
+packages/core test:     132|   it("resumes a persisted compound parent after restart from its exist…
+packages/core test:        |   ^
+packages/core test:     133|     const directory = mkdtempSync(join(ownedRuntime, "write-gateway-")…
+packages/core test:     134|     const path = join(directory, "fixture.sqlite"); const bank = write…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > keeps neutral facts usable while proposals are saved and counts assessment only after application
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:24:3
+packages/core test:      22|
+packages/core test:      23| describe("Hindsight policy curator through durable application state",…
+packages/core test:      24|   it("keeps neutral facts usable while proposals are saved and counts …
+packages/core test:        |   ^
+packages/core test:      25|     const driver = vi.fn(async (input: Parameters<typeof curatorTestAs…
+packages/core test:      26|       const report = curatorTestReport(input);
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > persists a real model failure and retries after the saved deadline without making native memory Pending
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:51:3
+packages/core test:      49|   });
+packages/core test:      50|
+packages/core test:      51|   it("persists a real model failure and retries after the saved deadli…
+packages/core test:        |   ^
+packages/core test:      52|     const path = tempPath(); const model = failingGenerateModel(new Er…
+packages/core test:      53|     const f = fixture({ path, model });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > recovers a lost commit acknowledgement after SQLite reopen without a second model call or command
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:72:3
+packages/core test:      70|   });
+packages/core test:      71|
+packages/core test:      72|   it("recovers a lost commit acknowledgement after SQLite reopen witho…
+packages/core test:        |   ^
+packages/core test:      73|     const path = tempPath(); const driver = vi.fn(curatorTestAssessDri…
+packages/core test:      74|     const bank = f.banks[0]!; const commit = bank.server.client.commit…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > keeps a remote receipt pending until the matching application projection actually exists
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:88:3
+packages/core test:      86|   });
+packages/core test:      87|
+packages/core test:      88|   it("keeps a remote receipt pending until the matching application pr…
+packages/core test:        |   ^
+packages/core test:      89|     const driver = vi.fn(curatorTestAssessDriver); const f = fixture({…
+packages/core test:      90|     f.deps.refreshBank = vi.fn(async () => undefined);
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > filters hidden, invalidated, expired and mood-gated candidates before the report limit and actual model input
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:99:3
+packages/core test:      97|   });
+packages/core test:      98|
+packages/core test:      99|   it("filters hidden, invalidated, expired and mood-gated candidates b…
+packages/core test:        |   ^
+packages/core test:     100|     const bank = curatorTestBank({ bankId: "character-taki", character…
+packages/core test:     101|       { id: "a-hidden", text: "HIDDEN_PRIVATE_CONTENT", policy: { visi…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > refuses the user card and restores a background Block through its preserved artifact identity and exact revision
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:129:3
+packages/core test:     127|   });
+packages/core test:     128|
+packages/core test:     129|   it("refuses the user card and restores a background Block through it…
+packages/core test:        |   ^
+packages/core test:     130|     const bank = curatorTestBank(); const key = { artifact_kind: "bloc…
+packages/core test:     131|     bank.artifacts.push(applicationTestArtifact({ scope: bank.scope, k…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > serializes simultaneous Global and Character reviews through one Utility Slot without cross-scope model input
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:162:3
+packages/core test:     160|   });
+packages/core test:     161|
+packages/core test:     162|   it("serializes simultaneous Global and Character reviews through one…
+packages/core test:        |   ^
+packages/core test:     163|     const banks = [curatorTestBank({ memories: [{ id: "global", text: …
+packages/core test:     164|       curatorTestBank({ bankId: "bank-taki", characterId: "taki", memo…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > preserves an existing pin=true without letting automatic assessment create or increase it
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:189:25
+packages/core test:     187|   });
+packages/core test:     188|
+packages/core test:     189|   it.each([false, true])("preserves an existing pin=%s without letting…
+packages/core test:        |                         ^
+packages/core test:     190|     const bank = curatorTestBank({ memories: [{ id: "memory-a", ...(pi…
+packages/core test:     191|       layerId: "profile", importance: 9, visibility: "pinned" as const…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/41]⎯
+packages/core test:  FAIL  src/memory/hindsight/hindsight-policy-curator.test.ts > Hindsight policy curator through durable application state > shares the configured model-step ceiling across Bank reviews and leaves the remaining Bank retryable
+packages/core test: Error: Test timed out in 5000ms.
+packages/core test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+packages/core test:  ❯ src/memory/hindsight/hindsight-policy-curator.test.ts:208:3
+packages/core test:     206|   });
+packages/core test:     207|
+packages/core test:     208|   it("shares the configured model-step ceiling across Bank reviews and…
+packages/core test:        |   ^
+packages/core test:     209|     const banks = [curatorTestBank(), curatorTestBank({ bankId: "bank-…
+packages/core test:     210|     const driver = vi.fn(curatorTestAssessDriver); const f = fixture({…
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/41]⎯
+packages/core test:  Test Files  13 failed | 469 passed | 1 skipped (483)
+packages/core test:       Tests  41 failed | 3968 passed | 2 skipped (4011)
+packages/core test:    Start at  21:24:24
+packages/core test:    Duration  176.03s (transform 308.75s, setup 0ms, import 1146.63s, tests 1759.48s, environment 95ms)
+packages/core test: Failed
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 test: `vitest run`
+Exit status 1

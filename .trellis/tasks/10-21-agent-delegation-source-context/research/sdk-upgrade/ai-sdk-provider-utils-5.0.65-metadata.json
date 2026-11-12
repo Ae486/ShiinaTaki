@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "bugs": {
+      "url": "https://github.com/vercel/ai/issues"
+    },
+    "dist": {
+      "shasum": "dd0695549aed98105f4215dc4cd970e043d45c2e",
+      "tarball": "https://registry.npmjs.org/@ai-sdk/provider-utils/-/provider-utils-5.0.65.tgz",
+      "fileCount": 187,
+      "integrity": "sha512-LCugcsP8oWmdeI3BASf4Fuo1wiC6Qx0YrefFssl7n12s+LV4DNi5RdwWQrtrB4oek3GGNQRN/h/NSwVZM2eHKw==",
+      "signatures": [
+        {
+          "sig": "MEQCIBrk0mLaJean9xGZrNk+WSGkFryAejSjVkZfE8dgJskBAiB3AaV1evSFKGnMIRlstBus0gs//kZsHmQuJ3XSGgWaKA==",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        },
+        {
+          "sig": "MEUCIQDf7okyLSNWOOh535gJxcSJ+MPC40o0mXjbCZtz4sdtIgIgExxFhkv/OnZEF1KWFnPA9dVi6H0xqzx1A7WcwFhcsZQ=",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@ai-sdk%2fprovider-utils@5.0.65",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 1409674
+    },
+    "main": "./dist/index.js",
+    "name": "@ai-sdk/provider-utils",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "source": "./src/index.ts",
+    "engines": {
+      "node": ">=22"
+    },
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "./test": {
+        "types": "./dist/test/index.d.ts",
+        "import": "./dist/test/index.js",
+        "default": "./dist/test/index.js"
+      },
+      "./package.json": "./package.json",
+      "./experimental-decision": {
+        "types": "./dist/experimental-decision/index.d.ts",
+        "import": "./dist/experimental-decision/index.js",
+        "default": "./dist/experimental-decision/index.js"
+      },
+      "./experimental-evaluation": {
+        "types": "./dist/experimental-evaluation/index.d.ts",
+        "import": "./dist/experimental-evaluation/index.js",
+        "default": "./dist/experimental-evaluation/index.js"
+      }
+    },
+    "license": "Apache-2.0",
+    "scripts": {
+      "test": "pnpm test:node && pnpm test:edge",
+      "build": "pnpm clean && tsdown",
+      "clean": "del-cli *.tsbuildinfo",
+      "test:edge": "vitest --config vitest.edge.config.js --run",
+      "test:node": "vitest --config vitest.node.config.js --run",
+      "test:watch": "vitest --config vitest.node.config.js",
+      "type-check": "tsc --build",
+      "build:watch": "pnpm clean && tsdown --watch",
+      "test:update": "pnpm test:node -u"
+    },
+    "_npmUser": {
+      "name": "GitHub Actions",
+      "email": "npm-oidc-no-reply@github.com",
+      "trustedPublisher": {
+        "id": "github",
+        "oidcConfigId": "09b8cd7c-d510-4cc5-a9d1-2b659f906b14"
+      }
+    },
+    "homepage": "https://ai-sdk.dev/docs",
+    "keywords": [
+      "ai"
+    ],
+    "repository": {
+      "url": "https://github.com/vercel/ai",
+      "type": "git",
+      "directory": "packages/provider-utils"
+    },
+    "directories": {},
+    "maintainers": [
+      {
+        "name": "vercel-release-bot",
+        "email": "infra+release@vercel.com"
+      },
+      {
+        "name": "matheuss",
+        "email": "matheus.frndes@gmail.com"
+      },
+      {
+        "name": "matt.straka",
+        "email": "matt.j.straka@gmail.com"
+      }
+    ],
+    "sideEffects": false,
+    "dependencies": {
+      "undici": "^7.29.0",
+      "@workflow/serde": "4.1.0",
+      "@ai-sdk/provider": "4.0.31",
+      "eventsource-parser": "^3.0.8",
+      "@standard-schema/spec": "^1.1.0"
+    },
+    "publishConfig": {
+      "access": "public",
+      "provenance": true
+    },
+    "_hasShrinkwrap": false,
+    "devDependencies": {
+      "msw": "2.7.0",
+      "zod": "3.25.76",
+      "tsdown": "^0.23.0",
+      "typescript": "6.0.3",
+      "@types/node": "22.19.19",
+      "@vercel/ai-tsconfig": "0.0.0",
+      "@vercel/ai-tsdown-config": "0.0.0"
+    },
+    "peerDependencies": {
+      "zod": "^3.25.76 || ^4.1.8"
+    },
+    "_npmOperationalInternal": {
+      "tmp": "tmp/provider-utils_5.0.65_1792549145456_0.951691315749206",
+      "host": "s3://npm-registry-packages-npm-production"
+    },
+    "_id": "@ai-sdk/provider-utils@5.0.65",
+    "version": "5.0.65"
+  },
+  "url": "https://registry.npmjs.org/%40ai-sdk%2Fprovider-utils/5.0.65"
+}

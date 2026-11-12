@@ -1,0 +1,62 @@
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/core
+
+ ❯ src/mcp/mcp-http.test.ts (3 tests | 2 failed) 176ms
+     × preserves structured-only results through the actual transport and namespaced tool 38ms
+     × waits for delayed modern-only HTTP discovery inside the Core candidate budget 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/mcp/mcp-http.test.ts > createMcpManager over Streamable HTTP (T7) > preserves structured-only results through the actual transport and namespaced tool
+AssertionError: expected { ok: false, …(2) } to match object { …(2) }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "content": [
+-     {
+-       "text": "{\"echo\":\"complete\"}",
+-       "type": "text",
+-     },
+-   ],
+-   "structuredContent": {
+-     "echo": "complete",
+-   },
++   "code": "MCP_CALL_FAILED",
++   "message": "MCP tool call failed",
++   "ok": false,
+  }
+
+ ❯ src/mcp/mcp-http.test.ts:116:20
+    114|       configRevision: 1, config: { url: running.url }, selectedTools: …
+    115|     const result = await manager.tools().structured_echo?.execute?.({ …
+    116|     expect(result).toMatchObject({ structuredContent: { echo: "complet…
+       |                    ^
+    117|       content: [{ type: "text", text: '{"echo":"complete"}' }] });
+    118|     expect(running.methods.filter(method => method === "tools/call")).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/mcp/mcp-http.test.ts > createMcpManager over Streamable HTTP (T7) > waits for delayed modern-only HTTP discovery inside the Core candidate budget
+AssertionError: expected undefined to be defined
+ ❯ src/mcp/mcp-http.test.ts:127:41
+    125|     await manager.reconcile([{ serverId: "modern", ownerHostId: "11111…
+    126|       configRevision: 1, config: { url: running.url }, selectedTools: …
+    127|     expect(manager.tools().modern_echo).toBeDefined();
+       |                                         ^
+    128|     expect(running.methods).toContain("server/discover");
+    129|     expect(running.methods).not.toContain("initialize");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  21:34:29
+   Duration  2.32s (transform 1.18s, setup 0ms, import 1.78s, tests 176ms, environment 0ms)
+
+undefined
+H:\TakiAgent-worktrees\t4\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/mcp/mcp-http.test.ts

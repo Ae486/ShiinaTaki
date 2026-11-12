@@ -26,6 +26,8 @@ export interface DeviceRegistry {
    * plaintext token ONCE, via the SAME issuance path as pairing — no parallel token scheme.
    */
   trustDevice(deviceId: string, identity: DeviceIdentity): string;
+  /** Authenticated native enrollment preserves an existing same-role record instead of rotating other windows' tokens. */
+  trustLocalDevice(deviceId: string, identity: DeviceIdentity): string | undefined;
   verifyToken(deviceId: string, token: string, role: Role): boolean;
 }
 
@@ -50,15 +52,7 @@ export function createDeviceRegistry(deps: DeviceRegistryDeps): DeviceRegistry {
   // Single token-issuance path shared by pairing and loopback auto-trust: mint a 256-bit token, persist
   // only its sha256, hand back the plaintext ONCE. Never duplicate this — one secret mechanism, one place.
   function issueToken(deviceId: string, identity: DeviceIdentity): string {
-    const token = randomBytes(32).toString("base64url");
-    store.save({
-      deviceId,
-      deviceName: identity.deviceName,
-      role: identity.role,
-      tokenHash: hashToken(token).toString("base64"),
-      pairedAt: new Date(now()).toISOString(),
-    });
-    return token;
+    return persistToken({ store, now }, deviceId, identity);
   }
 
   return {
@@ -87,6 +81,13 @@ export function createDeviceRegistry(deps: DeviceRegistryDeps): DeviceRegistry {
       return issueToken(deviceId, identity);
     },
 
+    trustLocalDevice(deviceId, identity) {
+      const existing = store.find(deviceId);
+      if (!existing) return issueToken(deviceId, identity);
+      if (existing.role !== identity.role) throw new PairingError("device role does not match its existing identity");
+      return undefined;
+    },
+
     verifyToken(deviceId, token, role) {
       const device = store.find(deviceId);
       if (!device || device.role !== role) return false;
@@ -95,6 +96,13 @@ export function createDeviceRegistry(deps: DeviceRegistryDeps): DeviceRegistry {
       return presented.length === stored.length && timingSafeEqual(presented, stored);
     },
   };
+}
+
+function persistToken(deps: { store: PairedDeviceStore; now(): number }, deviceId: string, identity: DeviceIdentity): string {
+  const token = randomBytes(32).toString("base64url");
+  deps.store.save({ deviceId, deviceName: identity.deviceName, role: identity.role,
+    tokenHash: hashToken(token).toString("base64"), pairedAt: new Date(deps.now()).toISOString() });
+  return token;
 }
 
 function hashToken(token: string): Buffer {

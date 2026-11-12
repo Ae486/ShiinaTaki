@@ -1,0 +1,52 @@
+{
+  "changedFiles": [
+    "packages/core/package.json",
+    "packages/core/src/agents/chat-agent-usage.test.ts",
+    "packages/core/src/agents/chat-agent.test.ts",
+    "packages/core/src/agents/chat-agent.ts",
+    "packages/core/src/agents/index.md",
+    "packages/core/src/agents/run-observability-telemetry.test.ts",
+    "packages/core/src/agents/sdk-wire-compatibility.test.ts",
+    "packages/core/src/mcp/index.md",
+    "packages/core/src/mcp/mcp-http.test.ts",
+    "packages/core/src/server/methods/chat-send-sdk-transport.test.ts",
+    "packages/core/src/server/methods/index.md",
+    "packages/core/src/testing/index.md",
+    "packages/core/src/testing/mock-language-model.ts",
+    "pnpm-lock.yaml",
+    ".trellis/spec/backend/agent-runtime.md"
+  ],
+  "preimages": {
+    "packages/core/package.json": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/package.json",
+    "packages/core/src/agents/chat-agent-usage.test.ts": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/preimages/packages/core/src/agents/chat-agent-usage.test.ts",
+    "packages/core/src/agents/chat-agent.test.ts": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/preimages/packages/core/src/agents/chat-agent.test.ts",
+    "packages/core/src/agents/chat-agent.ts": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/agents/chat-agent.ts",
+    "packages/core/src/agents/index.md": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/agents/index.md",
+    "packages/core/src/agents/run-observability-telemetry.test.ts": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/agents/run-observability-telemetry.test.ts",
+    "packages/core/src/mcp/index.md": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/mcp/index.md",
+    "packages/core/src/mcp/mcp-http.test.ts": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/packages/core/src/mcp/mcp-http.test.ts",
+    "packages/core/src/server/methods/index.md": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/preimages/packages/core/src/server/methods/index.md",
+    "packages/core/src/testing/index.md": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/preimages/packages/core/src/testing/index.md",
+    "packages/core/src/testing/mock-language-model.ts": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/preimages/packages/core/src/testing/mock-language-model.ts",
+    "pnpm-lock.yaml": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/preimages/pnpm-lock.yaml",
+    ".trellis/spec/backend/agent-runtime.md": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/preimages/.trellis/spec/backend/agent-runtime.md"
+  },
+  "sha256": {
+    "packages/core/package.json": "30604fd2035415faf5eb38c4cdd3603dd417612fabdc6eafaa2d93122cb52f58",
+    "packages/core/src/agents/chat-agent-usage.test.ts": "070bfe4f63c74639d0558506e160c55eefa35eab90b2d3b727c0f6d53abee198",
+    "packages/core/src/agents/chat-agent.test.ts": "a1d54bcf7d55ecb72895c40c02879007dca7a06106511276131fe681eb5a6d61",
+    "packages/core/src/agents/chat-agent.ts": "ca270e331805a772605bc0d015cf3317c250697d27421a4816027e1a4ce97548",
+    "packages/core/src/agents/index.md": "f84ddcd5223f631a45f1e22b7e9c9b892568c4e4e3cd5a945962d3717889021d",
+    "packages/core/src/agents/run-observability-telemetry.test.ts": "dc81ce9bfecac42d5eeedafff643d1c33ef99dba6826795d12b1f87bb6a92150",
+    "packages/core/src/agents/sdk-wire-compatibility.test.ts": "697d2effd0e8d31ff2ead98b39f8ff16d4ea30fd698640c39a7ddb7d97bb11a9",
+    "packages/core/src/mcp/index.md": "93b5f52fa877efbc73866ac92ea8dd222687e5b0913549a77b228951c5f5542e",
+    "packages/core/src/mcp/mcp-http.test.ts": "3b10903f4f51e8dc717622d97eb2ab1c4c0bd8ab05128dc45437f6c298847fd5",
+    "packages/core/src/server/methods/chat-send-sdk-transport.test.ts": "aa6fe4d1416600a735bae85190da5e136b5db30f354b0d46aca1ec847353caa4",
+    "packages/core/src/server/methods/index.md": "59ffb44ad156f742c7978cc2baef3d1b206b4e697891669d3ec7aa2e0f311669",
+    "packages/core/src/testing/index.md": "380aad50efad8d53e7138be2db7d150a26c4e232de8fb7df9a8843b25ebb26f8",
+    "packages/core/src/testing/mock-language-model.ts": "44fdd06043e4450aec70f74981df56275c4c6cd29afbbedfc2f4b76fd9ea72a7",
+    "pnpm-lock.yaml": "2f66fc75926ca324f353dea4b01eb9fc81822202f8e7044721b87091a58b3391",
+    ".trellis/spec/backend/agent-runtime.md": "204b80da3bbdc2b51f691959cf03e4c8987c7f45031f1101a6b94a88c13a323c"
+  },
+  "removedUpgradeOnlyAdapter": "packages/core/src/agents/provider-stream-failure.ts"
+}

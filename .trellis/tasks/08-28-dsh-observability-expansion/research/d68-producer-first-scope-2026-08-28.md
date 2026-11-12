@@ -25,7 +25,11 @@ Verified DSH facts from the checked-in reference:
 
 Important correction: DSH does not calculate cache hit/miss from absent fields. Its token usage contract defines optional `cacheReadTokens` and `cacheWriteTokens`; absence means no provider cache signal. TakiAgent must preserve `unknown/unavailable`, never synthesize `miss` or zero (`references/deepseek-harness-master/packages/llm/llm/src/types.ts:127-141`; `packages/core/src/observability/observability-query-service.ts:109-115`; `.trellis/spec/backend/observability-projection.md:38-42`).
 
-The DSH UI is semantic-first, not a raw event viewer: the main list shows role/kind, bounded summary, status, usage and measured duration; detailed input/output, prompt/tool schemas, and technical provenance are opened in an inspector. Opaque event IDs, hashes, and internal revisions should remain inspector-only in TakiAgent, consistent with the existing D65 decision.
+DSH's ordinary tool surface emphasizes operation content, while its dedicated Trajectory Inspector can expose richer
+payload/schema/timing information. The earlier TakiAgent adaptation allowed internal IDs/hashes/revisions in an
+Inspector; the 2026-09-05 G4 owner clarification supersedes that allowance. Remove meaningless bookkeeping from
+TakiAgent's user-facing primary and expanded views while keeping canonical/query identities intact. See the
+[current reference comparison and field inventory](../../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
 
 ### 2. Current TakiAgent producer inventory
 
@@ -84,11 +88,13 @@ Target one implementation/check of roughly 2–3 context windows:
 3. **Projection expansion over the same ledger**:
    - Run summary: model request count, tool call/result counts, failure/retry counts, token quality and optional cache buckets;
    - trajectory rows: semantic Model/Tool/Context/Governance/Recovery/Usage rows with measured duration and status;
-   - inspector: bounded provider/model, usage quality, error classification, approval state and context labels; technical IDs remain secondary.
+   - inspector: bounded provider/model, usage quality, error classification, approval state and context labels;
+     G4 (2026-09-05) removes meaningless technical IDs from user-facing details while preserving internal linkage.
 
 4. **Filters and UI only after producers**:
    - add provider/model/tool/category/severity/outcome filters from real fields;
-   - keep semantic-first rows, collapse/grouping, older-page loading and inspector; no raw event JSON as primary UI.
+   - keep semantic rows, collapse/grouping, older-page loading and useful inspection; G4 (2026-09-05) excludes internal
+     metadata dumps from both primary and expanded user-facing UI.
 
 5. **Tests**:
    - Shared strict schemas/version compatibility and forbidden raw payloads;

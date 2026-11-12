@@ -1,5 +1,24 @@
 # features/chat-bubble/
-The on-pet conversation bubble (#16): click taki's body → input → reply streams into a bubble on the shared timeline.
-- chat-bubble.tsx — editable local draft + readiness-gated submit + streaming reply; an "expand" button opens the full chat window (#17)
-- use-chat-bubble.ts — connection readiness plus fail-fast send and delta accumulation through the shared presentation gate; the component's only ws touchpoint
-- chat-bubble-store.ts — Zustand: the streamed reply content (empty/streaming/done/error); the interaction store owns bubbleOpen
+- bubble-committed-timeline.ts — latest complete ordinary Timeline text projection, preserving shared canonical semantic keys
+- bubble-timeline-binding.ts — bounded append/commit/history/removal recovery for autonomous and primary text through the existing presentation gate
+The disposable Pet conversation view: explicit body-click opening, fixed composer, ordered language/tool bubbles and read-only recovery.
+- chat-bubble.tsx — fixed transparent frame and open gate; only visible child surfaces participate in click-through hit testing
+- use-chat-bubble.ts — component-facing readiness, transcript, initiating send and explicit open/close actions
+- chat-bubble-store.ts — raw activity facts, gated visible snapshots, preserved recovery text and legacy initiating-reply fallback
+- bubble-activity-binding.ts — one client-generation activity adapter with guarded presentation-gate callbacks and read-only reopening refresh
+- bubble-visibility.ts — subscribable explicit opening/document visibility boundary; observation never opens Pet
+- bubble-transcript.ts — pure independent language segments, distinct transient tools and one safe message-only terminal error
+- use-bubble-transcript.ts — narrow store selectors and memoized semantic transcript projection
+- use-bubble-send.ts — exact initiating-request identity, guarded legacy delta fallback and retracted-draft recovery
+- bubble-form.tsx — fixed visible composer and existing Chat/close controls
+- use-bubble-form.ts — local draft, initial focus, readiness/IME submission gates and guarded retracted-draft restoration
+- bubble-transcript-view.tsx — top-anchored internal viewport with finite presence and browser tail anchoring
+- bubble-transcript-row.tsx — safe text/tool/error surface, truthful busy state and inaccessible/non-interactive exits
+- bubble-presence.ts — pure visual groups; successor language and outgoing tool sets share occupied space with distinct semantic keys
+- use-bubble-presence.ts — local presence state and token/revision-guarded row/group completion
+- bubble-presence-group.tsx — measured group wrapper and stable direct row children for overlapping content transitions
+- use-bubble-occupied-height.ts — natural-size observation, CSS height targets, post-transition tail correction and complete zero-space removal
+- use-bubble-row-presence.ts — cached natural row offset and CSS completion without reparenting an exiting node
+- bubble-css-completion.ts — finite browser animation promises; zero/missing/cancelled end-event cleanup without timers
+- use-bubble-motion.ts — actual reduced-motion/document visibility events
+- use-bubble-scroll.ts — reading/selection-aware tail following and natural-size callbacks without frame-by-frame measurement

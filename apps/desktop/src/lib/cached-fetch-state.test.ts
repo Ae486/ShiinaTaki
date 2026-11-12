@@ -17,11 +17,17 @@ describe("reduceCachedFetch", () => {
     expect(isRefreshing(reduceCachedFetch(seeded, { kind: "start" }))).toBe(true);
   });
 
-  it("shows a placeholder only while there is no answer of any kind", () => {
+  it("shows a placeholder only while a cold read is actually running", () => {
     const cold = initialCachedFetch<number[]>(null);
 
-    expect(isLoading(cold)).toBe(true);
+    expect(isLoading(cold)).toBe(false);
+    expect(isLoading(reduceCachedFetch(cold, { kind: "start" }))).toBe(true);
     expect(isRefreshing(reduceCachedFetch(cold, { kind: "start" }))).toBe(false);
+  });
+
+  it("retires a pending read without inventing loading or losing its last good answer", () => {
+    const running = reduceCachedFetch(initialCachedFetch([1]), { kind: "start" });
+    expect(reduceCachedFetch(running, { kind: "retired" })).toEqual({ data: [1], error: null, running: false });
   });
 
   it("replaces the value and clears the previous error on a successful load", () => {

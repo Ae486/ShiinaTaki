@@ -1,11 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TIMING_POLICY_DEVELOPMENT_DEFAULTS, type TimingPolicy } from "@taki/shared";
+import { TIMING_POLICY_DEVELOPMENT_DEFAULTS, type TimingPolicy, type CharacterCostumesResult } from "@taki/shared";
 import { createCostumeReportSyncTracker } from "./costume-report-sync.ts";
 import {
   CostumeAttemptStoppedError,
   startCostumeSwitchAttempt,
   type CostumeSwitchAttemptDeps,
 } from "./costume-switch-attempt.ts";
+
+const COSTUMES: CharacterCostumesResult = {
+  costumes: ["arbeit"], defaultCostume: "arbeit", settingsFilesByCostume: { arbeit: "model.json" },
+};
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -28,6 +32,7 @@ function policy(overrides: Partial<TimingPolicy> = {}): TimingPolicy {
 
 function harness(overrides: Partial<CostumeSwitchAttemptDeps> = {}) {
   const defaultClient = {
+    characterCostumes: vi.fn(async () => COSTUMES),
     currentTimingPolicy: vi.fn(() => policy({ petCostumeTotalMs: 40, rendererLoadMs: 30 })),
     costumeResolution: vi.fn(async () => ({ resolution: {} })),
     reportAvatar: vi.fn(async () => undefined),
@@ -47,7 +52,6 @@ function harness(overrides: Partial<CostumeSwitchAttemptDeps> = {}) {
   const reportSync = overrides.reportSync ?? createCostumeReportSyncTracker();
   const deps: CostumeSwitchAttemptDeps = {
     costume: "arbeit",
-    settingsFile: "model.json",
     ...overrides,
     client,
     scene,
@@ -77,11 +81,53 @@ beforeEach(() => {
 
 afterEach(() => vi.useRealTimers());
 
+describe("current-attempt costume metadata", () => {
+  it("uses a newly imported or reimported manifest without a Pet metadata reload", async () => {
+    const h = harness();
+    vi.mocked(h.client.characterCostumes).mockResolvedValue({ ...COSTUMES,
+      settingsFilesByCostume: { arbeit: "fresh.model3.json" } });
+    await startCostumeSwitchAttempt(h.deps).result;
+    expect(h.resolveAsset).toHaveBeenCalledWith(expect.objectContaining({ settingsFile: "fresh.model3.json" }));
+    expect(h.client.characterCostumes).toHaveBeenCalledExactlyOnceWith("taki");
+  });
+
+  it.each(["cancelled", "superseded", "deadline"] as const)("blocks late metadata after %s", async (reason) => {
+    const pending = deferred<CharacterCostumesResult>();
+    const h = harness();
+    vi.mocked(h.client.characterCostumes).mockReturnValue(pending.promise);
+    const attempt = startCostumeSwitchAttempt(h.deps);
+    const rejected = expect(attempt.result).rejects.toMatchObject({ reason });
+    if (reason === "deadline") await vi.advanceTimersByTimeAsync(40);
+    else attempt.cancel(reason);
+    await rejected;
+    pending.resolve(COSTUMES);
+    await flush();
+    expect(h.costumeResolution).not.toHaveBeenCalled();
+    expect(h.resolveAsset).not.toHaveBeenCalled();
+    expect(h.switchCostume).not.toHaveBeenCalled();
+    expect(h.reportAvatar).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes fresh unknown/unrenderable metadata from a failed read", async () => {
+    const h = harness();
+    const read = vi.mocked(h.client.characterCostumes);
+    read.mockResolvedValueOnce({ costumes: [], defaultCostume: "", settingsFilesByCostume: {} });
+    await expect(startCostumeSwitchAttempt(h.deps).result).rejects.toThrow("unknown-costume");
+    read.mockResolvedValueOnce({ ...COSTUMES, availability: { arbeit: { renderable: false, missingMotions: 0, missingPacks: [] } } });
+    await expect(startCostumeSwitchAttempt(h.deps).result).rejects.toThrow("not-renderable");
+    read.mockRejectedValueOnce(new Error("metadata read unavailable"));
+    await expect(startCostumeSwitchAttempt(h.deps).result).rejects.toThrow("metadata read unavailable");
+    expect(h.costumeResolution).not.toHaveBeenCalled();
+    expect(h.switchCostume).not.toHaveBeenCalled();
+  });
+});
+
 describe("whole costume-attempt deadline and cancellation", () => {
   it("times out unresolved resolution and prevents every later side effect", async () => {
     const resolution = deferred<{ resolution: Record<string, string | null> }>();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 5 }),
         costumeResolution: () => resolution.promise,
         reportAvatar: vi.fn(),
@@ -107,6 +153,7 @@ describe("whole costume-attempt deadline and cancellation", () => {
     const resolution = deferred<{ resolution: Record<string, string | null> }>();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 5 }),
         costumeResolution: () => resolution.promise,
         reportAvatar: vi.fn(),
@@ -154,6 +201,7 @@ describe("whole costume-attempt deadline and cancellation", () => {
     const resolution = deferred<{ resolution: Record<string, string | null> }>();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 5 }),
         costumeResolution: () => resolution.promise,
         reportAvatar: vi.fn(),
@@ -182,6 +230,7 @@ describe("renderer commit and report synchronization", () => {
     const abortSwitch = vi.fn();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 40, rendererLoadMs: 10 }),
         costumeResolution: async () => ({ resolution: {} }),
         reportAvatar: vi.fn(),
@@ -205,6 +254,7 @@ describe("renderer commit and report synchronization", () => {
     const reportAvatar = vi.fn(async () => Promise.reject(new Error("report unavailable")));
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 40, rendererLoadMs: 30 }),
         costumeResolution: async () => ({ resolution: {} }),
         reportAvatar,
@@ -234,6 +284,7 @@ describe("renderer commit and report synchronization", () => {
     const resolution = deferred<{ resolution: Record<string, string | null> }>();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy,
         costumeResolution: () => resolution.promise,
         reportAvatar: async () => undefined,
@@ -252,6 +303,7 @@ describe("renderer commit and report synchronization", () => {
     const report = deferred<void>();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 5 }),
         costumeResolution: async () => ({ resolution: {} }),
         reportAvatar: () => report.promise,
@@ -274,6 +326,7 @@ describe("renderer commit and report synchronization", () => {
     const reportAvatar = vi.fn(async () => undefined);
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 10 }),
         costumeResolution: async () => ({ resolution: {} }),
         reportAvatar,
@@ -313,6 +366,7 @@ describe("renderer commit and report synchronization", () => {
     const abortSwitch = vi.fn();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 10 }),
         costumeResolution: async () => ({ resolution: {} }),
         reportAvatar: vi.fn(),
@@ -347,6 +401,7 @@ describe("renderer commit and report synchronization", () => {
     const report = deferred<void>();
     const h = harness({
       client: {
+        characterCostumes: async () => COSTUMES,
         currentTimingPolicy: () => policy({ petCostumeTotalMs: 10, rendererLoadMs: 5 }),
         costumeResolution: async () => ({ resolution: {} }),
         reportAvatar: vi.fn(() => report.promise),

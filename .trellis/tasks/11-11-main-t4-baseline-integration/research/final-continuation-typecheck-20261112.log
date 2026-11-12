@@ -1,0 +1,29 @@
+Scope: 7 of 8 workspace projects
+
+> @taki/shared@0.0.0 typecheck G:\TakiAgent-integration\packages\shared
+> tsc --noEmit
+
+
+> @taki/cli@0.0.0 typecheck G:\TakiAgent-integration\apps\cli
+> tsc --noEmit
+
+
+> @taki/desktop@0.0.0 typecheck G:\TakiAgent-integration\apps\desktop
+> tsc --noEmit
+
+
+> @taki/e2e@0.0.0 typecheck G:\TakiAgent-integration\e2e
+> tsc --noEmit
+
+
+> @taki/secret-catalog-codec@0.0.0 typecheck G:\TakiAgent-integration\packages\secret-catalog-codec
+> tsc --noEmit
+
+
+> @taki/hindsight-host@0.0.0 typecheck G:\TakiAgent-integration\apps\hindsight-host
+> tsc --noEmit
+
+
+> @taki/core@0.0.0 typecheck G:\TakiAgent-integration\packages\core
+> tsc --noEmit
+

@@ -20,6 +20,7 @@ export type {
   ApprovalStoredDurableDecisionBinding,
 } from "./approval-decision-schema.ts";
 export {
+  APPROVAL_COMMAND_DISCLOSURE_REVISION, ApprovalCommandDisclosureSchema, reconstructApprovalCommand,
   APPROVAL_METHODS, ApprovalChoiceSchema, ApprovalClosedReasonSchema, ApprovalClosedSchema,
   ApprovalDisclosureAckSchema, ApprovalListParamsSchema, ApprovalListResultSchema,
   ApprovalPresentationSchema, ApprovalRespondStatusSchema, ApprovalRevokeParamsSchema,
@@ -27,6 +28,7 @@ export {
   CanonicalApprovalRespondParamsSchema, CanonicalApprovalRespondResultSchema,
 } from "./approval-schema.ts";
 export type {
+  ApprovalCommandDisclosure,
   ApprovalChoice, ApprovalClosed, ApprovalClosedReason, ApprovalDisclosureAck, ApprovalListParams, ApprovalListResult,
   ApprovalPresentation, ApprovalRevokeParams, ApprovalRevokeResult, CanonicalApprovalRequest,
   CanonicalApprovalRespondParams, CanonicalApprovalRespondResult,

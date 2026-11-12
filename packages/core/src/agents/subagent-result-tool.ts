@@ -1,0 +1,81 @@
+/**
+ * INPUT: exact child Run/Attempt, selected real materials and completed SDK tool-result witnesses
+ * OUTPUT: one validated child result proposal and structural loop stop
+ * POS: core/agents — informational result collector; no publication, parent dispatch or Memory mutation
+ */
+import { tool, type StopCondition, type ToolSet } from "ai";
+import { SubagentResultToolSchema, SubagentProposalSchema, type SubagentProposal, type SubagentWorkToken } from "@taki/shared";
+import type { SubagentExecutionRepo } from "../db/subagent-execution-repo.ts";
+import type { MaterialSelection } from "../harness/subagent-tool-materials.ts";
+import { digestRunValue } from "../db/run-row-mappers.ts";
+import type { TurnMessage } from "./turn-mapping.ts";
+import type { SubagentTerminalChoice } from "./subagent-interact-tool.ts";
+
+export interface SubagentResultCollector {
+  tools: ToolSet; stop: StopCondition<ToolSet>;
+  commit(input: { attemptId: string; messages: TurnMessage[] }): void;
+}
+
+export function createSubagentResultCollector(input: {
+  runId: string; attemptId(): string; token(): SubagentWorkToken; current(): boolean;
+  executions: SubagentExecutionRepo; materials: MaterialSelection;
+  terminal?: SubagentTerminalChoice; canCommit?(): boolean;
+}): SubagentResultCollector {
+  let pending: { callId: string; attemptId: string; proposal: SubagentProposal } | undefined;
+  let committed = false;
+  return {
+    tools: { complete_subagent: tool({
+      description: "Finish the entire assigned job with a useful result and references to material actually supplied or acquired. "
+        + "Put the parent-requested report format and content in text. If missing information still blocks the job, use interact_parent with kind needs_input instead; a clarification-stage report is not final completion. "
+        + "Use an empty materials array when none applies. This records private work; it does not speak or write Memory.",
+      inputSchema: SubagentResultToolSchema,
+      execute(candidate, options) {
+        if (!input.current()) return { ok: false, code: "SUBAGENT_RESULT_STALE" };
+        let proposal: SubagentProposal;
+        try {
+          proposal = SubagentProposalSchema.parse({ text: candidate.text,
+            sourceContext: { materials: input.materials.resolve(candidate.materials) } });
+        } catch (error) {
+          const refusal = materialRefusal(error);
+          if (!refusal) throw error;
+          return refusal;
+        }
+        // Invalid material must not claim the shared final/question slot and prevent a corrected call.
+        if (input.terminal && !input.terminal.reserve(input.attemptId(), options.toolCallId, "final")) {
+          return { ok: false, code: "SUBAGENT_TERMINAL_CHOICE_CONFLICT" };
+        }
+        if (pending && pending.attemptId === input.attemptId() && digestRunValue(pending.proposal) !== digestRunValue(proposal)) {
+          return { ok: false, code: "SUBAGENT_RESULT_CONFLICT" };
+        }
+        pending = { callId: options.toolCallId, attemptId: input.attemptId(), proposal };
+        return { ok: true, proposed: true, accepted: false };
+      },
+    }) },
+    stop: () => committed,
+    commit(step) {
+      if (!pending || pending.attemptId !== step.attemptId || !hasCollectorResult(step.messages, pending.callId, "complete_subagent")) return;
+      if (input.canCommit?.() === false) { input.terminal?.release(step.attemptId, pending.callId); pending = undefined; return; }
+      input.executions.recordProposal({ runId: input.runId, attemptId: step.attemptId, workToken: input.token(),
+        proposal: pending.proposal, digest: digestRunValue(pending.proposal) });
+      committed = true;
+    },
+  };
+}
+
+function materialRefusal(error: unknown) {
+  if (!(error instanceof Error) || !["SUBAGENT_MATERIAL_NOT_FOUND", "SUBAGENT_MATERIAL_SCOPE_MISMATCH",
+    "SUBAGENT_MATERIAL_STALE", "SUBAGENT_MATERIAL_LIMIT", "SUBAGENT_INPUT_NOT_FOUND",
+    "SUBAGENT_EXECUTION_NOT_FOUND", "SUBAGENT_NOT_FOUND"].includes(error.message)) return;
+  return { ok: false, code: error.message, state: "not_proposed",
+    message: "A material reference is unavailable, stale, or outside this child's scope. This call recorded no result proposal.",
+    nextAction: "Use the exact Core materialReferences supplied with completed results, or read_self_history to recover this child's "
+      + "actual inputs/results, then retry complete_subagent with valid references. Do not invent reference fields or remove supporting sources to bypass this refusal." };
+}
+
+export function hasCollectorResult(messages: TurnMessage[], callId: string, name: string): boolean {
+  return messages.some((message) => message.role === "tool" && message.content.some((part) =>
+    part.type === "tool-result" && part.toolCallId === callId && part.toolName === name
+    && part.output.type === "json" && typeof part.output.value === "object" && part.output.value !== null
+    && (("proposed" in part.output.value && part.output.value.proposed === true)
+      || ("accepted" in part.output.value && part.output.value.accepted === true))));
+}

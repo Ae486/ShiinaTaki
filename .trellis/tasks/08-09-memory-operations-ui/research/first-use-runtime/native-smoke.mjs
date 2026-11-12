@@ -14,8 +14,6 @@ import { join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import * as shared from "../../../../../packages/shared/src/index.ts";
-import { fenceUntrusted } from "../../../../../packages/core/src/agents/untrusted-fence.ts";
-import { decodeHindsightMemoryWrite } from "../../../../../packages/core/src/db/hindsight-memory-write-storage.ts";
 import { getApplicationReplicaRecord } from "../../../../../packages/core/src/db/hindsight-application-replica-records.ts";
 import { EPISODIC_EVERY_N } from "../../../../../packages/core/src/memory/auto-memory.ts";
 import { loadManagedTemplate, TAKI_MANAGED_TEMPLATE_REVISION } from "../../../../../packages/core/src/memory/hindsight/template-lifecycle/template-catalog.ts";
@@ -29,8 +27,10 @@ import {
 import { startHome, homeStep } from "./home-browser.mjs";
 import { startNativeFault } from "./native-fault.mjs";
 import { pendingWriteEvidence, nativeWriteEvidence } from "./pending-write-evidence.mjs";
+import { parseMemoryModelOutput, readMemoryToolEvidence, readRetainWrite, assertRecallModelView } from "./memory-tool-evidence.mjs";
 
 const script = fileURLToPath(import.meta.url);
+const repository = fileURLToPath(new URL("../../../../../", import.meta.url));
 const evidenceDir = fileURLToPath(new URL(`./results/${new Date().toISOString().replaceAll(":", "-")}/`, import.meta.url));
 const API_KEY_REF = "memory.hindsight.connection.api-key";
 const OP_MS = 300_000;
@@ -146,44 +146,28 @@ function bankView(status) {
 async function retainedChat(ctx, message) {
   const db = new DatabaseSync(join(ctx.coreOptions.dataDir, "taki.db"), { readOnly: true });
   try {
-    const before = db.prepare("SELECT coalesce(max(seq), 0) AS seq FROM timeline_messages WHERE character_id = 'taki'").get().seq;
     const run = await chat(ctx.operator, "taki", message);
     check(run.outcome === shared.CHAT_METHODS.complete && run.runState === "completed", "retain Run failed", run);
-    const parts = db.prepare("SELECT parts FROM timeline_messages WHERE character_id = 'taki' AND seq > ? ORDER BY seq")
-      .all(before).flatMap((row) => row.parts ? JSON.parse(row.parts) : []);
-    const results = parts.filter((part) => part.type === "tool-result" && part.toolName === "retain");
-    check(results.length === 1, "retain must have exactly one persisted tool result", { count: results.length, runId: run.runId });
-    const part = results[0];
-    check(parts.some((call) => call.type === "tool-call" && call.toolName === "retain" && call.toolCallId === part.toolCallId),
-      "persisted retain call/result identity missing");
-    const output = part.output;
-    check(output.type === "json" || output.type === "text", "retain tool returned an SDK error", output);
-    const value = output.type === "json" ? output.value : JSON.parse(output.value.slice(output.value.indexOf("{"), output.value.lastIndexOf("}") + 1)
-      .replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&"));
-    const retain = shared.HindsightMemoryRetainEnvelopeV1Schema.parse(value);
-    check(retain.ok && retain.providerId === "hindsight" && retain.authorityEpochId === ctx.epochId, "retain result is not successful current Hindsight", retain);
-    return { ...run, retain };
+    const { modelView: retain, memoryEffect } = readMemoryToolEvidence(db, { runId: run.runId, characterId: "taki",
+      toolName: "retain", providerId: "hindsight", authorityEpochId: ctx.epochId });
+    const { child } = readRetainWrite(db, memoryEffect);
+    check(retain.scope === child.intent.bank.scope, "retain model scope differs from original Native child", retain);
+    return { ...run, retain, memoryEffect, retainedDocumentId: child.documentId ?? null };
   } finally { db.close(); }
 }
 
 function retainedWrite(ctx, run, completed = false) {
   const db = new DatabaseSync(join(ctx.coreOptions.dataDir, "taki.db"), { readOnly: true });
   try {
-    const rows = db.prepare("SELECT * FROM hindsight_memory_write_intents WHERE authority_epoch_id = ? AND request_id = ?")
-      .all(ctx.epochId, run.retain.requestId);
-    check(rows.length === 1, "original retain must have one durable parent", { requestId: run.retain.requestId, count: rows.length });
-    const job = decodeHindsightMemoryWrite(rows[0]);
+    check(run.memoryEffect.authorityEpochId === ctx.epochId, "original retain belongs to another authority");
+    const { parentRow, parent: job, child } = readRetainWrite(db, run.memoryEffect);
     const bankId = job.identity.key.bankId;
-    const childRow = db.prepare("SELECT state_json FROM pending_memory WHERE authority_epoch_id = ? AND bank_id = ? AND operation_id = ?")
-      .get(ctx.epochId, bankId, job.nativeOperationId);
-    check(childRow, "original retain has no durable Native child");
-    const child = shared.PendingMemoryStateSchema.parse(JSON.parse(childRow.state_json));
-    const evidence = { requestId: run.retain.requestId, bankId, nativeOperationId: job.nativeOperationId,
-      parentState: rows[0].state, childPhase: child.phase, documentId: child.documentId ?? null };
+    const evidence = { requestId: run.memoryEffect.requestId, bankId, nativeOperationId: job.nativeOperationId,
+      parentState: parentRow.state, childPhase: child.phase, documentId: child.documentId ?? null };
     if (!completed) return evidence;
     check(job.terminal?.kind === "retain" && child.phase === "completed", "original retain has not completed", evidence);
     const result = job.terminal.result;
-    check(child.documentId === result.documentId && (!run.retain.data.documentId || run.retain.data.documentId === result.documentId),
+    check(child.documentId === result.documentId && (!run.retainedDocumentId || run.retainedDocumentId === result.documentId),
       "original retain document identity changed", evidence);
     const projections = db.prepare("SELECT object_kind, object_id FROM hindsight_application_replica_projections WHERE bank_id = ? AND object_kind IN ('memory_unit', 'document')")
       .all(bankId).map((row) => getApplicationReplicaRecord(db, { bankId, objectKind: row.object_kind, objectId: row.object_id }));
@@ -209,22 +193,16 @@ async function memoryChat(ctx, message, providerId, expectedText) {
   check(calls.length === 1, "memory chat did not produce one tool result", calls);
   const text = calls[0].toolResult;
   check(typeof text === "string", "memory tool result missing");
-  const json = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1)
-    .replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&");
-  const result = JSON.parse(json);
-  check(result.ok === true && result.providerId === providerId && result.authorityEpochId === ctx.epochId,
-    "memory tool failed or used another authority", result);
-  if (message.startsWith("[retain]")) check(result.data.status === "completed", "Local retain did not commit", result);
-  else {
-    check(result.data.partial === false, "recall had a failed branch", result);
-    // Local fences observed records before returning them. Compare the exact model-facing
-    // representation; a derived observation containing the phrase is still not the base fact.
-    const matching = result.data.hits.filter((hit) => hit.record.unit.text ===
-      (providerId === "local" && hit.record.policy.origin === "observed"
-        ? fenceUntrusted({ source: "memory", content: expectedText }) : expectedText));
-    check(matching.length === 1, "recall must return the preserved fact exactly once", result);
-  }
-  return { ...run, toolResult: result };
+  const result = parseMemoryModelOutput({ type: "text", value: text });
+  const toolName = message.startsWith("[retain]") ? "retain" : "recall";
+  const db = new DatabaseSync(join(ctx.coreOptions.dataDir, "taki.db"), { readOnly: true });
+  try {
+    const evidence = readMemoryToolEvidence(db, { runId: run.runId, characterId: "taki", toolName, providerId, authorityEpochId: ctx.epochId });
+    check(JSON.stringify(result) === JSON.stringify(evidence.modelView), "provider result differs from the persisted memory projection");
+    if (toolName === "retain") check(result.status === "completed" && result.scope === "global", "Local retain did not commit to Global", result);
+    else assertRecallModelView(result, { providerId, text: expectedText, scope: "global" });
+    return { ...run, toolResult: result, memoryEffect: evidence.memoryEffect };
+  } finally { db.close(); }
 }
 
 async function stepSetup(ctx, observed) {
@@ -271,7 +249,7 @@ async function stepCaptureAndSync(ctx, observed) {
   observed.chat = run;
   ctx.runs.push({ label: "hindsight-capture", ...run });
   check(run.outcome === shared.CHAT_METHODS.complete, "Hindsight chat Run failed", run);
-  check(run.retain.data.status === "pending", "automatic settlement requires a Pending retain receipt", run.retain);
+  check(run.retain.status === "pending", "automatic settlement requires a Pending retain receipt", run.retain);
   observed.retainedBefore = retainedWrite(ctx, run);
   const bankBefore = before.replica?.find((bank) => bank.bankId === observed.retainedBefore.bankId);
   check(bankBefore?.automatic && bankBefore.run === null && bankBefore.pendingManualKind === null && !bankBefore.catchUpRequested,
@@ -665,7 +643,7 @@ async function stepRestart(ctx, observed) {
   const changed = operations.filter((row) => JSON.stringify(row) !== JSON.stringify(before.operations.find((old) => old.operationId === row.operationId)));
   observed.operationRowsChanged = changed.map(brief);
   observed.bootNativeCalls = nativeCalls(ctx.native, offset);
-  check(observed.migrationHead === 63, "migrations are not at the phase-2 checkpoint head 063", observed.migrationHead);
+  check(observed.migrationHead === 77, "migrations are not at the integrated checkpoint head 077", observed.migrationHead);
   check(JSON.stringify(status.authority) === JSON.stringify(before.authority.authority), "authority changed across restart", observed.authority);
   check(status.runtime.available, "runtime unavailable after restart", status.runtime);
   check(observed.banksStable, "Bank readiness changed across restart", bankView(status));
@@ -750,7 +728,7 @@ async function stepPendingRestart(ctx, observed) {
       { bankId: bank.bankId, config: { ...original, automatic: true, autoIntervalMs: 60_000 } });
     observed.chat = await retainedChat(ctx, "[retain] I keep a silver compass in my desk during the restart fixture.");
     ctx.runs.push({ label: "pending-restart", ...observed.chat });
-    check(observed.chat.retain.data.status === "pending", "faulted retain did not return Pending", observed.chat.retain);
+    check(observed.chat.retain.status === "pending", "faulted retain did not return Pending", observed.chat.retain);
     observed.originalWrite = pendingWriteEvidence(ctx, observed.chat);
     assertOriginalPending(observed.originalWrite);
     check(observed.originalWrite.identity.parent.bankId === bank.bankId, "restart retain used another Bank", observed.originalWrite);
@@ -933,7 +911,7 @@ async function backupJourney(ctx, observed) {
   check(backup !== null, "Home backup has no verified pair");
   const pairDir = join(ctx.coreOptions.dataDir, "backups", backup.backupId);
   const manifest = shared.HindsightBackupManifestSchema.parse(JSON.parse(readFileSync(join(pairDir, "manifest.json"), "utf8")));
-  check(manifest.version === 2 && manifest.core.migrationHead === 63, "backup did not capture current template/Core build");
+  check(manifest.version === 2 && manifest.core.migrationHead === 77, "backup did not capture current template/Core build");
   check(manifest.authority.epochId === status.authority.epochId && manifest.verifiedAt, "backup authority or verification mismatch");
   observed.templates = manifest.templates.banks;
   check(observed.templates.length === status.hindsight.banks.length
@@ -972,7 +950,7 @@ async function transitionJourney(ctx) {
   const { step } = ctx.journey;
   const originalBanks = fixtureBanks(await authority(ctx.operator));
   const originalDefaults = (await ctx.operator.call(shared.MEMORY_TEMPLATE_METHODS.status, {})).defaults;
-  await step(11, `Home captures and verifies a backup-v2 pair with ${ctx.templateRevision} at Core head063`, (observed) => backupJourney(ctx, observed));
+  await step(11, `Home captures and verifies a backup-v2 pair with ${ctx.templateRevision} at Core head077`, (observed) => backupJourney(ctx, observed));
   await step(12, "Home healthy return; Local recall and a new retained memory", async (observed) => {
     await transitionHome(ctx, "return-local", observed);
     observed.recall = await memoryChat(ctx, "[recall] blue seashells", "local", "The user said: I collect blue seashells during the fixture outage.");
@@ -1108,7 +1086,7 @@ function sourceBaseline(cwd) {
 function harnessBaseline() {
   // Keep this inventory with the imports/launchers: it includes indirect Python and archived fixture helpers.
   const paths = ["./native-smoke.mjs", "./smoke-core.mjs", "./smoke-native.mjs", "./native-fault.mjs",
-    "./home-browser.mjs", "./home-check.py", "./pending-write-evidence.mjs", "./native-write-evidence.py",
+    "./home-browser.mjs", "./home-check.py", "./pending-write-evidence.mjs", "./native-write-evidence.py", "./memory-tool-evidence.mjs",
     "../../../archive/2026-09/09-25-hindsight-native-smoke/research/smoke-fake-provider.mjs",
     "../../../archive/2026-09/09-25-hindsight-native-smoke/research/native_launcher.py"];
   if (process.argv.includes("--with-transitions")) paths.push("./paired-restore.mjs", "./paired-restore.py",
@@ -1121,7 +1099,7 @@ function harnessBaseline() {
 }
 
 async function main() {
-  const baseline = { taki: sourceBaseline("H:/TakiAgent"), native: sourceBaseline("H:/hindsight"), node: process.version,
+  const baseline = { taki: sourceBaseline(repository), native: sourceBaseline("H:/hindsight"), node: process.version,
     harness: harnessBaseline() };
   const root = mkdtempSync("G:/taki-first-use-");
   const before = { pg0Registry: listPg0Registry(), ownerTaki: listOwnerTaki(), processes: processSnapshot() };
@@ -1190,6 +1168,9 @@ async function main() {
         newProcessesAfter: newPids, newProcessesStillRunningAfter5s: running(newPids.map((entry) => entry.pid)),
         processesBefore: before.processes },
     };
+    const sourceAfter = { taki: sourceBaseline(repository), native: sourceBaseline("H:/hindsight"), harness: harnessBaseline() };
+    result.sourceUnchanged = JSON.stringify({ taki: baseline.taki, native: baseline.native, harness: baseline.harness }) === JSON.stringify(sourceAfter);
+    if (!result.sourceUnchanged && result.status === "passed") result.status = "failed";
     copyEvidence(ctx, result);
     // Retain only this owned run directory for diagnosis; no recursive deletion in this adaptation.
     result.teardown.tempRootRetained = existsSync(root);

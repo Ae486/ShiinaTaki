@@ -1,0 +1,1140 @@
+{
+  "scope": "Original inherited historical artifact whitespace only; Git blob comparisons establish exact tracked bytes, including trailing whitespace and EOF",
+  "originalCachedCheckAffectedPaths": 118,
+  "remainingKnownArtifacts": 112,
+  "fixedSourceOrDocumentPaths": [
+    ".trellis/workspace/pleia/index.md",
+    ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/README.md",
+    "packages/core/src/harness/run-service.ts",
+    "packages/core/src/agents/agent-tool-assembly.ts",
+    "apps/desktop/src/features/subagents/use-subagent-activity.ts",
+    "apps/desktop/lab/ui-prototype.html"
+  ],
+  "frozenMain": "9b98794a673efb561682b9fd451fe1da2db95086",
+  "frozenT4": "63faf8119be1747b685aacf43529d754626ab35c",
+  "artifacts": [
+    {
+      "path": ".trellis/tasks/09-11-companion-initiative-implementation/research/observability-contracts.md",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "df0903a0531c3ec1314ef8cf5ec1f12354a3339e",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/cli-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5ccbad5c83c8a0aa9244736aec42a574496ae348",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/core-migration-recheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "e719b4941e06a036c22711f434cdd6f71cf29cb5",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/desktop-build-final.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "d8e2ff02b1e54fd4346b9b547aef2408ebd04a24",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/desktop-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "60053bcbfd826760f5f1e73234d9347a5fa18aa4",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/process-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "054636f7baa667b81643a3cdaa572c4d4e716e00",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/real-c3-compat.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2b2bddb7d646f3200a4823d9c551132d2b17fc8e",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/real-llm-round2.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "894ca808de3a63abc4b2a456953d4950b6555375",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/root-lint-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-intentions-acceptance/research/validation/shared-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "af2d296dcfaecb7723dd578b2501e8957595d8e5",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/design.md",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "f96999316d8ebf0329de8ac344b76bb0b978f494",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/prd.md",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "dcea8c54afb3616a8c1f73ba387f88e1d8225aa8",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/c3-active-checkpoint.md",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "9dbf444cc0ea90945f462b7a57fa44b949af43e2",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/cli-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "8ada40f247870a3954821133f78b7e2e5c30bed9",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/core-serial-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "1e80c4f809f28334900f46bc8d00f4a4cf0f9c68",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/desktop-build-final.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "b5e26989f0c029a779a703b91bb7dffa6a88c587",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/desktop-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5afdc0c7c5a2df5bcea8011eb1d93a03655bd38f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/e2e-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "f1384ea2b7848b614241702d25cd7004c6c54fa6",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/pattern-process.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "e2dd83154d10e96263a4859103e8a13a0c1820ad",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-core-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "734661270e70f7863336fba79ab8da40cbd86e1c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "425bf7e834a79321a5872e7958f3e14e5f8bbea2",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-process-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "fff9967258248989de9e313de57ae66cb1191383",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-root-lint-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-round2.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "85374bbbfc03f299d9efad797a54941cd768a618",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-shared-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "6287175b36d25601e8681d252f56a7ad98b6366d",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/real-llm-smoke.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "779e0d195eb3c68ef4bfa85caa549670990f0e44",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-pattern-authoring/research/validation/shared-full.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "938d78cdc0573a186c3b4adb9f50ca1f65250f3f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-presence-feedback/research/core-serial-final-2026-09-28.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "8e20ee2934701e6f39667a01e9629a7dfd6b46f8",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-presence-feedback/research/core-timeout-recheck-2026-09-28.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "48f3f684fe00f59338445efb4825a7eb33bd3c24",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-presence-feedback/research/desktop-build-final-2026-09-28.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "4fcf20ed42014f5036c36c0f4a7da4e7025cee61",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-presence-feedback/research/desktop-cargo-test-final-2026-09-28.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "40e227c2455878c3b09489047fa1c9e94765e268",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-presence-feedback/research/e2e-final-2026-09-28.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "4c7d6d909dabb2bcce42b29f68eb4552379c9a0c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-presence-feedback/research/shared-full-2026-09-28.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "1b858ff61c05383514ccf12a69aed63bfcaf5797",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/cli-tests-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "fb964c0e2491a817cb236e307a8666b0e5d23c93",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/core-tests-initial-2026-09-26.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "7b9bf8aa3e8671276900064b4eefb84dd75430fa",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/core-typecheck-verified-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/desktop-build-2026-09-26.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "0ead23dfcd1368105f92b36eb090591c8b3e0ab8",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/desktop-build-final-2026-09-26.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "c4287cf57dc107684394a97efc0f67bd80749bbe",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/desktop-current-lock-build-2026-09-26.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "31f3aeaec7099d1537b49b32739b2ddcb3385f75",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/desktop-current-lock-tests-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "e97bf77a12daef588d708952dc34c86b1a152c61",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/desktop-current-lock-typecheck-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "f812df3b08ff262e15be1733492c468c68be6f02",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/desktop-tests-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "571d089c6002fb6765748a9f62e5cc1eea897076",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/e2e-crash-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "06c4f516d56478e2c51f414d0ee2d5f44c6cb390",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/e2e-runtime-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "0d11e2a634593adfa47d9abc8c4a929b777bef49",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/e2e-runtime-final-2026-09-26.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "25e6e23b619b34c3d63a3f89ad9df3b9585c0428",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/e2e-runtime-first.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "77572f0f028eb5a5757c1d867be1a14eff468d8f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/e2e-runtime-resumed-2026-09-21.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "7b568b990f3504a0b94c865048f2b8eb0d7216a5",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/e2e-runtime-verified-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "8d7b4219d696272ffbc20fba9f49ab5a048e972a",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/lint-verified-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/recovery-verified-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "e438ab8fc2871c25e56d63405131df954b06f452",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/shared-desktop-tests-2026-09-26.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "0d2c8f7c81a96fb147f9ea8118736868bb55b1d6",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/09-11-initiative-runtime-foundation/research/workspace-tests-final-2026-09-26.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "741d4f77f65333e4e87fe8f0a5d7309243896b00",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired-final/core-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired-final/desktop-build.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "acf86671fc0f1c02116402da364ee5b1bec7ee57",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired-final/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired-final/task-validation.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "7c62f0ec894452e7742ded82d9b13e2b4a0b9208",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-context-acceptance/research/final-automatic/repaired/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-core-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-repair.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "20c85f83aab35c5927ae9e9eae8f8f29edb37e4c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/final-review/gate-shared-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2840bfa59db3c06b9e97f3f3714a25dfb8d76432",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/final-review/suite-repair.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "4a382646ddcfc27cad5334a1f1b96115c71562f3",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/s1/core-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/s1/review/lint-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/s1/review/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/s1/review/migration-tests.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "b4943a7a5f1261c48b18f938444f561657c219f9",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/s1/s1-working-baseline.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "18dbdc673f71be91d593f1a5805b486dfe84de4b",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-delegation-runtime/research/s1/shared-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2840bfa59db3c06b9e97f3f3714a25dfb8d76432",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s4/core-typecheck-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s4/shared-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2840bfa59db3c06b9e97f3f3714a25dfb8d76432",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s4/working-preimage.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "35641d1eb094cfc78f1e178c23c39a0506a603f5",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-acceptance/a3-compaction-candidate.patch",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "e008b4dc22172a4cf3e8639981ce2bd42e28a7b7",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-acceptance/typecheck-a3-repair.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-acceptance/typecheck-quality-retry.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-acceptance/typecheck-ready.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-acceptance/working-preimage.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "62fb0c20d6c63529fc0ee80d1d3a5078c96dcad3",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-recovery/shared-typecheck-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2840bfa59db3c06b9e97f3f3714a25dfb8d76432",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-recovery/typecheck-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-agent-source-context/research/s5-s6-recovery/working-preimage.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "d09b1d76697c343214a7096bf0b2cfd1e7da82aa",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/cancellation.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "6d36f268f011301477e49c68ffbca4545f5d2711",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/consumers.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "9a2c6324d07c93da7844ea51c009eddde44c518f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/existing-lock-diff.txt",
+      "kinds": [
+        "trailing whitespace.",
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "cf978e64f9d3c27f590b40b9038640731eb854d4",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/governance.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "8cb27aa5e6d4cc244bd0663658bf17e5e4b3bb11",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/mcp.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "9498c603419f5db7d138b735cd7e93739fbdf6a9",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/provider.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "46ce8c16cd1a7acc95ce8276dbfbbffc826a9967",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/rust-tests.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "649c38b0c85470dc01355a8f670263bc206482cd",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/baseline/sdk-wire.log",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "9b7ab326e7217f2bfb65bffacc29bf699549eae2",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final-verified/existing-lock-diff.txt",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "b126dfb8051d6a3d4dd9259f2d55d68ccf7eff5c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final-verified/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/focused-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2992c42359a7d7d4319778b572fd1ec545220187",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/focused.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "c78c3aea34a0d6e6b072081c6056bf0e97424624",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/sdk-scope.diff",
+      "kinds": [
+        "trailing whitespace.",
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "249b68fb4cc09070b9df46234245cec042427bf9",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/transport-before-fix.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5fa4dce45bb7f825104d46b067fa0d9ffdf41a8c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/final/transport-red.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "a11045549593ff12ca574ab5740f6ed1841ca55f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/pre-upgrade/existing-lock-diff.txt",
+      "kinds": [
+        "trailing whitespace.",
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "cf978e64f9d3c27f590b40b9038640731eb854d4",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/cancel-policy-candidate.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "919d97259ee0a870b601346e5f6f0541c3c8617e",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/existing-lock-diff.txt",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "b126dfb8051d6a3d4dd9259f2d55d68ccf7eff5c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/lint.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "829f57610dbf2c2f2f3fd2aa985ed3119bf3f079",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/rust-tests.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "2cc58b45fb484bde01703e25a88fd083ac87bd0f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/sdk-scope.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "bd1cb8b4cec76ee39be8e85975ce2d8d0f176582",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/reviewed-lock.diff",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "63db2886ac4a9b0cf3dfdf68a3bcd892502a0ae5",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-compatibility-final.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "227de658e5f72fb2d2c6346197fdcb959ab7d302",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-compatibility.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "a793776d973f299c3696a4d5e785c262e703ed1f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-core-typecheck.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "5d79ddf77b1d961bf349eac25029e9f5133da65f",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-effect-cancel.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "7bf441de5693b4641fd40c406eabb30149c71e3a",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-final-adaptation.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "f04f38e5917817ce892508d02bdb75bccdcd33da",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-final-agent.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "49ef0c6a065986030ddd6d4c881ac6bb39aba344",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-final-cancel.log",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "42b10a6adb267bcfe2a8a40877aea3f7b2a76527",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/target-final/existing-lock-diff.txt",
+      "kinds": [
+        "trailing whitespace."
+      ],
+      "gitBlobSha1": "b126dfb8051d6a3d4dd9259f2d55d68ccf7eff5c",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-25-agent-delegation-conversations/research/context-preimages-20261025-final-resume/agents/chat-agent.ts",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "02c54cc006c72d569ca9381e5fc31c506976d4fe",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    },
+    {
+      "path": ".trellis/tasks/10-25-agent-delegation-conversations/research/context-preimages-20261025-resume/agents/chat-agent.ts",
+      "kinds": [
+        "new blank line at EOF."
+      ],
+      "gitBlobSha1": "9df0de565a130b6827fdb5c3afc80df52510381a",
+      "byteIdenticalFrozenRefs": [
+        "63faf8119be1747b685aacf43529d754626ab35c"
+      ]
+    }
+  ]
+}

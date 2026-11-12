@@ -1,0 +1,13 @@
+
+> @taki/shared@0.0.0 test H:\TakiAgent-worktrees\t4\packages\shared
+> vitest run
+
+
+ RUN  v4.1.10 H:/TakiAgent-worktrees/t4/packages/shared
+
+
+ Test Files  63 passed (63)
+      Tests  610 passed (610)
+   Start at  10:13:30
+   Duration  6.99s (transform 29.06s, setup 0ms, import 60.67s, tests 2.28s, environment 15ms)
+

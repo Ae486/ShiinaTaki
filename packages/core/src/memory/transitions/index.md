@@ -26,7 +26,7 @@ W5 owns orchestration. These modules never temporarily select a candidate or man
 - transition-queued-provider.ts — original-call admission into bounded typed custody, distinct queue ACK/refusals and immutable provenance.
 - transition-queue-mapping.ts — exact target scope, logical identity and original/current CAS revision before dispatch.
 - transition-intent-executor.ts — ordered fresh target requests, actual receipt/refusal recovery and unknown ownership across restart/shutdown.
-- transition-runtime.ts — production composition of drain, proof, COMMIT, native readiness/release, source repair and queued execution.
+- transition-runtime.ts — production drain/proof/COMMIT, native readiness/release and source repair; awaits real Local index readiness before queued execution.
 - transition-current-identity.ts — healthy/emergency full identity capture with read-only surviving closure and predecessor-policy eligibility before admission; standalone DB readers remain independent
 - transition-native-session.ts — exact acquire/claim/verify/decision history; late renewal validates the dispatched request before preserving newer executor/proof/terminal state; a typed executor-lost refusal joins only the original in-flight decision and requires its exact stored terminal proof.
 - transition-native-decision.ts — immutable finalization decisions and proof-bound continuation of an original refused abort.

@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { tool } from "ai";
+import { z } from "zod";
 import type { EffectLifecycle } from "@taki/shared";
 import { createRunEventRepo } from "../db/run-event-repo.ts";
 import { createEffectRepo } from "../db/effect-repo.ts";
 import { createEffectLifecycleService, type EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
-import { failingMockModel, midStreamErrorModel, streamingMockModel } from "../testing/mock-language-model.ts";
+import { abortRejectingModel, failingMockModel, midStreamErrorModel, scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import { createChatAgent } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
@@ -46,6 +48,28 @@ async function drain(stream: AsyncIterable<string>): Promise<string> {
 }
 
 describe("Run observability telemetry", () => {
+  it.each([false, true])("settles one unknown model Effect without replay after partial cancel, rejecting=%s", async rejecting => {
+    const { companion, events, lifecycle } = fixture();
+    const controller = new AbortController();
+    const model = rejecting ? abortRejectingModel(["partial", "never"], 20) : slowStreamingModel(["partial", "never"], 20);
+    const agent = createChatAgent({ model, store: companion.conversation, memory: companion.memory, effectLifecycle: lifecycle });
+    let failure: unknown;
+    try {
+      for await (const delta of agent.stream({ characterId: "taki", message: "Fixture" }, {
+        runId: "run", attemptId: "attempt", signal: controller.signal,
+      })) { expect(delta).toBe("partial"); controller.abort("fixture cancel"); }
+    } catch (error) { failure = error; }
+    // Owner-approved SDK policy: immediate cancellation may close either provider gracefully;
+    // Core preserves the partial source and suppresses post-turn callbacks without inventing a throw.
+    expect(failure).toBeUndefined();
+    expect(model.doStreamCalls).toHaveLength(1);
+    expect(companion.db.prepare("SELECT state,outcome FROM run_effects WHERE kind='model'").all())
+      .toEqual([{ state: "terminal", outcome: "outcome_unknown" }]);
+    expect(events.list("run").filter(event => event.payload.kind === "model.response.settled")).toHaveLength(1);
+    expect(companion.conversation.history("taki")).toEqual([
+      { role: "user", content: "Fixture" }, { role: "assistant", content: "partial" },
+    ]);
+  });
   it("persists one successful model lifecycle with authoritative detailed usage and measured timing", async () => {
     const { companion, events, lifecycle } = fixture();
     const agent = createChatAgent({
@@ -110,6 +134,52 @@ describe("Run observability telemetry", () => {
     });
     await expect(drain(agent.stream({ characterId: "taki", message: "hi" }, { runId: "run", attemptId: "attempt" })))
       .rejects.toThrow("settlement failed");
+  });
+
+  it("uses the real SDK object bridge for reused call IDs, captured names, and pre-conversion failure outcomes", async () => {
+    const { companion, events, lifecycle } = fixture();
+    const model = scriptedModel([
+      { kind: "tool", toolCallId: "reused", toolName: "echo", input: { privateInput: "not-in-events" } },
+      { kind: "tool", toolCallId: "reused", toolName: "echo", input: { privateInput: "not-in-events" } },
+      { kind: "tool", toolCallId: "reused", toolName: "echo", input: { privateInput: "not-in-events" } },
+      { kind: "text", deltas: ["done"] },
+    ]);
+    const outputs = [
+      { ok: true, content: [{ type: "text" as const, text: "one" }] },
+      { isError: true, content: [{ type: "text" as const, text: "two" }] },
+      { ok: false, code: "TOOL_FAILED", content: [{ type: "text" as const, text: "three" }] },
+    ];
+    let calls = 0;
+    const capturedName = "名".repeat(240);
+    const names = { echo: capturedName };
+    const agent = createChatAgent({
+      model, store: companion.conversation, memory: companion.memory, effectLifecycle: lifecycle,
+      runContext: () => ({ toolDisplayNames: names, tools: {
+        echo: tool({ inputSchema: z.object({ privateInput: z.string() }), execute: async () => {
+          names.echo = "catalog replacement";
+          return outputs[calls++]!;
+        }, toModelOutput: ({ output }) => ({ type: "content", value: output.content }) }),
+      } }),
+    });
+    await expect(drain(agent.stream({ characterId: "taki", message: "hi" }, { runId: "run", attemptId: "attempt" })))
+      .resolves.toBe("done");
+    const ledger = events.list("run");
+    const requests = ledger.filter((event) => event.payload.kind === "model.request.started")
+      .map((event) => event.payload as Extract<typeof event.payload, { kind: "model.request.started" }>);
+    const starts = ledger.filter((event) => event.payload.kind === "tool.call.started")
+      .map((event) => event.payload as Extract<typeof event.payload, { kind: "tool.call.started" }>);
+    const results = ledger.filter((event) => event.payload.kind === "tool.result.settled")
+      .map((event) => event.payload as Extract<typeof event.payload, { kind: "tool.result.settled" }>);
+    expect(calls).toBe(3);
+    expect(new Set(requests.map((request) => request.callId)).size).toBe(1);
+    expect(new Set(requests.map((request) => request.effectId)).size).toBe(4);
+    expect(starts.map((start) => start.modelEffectId)).toEqual(requests.slice(0, 3).map((request) => request.effectId));
+    expect(results.map((result) => result.invocationId)).toEqual(starts.map((start) => start.invocationId));
+    expect(new Set(starts.map((start) => start.invocationId)).size).toBe(3);
+    expect(results.map((result) => result.outcome)).toEqual(["completed", "failed", "failed"]);
+    expect(results.every((result) => result.displayName === capturedName && result.startedAt !== undefined)).toBe(true);
+    expect(JSON.stringify(ledger)).not.toContain("not-in-events");
+    expect(JSON.stringify(ledger)).not.toContain("catalog replacement");
   });
 });
 

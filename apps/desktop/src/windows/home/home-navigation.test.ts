@@ -13,7 +13,7 @@ import { appendVisitedPage } from "./visited-page-ids.ts";
 
 describe("home page registry", () => {
   it("registers the home pages in menu order, chat first", () => {
-    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp", "skills", "monitor"]);
+    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "subagents", "initiative", "qqmm", "settings", "operations", "perception", "costume", "mcp", "skills", "monitor"]);
     expect(DEFAULT_PAGE_ID).toBe("chat");
   });
 
@@ -45,6 +45,7 @@ describe("home page registry", () => {
 describe("pageFromSearch", () => {
   it("boots the requested registered page", () => {
     expect(pageFromSearch("?page=chat")).toBe("chat");
+    expect(pageFromSearch("?page=qqmm")).toBe("qqmm");
   });
 
   it("falls back to the default for a missing or unregistered page", () => {

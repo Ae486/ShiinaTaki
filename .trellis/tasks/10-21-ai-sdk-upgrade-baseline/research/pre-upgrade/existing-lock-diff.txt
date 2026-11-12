@@ -1,0 +1,34 @@
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index b1117fc..6d1156d 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -48,6 +48,9 @@ importers:
+ 
+   apps/desktop:
+     dependencies:
++      '@qqmm/management-client':
++        specifier: file:..\..\..\..\QQMessageMonitor\packages\management-client\artifacts\qqmm-management-client-0.1.0.tgz
++        version: file:../../QQMessageMonitor/packages/management-client/artifacts/qqmm-management-client-0.1.0.tgz
+       '@taki/shared':
+         specifier: workspace:*
+         version: link:../../packages/shared
+@@ -340,6 +343,10 @@ packages:
+     peerDependencies:
+       pixi.js: ^8.0.0
+ 
++  '@qqmm/management-client@file:../../QQMessageMonitor/packages/management-client/artifacts/qqmm-management-client-0.1.0.tgz':
++    resolution: {integrity: sha512-df0mjrnRAviTH6YG60rPYdfPUGjdsz0AWdqd9dUKbEANP81cIWDxSzcfvoeQMrIhdcFr6+M55ihpXPaSTNNO3g==, tarball: file:../../QQMessageMonitor/packages/management-client/artifacts/qqmm-management-client-0.1.0.tgz}
++    version: 0.1.0
++
+   '@rolldown/binding-android-arm64@1.1.4':
+     resolution: {integrity: sha512-EZLpf/8y7GXkkra90ML47kzik/GMP3EMcE9bPyHmRfxLC6z9+aW5A8poCsoxjrT5GfEcNAAvWwUHjvP1pUQkfw==}
+     engines: {node: ^20.19.0 || >=22.12.0}
+@@ -2149,6 +2156,8 @@ snapshots:
+     dependencies:
+       pixi.js: 8.19.0
+ 
++  '@qqmm/management-client@file:../../QQMessageMonitor/packages/management-client/artifacts/qqmm-management-client-0.1.0.tgz': {}
++
+   '@rolldown/binding-android-arm64@1.1.4':
+     optional: true
+ 

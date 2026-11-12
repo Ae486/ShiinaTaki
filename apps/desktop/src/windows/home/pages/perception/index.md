@@ -1,8 +1,14 @@
 # windows/home/pages/perception/
-The perception & privacy page: the Privacy Pause control, what is being sampled right now, and the coalesced activity
-card. It surfaces ONLY what perception.* already exposes — retention/screenshot policy is knob material, so this page
-points at the settings page instead of inventing a control.
-- perception-page.tsx — page root: pause card, sampling + activity cards, retention knob pointer; loading rides Skeleton, the failed read carries a retry, and the pointer is the ActionButton link tone
-- pause-controls.tsx — the Privacy Pause card: current wording + pause / 暂停到明天 / resume
-- use-perception.ts — the page's ONLY ws touchpoint: perception.card / pauseGet / pauseSet; a successful replacement pause read clears stale transport error, while failed reads retain it. The card is MEMORY-ONLY and pause is never cached; P1e: reads are skipped while the page is hidden and rerun on reactivation
-- perception-view.ts — pure view models (pause wording, sampling + activity rows) + the local-midnight deadline
+The perception & privacy page: Privacy Pause evidence, scheduled sampling loops and the latest accepted activity
+card, optional browser observations and explicit Co-Watching. Each card reads its actual Core producer;
+retention/screenshot policy remains knob material linked to Settings.
+- perception-page.tsx — retained sampling/activity cards, compact header qualification and delayed pending indication; initial loading, genuine empty results and failed reads stay distinct
+- pause-controls.tsx — stable last-confirmed privacy wording, non-displacing pending slot and guarded pause / 暂停到明天 / resume actions
+- perception-controller.ts — subscribe-before-card producer observation, explicit older-Core fallback, qualified pause authority and independent write/hidden read lifetimes
+- use-perception.ts — current-client/effective-visibility React adapter over the memory-only Perception controller
+- perception-view.ts — truthful pause/scheduling wording, stable sampled-entry identities and the local-midnight input shortcut
+- browser-attachment-card.tsx — explicit local pairing/Core receive controls, user-revealed copyable credentials and last-read source feedback
+- use-browser-attachment.ts — live local setup and separate Core observation actions; local failure/restart feedback follows native results and credentials remain component-local
+- co-watching-card.tsx — matching video/analysis selection, visible finite lifetime, real preparation/sent/paused-child state, explicit start/stop and exact private-child navigation
+- co-watching-controller.ts — subscribe-before-read observation, retired-result guards and command ownership preserved through hidden/replaced read lifetimes
+- use-co-watching.ts — ordinary active Character and Home visibility/connection binding for the disposable control card

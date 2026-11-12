@@ -227,6 +227,16 @@ covering R1-R10 and later rulings, plus the [dependency order and 16 acceptance 
 Treat it as the current completeness ledger; scoped batch tests and data reconstruction do not prove missing operator
 journeys. Implementation, deployment and owner/manual acceptance remain separate work.
 
+## Integration Maintenance Handoff (2026-11-12)
+
+The active main/T4 baseline integration records its Hindsight changes, source identities, validation receipts and
+remaining limits in [the integration handoff](research/main-t4-integration-20261112.md). Read it before a Hindsight
+follow-up. It covers the G: integrated working tree; original branches are not yet aligned.
+
+The owner additionally requires [startup configuration blockers](research/startup-configuration-blockers.md) to be
+recorded during E2E. Missing embedding/reranking models must become configurable after application startup in a
+later product increment. Cache preparation in the integration harness does not satisfy that product requirement.
+
 ## Open Questions
 
 No owner-blocking product question is currently known. Technical unknowns must be resolved from the live Taki and Hindsight repositories and persisted as research rather than returned to the owner unless multiple equally valid product choices remain.

@@ -1,0 +1,185 @@
+{
+  "thinkingBaseline": {
+    "calls": 5,
+    "inputTokens": 107987,
+    "cacheReadTokens": 896,
+    "outputTokens": 28829,
+    "elapsedMs": 172428,
+    "estimatedCny": 0.22242492,
+    "fullColdEstimatedCny": 0.223303
+  },
+  "nonthinkingOriginalSettings": {
+    "calls": 5,
+    "inputTokens": 107861,
+    "cacheReadTokens": 640,
+    "outputTokens": 8585,
+    "elapsedMs": 51746,
+    "estimatedCny": 0.1415738,
+    "fullColdEstimatedCny": 0.142201
+  },
+  "nonthinkingSummaryControl": {
+    "calls": 1,
+    "inputTokens": 83578,
+    "cacheReadTokens": 83328,
+    "outputTokens": 2311,
+    "elapsedMs": 16504,
+    "estimatedCny": 0.01116056,
+    "fullColdEstimatedCny": 0.092822
+  },
+  "nonthinkingWithCompletedControl": {
+    "calls": 5,
+    "inputTokens": 107861,
+    "cacheReadTokens": 83968,
+    "outputTokens": 2704,
+    "elapsedMs": 21689,
+    "estimatedCny": 0.03638836,
+    "fullColdEstimatedCny": 0.118677
+  },
+  "newExperimentSpend": {
+    "calls": 6,
+    "inputTokens": 191439,
+    "cacheReadTokens": 83968,
+    "outputTokens": 10896,
+    "elapsedMs": 68250,
+    "estimatedCny": 0.15273436,
+    "fullColdEstimatedCny": 0.235023
+  },
+  "source": "provider returned usage; CNY Sunday off-peak tariff; not measured invoice",
+  "promptMatches": 6,
+  "nonthinkingReasoningCounts": "Raw field absent; ledger correctly null, despite SDK default0. Requests explicitly disabled thinking.",
+  "truncatedOriginalSummary": true,
+  "productionDefaultChanged": false,
+  "pairs": [
+    {
+      "call": 1,
+      "label": "canonical-write-gate",
+      "thinking": {
+        "calls": 1,
+        "inputTokens": 8586,
+        "cacheReadTokens": 128,
+        "outputTokens": 4876,
+        "elapsedMs": 33534,
+        "estimatedCny": 0.02796456,
+        "fullColdEstimatedCny": 0.02809
+      },
+      "nonthinking": {
+        "calls": 1,
+        "inputTokens": 8561,
+        "cacheReadTokens": 0,
+        "outputTokens": 21,
+        "elapsedMs": 666,
+        "estimatedCny": 0.008645,
+        "fullColdEstimatedCny": 0.008645
+      },
+      "finishReason": {
+        "unified": "stop",
+        "raw": "stop"
+      }
+    },
+    {
+      "call": 2,
+      "label": "canonical-local-extraction",
+      "thinking": {
+        "calls": 1,
+        "inputTokens": 825,
+        "cacheReadTokens": 128,
+        "outputTokens": 592,
+        "elapsedMs": 3734,
+        "estimatedCny": 0.00306756,
+        "fullColdEstimatedCny": 0.003193
+      },
+      "nonthinking": {
+        "calls": 1,
+        "inputTokens": 800,
+        "cacheReadTokens": 0,
+        "outputTokens": 114,
+        "elapsedMs": 1442,
+        "estimatedCny": 0.001256,
+        "fullColdEstimatedCny": 0.001256
+      },
+      "finishReason": {
+        "unified": "stop",
+        "raw": "stop"
+      }
+    },
+    {
+      "call": 3,
+      "label": "canonical-write-gate",
+      "thinking": {
+        "calls": 1,
+        "inputTokens": 7733,
+        "cacheReadTokens": 384,
+        "outputTokens": 1565,
+        "elapsedMs": 11227,
+        "estimatedCny": 0.01361668,
+        "fullColdEstimatedCny": 0.013993
+      },
+      "nonthinking": {
+        "calls": 1,
+        "inputTokens": 7708,
+        "cacheReadTokens": 384,
+        "outputTokens": 21,
+        "elapsedMs": 880,
+        "estimatedCny": 0.00741568,
+        "fullColdEstimatedCny": 0.007792
+      },
+      "finishReason": {
+        "unified": "stop",
+        "raw": "stop"
+      }
+    },
+    {
+      "call": 4,
+      "label": "canonical-local-extraction",
+      "thinking": {
+        "calls": 1,
+        "inputTokens": 7239,
+        "cacheReadTokens": 256,
+        "outputTokens": 2115,
+        "elapsedMs": 13048,
+        "estimatedCny": 0.01544812,
+        "fullColdEstimatedCny": 0.015699
+      },
+      "nonthinking": {
+        "calls": 1,
+        "inputTokens": 7214,
+        "cacheReadTokens": 256,
+        "outputTokens": 237,
+        "elapsedMs": 2197,
+        "estimatedCny": 0.00791112,
+        "fullColdEstimatedCny": 0.008162
+      },
+      "finishReason": {
+        "unified": "stop",
+        "raw": "stop"
+      }
+    },
+    {
+      "call": 5,
+      "label": "compact",
+      "thinking": {
+        "calls": 1,
+        "inputTokens": 83604,
+        "cacheReadTokens": 0,
+        "outputTokens": 19681,
+        "elapsedMs": 110885,
+        "estimatedCny": 0.162328,
+        "fullColdEstimatedCny": 0.162328
+      },
+      "nonthinking": {
+        "calls": 1,
+        "inputTokens": 83578,
+        "cacheReadTokens": 0,
+        "outputTokens": 8192,
+        "elapsedMs": 46561,
+        "estimatedCny": 0.116346,
+        "fullColdEstimatedCny": 0.116346
+      },
+      "finishReason": {
+        "unified": "length",
+        "raw": "length"
+      }
+    }
+  ],
+  "fullColdReductionWithControl": 0.46853826415229527
+}

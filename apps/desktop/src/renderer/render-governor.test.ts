@@ -43,6 +43,30 @@ function countFramesWhile(setup: (g: RenderGovernor, t: FakeTicker) => void): nu
 }
 
 describe("RenderGovernor", () => {
+  it("keeps empty content paused across activity, focus, visibility and throttle changes", () => {
+    const ticker = new FakeTicker(); const governor = new RenderGovernor(ticker, undefined, false);
+    let frames = 0; ticker.add(() => { frames += 1; });
+    expect(ticker.started).toBe(false);
+    governor.setActivity("active"); governor.setFocused(false); governor.setHidden(true);
+    governor.setThrottling(false); governor.setFocused(true); governor.setHidden(false);
+    ticker.tick(20); expect(frames).toBe(0); expect(ticker.started).toBe(false);
+    governor.setRenderable(true); ticker.tick(2);
+    expect(frames).toBe(2); expect(ticker.maxFPS).toBe(60);
+    governor.setRenderable(false); ticker.tick(2); expect(frames).toBe(2);
+  });
+
+  it("attachment resumes the current tier and respects loaded hidden/asleep policy", () => {
+    const ticker = new FakeTicker(); const governor = new RenderGovernor(ticker, undefined, false);
+    governor.setFocused(false); governor.setRenderable(true);
+    expect(ticker.started).toBe(true); expect(ticker.maxFPS).toBe(15);
+    governor.setRenderable(false); governor.setHidden(true); governor.setRenderable(true);
+    expect(ticker.started).toBe(false);
+    governor.setHidden(false); governor.setActivity("asleep"); governor.setRenderable(false); governor.setRenderable(true);
+    expect(ticker.started).toBe(false);
+    governor.setActivity("idle"); governor.setFocused(true);
+    expect(ticker.started).toBe(true); expect(ticker.maxFPS).toBe(30);
+  });
+
   it("provably pauses when the window is hidden (zero frames while paused)", () => {
     const frames = countFramesWhile((g) => {
       g.setActivity("active");

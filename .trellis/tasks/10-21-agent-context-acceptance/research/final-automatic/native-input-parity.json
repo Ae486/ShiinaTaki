@@ -1,0 +1,333 @@
+{
+  "baseline": ".trellis/tasks/10-21-ai-sdk-upgrade-baseline/research/recovery/platform-hashes.json",
+  "checkedAt": "2026-10-23T02:50:42.8449855Z",
+  "files": 54,
+  "unchanged": 54,
+  "changed": [],
+  "comparison": [
+    {
+      "path": "apps/desktop/src-tauri/src/audit.rs",
+      "expected": "5de6ce9db42f102dcab61cbd3de7e5b27cf85f1a8ec5f163d3ba038e34211097",
+      "actual": "5de6ce9db42f102dcab61cbd3de7e5b27cf85f1a8ec5f163d3ba038e34211097",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_attachment.rs",
+      "expected": "c29aba1e3b27dd8a40f8b7abf748b528bf773f0a00d363a574aa621192354c70",
+      "actual": "c29aba1e3b27dd8a40f8b7abf748b528bf773f0a00d363a574aa621192354c70",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_attachment_commands.rs",
+      "expected": "a29b72fb7ed751efdcedf6673afc5149d034f7cbc5f8e29c5fb8b633cb45002e",
+      "actual": "a29b72fb7ed751efdcedf6673afc5149d034f7cbc5f8e29c5fb8b633cb45002e",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_playback_protocol.rs",
+      "expected": "c4a9d3cf338e73b3177221d3b0951c950f6a8aef675a26d3935c6d5363b93225",
+      "actual": "c4a9d3cf338e73b3177221d3b0951c950f6a8aef675a26d3935c6d5363b93225",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl.rs",
+      "expected": "96b42c5029562f78048bffef616882b8286515001b3d1c1f8314338d4e1762bb",
+      "actual": "96b42c5029562f78048bffef616882b8286515001b3d1c1f8314338d4e1762bb",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/exec_command_disclosure.rs",
+      "expected": "5200bf5bc07dab575d47f1d6bb98da57bb90e1f647510b78357191731d217aad",
+      "actual": "5200bf5bc07dab575d47f1d6bb98da57bb90e1f647510b78357191731d217aad",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate.rs",
+      "expected": "a47560d6162087c4a99830d6eec3c38d2cd955c4a84cc4999765498f07ad4458",
+      "actual": "a47560d6162087c4a99830d6eec3c38d2cd955c4a84cc4999765498f07ad4458",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/host_approval_protocol.rs",
+      "expected": "6d7fe136bb3345c276f5f805493ffb530fa8aaedf0c122ed033912d11a780e36",
+      "actual": "6d7fe136bb3345c276f5f805493ffb530fa8aaedf0c122ed033912d11a780e36",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/host_control_protocol.rs",
+      "expected": "c93354188bff26d9bfbb543d4ae1e42b10e546005d36796fd4988f5d62dba8ff",
+      "actual": "c93354188bff26d9bfbb543d4ae1e42b10e546005d36796fd4988f5d62dba8ff",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/host_session.rs",
+      "expected": "ebf06f63eca188af9e0d1bb6c5d4c11ac3a72574078f72ae99f23b05b493c75f",
+      "actual": "ebf06f63eca188af9e0d1bb6c5d4c11ac3a72574078f72ae99f23b05b493c75f",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/index.md",
+      "expected": "336131486d944854eb465fa4a2ba4991ec8653cf87632d641021ced9e81d5302",
+      "actual": "336131486d944854eb465fa4a2ba4991ec8653cf87632d641021ced9e81d5302",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/lib.rs",
+      "expected": "ede0341b03eb80cb3f1077c3a459ab5ea7b9a5dfb9a067b410409593d69792bc",
+      "actual": "ede0341b03eb80cb3f1077c3a459ab5ea7b9a5dfb9a067b410409593d69792bc",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/main.rs",
+      "expected": "a6d5f10c8b325686f372561c736bf35c87ba425b23e5f65788cf3639988b40c9",
+      "actual": "a6d5f10c8b325686f372561c736bf35c87ba425b23e5f65788cf3639988b40c9",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/node.rs",
+      "expected": "fad564113f311d34e25236b2d94b7d9ee90c1e289ed5e69d512426602e2624ef",
+      "actual": "fad564113f311d34e25236b2d94b7d9ee90c1e289ed5e69d512426602e2624ef",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/protocol.rs",
+      "expected": "76bc3da64fe92a8d729573e04d326e24a91f90983031318398e449beb3e7c2da",
+      "actual": "76bc3da64fe92a8d729573e04d326e24a91f90983031318398e449beb3e7c2da",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/qqmm.rs",
+      "expected": "80dd5d7febc50757a25d3a458e8728276c67a2e418b8580756bbd877d2c516ae",
+      "actual": "80dd5d7febc50757a25d3a458e8728276c67a2e418b8580756bbd877d2c516ae",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/secrets.rs",
+      "expected": "efa50d90fc4f894d1cbf853e7be5633b5340b6ea54d77e23e64b89d5ae0b6ec5",
+      "actual": "efa50d90fc4f894d1cbf853e7be5633b5340b6ea54d77e23e64b89d5ae0b6ec5",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/status.rs",
+      "expected": "328e1fd6f15a79a06bc332ea33d2650cf80ed624e570464673d5d94ed5a60554",
+      "actual": "328e1fd6f15a79a06bc332ea33d2650cf80ed624e570464673d5d94ed5a60554",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/ws_challenge.rs",
+      "expected": "49223fd4c0c9c833cee7831c6dd387ac81cd624051a88c15fe48fa51d617c876",
+      "actual": "49223fd4c0c9c833cee7831c6dd387ac81cd624051a88c15fe48fa51d617c876",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/ws_client.rs",
+      "expected": "398cdca89049c7517548e9e46a5057f28682cef561f228ef2936bddd32790269",
+      "actual": "398cdca89049c7517548e9e46a5057f28682cef561f228ef2936bddd32790269",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/bin/index.md",
+      "expected": "75e37fa060bf1d8563d265992592fbf14d7c6720bfeb2732a30b6fb011c60b25",
+      "actual": "75e37fa060bf1d8563d265992592fbf14d7c6720bfeb2732a30b6fb011c60b25",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/bin/taki-node.rs",
+      "expected": "87bf248dd1857874662c4ef7f5215798c3b988327753571206d42fa89fa8e3e9",
+      "actual": "87bf248dd1857874662c4ef7f5215798c3b988327753571206d42fa89fa8e3e9",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/bin/taki-secret-key.rs",
+      "expected": "534522db567046ae46d2e09c288a7b86cb4f8964ebf6bfaedb1ce624dd099080",
+      "actual": "534522db567046ae46d2e09c288a7b86cb4f8964ebf6bfaedb1ce624dd099080",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_attachment/forwarder.rs",
+      "expected": "2bbf1e538598d84f0a2172699ecb69a9916056a7f8fe1e7a3c57e8a4b4363cc4",
+      "actual": "2bbf1e538598d84f0a2172699ecb69a9916056a7f8fe1e7a3c57e8a4b4363cc4",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_attachment/index.md",
+      "expected": "71609acdf6c371d491d4ecbed5740181aa2df50a9f0240f2fad4db5e3a7985c4",
+      "actual": "71609acdf6c371d491d4ecbed5740181aa2df50a9f0240f2fad4db5e3a7985c4",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_attachment/server.rs",
+      "expected": "81ec5cf5123b47f4ad870296bb2fc7527d1574a19afd08179154a9e0503e78aa",
+      "actual": "81ec5cf5123b47f4ad870296bb2fc7527d1574a19afd08179154a9e0503e78aa",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/browser_attachment/tests.rs",
+      "expected": "eee0a3be233ce9b865fecd3f76a094d40f3bf90661452bd1a417b46fb085e34d",
+      "actual": "eee0a3be233ce9b865fecd3f76a094d40f3bf90661452bd1a417b46fb085e34d",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/clipboard.rs",
+      "expected": "59759aa0015c7cd7424a9b1b83aa4e923fcefe6b8feb3a13740664edf26e65c0",
+      "actual": "59759aa0015c7cd7424a9b1b83aa4e923fcefe6b8feb3a13740664edf26e65c0",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/exec.rs",
+      "expected": "f7bb12110f5e4750fbcb7961b47ac0bff4ebd274485b47ecc61b23315b20d6b6",
+      "actual": "f7bb12110f5e4750fbcb7961b47ac0bff4ebd274485b47ecc61b23315b20d6b6",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/foreground_window.rs",
+      "expected": "e359bf9e419d90369184dc4974042d4fc0e0761dfec5032b54ee5fb819a4a205",
+      "actual": "e359bf9e419d90369184dc4974042d4fc0e0761dfec5032b54ee5fb819a4a205",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/index.md",
+      "expected": "478ea1285314480b488725babdab712047153121f3392e65e4ec7c3b845f3e2c",
+      "actual": "478ea1285314480b488725babdab712047153121f3392e65e4ec7c3b845f3e2c",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/process_list.rs",
+      "expected": "5b2b94a1ca1da2bb4cad225fb6c8b5a559e0bc36400ae096c61b4ef910bf6922",
+      "actual": "5b2b94a1ca1da2bb4cad225fb6c8b5a559e0bc36400ae096c61b4ef910bf6922",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/screenshot.rs",
+      "expected": "fce13ebde8c2cf5e5640cea8c79aa35fc35b4dc92d2b234a0c3253ecad76725e",
+      "actual": "fce13ebde8c2cf5e5640cea8c79aa35fc35b4dc92d2b234a0c3253ecad76725e",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/shell_open.rs",
+      "expected": "d4e96af8d6f76b96cb889d054b0abc462772813f5e7354f344768406a285f414",
+      "actual": "d4e96af8d6f76b96cb889d054b0abc462772813f5e7354f344768406a285f414",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/exec_command_disclosure/index.md",
+      "expected": "e0c14d530c255b89fcd1a91807792397d2b3f00713fae327fdd7b3790d5b70f5",
+      "actual": "e0c14d530c255b89fcd1a91807792397d2b3f00713fae327fdd7b3790d5b70f5",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/exec_command_disclosure/patterns.rs",
+      "expected": "07c0d28ef45fcf25ffdd9a738a247f49be9517848729156ce2d7513a988f673c",
+      "actual": "07c0d28ef45fcf25ffdd9a738a247f49be9517848729156ce2d7513a988f673c",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/exec_command_disclosure/scanner.rs",
+      "expected": "aa21282825c4a58665beb1921b828d77f9bc964662f990ced4818a9f1e30e9b4",
+      "actual": "aa21282825c4a58665beb1921b828d77f9bc964662f990ced4818a9f1e30e9b4",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/exec_command_disclosure/tests.rs",
+      "expected": "01c0044c47bf3e823bceeb11d0d898704bb89d8fe8cec52121838dc74b1861a4",
+      "actual": "01c0044c47bf3e823bceeb11d0d898704bb89d8fe8cec52121838dc74b1861a4",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/approver.rs",
+      "expected": "041c0a15edf3baca4aac51d761af77b3ca34c23f66824ec034ed1605eb9cf13d",
+      "actual": "041c0a15edf3baca4aac51d761af77b3ca34c23f66824ec034ed1605eb9cf13d",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/decisions.rs",
+      "expected": "79fcc9524ffadd9685a274d3b5a49c4df7963e14adc679f33b980769994e6158",
+      "actual": "79fcc9524ffadd9685a274d3b5a49c4df7963e14adc679f33b980769994e6158",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/fs_write_class.rs",
+      "expected": "114495b2f6d681b4ad5cb39fbe5c2ba18a2717f9b552a982e4af954f41ead6c3",
+      "actual": "114495b2f6d681b4ad5cb39fbe5c2ba18a2717f9b552a982e4af954f41ead6c3",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/governance.rs",
+      "expected": "36d183f9388ea4b345990c7e1b88cc027bc0013e195282e117b4a68103ad2cb4",
+      "actual": "36d183f9388ea4b345990c7e1b88cc027bc0013e195282e117b4a68103ad2cb4",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/index.md",
+      "expected": "f425740d915d0ac95f18b8397c8719323d8dd07439d9992d7643075e6740bcd3",
+      "actual": "f425740d915d0ac95f18b8397c8719323d8dd07439d9992d7643075e6740bcd3",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/gate/level.rs",
+      "expected": "e1d763dfc96dedd2ac7be837d5f3b1305714f5ca58670dd97de74913f90d8d23",
+      "actual": "e1d763dfc96dedd2ac7be837d5f3b1305714f5ca58670dd97de74913f90d8d23",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/exec/index.md",
+      "expected": "5114d769f85bdf6774600c245363993a369c28756118e03cc9c4e9524e4c7d02",
+      "actual": "5114d769f85bdf6774600c245363993a369c28756118e03cc9c4e9524e4c7d02",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/exec/parser.rs",
+      "expected": "cfeaa45b82a049662d2413bef850cc5741e90fc7560a6a6c1e766f2f3f033947",
+      "actual": "cfeaa45b82a049662d2413bef850cc5741e90fc7560a6a6c1e766f2f3f033947",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/exec/policy.rs",
+      "expected": "2afaf8cc8ed6b93afbee960b1e8ee919e63a042783eda98418ea24afb8c40ae0",
+      "actual": "2afaf8cc8ed6b93afbee960b1e8ee919e63a042783eda98418ea24afb8c40ae0",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/exec/resolve.rs",
+      "expected": "839ab275aef9cfc3b618fc4e52cb0fe789788b6f1a09b5ba13cc165877b971b3",
+      "actual": "839ab275aef9cfc3b618fc4e52cb0fe789788b6f1a09b5ba13cc165877b971b3",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/exec/sandbox.rs",
+      "expected": "226be2251f59288e0096b3444f0e904d54a758a820e2515b1849b2b3d7b26b87",
+      "actual": "226be2251f59288e0096b3444f0e904d54a758a820e2515b1849b2b3d7b26b87",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/shell_open/index.md",
+      "expected": "a82d573f7e77321c6bdf3730ad42e4d0384110ef4c1530b4a209119aa89ffbed",
+      "actual": "a82d573f7e77321c6bdf3730ad42e4d0384110ef4c1530b4a209119aa89ffbed",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/capabilities_impl/shell_open/target.rs",
+      "expected": "be7ecd00eb88f85193dca97242cc0de0b039f0ab079565de02e9ef6f82490d84",
+      "actual": "be7ecd00eb88f85193dca97242cc0de0b039f0ab079565de02e9ef6f82490d84",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/Cargo.toml",
+      "expected": "ea7e8af5bf48c14fe1ea406845cb0c88d248a3e5eaaae47756ebd050a446d27b",
+      "actual": "ea7e8af5bf48c14fe1ea406845cb0c88d248a3e5eaaae47756ebd050a446d27b",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/Cargo.lock",
+      "expected": "9a45d226edaa07d8a140aec14c9f96eeb574066d902bde79f57e959a62ed8e5c",
+      "actual": "9a45d226edaa07d8a140aec14c9f96eeb574066d902bde79f57e959a62ed8e5c",
+      "unchanged": true
+    },
+    {
+      "path": "apps/desktop/src-tauri/build.rs",
+      "expected": "bbd74f583f3516adaf2ad7a249ba622a94304f5fe1aed6699a6165928fff67d6",
+      "actual": "bbd74f583f3516adaf2ad7a249ba622a94304f5fe1aed6699a6165928fff67d6",
+      "unchanged": true
+    }
+  ]
+}

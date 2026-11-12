@@ -73,6 +73,24 @@ function expectFinalSchema(db: Database): void {
     "hindsight_template_applied",
     "hindsight_template_default_history",
     "hindsight_template_defaults",
+    "hindsight_application_runtime_admission",
+    "hindsight_memory_write_intents",
+    "memory_operations",
+    "model_profiles",
+    "model_profile_secrets",
+    "search_projection_policy",
+    "memory_tidy_reviews",
+    "memory_tidy_block_reviews",
+    "memory_tidy_retry",
+    "subagent_conversations",
+    "subagent_inputs",
+    "subagent_executions",
+    "run_messages",
+    "run_deliveries",
+    "initiative_policy_facts",
+    "initiative_model_opportunities",
+    "delivery_presentations",
+    "initiative_feedback",
     "mcp_desired_servers",
     "skill_packages",
     "memory_authority_selection",
@@ -100,7 +118,7 @@ function expectFinalSchema(db: Database): void {
     "run_receipts",
     "run_events",
     "run_effects",
-    "run_usage",
+    "run_usage", "auxiliary_model_calls",
     "core_process_generations",
     "scheduled_tasks",
     "schedule_occurrences",
@@ -182,7 +200,7 @@ describe("migration lineage reopen matrix", () => {
     expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(MIGRATIONS.length);
   });
 
-  it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
+  it("converges the historical T4 17/18 MCP-Skill lineage through the current tail", () => {
     const path = createPath();
     const first = open(path, MIGRATIONS.slice(0, 16));
     expect(runMigrations(first, [
@@ -325,7 +343,8 @@ describe("migration lineage reopen matrix", () => {
     expect(upgraded.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
       .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);
     const after = memoryTimelineData(upgraded);
-    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null })));
+    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null,
+      source_context_json: null, primary_source_id: null })));
     if (before.presentationBytes) expect(after.presentationBytes).toEqual(before.presentationBytes);
     expect(after.pending).toEqual(before.pending);
     expect(after.watermarks).toEqual(before.watermarks);

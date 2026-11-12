@@ -1,0 +1,11 @@
+{
+  "command": [
+    "pnpm.cmd",
+    "-r",
+    "typecheck"
+  ],
+  "startedAt": "2026-09-26T11:28:36.618553+00:00",
+  "seconds": 82.719,
+  "exitCode": 0,
+  "log": "typecheck-final-2026-09-26.log"
+}

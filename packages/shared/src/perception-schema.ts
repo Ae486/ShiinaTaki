@@ -1,9 +1,7 @@
 /**
- * INPUT:  candidate perception.* params/results (the operator's privacy + activity-card surface)
- * OUTPUT: PERCEPTION_METHODS + pause-state / pause-set / activity-card schemas (+types)
- * POS:    shared/protocol — the Privacy Pause + activity-card contract (T3b; panel UI lands with #26); operator-only,
- *         NO Rust mirror (webview↔core only, like the media and avatar surfaces) and so no golden fixtures — the
- *         fixture sweep is the Rust anti-drift contract, and nothing Rust-side consumes these shapes.
+ * INPUT:  candidate operator perception.* params/results and content-free invalidations
+ * OUTPUT: PERCEPTION_METHODS + strict pause, card, subscription and change schemas/types
+ * POS:    shared/protocol — operator↔Core only; no Rust consumer or Rust protocol fixtures
  */
 import { z } from "zod";
 
@@ -13,7 +11,19 @@ export const PERCEPTION_METHODS = {
   pauseGet: "perception.pauseGet", // operator → core: read the Privacy Pause snapshot
   pauseSet: "perception.pauseSet", // operator → core: pause (optionally until a deadline) or resume ambient sampling
   card: "perception.card", // operator → core: the activity card { current, recent, samplingStatus, pauseState }
+  subscribe: "perception.subscribe", // operator → core: opt in once per physical connection
+  changed: "perception.changed", // core → subscribed operators: the read projection may have changed
 } as const;
+
+export const PerceptionSubscribeParamsSchema = z.strictObject({});
+export type PerceptionSubscribeParams = z.infer<typeof PerceptionSubscribeParamsSchema>;
+export const PerceptionSubscribeResultSchema = z.strictObject({ status: z.literal("ok") });
+export type PerceptionSubscribeResult = z.infer<typeof PerceptionSubscribeResultSchema>;
+
+// This process-local sequence orders invalidations only. It is neither a persisted cursor nor a revision of a
+// card response, and carries no sampled identity, privacy reason or observation content.
+export const PerceptionChangedSchema = z.strictObject({ revision: z.int().nonnegative() });
+export type PerceptionChanged = z.infer<typeof PerceptionChangedSchema>;
 
 // `until` is an epoch-ms auto-resume deadline (the caller computes "until tomorrow" = local midnight — a timezone
 // is the client's business, never the core's); null = paused until manually resumed, or not paused at all.
@@ -46,8 +56,8 @@ export const PerceptionActivityEntrySchema = z.strictObject({
 });
 export type PerceptionActivityEntry = z.infer<typeof PerceptionActivityEntrySchema>;
 
-// "Is it observing me right now" — the Recall tray-indicator concern, per sampler. False also covers a sampler that
-// stopped itself for the session after a denial, so the badge never claims sampling that is not happening.
+// Scheduled-loop state only: true does not prove capture, Host availability, or an unpaused tick. False also covers
+// a sampler that stopped itself for the session after a denial.
 export const PerceptionSamplingStatusSchema = z.strictObject({
   foreground: z.boolean(),
   ambientScreen: z.boolean(),

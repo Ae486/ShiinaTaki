@@ -1,6 +1,6 @@
 # core/boot/
-- core-bootstrap.ts — bootstrapCore(env): opens the DB on the env-only data root, builds the config plane (repo/source/writer/subscriptions), then parses every loader against the RESOLVED env (env > stored > default) and constructs the model slots; returns the composition root's config+storage phase in one object
-- hindsight-setup-boot.ts — composes the inactive B3 Hindsight setup service (refusing validate/setup/disable while an activation row is open) and operator methods without boot network/provider calls
+- core-bootstrap.ts — bootstrapCore(env): opens the env-only data root, resolves application settings over environment fallback/defaults, and validates optional models/features independently so the basic configuration plane remains available
+- hindsight-setup-boot.ts — inactive B3 setup and operator methods without boot network/provider calls; validate/setup/disable refuse while an activation row is open
 - hindsight-custody-boot.ts — external registration/current configuration admission plus the authenticated Host route; operator-only status keeps accepted custody handles inside Core.
 - hindsight-deployment-boot.ts — composes durable C2 admission/observation and registers operator methods plus the current authenticated Node checkpoint.
 - hindsight-activation-boot.ts — composes the Stage 2b activation service over the production client factory, the live connection fingerprint and the composition binding seams; no boot network call
@@ -10,3 +10,4 @@
 
 - hindsight-configuration-boot.ts — one optional observation owner; operator status captures observed selection in one read transaction, while network observation keeps independent before/after captures
 - hindsight-template-boot.ts — template producer and separate operator status facade; status selection and bound identity share one read transaction, original producer verification remains independent
+- feature-configuration.ts — independent optional-policy validation with explicit unavailable observations and non-dispatch construction defaults

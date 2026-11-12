@@ -18,6 +18,20 @@ function makeRepo(): WindowStateRepo {
 const DECLARED = 32768;
 
 describe("createWindowCalibrator (R1 tier 2 + R2 storage)", () => {
+  it("snapshots real-token capacity separately from the estimator budget without mutating stored calibration", () => {
+    const repo = makeRepo();
+    const calibrator = createWindowCalibrator({ repo, slot: "main", declared: DECLARED });
+    calibrator.onUsage(2000, 1000);
+    calibrator.onOverflow(30000);
+    const stored = repo.get("main");
+    const snapshot = calibrator.snapshot();
+    expect(snapshot.declaredRealTokens).toBe(DECLARED);
+    expect(snapshot.effectiveRealTokens).toBe(27000);
+    expect(snapshot.factor).toBeCloseTo(1.3);
+    expect(snapshot.estimatorWindowUnits).toBe(calibrator.effectiveWindow());
+    expect(snapshot.estimatorWindowUnits).not.toBe(snapshot.effectiveRealTokens);
+    expect(repo.get("main")).toEqual(stored);
+  });
   it("starts at declared × factor 1.0 with no persisted state", () => {
     const calibrator = createWindowCalibrator({ repo: makeRepo(), slot: "main", declared: DECLARED });
     expect(calibrator.effectiveWindow()).toBe(DECLARED);

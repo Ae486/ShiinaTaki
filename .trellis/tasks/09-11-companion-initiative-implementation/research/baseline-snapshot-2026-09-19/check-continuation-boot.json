@@ -1,0 +1,12 @@
+{
+  "label": "continuation-boot",
+  "command": [
+    "node",
+    ".trellis/tasks/09-11-companion-initiative-implementation/research/baseline-snapshot-2026-09-19/boot-smoke.mjs"
+  ],
+  "cwd": "H:\\TakiAgent-worktrees\\t4",
+  "startedAt": "2026-09-20T11:13:48.230255+00:00",
+  "seconds": 6.531,
+  "exitCode": 0,
+  "log": "logs/continuation-boot.log"
+}

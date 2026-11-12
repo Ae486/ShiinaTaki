@@ -20,6 +20,7 @@ import { createPrimaryMemoryCustody } from "../../db/primary-memory-custody-repo
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { createTimelineRepo } from "../../db/timeline-repo.ts";
+import { createHistoricalMainTimelineRepo } from "../../testing/memory-historical-timeline-fixture.ts";
 import { createCaptureLogger } from "../../testing/capture-logger.ts";
 import { createHindsightActivationTransport } from "../../testing/hindsight-activation-transport.ts";
 import { failingGenerateModel } from "../../testing/mock-language-model.ts";
@@ -56,7 +57,7 @@ export function createHindsightActivationHarness(options: { model?: LanguageMode
   const { logger, records: logs } = createCaptureLogger();
   const model = options.model ?? failingGenerateModel(new Error("harness forbids unexpected Utility model calls"));
   const utility = createUtilitySlot({ mainModel: model, logger });
-  const timeline = createTimelineRepo(db);
+  const timeline = options.migrationVersion === undefined ? createTimelineRepo(db) : createHistoricalMainTimelineRepo(db);
   const subsystem = createCanonicalLocalSubsystem({ db, epochId: local.epochId, promptDir: join(dataDir, "prompt"), timeline, utility,
     config: loadMemoryConfig({}), logger });
   const now = options.now ?? (() => ACTIVATION_NOW);

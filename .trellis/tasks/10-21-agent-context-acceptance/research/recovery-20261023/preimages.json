@@ -1,0 +1,18 @@
+[
+  {
+    "path": "e2e/src/fixture/real-provider-observer.ts",
+    "sha256": "a5b0c6b2be72efc84eacacc98cf13ac6ffcfc19e84a4e27e757baf3fa5fefd43"
+  },
+  {
+    "path": "e2e/src/fixture/real-provider-observer.e2e.test.ts",
+    "sha256": "cc98931089dfc771a62e267669d611edb3be8f61b41238b103bf98025b1bd05d"
+  },
+  {
+    "path": "e2e/src/fixture/index.md",
+    "sha256": "53e23e0fa639ea2e06efe64eca73c0ad687f1d27b71146f246146fd596f8d26c"
+  },
+  {
+    "path": ".trellis/spec/backend/e2e-harness.md",
+    "sha256": "f39ab4357453acaffd927aa50794bef4679da8bdf69b838a788f6e8a7d59f4b6"
+  }
+]

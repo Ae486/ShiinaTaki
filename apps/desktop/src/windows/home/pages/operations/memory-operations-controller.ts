@@ -1,34 +1,36 @@
 /**
- * INPUT:  replaceable authenticated WsClient generations (one status read — memory.authority.status or
- *         memory.activation.status — operations submit/cancel, replica configure and both configuration/operation pushes) and a sink
- *         for validated views/outcomes.
- * OUTPUT: createMemoryOperationsController() — current-generation-only status reads behind the push subscription,
- *         serialized submit/configure/cancel, one shared subscription per generation, and coalesced refetch on every
- *         changed push and after every mutation outcome (Core is the only truth).
- * POS:    ui/windows/home/pages/operations — framework-free authority guard shared by the Stage 1 and Hindsight
- *         activation cards; never replays a timed-out mutation and never derives an operation outcome locally.
+ * INPUT:  replaceable authenticated WsClient generations (memory.authority.status, memory.operations.submit/cancel,
+ *         the memory.operations.changed push) and a sink for validated views/outcomes.
+ * OUTPUT: createMemoryOperationsController() — current-generation-only status reads, serialized submit/cancel, one
+ *         accepted push subscription per generation, and acknowledgement-gated reads with feature-specific setup feedback.
+ * POS:    ui/windows/home/pages/operations — framework-free authority guard in the MCP-controller shape; never
+ *         replays a timed-out mutation and never derives an operation outcome locally.
  */
 import type { WsClient } from "@/lib/ws-client.js";
+import type { MemoryAuthorityStatus, MemoryOperation, MemoryOperationRequest, MemoryReplicaRunKind, MemoryReplicaScheduleConfig } from "@taki/shared";
 import { RpcDeadlineExceededError } from "@/lib/rpc-deadline.js";
-import type { MemoryOperation, MemoryOperationRequest, MemoryReplicaRunKind, MemoryReplicaScheduleConfig } from "@taki/shared";
+import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { MEMORY_OPERATION_KIND_LABEL, memoryOperationAppError } from "./memory-authority-state.ts";
 
-export interface MemoryOperationsFeedback { tone: "ok" | "warn" | "danger"; message: string }
+export interface MemoryOperationsFeedback { tone: "ok" | "warn" | "danger"; message: string; scope?: "tidy"; operationId?: string }
 
-export interface MemoryOperationsSink<TStatus> {
+export interface MemoryOperationsSink<TStatus = MemoryAuthorityStatus> {
   loading(): void;
   loaded(status: TStatus): void;
   loadFailed(cause: unknown): void;
+  tidyLoaded?(operation: MemoryOperation | null): void;
+  tidyLoadFailed?(cause: unknown): void;
   mutationStarted(key: string): void;
   mutationSettled(feedback: MemoryOperationsFeedback | null): void;
 }
 
 export interface MemoryOperationsController {
   replace(client: MemoryOperationsClient | null): void;
+  setVisible(visible: boolean): void;
   refresh(): Promise<void>;
-  /** Submits one durable request under the serialized mutation guard; `key` names the pending control for the card. */
-  submit(request: MemoryOperationRequest, key: string): Promise<void>;
   submitSync(bankId: string, syncKind: MemoryReplicaRunKind): Promise<void>;
+  submitTidy(): Promise<void>;
+  submit(request: MemoryOperationRequest, key: string): Promise<void>;
   configureSync(bankId: string, config: MemoryReplicaScheduleConfig): Promise<void>;
   cancel(operationId: string): Promise<void>;
   dispose(): void;
@@ -36,59 +38,70 @@ export interface MemoryOperationsController {
 
 export type MemoryOperationsClient = Pick<
   WsClient,
-  "memoryAuthorityStatus" | "memoryActivationStatus" | "memoryOperationSubmit" | "memoryOperationCancel" | "subscribeMemoryOperations" | "onMemoryOperationChanged"
-  | "memoryReplicaConfigure" | "onMemoryReplicaChanged"
+  "memoryAuthorityStatus" | "memoryOperationSubmit" | "memoryOperationCancel" | "memoryOperationList" | "memoryOperationStatus"
+  | "subscribeMemoryOperations" | "onMemoryOperationChanged"
+  | "memoryActivationStatus" | "memoryReplicaConfigure" | "onMemoryReplicaChanged"
 >;
-
 export type MemoryStatusReader<TStatus> = (client: MemoryOperationsClient) => Promise<TStatus>;
 
-interface ControllerState<TStatus> {
+interface ControllerState {
+  read: MemoryStatusReader<unknown>;
+  feedbackForError: (cause: unknown) => MemoryOperationsFeedback;
   client: MemoryOperationsClient | null;
   epoch: number;
+  readEpoch: number;
+  visible: boolean;
+  pendingMutation: (() => void) | null;
+  subscribed: boolean;
   mutating: boolean;
   refreshing: boolean;
   /** A changed push that arrived mid-read: one more read follows so the last frame is never dropped. */
   dirty: boolean;
-  /** The generation's push subscription; reads wait for it so no change lands between the read and the subscription. */
-  subscribed: Promise<void> | null;
   unsubscribe: (() => void) | null;
-  read: MemoryStatusReader<TStatus>;
-  sink: MemoryOperationsSink<TStatus>;
-  feedbackForError: (cause: unknown) => MemoryOperationsFeedback;
 }
 
-function isCurrent<T>(state: ControllerState<T>, candidate: MemoryOperationsClient, token: number): boolean {
+function isCurrent(state: ControllerState, candidate: MemoryOperationsClient, token: number): boolean {
   return state.client === candidate && state.epoch === token;
 }
 
-function subscribed<T>(state: ControllerState<T>, candidate: MemoryOperationsClient, token: number): Promise<void> {
-  state.subscribed ??= candidate.subscribeMemoryOperations().catch((cause: unknown) => {
-    // Without the push channel the card still tells the truth: every mutation and remount re-reads Core; nothing polls.
-    if (isCurrent(state, candidate, token)) { state.subscribed = null; state.sink.mutationSettled(state.feedbackForError(cause)); }
-  });
-  return state.subscribed;
-}
-
-async function refreshController<T>(state: ControllerState<T>): Promise<void> {
+async function refreshController(state: ControllerState, sink: MemoryOperationsSink<unknown>): Promise<void> {
   const candidate = state.client;
   if (!candidate) return;
+  if (!state.visible) { state.dirty = true; return; }
+  const readEpoch = state.readEpoch;
   if (state.refreshing) { state.dirty = true; return; }
   const token = state.epoch;
   state.refreshing = true;
-  state.sink.loading();
+  sink.loading();
   try {
-    await subscribed(state, candidate, token);
-    if (!isCurrent(state, candidate, token)) return;
-    const status = await state.read(candidate);
-    if (isCurrent(state, candidate, token)) state.sink.loaded(status);
+    if (!state.subscribed) {
+      await candidate.subscribeMemoryOperations();
+      if (isCurrent(state, candidate, token)) state.subscribed = true;
+    }
+    if (isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch) {
+      // This baseline covers hints received before setup completed. Later hints retain one trailing read.
+      state.dirty = false;
+      const current = () => isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch;
+      await Promise.all([
+        state.read(candidate).then((status) => { if (current()) sink.loaded(status); },
+          (cause: unknown) => { if (current()) sink.loadFailed(cause); }),
+        sink.tidyLoaded ? candidate.memoryOperationList({ kind: "tidy", characterId: ACTIVE_CHARACTER_ID, includeTerminal: true, limit: 1 })
+          .then((operations) => { if (current()) sink.tidyLoaded?.(operations[0] ?? null); },
+            (cause: unknown) => { if (current()) sink.tidyLoadFailed?.(cause); }) : Promise.resolve(),
+      ]);
+    }
   } catch (cause) {
-    if (isCurrent(state, candidate, token)) state.sink.loadFailed(cause);
+    if (isCurrent(state, candidate, token) && state.visible && state.readEpoch === readEpoch) {
+      sink.loadFailed(cause); sink.tidyLoadFailed?.(cause);
+      if (!state.mutating) sink.mutationSettled(state.feedbackForError(cause));
+    }
   } finally {
     if (state.epoch === token) state.refreshing = false;
   }
-  if (state.dirty && isCurrent(state, candidate, token)) {
+  // Failed setup waits for another explicit demand; a queued push must not create a retry loop.
+  if (state.subscribed && state.dirty && state.visible && isCurrent(state, candidate, token)) {
     state.dirty = false;
-    await refreshController(state);
+    await refreshController(state, sink);
   }
 }
 
@@ -97,94 +110,153 @@ interface MutationSpec {
   operation: (candidate: MemoryOperationsClient) => Promise<MemoryOperationsFeedback>;
 }
 
-async function mutateController<T>(state: ControllerState<T>, spec: MutationSpec): Promise<void> {
+async function mutateController(state: ControllerState, sink: MemoryOperationsSink<unknown>, spec: MutationSpec): Promise<void> {
   const candidate = state.client;
   if (!candidate || state.mutating) return;
   const token = state.epoch;
   state.mutating = true;
-  state.sink.mutationStarted(spec.key);
+  if (state.subscribed) state.readEpoch += 1;
+  state.dirty = true;
+  publishMutation(state, () => sink.mutationStarted(spec.key));
   try {
     const feedback = await spec.operation(candidate);
     if (!isCurrent(state, candidate, token)) return;
-    state.sink.mutationSettled(feedback);
+    publishMutation(state, () => sink.mutationSettled(feedback));
   } catch (cause) {
     if (!isCurrent(state, candidate, token)) return;
-    state.sink.mutationSettled(state.feedbackForError(cause));
+    publishMutation(state, () => sink.mutationSettled(spec.key === "tidy" ? tidyRefusal(cause) : state.feedbackForError(cause)));
   } finally {
     if (state.epoch === token) state.mutating = false;
   }
-  // Every outcome (accepted, refused or lost) is re-read from Core rather than patched into the last frame.
-  await refreshController(state);
+  // Every outcome (accepted or refused) is re-read from Core rather than patched into the last frame.
+  await refreshController(state, sink);
 }
 
 function refusalFeedback(cause: unknown): MemoryOperationsFeedback {
   if (cause instanceof RpcDeadlineExceededError && cause.outcomeUnknown) {
-    return { tone: "warn", message: "请求超时，操作结果未知。正在重新读取 Core 状态，请根据结果选择下一步。" };
+    return { tone: "warn", message: "请求超时，操作结果未知。请刷新 Core 状态核对后选择下一步；系统不会自动重复提交。" };
   }
-  const { code, reason, activeOperationId } = memoryOperationAppError(cause);
+  const { code, reason } = memoryOperationAppError(cause);
   if (code === "MEMORY_OPERATION_REFUSED") {
-    const suffix = activeOperationId ? `（进行中：${activeOperationId}）` : "";
-    return { tone: "warn", message: `Core 拒绝了该操作：${reason ?? code}${suffix}` };
+    return { tone: "warn", message: `Core 拒绝了该操作：${reason ?? code}` };
   }
   return { tone: "danger", message: cause instanceof Error ? cause.message : String(cause) };
 }
 
-function acceptedFeedback(request: MemoryOperationRequest, operation: MemoryOperation): MemoryOperationsFeedback {
-  if (request.kind === "replica.sync") return { tone: "ok", message: `已受理 ${request.syncKind} 同步：${operation.operationId}` };
-  return { tone: "ok", message: `Core 已受理「${MEMORY_OPERATION_KIND_LABEL[request.kind]}」；是否完成以最新状态为准。` };
+function installSubscription(state: ControllerState, sink: MemoryOperationsSink<unknown>, candidate: MemoryOperationsClient): void {
+  const token = state.epoch;
+  const invalidate = () => {
+    if (isCurrent(state, candidate, token)) void refreshController(state, sink);
+  };
+  const removeOperation = candidate.onMemoryOperationChanged(invalidate);
+  const removeReplica = candidate.onMemoryReplicaChanged?.(invalidate);
+  state.unsubscribe = () => { removeOperation(); removeReplica?.(); };
+  void refreshController(state, sink);
 }
 
-function retire<T>(state: ControllerState<T>): void {
+function retire(state: ControllerState): void {
   state.epoch += 1;
+  state.readEpoch += 1;
+  state.pendingMutation = null;
+  state.subscribed = false;
   state.unsubscribe?.();
   state.unsubscribe = null;
-  state.subscribed = null;
   state.client = null;
   state.mutating = false;
   state.refreshing = false;
   state.dirty = false;
 }
 
+export function createMemoryOperationsController(sink: MemoryOperationsSink): MemoryOperationsController;
 export function createMemoryOperationsController<TStatus>(sink: MemoryOperationsSink<TStatus>, read: MemoryStatusReader<TStatus>,
+  feedbackForError?: (cause: unknown) => MemoryOperationsFeedback): MemoryOperationsController;
+export function createMemoryOperationsController(sink: MemoryOperationsSink<unknown>,
+  read: MemoryStatusReader<unknown> = (client) => client.memoryAuthorityStatus(),
   feedbackForError: (cause: unknown) => MemoryOperationsFeedback = refusalFeedback): MemoryOperationsController {
-  const state: ControllerState<TStatus> = {
-    client: null, epoch: 0, mutating: false, refreshing: false, dirty: false, subscribed: null, unsubscribe: null, read, sink, feedbackForError,
-  };
-  const submit = (request: MemoryOperationRequest, key: string) => mutateController(state, {
-    key,
-    operation: async (candidate) => acceptedFeedback(request, await candidate.memoryOperationSubmit(request)),
-  });
+  const state: ControllerState = { client: null, epoch: 0, readEpoch: 0, visible: true, pendingMutation: null,
+    subscribed: false, mutating: false, refreshing: false, dirty: false, unsubscribe: null, read, feedbackForError };
   return {
     replace(next) {
       retire(state);
       state.client = next;
-      if (!next) { sink.loading(); return; }
-      const token = state.epoch;
-      const invalidate = () => {
-        if (isCurrent(state, next, token)) void refreshController(state);
-      };
-      const removeOperation = next.onMemoryOperationChanged(invalidate);
-      const removeReplica = next.onMemoryReplicaChanged(invalidate);
-      state.unsubscribe = () => { removeOperation(); removeReplica(); };
-      void refreshController(state);
+      if (!next) { if (state.visible) sink.loading(); return; }
+      installSubscription(state, sink, next);
     },
-    refresh: () => refreshController(state),
-    submit,
-    submitSync: (bankId, syncKind) => submit({ kind: "replica.sync", bankId, syncKind }, `sync:${bankId}`),
-    configureSync: (bankId, config) => mutateController(state, {
-      key: `configure:${bankId}`,
+    setVisible(visible) {
+      if (state.visible === visible) return;
+      state.visible = visible;
+      state.readEpoch += 1;
+      state.dirty = true;
+      if (!visible) return;
+      const pending = state.pendingMutation; state.pendingMutation = null; pending?.();
+      if (!state.refreshing) state.dirty = false;
+      void refreshController(state, sink);
+    },
+    refresh: () => refreshController(state, sink),
+    ...mutationActions(state, sink),
+    dispose: () => retire(state),
+  };
+}
+
+function mutationActions(state: ControllerState, sink: MemoryOperationsSink<unknown>): Pick<MemoryOperationsController,
+  "submit" | "configureSync" | "submitSync" | "submitTidy" | "cancel"> {
+  return {
+    submit: (request, key) => mutateController(state, sink, { key,
+      operation: async (candidate) => {
+        await candidate.memoryOperationSubmit(request);
+        return { tone: "ok", message: `Core 已受理「${MEMORY_OPERATION_KIND_LABEL[request.kind]}」；是否完成以最新状态为准。` };
+      },
+    }),
+    configureSync: (bankId, config) => mutateController(state, sink, { key: `configure:${bankId}`,
       operation: async (candidate) => {
         await candidate.memoryReplicaConfigure(bankId, config);
         return { tone: "ok", message: "Core 已保存此 Bank 的同步设置。" };
       },
     }),
-    cancel: (operationId) => mutateController(state, {
-      key: `cancel:${operationId}`,
+    submitSync: (bankId, syncKind) => mutateController(state, sink, {
+      key: `sync:${bankId}`,
       operation: async (candidate) => {
-        const operation = await candidate.memoryOperationCancel(operationId);
-        return { tone: "ok", message: `已取消 ${operation.operationId}` };
+        await candidate.memoryOperationSubmit({ kind: "replica.sync", bankId, syncKind });
+        return { tone: "ok", message: syncKind === "full" ? "已受理完整对账。" : "已受理增量同步。" };
       },
     }),
-    dispose: () => retire(state),
+    submitTidy: () => mutateController(state, sink, {
+      key: "tidy",
+      operation: submitTidy,
+    }),
+    cancel: (operationId) => mutateController(state, sink, {
+      key: `cancel:${operationId}`,
+      operation: async (candidate) => {
+        await candidate.memoryOperationCancel(operationId);
+        return { tone: "ok", message: "已取消同步操作。" };
+      },
+    }),
   };
+}
+
+// Visibility retires read authority only: the mutation lock and terminal outcome survive a hidden page.
+function publishMutation(state: ControllerState, publish: () => void): void {
+  if (state.visible) publish(); else state.pendingMutation = publish;
+}
+
+async function submitTidy(candidate: MemoryOperationsClient): Promise<MemoryOperationsFeedback> {
+  try {
+    const operation = await candidate.memoryOperationSubmit({ kind: "tidy", characterId: ACTIVE_CHARACTER_ID });
+    return { scope: "tidy", tone: "ok", operationId: operation.operationId, message: "整理已受理，关闭此页面不会中断执行。" };
+  } catch (cause) {
+    const error = memoryOperationAppError(cause);
+    if (error.reason !== "MEMORY_OPERATION_BUSY" || !error.activeOperationId) throw cause;
+    await candidate.subscribeMemoryOperations();
+    const operation = await candidate.memoryOperationStatus(error.activeOperationId);
+    return { scope: "tidy", tone: "warn", operationId: operation.operationId, message: operation.terminalAt === null
+      ? "已有记忆整理正在执行，正在读取进度。"
+      : "此前的整理已结束，正在读取结果；如需继续，请再次操作。" };
+  }
+}
+
+function tidyRefusal(cause: unknown): MemoryOperationsFeedback {
+  const error = memoryOperationAppError(cause);
+  return { scope: "tidy", tone: "warn", message: error.code === "MEMORY_OPERATION_REFUSED"
+    ? "当前无法开始整理，请刷新状态；若记忆服务不可用，请先检查配置与连接。"
+    : "尚未确认整理是否受理，请先刷新状态核对；系统不会自动重复提交。" };
 }

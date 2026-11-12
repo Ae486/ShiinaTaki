@@ -7,9 +7,32 @@ exists. Each stage must preserve the single Run/Event authority and update this 
 the design. The first implementation dispatch should own one coherent vertical slice of approximately two to three
 context windows; later stages may become child tasks if the measured scope exceeds that budget.
 
+G5 owner clarification (2026-09-05): D68-B is a direct DSH Trajectory presentation port/rebuild. The
+current Monitor proves traceability but is not an accepted visual or interaction baseline. The UI stage
+must cover DSH composition, visual treatment, Chinese labels and interaction, not just scaffold repair.
+
+Existing D68-A producer/projection work has its own accepted evidence. Stages 1–4 retain the original
+data plan; do not repeat them wholesale to start G5. The UI preflight maps actual available facts to
+the port and identifies only concrete missing-data work. Cache and Compaction gates below are complete.
+
+The [2026-09-06 source/adapter preflight](research/d68-b-ui-port-adapter-map-2026-09-06.md) is complete.
+It identifies request-correlation and backward-history projection work, current selection/live-summary
+defects, and the DSH virtualizer dependency. Main adopted version 3.14.9 under the owner's 2026-09-06
+execution delegation. The additive wire/producer contract is now reviewed in design section 9 and
+the [query preflight](research/d68-query-contract-2026-09-06.md). A1/A2 is committed as `a771496`;
+D64 in the readable-operations task precedes this implementation. D75 remains deferred.
+
+Continuation activation (2026-09-06): D64 passed independent review and engineering acceptance and
+is committed as `a5d1b66`. Main recovered the original session, reviewed this adapter contract,
+validated both 17-entry manifests and activated this task for session
+`codex_01a074f6-ff11-71b3-832a-e35578901417`. One direct `gpt-6-astra/high` implement agent,
+`/root/d68_implementation`, now owns the coherent Shared/Core/Desktop D68-B slice. Main owns
+documents, cross-slice integration and isolated WebView2/reference verification. D68-B acceptance
+remains pending until that implementation and its independent check finish.
+
 ## Dispatch and task-pointer protocol
 
-Before any delegated explore, implementation, or check:
+Before any execution-stage delegated explore, implementation, or check:
 
 1. The main session verifies `cwd`, branch, worktree list, `HEAD`, dirty paths, and `python ./.trellis/scripts/task.py current --source`.
 2. The main session activates the exact task being worked on with `python ./.trellis/scripts/task.py start <task-dir>` only
@@ -21,11 +44,15 @@ Before any delegated explore, implementation, or check:
 4. Every prompt is in English and explicitly states: `YCE is disabled and must not be used`; use `jbcontext` for semantic
    search; do not spawn or delegate to another agent; do not commit, push, reset, rebase, or archive.
 5. There is at most one explore/research, one implementation agent, and one formal check agent for each executable slice.
-   A healthy child is not interrupted; the main session waits in ten-minute cadence.
+   A healthy child is not interrupted. The owner's latest refinement uses thirty-minute wait cycles;
+   main replies to actual questions/blockers/checkpoints without periodic progress requests.
 
 The explore step is a bounded preflight, not a second architecture discussion. It writes only a research artifact with
 verified file/symbol/stream-shape facts. It must not alter production code or task status. Once the main session reviews
 that artifact, the executable slice is frozen before dispatching `trellis-implement`.
+
+Planning-only reference reads do not activate a task merely to inspect source; they report the actual
+session pointer and remain within the owner's planning authorization.
 
 ### Upstream metric evidence gate
 
@@ -76,7 +103,8 @@ Exit gate: producer tests prove event order, bounded payloads, non-blocking beha
 2. Expand trajectory rows into semantic Model/Assistant/Tool/Usage/Context/Governance/Recovery/Delivery kinds.
 3. Pair start/settlement facts for readable durations while retaining individual ledger events.
 4. Add real-field filters for provider, model, tool, category, state/outcome, retry/error and text.
-5. Replace technical-first Inspector payloads with semantic sections and a collapsed, mode-gated `技术关联` section.
+5. Provide useful semantic Inspector sections. G4 excludes user-facing internal metadata rows and `技术关联` dumps;
+   retain required identities in wire/query/replay contracts without automatically rendering them.
 6. Preserve Character authorization, redaction and `current`/`shadowed`/`log-only` classification.
 
 Exit gate: projection tests cover sparse filters, absent fields, deterministic replay, authorization and privacy.
@@ -111,26 +139,39 @@ Gate result (2026-08-31): child `08-29-compaction-harness` completed all four sl
 workspace typecheck, root lint, task validation, diff check, and isolated Core boot. D68-B may proceed as a separate
 implementation stage; this gate completion does not itself start Desktop work.
 
-## Stage 5 — DSH-shaped Desktop Monitor
+## Stage 5 — DSH Trajectory UI port, Chinese localization and interaction
 
-1. Replace the vertical PageCard composition with a full-height three-region workspace.
-2. Implement the left Run browser, central Overview/timeline ledger and conditional right Inspector.
-3. Add visible close controls and two-way disclosure controls for every expandable group/section.
-4. Render all visible labels and accessibility strings in Chinese; keep wire values internal.
-5. Add conditional Inspector tabs: `概览`, `用量`, `耗时`, `上下文`, `输入摘要`, `输出摘要`, `工具定义`, `重试/恢复`.
-6. Add responsive bottom-drawer fallback for narrow windows.
-7. Preserve lazy older-page loading, tail-follow, scroll-anchor preservation and generation-safe reconnect/backfill.
-8. Do not expose IDs, hashes, generations or revisions in ordinary rows or default details.
+1. Freeze the source-component/style map from design section 2, representative reference states and required
+   TakiAgent adapters. Reuse the existing source findings; investigate only an unresolved seam. Inventory library
+   compatibility and attribution before implementation; do not replace direct porting with another generic mock.
+2. Port the full-height Toolbar/Overview/ledger/conditional-Inspector composition, row density, spacing, typography,
+   selection/error treatment and grouped-content hierarchy. Integrate Run selection and remove the inherited
+   page-width constraint that prevents the right pane from appearing.
+3. Adapt source view models to existing canonical Run/Event projections. List any missing facts explicitly rather
+   than fabricating values. Preserve G4's removal of internal metadata in every primary/expanded/local view.
+4. Port the corresponding record/range selection, search, grouping, close/resize and useful input/output/detail
+   interactions. Adapt narrow layouts while retaining the reference information hierarchy.
+5. Port bounded row mounting, initial tail placement, older-page loading and scroll-anchor preservation. Correct
+   selected-row request races, close behavior, live Run summaries and reconnect/older-Run selection recovery.
+6. Translate all system-owned visible and accessible copy: toolbar/Overview, tabs, labels, states, tooltips and
+   empty/loading/error fallbacks. Keep protocol values internal and actual names/paths/output unchanged.
+7. Apply the shared continuity/reduced-motion requirements. New rows, pane changes and disclosures must preserve
+   reading/control positions; manual resize responds directly to the pointer.
+8. Compare the resulting default, selected, expanded, live, historical and narrow states against DSH, recording each
+   deliberate domain/privacy/G4 difference. Exercise the real enabled Monitor in WebView2, including a successful
+   and failed tool/model path. Revise old scaffold tests that would preserve the rejected presentation.
 
-Exit gate: Desktop tests and a real enabled Monitor smoke show the DSH layout, Chinese labels, meaningful values,
-close/reopen behavior, live updates and no technical-field dump.
+Exit gate: automated behavior checks plus reference comparison and real-window engineering acceptance confirm
+the DSH-led product UI, complete Chinese system labels, meaningful data and working live/history interactions.
+Traceability, a nominal three-region component, or a static screenshot alone cannot pass this gate.
 
 ## Stage 6 — Cross-layer quality and handoff
 
 1. Run Shared/Core/Desktop typechecks, tests, lint, Desktop build, task validation and `git diff --check`.
 2. Verify disabled/feedback/full modes and provider-without-cache behavior.
-3. Run a real isolated Core/desktop monitor smoke with the configured model and inspect a model request plus a tool
-   success/failure.
+3. Run a real isolated Core/SDK producer smoke with deterministic model responses, then actual WebView2
+   interaction for a model request and tool success/failure. Label fixture data explicitly; do not repeat
+   paid cache/Compaction acceptance or claim personal owner inspection.
 4. Update the observability spec and deferred decision links with any implementation learning.
 5. Reassess whether D67's generic Home disclosure/read-model work remains separate; do not silently absorb it.
 
@@ -142,7 +183,7 @@ close/reopen behavior, live updates and no technical-field dump.
 | D68-A | Shared event contracts, redaction/unknown rules, fixtures, Core producers, projection and semantic Inspector data | 2–3 context windows |
 | Prefix-cache child (complete) | Stable Harness request prefix plus deterministic and real-provider verification | 1–2 context windows |
 | Compaction Harness child | Current-design audit, DSH comparison, token-first/Memory-independent redesign, and staged implementation plan | 2–3 context windows for planning; implementation split by the approved slices |
-| D68-B | DSH-shaped Monitor layout, Chinese labels, disclosures, close behavior and responsive UI | 2–3 context windows |
+| D68-B | Direct DSH Trajectory presentation port/rebuild, full Chinese UI, real-data adapters, history/live interactions and reference-based visual acceptance | Slice after the source/adapter map; the existing mock is not a completion shortcut |
 | D68-C (conditional) | Provider-neutral cache semantics or delivery facts after an authority exists | separate task, only if evidence supports it |
 
 D68-A and D68-B share the same research/design context but have independent acceptance gates and ownership. The
@@ -159,8 +200,9 @@ exceeded.
 | Event contract drift | strict Zod fixtures, version compatibility and all producers/projections typecheck |
 | Missing/duplicate metrics | producer unit tests plus durable replay equality and usage reconciliation |
 | Tool/model failure visibility | success/failure/interruption tests with bounded error classifications |
-| Privacy leakage | forbidden-content tests for prompts, secrets, authorization, Host/MCP, sensor/media and technical default UI |
+| Privacy and irrelevant-field exposure | forbidden-content checks for protected payloads plus G4 absence checks for internal metadata in primary and expanded user-facing UI |
 | UI disclosure regression | component tests assert every expandable region closes and Inspector close clears selection |
+| DSH presentation drift / untranslated UI | compare representative states with the DSH source/reference, audit all UI-owned copy, and run actual WebView2 interaction; traceability alone is insufficient |
 | Live UX regression | controller tests for update, tail suspension, backfill, overflow and generation replacement |
 | Performance | bounded payloads, pagination, visible-window rendering and no page-local polling loops |
 
@@ -171,3 +213,14 @@ exceeded.
 - Producer wiring can be feature-gated by Monitor mode without changing Run correctness.
 - UI can fall back to the existing semantic projection if a new optional detail is unavailable; it must never fall back to
   raw technical fields.
+
+## D68-B completion checkpoint — 2026-09-07
+
+Stages 5 and 6 passed implementation, one combined independent review and delegated actual-WebView2 engineering
+acceptance. See [the final evidence](implementation-evidence-d68-b-2026-09-07.md): 93 reviewed files, five fixed defect
+groups, Shared 411/Core 1,940/Desktop 690 passing tests, type/lint/build/context gates, three isolated Core modes,
+and 24/24 final WebView2 interaction groups. One existing archive fixture remains skipped; existing lint/build
+advisories remain recorded. All owned test/QA processes are stopped. No personal owner inspection is claimed.
+
+The wider UI/UX program continues with checked upstream synchronization, then the reviewed Chat/Pet child.
+D75/D76/D77 and true T4 remain outside this delivery. This checkpoint does not archive the parent program.
