@@ -1,0 +1,97 @@
+{
+  "kind": "verified-engineering-baseline-alignment",
+  "recordedAt": "2026-11-12T11:42:05.543973+00:00",
+  "applicationBaselineCommit": "95ce75eed5baedfd3c4f35f3fb1ade48a54a678c",
+  "mergeParents": [
+    "9b98794a673efb561682b9fd451fe1da2db95086",
+    "63faf8119be1747b685aacf43529d754626ab35c"
+  ],
+  "refsAtFirstAlignment": [
+    {
+      "root": "G:/TakiAgent-integration",
+      "branch": "integration/main-t4-20261111",
+      "head": "95ce75eed5baedfd3c4f35f3fb1ade48a54a678c",
+      "tree": "4e19af10616615006ff71e24d6db5f03892aaa79",
+      "clean": true
+    },
+    {
+      "root": "H:/TakiAgent",
+      "branch": "main",
+      "head": "95ce75eed5baedfd3c4f35f3fb1ade48a54a678c",
+      "tree": "4e19af10616615006ff71e24d6db5f03892aaa79",
+      "clean": true
+    },
+    {
+      "root": "H:/TakiAgent-worktrees/t4",
+      "branch": "task/t4-skills-mcp-productization",
+      "head": "95ce75eed5baedfd3c4f35f3fb1ade48a54a678c",
+      "tree": "4e19af10616615006ff71e24d6db5f03892aaa79",
+      "clean": true
+    }
+  ],
+  "alignmentMethod": "Fetch local verified integration history; fast-forward both original branches; no reset, rebase or push",
+  "dependencyPreparation": {
+    "command": "pnpm install --frozen-lockfile --ignore-scripts --offline",
+    "main": "passed, 2.8 seconds; zero downloads",
+    "t4Initial": "failed ENOENT: ../QQMessageMonitor local tarball path absent",
+    "t4Repair": {
+      "alias": "H:/TakiAgent-worktrees/QQMessageMonitor",
+      "target": "H:/QQMessageMonitor",
+      "kind": "additive junction; source and lockfile unchanged",
+      "verifiedClientSha256": "6da16e0723e3f01f44c2fee1e5835f6b90433b7075f16c22978271eb96c3ed78"
+    },
+    "t4Retry": "passed,14.7 seconds;367 reused/zero downloads",
+    "moduleImportSmoke": {
+      "coreBothLayouts": "AI SDK/openai-compatible/MCP/libsodium/Shared/codec ESM imports passed",
+      "desktopBothLayouts": "QQ management client ESM import passed",
+      "initialQQProbe": "CommonJS require.resolve was inapplicable to this import-only ESM package; corrected ESM smoke passed",
+      "providerCalls": 0,
+      "realDataOpened": false
+    }
+  },
+  "frozenBackup": {
+    "path": "G:\\taki-t4-freeze-20261110\\data\\core-profile\\taki.db",
+    "sha256": "973f100874a9f80716d71be96e2b8064e0aa7bf6c40d2e60ec02ff5a6304c023",
+    "originalHashUnchanged": true
+  },
+  "sourceFormatting": "precommit-formatting-20261112.json; only two EOF blank-line cleanups after test manifests; nonterminal bytes unchanged",
+  "checks": {
+    "lint": "passed current",
+    "workspaceTypechecks": 7,
+    "fullTsPassed": 8960,
+    "conditionalSkips": 8,
+    "codecTests": 0,
+    "currentProcessE2E": {
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "actualFiles": 10
+    },
+    "connectedJourney": {
+      "passedStages": 24,
+      "controlledModels": true,
+      "realNativePostgresHomeCore": true,
+      "minimumAvailableGiB": 2.072
+    },
+    "rust": "225 library plus seven binary tests and clippy passing receipts",
+    "desktopBuild": "production Vite assets plus debug Tauri application; no installer bundle"
+  },
+  "activeTask": ".trellis/tasks/11-11-main-t4-baseline-integration",
+  "sessionBinding": "codex_01a1cf67-4df4-7c42-af1c-51885631386c, verified in G integration and H main",
+  "remainingProductFollowups": [
+    "HS-START-01 embedding configuration after startup",
+    "HS-START-02 reranking configuration after startup"
+  ],
+  "excludedAcceptance": [
+    "actual QQ account observations",
+    "Pet/WebGL rendering",
+    "real-provider inference",
+    "installer distribution",
+    "owner-manual acceptance",
+    "large-library stress/quality",
+    "real-profile upgrade",
+    "push/release",
+    "original task archive"
+  ],
+  "finalRefReceipt": "G:/taki-codex-work/main-t4-alignment-20261112/receipt.json after bookkeeping commit alignment"
+}

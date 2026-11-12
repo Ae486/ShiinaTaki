@@ -21,16 +21,16 @@ Integrate the accepted main and frozen T4 increments into one verified engineeri
 
 ## Acceptance Criteria
 
-- [ ] Integrated history contains exact main `9b98794a673efb561682b9fd451fe1da2db95086` and T4 `63faf8119be1747b685aacf43529d754626ab35c` as ancestors.
-- [ ] Both feature inventories remain present and their changed cross-layer wiring is reviewed.
-- [ ] A fresh isolated Core boots without model/provider configuration; feature admission gives typed not-ready behavior and supported configuration updates apply with T4's documented semantics.
-- [ ] Fresh/main/T4/mixed migration cases converge, reopen idempotently, preserve old receipts and meaningful row values, and roll back atomically on failures. Unknown unsupported schema is refused without data loss.
-- [ ] Recognized governance revisions and durable Approval decisions are compatible; future revisions still refuse; Rust Host projections match the canonical definitions.
-- [ ] Relevant workspace lint/typechecks/builds and TS/Rust tests pass or have individually evidenced, explicitly reported pre-existing limitations. Prior main failures are re-evaluated rather than permanently waived.
-- [ ] Critical main memory journeys and T4 startup/configuration/delegation/Tidy/QQ/Avatar paths are exercised at the appropriate test level; omissions are explicit.
-- [ ] Historical stopped-copy replay passes without changing original backup hashes or real profile state.
-- [ ] Source identities, test counts, artifacts and memory/duration observations are recorded. No filesystem-hash count is mislabeled as memory-source scale.
-- [ ] Both original branches are aligned only after integration gates pass and original clean-state/watchers are rechecked; real-data upgrade remains separate.
+- [x] Integrated history contains exact main `9b98794a673efb561682b9fd451fe1da2db95086` and T4 `63faf8119be1747b685aacf43529d754626ab35c` as ancestors.
+- [x] Both feature inventories remain present and their changed cross-layer wiring is reviewed.
+- [x] A fresh isolated Core boots without model/provider configuration; feature admission gives typed not-ready behavior and supported configuration updates apply with T4's documented semantics.
+- [x] Fresh/main/T4/mixed migration cases converge, reopen idempotently, preserve old receipts and meaningful row values, and roll back atomically on failures. Unknown unsupported schema is refused without data loss.
+- [x] Recognized governance revisions and durable Approval decisions are compatible; future revisions still refuse; Rust Host projections match the canonical definitions.
+- [x] Relevant workspace lint/typechecks/builds and TS/Rust tests pass or have individually evidenced, explicitly reported pre-existing limitations. Prior main failures are re-evaluated rather than permanently waived.
+- [x] Critical main memory journeys and T4 startup/configuration/delegation/Tidy/QQ/Avatar paths are exercised at the appropriate test level; omissions are explicit.
+- [x] Historical stopped-copy replay passes without changing original backup hashes or real profile state.
+- [x] Source identities, test counts, artifacts and memory/duration observations are recorded. No filesystem-hash count is mislabeled as memory-source scale.
+- [x] Both original branches are aligned only after integration gates pass and original clean-state/watchers are rechecked; real-data upgrade remains separate.
 
 ## Confirmed Scope and Authority
 
@@ -46,3 +46,10 @@ External push/release; original-profile migration; paid model invocation without
 - `research/phase2-validation-20261111.md` and `research/baseline-alignment-assessment-20261111.md` in that task.
 - T4 `docs/T4-FREEZE-HANDOFF.md`; frozen backup `G:/taki-t4-freeze-20261110`.
 - Design and execution details belong in `design.md` and `implement.md`.
+
+## Engineering acceptance receipt
+
+The engineering baseline gates and both-branch fast-forward alignment are complete; see
+[delivery evidence](research/baseline-delivery-20261112.md) and [alignment receipt](research/baseline-alignment-receipt-20261112.json).
+All stated real-provider/manual/installed-distribution/large-library and real-profile rollout limits remain separate.
+The open Hindsight startup-first configuration requirements remain in the canonical parent ledger.

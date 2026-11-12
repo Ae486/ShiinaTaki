@@ -1,7 +1,9 @@
 # Integration verification progress
 
 Updated 2026-11-12. Latest engineering gate: complete connected journey 24/24 and current process E2E 26/26 pass.
-The final independent review and Git ancestry/alignment receipt determine final baseline completion;
+The final independent review passed and both original branches fast-forwarded to application merge `95ce75e`;
+[delivery evidence](baseline-delivery-20261112.md) and [alignment receipt](baseline-alignment-receipt-20261112.json)
+record engineering completion and remaining product limits;
 the older checkpoint paragraphs below retain their original scope and failed-attempt history.
 
 ## Latest continuation gate (2026-11-12)

@@ -119,5 +119,7 @@ See `journey-resources-20261112T092108256Z-7107d850.jsonl` under the integration
   Missing embedding/reranking setup must become configurable after application startup in the later product task.
 - Keep installed-distribution, live-provider, owner/manual and large-library acceptance separate. The prior main-only
   real-provider receipts do not certify this integrated source.
-- Baseline commit/alignment remains gated on the integration task's remaining verification. No parent completion,
-  real-data upgrade, authority promotion or Native feature readiness is inferred from this handoff.
+- Verified application merge `95ce75e` now contains both original histories and both H branches fast-forwarded
+  to it after engineering validation. [Delivery/alignment receipt](../../11-11-main-t4-baseline-integration/research/baseline-delivery-20261112.md)
+  records final dependency checks and explicit scope limits. No parent completion, real-data upgrade, authority
+  promotion or missing-model Native readiness is inferred from this baseline alignment.

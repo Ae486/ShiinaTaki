@@ -59,12 +59,16 @@ records and the canonical Hindsight startup ledger; marking the evidence gates d
 
 ## 5. Alignment and Delivery
 
-- [ ] Record integrated test receipt and exact source identity; confirm both frozen tips are ancestors.
-- [ ] Commit tested integration with explicit outcome/limitations under the existing baseline-integration authority; no push.
-- [ ] Recheck original refs, clean state and watchers; avoid triggering original-profile upgrade when working files change.
-- [ ] Import tested history and align both original branches by fast-forward when possible; stop on unexpected user divergence rather than resetting it.
-- [ ] Record final branch identities and remaining original task/acceptance scope. Do not finish/archive the original task or claim real-data deployment.
+- [x] Record integrated test receipt and exact source identity; confirm both frozen tips are ancestors.
+- [x] Commit tested integration with explicit outcome/limitations under the existing baseline-integration authority; no push.
+- [x] Recheck original refs, clean state and watchers; avoid triggering original-profile upgrade when working files change.
+- [x] Import tested history and align both original branches by fast-forward when possible; stop on unexpected user divergence rather than resetting it.
+- [x] Record final branch identities and remaining original task/acceptance scope. Do not finish/archive the original task or claim real-data deployment.
 
 ## Recovery Boundaries
 
 Before alignment, originals remain the rollback points. Failed isolated upgrades are rebuilt from untouched copies. After alignment, retain exact original refs/receipts and integration SHA; do not open an upgraded real profile with older code. Any real-data rollout is a separate approved procedure with a fresh backup.
+
+Final engineering delivery and dependency-layout evidence: `research/baseline-delivery-20261112.md` and
+`research/baseline-alignment-receipt-20261112.json`. Final documentation/ref receipt remains outside the commit
+at `G:/taki-codex-work/main-t4-alignment-20261112/receipt.json`. Original task and product follow-ups remain open.
