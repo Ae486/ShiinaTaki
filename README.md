@@ -90,10 +90,3 @@ pnpm lint
 pnpm test
 ```
 
-## 相关文档
-
-- [文档索引](docs/index.md)
-- [领域术语](CONTEXT.md)
-- [产品定义](docs/PRODUCT.md)
-- [技术栈](docs/TECH-STACK.md)
-- [架构决策](docs/adr/)
