@@ -1,6 +1,6 @@
 # TakiAgent
 
-面向 Windows 的桌面 AI 智能体，将对话、长期记忆、桌面操作、主动互动与 Live2D 展示结合在一起。支持接入自选模型服务、导入模型资源，并通过 MCP 和 Skills 扩展能力。
+参考Hermes、BANDORI-PET实现的面向 Windows 的邦邦桌面 AI 智能体，将对话、长期记忆、桌面操作、主动互动与 Live2D 展示结合在一起。支持接入自选模型服务、导入模型资源，并通过 MCP 和 Skills 扩展能力。
 
 ## 主要功能
 
@@ -49,6 +49,22 @@ node scripts/vendor-live2d-runtimes.mjs
 ```
 
 模型资源需自行准备，通过桌面界面导入，并遵守对应模型与运行时的授权要求。专有开发资源不应提交到 Git 或包含在发布包中。
+
+> 💡 **推荐：zstd 压缩流格式模型包**（~900MB，流式加载无需解压到磁盘，性能损失极低）
+>
+> | 下载渠道           | 链接                                                         |
+> | ------------------ | ------------------------------------------------------------ |
+> | 🚀 **ModelScope**   | [models.zip](https://modelscope.cn/datasets/HELPMEEADICE/BanG-Dream-Live2D/resolve/master/models.zip) |
+> | ☁️ **Google Drive** | [下载](https://drive.google.com/file/d/1rSwE6oHIyESYmbF7B_GtogAVbjASyBb9) |
+> | 🐌 **百度网盘**     | [下载](https://pan.baidu.com/s/1oapb5rxt1Qz5nRkyb3XZtw?pwd=3724) 提取码：`3724` |
+
+> 🚨 **传统 7z 模型包**（~4GB，需解压到磁盘）
+>
+> | 下载渠道           | 链接                                                         |
+> | ------------------ | ------------------------------------------------------------ |
+> | 🚀 **ModelScope**   | [models.7z](https://modelscope.cn/datasets/HELPMEEADICE/BanG-Dream-Live2D/resolve/master/models.7z) |
+> | ☁️ **Google Drive** | [下载](https://drive.google.com/file/d/1qX9rEhBviT5auwCLg7g3klBbT5wAbjnL) |
+> | 🐌 **百度网盘**     | [下载](https://pan.baidu.com/s/17GAJy2_WEZZbdVdZAMfXHQ?pwd=3724) 提取码：`3724` |
 
 在一个终端启动智能体核心：
 
