@@ -22,8 +22,11 @@ apps/desktop/public/vendor/
 # One-off local scripts (machine-specific)
 scripts/migrate-node-to-g.ps1
 
-# Claude Code local worktrees (agent isolation scratch — never commit)
-.claude/worktrees/
+# Local agent tooling and instructions (keep local; never commit)
+/.claude/
+/.zcode/
+/AGENTS.md
+/CLAUDE.md
 
 # Live user-data backups taken before memory migrations (protected; never commit)
 .backup-*/
